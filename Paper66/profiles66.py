@@ -8,11 +8,11 @@ In conjuction with: Brho_particles66.py
 
 
 A SCRIPT FOR PROFILES,PHASES,PLOT
-
+/scratch2/luzlourdes/simulations/u05grav/GravPotential, faulty disk
 """
 from starter2 import *
 from starter1 import *
-#import Brho_particles66 as brp 
+import Brho_particles66 as brp 
 
 
 if 0:
@@ -24,14 +24,14 @@ def _BoverRho(field,data):
 yt.add_field('_BoverRho',function=_BoverRho,units='cm**3*gauss/g')
 
 
-#core_list = [0,10]
-core_list = looper.get_all_nonzero()
+#core_list = [21,70]
+core_list = looper.get_all_nonzero()  #check what returns on get_all_nonzero
 #frame_list=[125]
-#frame_list=[1,10,20,30,40,50,60,70,80,90,100,110,120,125]
+frame_list=[1,10,20,30,40,50,60,70,80,90,100,110,120,125]
 fields=['density']
      
 if 'this_looper' not in dir():
-    directory = '/scratch2/luzlourdes/simulations/u05grav/GravPotential' 
+    directory = '/scratch1/dcollins/Paper19/u05-r4-l4-128'  #double check before using
     this_looper = looper.core_looper(directory= directory,
                                      derived=[],
                                      sim_name = 'u05',
@@ -66,14 +66,14 @@ valsC = []
 
 print("READY")
 for index,frame in enumerate(frame_list):
-    if 0: 
+    if 1: 
         ds = this_looper.load(frame=frame,derived=[em.add_tracer_density])
         em.add_tracer_density(ds)  
         ad = ds.all_data()
         # test new fields here with ad['field']
         deposit_tuple = ("deposit","target_particle_volume") 
         
-    if 0:
+    if 1:
         all_target_indices = np.concatenate([this_looper.target_indices[core_id] for core_id in core_list])
         ad.set_field_parameter('target_indices',all_target_indices)
         ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
@@ -111,13 +111,13 @@ for index,frame in enumerate(frame_list):
             print(outname)
             plt.close(fig)
 
-        # 3 PLOTS PER FRAME (all_data, core_data, phase-all_data) + scatter plot... 
-        if 0:
+        # 4 PLOTS PER FRAME (all_data, core_data, phase-all_data + scatter plot) 
+        if 1:
             p = yt.ParticlePhasePlot.from_profile(phase_all)
             p.set_xlim(1e-3,1e7)
             p.set_ylim(1e-1,1e4)  
             #p.set_cmap('cell_volume','arbre')
-            p.set_zlim('cell_volume',1e-10,1e-1)  #TEST 
+            p.set_zlim('cell_volume',1e-10,1e-1) 
             p.save()
             cell_plot = p.plots['cell_volume']
             this_axes = cell_plot.axes
@@ -126,7 +126,7 @@ for index,frame in enumerate(frame_list):
  
             frame = index+2  #this only works if all frames are executed in order  
             brp.plot_particles(this_axes,frame) 
-            p.save('overplot_%d'%frame)
+            p.save('4plots_%d'%frame)
            
 # FOR ALL TIME PDFS (one plot)
 if 0:

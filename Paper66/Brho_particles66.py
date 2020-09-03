@@ -6,7 +6,6 @@ With: starter1.py, starter2.py on same directory.
 Started as: ~/p19_newscripts/tools_tracks/density_radius.py
 In conjuction with: Brho_particles66.py
 
-
  notes: 
  for debug purposes, long_list = long_list[:3]
 '''
@@ -17,16 +16,17 @@ reload(davetools)
 # NEW
 import scipy
 from scipy import stats
+from scipy.optimize import curve_fit
 import matplotlib.gridspec as gridspec
 import matplotlib.ticker as mtick
 # - - - - - - - - - - - - - - - - - - - - 
-
 
 plt.close('all')
 file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
 
 # RUN ONCE with ipython -i file_name.py, then this if statement should save you time
 # RUN SECOND time with run -i file_name.py in python shell
+
 if 'this_looper' not in dir():
     this_looper=looper.core_looper(directory=dl.enzo_directory)
     for nfile,fname in enumerate(file_list):
@@ -37,11 +37,12 @@ if 'this_looper' not in dir():
     all_cores = np.unique(thtr.core_ids)
 
 #core_list=all_cores
-parts, all_nonzero, core_list = looper.get_all_nonzero()  #TRY
-core_part = parts[128:,0]
-particle_part = parts[128:,1]
-#core_list = [21,70,85,165,275,297]
-#core_list=[21,70]
+#core_list = [21,70,85,165,275,297]  #chosen for paper
+core_list = [21,70]
+
+#parts, all_nonzero, core_list = looper.get_all_nonzero()  #change looper.py for profiles.py
+#core_part = parts[128:,0]
+#particle_part = parts[128:,1]
 
 frames = [1] + list(range(10,130,10)) + [125]  
 G = 1620/(4*np.pi)
@@ -76,7 +77,9 @@ if 'rho_extents' not in dir():
 
 # ARRAYS FOR HISTOGRAMS
 betarr = np.empty([0],dtype=float)
-beta_neg = np.empty([0],dtype=float)
+beta_covarr = np.empty([0],dtype=float)
+beta_neg_c = np.empty([0],dtype=float)
+beta_neg_p = np.empty([0],dtype=float)
 time_stamp = np.empty([0],dtype=float)
 
 pearsonr = np.empty([0],dtype=float)
@@ -114,7 +117,7 @@ def labelled(ax,xscale=None,yscale=None,xlabel=None,ylabel=None,\
     ax.set_ylim(ylim)
     ax.set_title(title)
 
-for nc,core_id in enumerate(core_part):  #core_list
+for nc,core_id in enumerate(core_list):
 
     #miniscrubber computes distance, r^2, several other quantities
     ms = trackage.mini_scrubber(thtr,core_id)
@@ -142,7 +145,7 @@ for nc,core_id in enumerate(core_part):  #core_list
     if 0:
         fig = plt.figure()
         # exploring a common axis with fig.text OR ax = fig.add_subplot(111) 
-        fig.text(0.38,0.03,r'$\rho$')#, ha='center', va='center') 
+        fig.text(0.365,0.03,r'$\rho/\rho_{o}$')#, ha='center', va='center') 
 
         ax1 = plt.subplot(331)
         ax2 = plt.subplot(332)
@@ -164,43 +167,58 @@ for nc,core_id in enumerate(core_part):  #core_list
         r_un = nar(sorted(np.unique(this_r)))
 
 
-        # B = B0 rho^beta --> lnB = ln(B_0*rho^beta) -->
-        # lnB = beta*ln(rho) + lnB_0
         # FOR ALL TIMES do field only, choose respective fig, and change lplots[n_time] for ax1
         # FOR EACH TIME FRAME, add [:,n_time]
         X = np.log10(density[:,n_time]).flatten()   
         Y = np.log10(magfield[:,n_time]).flatten()  
-       
-        #np.var(X) # if 0, flag, same for y
-        pfit = np.polyfit(X,Y,1) 
-        other = np.poly1d(pfit)
-        beta = pfit[0]
-        B_o = pfit[1]
+        XX = 10 ** X 
+        #X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
+        X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
+        XX2 = 10 ** X2 
+     
 
-        spear0,spear1 = scipy.stats.spearmanr(X,Y)  
-        # if np.std for X or Y is 0, flag 
+        # USING PEARSONr: scipy vs manual 
         xs = np.std(X)
         ys = np.std(Y)
         if xs or ys != 0:
             pear0,pear1 = scipy.stats.pearsonr(X,Y) #look into this source code!
             # must also now account for a shift in the time frame...
         else:
-            pear0 = 0 
-      
+            pear0 = 0  
         pearsonr = np.append(pearsonr,pear0)  #otherwise pear0 is taking the same value twice
-        #if n_time == 15:  #FOR ALL TIME ONLY, comment out and unindent if per frame
+        # MANUAL:
+
+
+        # B = B0 rho^beta --> lnB = ln(B_0*rho^beta) -->
+        # lnB = beta*ln(rho) + lnB_0
+
+        # CURVE-FIT attempt:
+        def testing(X, a, b):
+            return 10 ** (a * XX + b)
+        param, param_cov = curve_fit(testing, X, Y)
+        YY = 10 ** (param[0] * XX + param[1])
+        beta_cov = param[0]
+
+        # POLY-FITTING:
+        pfit = np.polyfit(X,Y,1) 
+        other = np.poly1d(pfit)
+        beta = pfit[0]
+        B_o = pfit[1]
+       
+
+        #if n_time == 15:  #FOR ALL TIME ONLY
+        betarr = np.append(betarr,beta)  #unindent if per frame
+        #beta_covarr = np.append(beta_covarr, beta_cov)
+
+        # THE NEGATIVE OUTLIERS
         if beta < 0:
-            beta_neg = np.append(beta_neg,particle_part[nc])
+            #comment out when using profiles.py
+            #beta_neg_p = np.append(beta_neg_p,particle_part[nc])  
+            #beta_neg_c = np.append(beta_neg_c,core_part[nc])  
             time_stamp = np.append(time_stamp,n_time)
-        betarr = np.append(betarr,beta)
-        #spearmanr = np.append(spearmanr,spear0)
 
-        XX = 10 ** X 
-        #X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
-        X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
-        XX2 = 10 ** X2 
+
         YY = 10 ** (pfit[0]*X2 + pfit[1]) 
-
         if 0: 
             if n_time in {3,6,8,10,12,14}: 
                 # FOR ALL TIME indent 4 left, comment if above, change lplots[n_time] to ax1, & comment out labelled to ax8
@@ -211,7 +229,7 @@ for nc,core_id in enumerate(core_part):  #core_list
                 labelled(lplots[n_time],xscale='log',yscale='log',xlabel=None,ylabel=None,
                          xlim=rho_extents.minmax, ylim=magfield_extents.minmax)
                 ax2.tick_params(axis='y',labelleft=False)
-                ax4.set_ylabel(r'$\mid B \mid$')
+                ax4.set_ylabel(r'$\mid B \mid (\mu G)$')
                 ax5.tick_params(axis='y',labelleft=False)
                 ax8.tick_params(axis='y',labelleft=False)
                 
@@ -236,7 +254,7 @@ for nc,core_id in enumerate(core_part):  #core_list
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 1:
+        if 0:
             if n_time == 15:              
                 bear2 = np.append(bear2,betarr[0])
                 bear3 = np.append(bear3,betarr[1]) 
@@ -252,9 +270,10 @@ for nc,core_id in enumerate(core_part):  #core_list
                 bear13 = np.append(bear13,betarr[11]) 
                 bear14 = np.append(bear14,betarr[12]) 
                 bear15 = np.append(bear15,betarr[13])   
-                # take the emptying array from the following if statement
+              
+                # comment on / off as needed
                 #pearsonr = np.empty([0],dtype=float)
-                betarr = np.empty([0],dtype=float)
+                #betarr = np.empty([0],dtype=float)
 
                 if 0: 
                     #plt.clf()
@@ -273,10 +292,9 @@ for nc,core_id in enumerate(core_part):  #core_list
                     ax3.set_yscale('linear')
                     ax3.set_ylim(-0.5,0.5)     
                     ax3.set_title(r"$\beta$ vs t")#, P=%.3f, S=%.3f"%(p1,s1)) 
-         
-                    # GRAB THE EMPTYING ARRAY from the past if statement if not here 
+          
                     #spearmanr = np.empty([0],dtype=float)
-                    #betarr = np.empty([0],dtype=float)
+                    betarr = np.empty([0],dtype=float)
 
     if 0:
         #plt.tight_layout()
@@ -353,9 +371,9 @@ if 0:
     y_vals = ax1.get_yticks()
     ax1.set_yticklabels(['{:.3f}'.format(x/len(betarr)) for x in y_vals])
 
-    name_save = "BetaHistogramTff"   #TEST THE NEXT LINE
-    ax1.text(0.56,15, r"Cores: %d\nMean $\beta$ = %.3f\n$\sigma = %.3f$"%(entries,betavg,betastd),\
-             color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1')) 
+    name_save = "BetaHistogramTff" 
+    t = 'Cores: %d\n'%entries +  r'Mean $\beta = %.3f$'%betavg + '\n' + r'$\sigma = %.3f$'%betastd
+    ax1.text(0.56, 15, t, color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1')) 
     plt.savefig(name_save)
     print('saved '+name_save)
    
@@ -400,7 +418,7 @@ def plot_particles(axes,frame):
             Y = np.log10(magfield[:,n_time]).flatten()  
             
             if n_time == frame:
-                axes.scatter(density[:,n_time],magfield[:,n_time],c='tab:gray',label=thtr.times[n_time],s=0.1)           
+                axes.scatter(density[:,n_time],magfield[:,n_time],c='b',label=thtr.times[n_time],s=0.1)           
     return
 
 # - - - - - SCATTER PLOT FOR <beta> vs time: EDIT
