@@ -4,7 +4,7 @@
 This script must be placed on: ~/p19_newscripts
 With: starter1.py, starter2.py on same directory.
 Started as: ~/p19_newscripts/tools_tracks/density_radius.py
-In conjuction with: Brho_particles66.py
+In conjuction with: profiles66.py
 
  notes: 
  for debug purposes, long_list = long_list[:3]
@@ -36,9 +36,9 @@ if 'this_looper' not in dir():
     thtr.sort_time()
     all_cores = np.unique(thtr.core_ids)
 
-#core_list=all_cores
+core_list=all_cores
 #core_list = [21,70,85,165,275,297]  #chosen for paper
-core_list = [21,70]
+#core_list = [21,70]
 
 #parts, all_nonzero, core_list = looper.get_all_nonzero()  #change looper.py for profiles.py
 #core_part = parts[128:,0]
@@ -77,30 +77,47 @@ if 'rho_extents' not in dir():
 
 # ARRAYS FOR HISTOGRAMS
 betarr = np.empty([0],dtype=float)
-beta_covarr = np.empty([0],dtype=float)
 beta_neg_c = np.empty([0],dtype=float)
 beta_neg_p = np.empty([0],dtype=float)
 time_stamp = np.empty([0],dtype=float)
 
+beta_curvarr = np.empty([0],dtype=float)
 pearsonr = np.empty([0],dtype=float)
+pearson_lmr = np.empty([0],dtype=float)
+pearson_mr = np.empty([0],dtype=float)
 spearmanr = np.empty([0],dtype=float)
 
 # TRYNG TO AVOID MORE LOOPS FOR NOW...
 # change to pears for the pearsonR boxplot
-bear2 = np.empty([0],dtype=float)
-bear3 = np.empty([0],dtype=float)
-bear4 = np.empty([0],dtype=float)
-bear5 = np.empty([0],dtype=float)
-bear6 = np.empty([0],dtype=float)
-bear7 = np.empty([0],dtype=float)
-bear8 = np.empty([0],dtype=float)
-bear9 = np.empty([0],dtype=float)
-bear10 = np.empty([0],dtype=float)
-bear11 = np.empty([0],dtype=float)
-bear12 = np.empty([0],dtype=float)
-bear13 = np.empty([0],dtype=float)
-bear14 = np.empty([0],dtype=float)
-bear15 = np.empty([0],dtype=float)
+pear2 = np.empty([0],dtype=float)
+pear3 = np.empty([0],dtype=float)
+pear4 = np.empty([0],dtype=float)
+pear5 = np.empty([0],dtype=float)
+pear6 = np.empty([0],dtype=float)
+pear7 = np.empty([0],dtype=float)
+pear8 = np.empty([0],dtype=float)
+pear9 = np.empty([0],dtype=float)
+pear10 = np.empty([0],dtype=float)
+pear11 = np.empty([0],dtype=float)
+pear12 = np.empty([0],dtype=float)
+pear13 = np.empty([0],dtype=float)
+pear14 = np.empty([0],dtype=float)
+pear15 = np.empty([0],dtype=float)
+
+cbear2 = np.empty([0],dtype=float)
+cbear3 = np.empty([0],dtype=float)
+cbear4 = np.empty([0],dtype=float)
+cbear5 = np.empty([0],dtype=float)
+cbear6 = np.empty([0],dtype=float)
+cbear7 = np.empty([0],dtype=float)
+cbear8 = np.empty([0],dtype=float)
+cbear9 = np.empty([0],dtype=float)
+cbear10 = np.empty([0],dtype=float)
+cbear11 = np.empty([0],dtype=float)
+cbear12 = np.empty([0],dtype=float)
+cbear13 = np.empty([0],dtype=float)
+cbear14 = np.empty([0],dtype=float)
+cbear15 = np.empty([0],dtype=float)
 
 # LABELS FOR ALL PLOTS
 def labelled(ax,xscale=None,yscale=None,xlabel=None,ylabel=None,\
@@ -128,6 +145,7 @@ for nc,core_id in enumerate(core_list):
     asort =  np.argsort(thtr.times)
     density = thtr.c([core_id],'density')
     magfield = thtr.c([core_id],'magnetic_field_strength')  #ADDED
+    cellvolume = thtr.c([core_id],'cell_volume')  #ADDED
     if (asort != sorted(asort)).any():
         print("Warning: times not sorted.")
     n0=asort[0]
@@ -163,41 +181,88 @@ for nc,core_id in enumerate(core_list):
         if time == 0:
             continue
         c=tmap(n_count,ms.nparticles) # previously as n_count
-        this_r=ms.r[:,n_time]+0
-        r_un = nar(sorted(np.unique(this_r)))
+        
+        this_r=ms.r[:,n_time]+0 
+        this_B = magfield[:,n_time]+0  #ADDED, no mini_scrubber needed
+        this_rho=ms.density[:,n_time]+0  #ADDED
+        this_cv=ms.cell_volume[:,n_time]+0  #ADDED
 
+        r_un = nar(sorted(np.unique(this_r)))
 
         # FOR ALL TIMES do field only, choose respective fig, and change lplots[n_time] for ax1
         # FOR EACH TIME FRAME, add [:,n_time]
         X = np.log10(density[:,n_time]).flatten()   
         Y = np.log10(magfield[:,n_time]).flatten()  
+        Z = np.log10(cellvolume[:,n_time]).flatten()  #ADDED 
+
         XX = 10 ** X 
         #X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
         X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
         XX2 = 10 ** X2 
-     
+   
 
-        # USING PEARSONr: scipy vs manual 
+
+        # NOTE: the "else" statements are a holder for the pearsonR's that are nans;
+        # these need to be accounted for rightfully. suggestion: reverse the time,core loops
+
+        # PEARSONr: scipy vs manual 
         xs = np.std(X)
+        mxs = np.std(this_rho)
         ys = np.std(Y)
-        if xs or ys != 0:
-            pear0,pear1 = scipy.stats.pearsonr(X,Y) #look into this source code!
-            # must also now account for a shift in the time frame...
+        mys = np.std(this_B)
+
+        # SCIPY PEARSONr: scipy logged
+        if xs != 0 and ys != 0:
+            pear0,pear1 = scipy.stats.pearsonr(X,Y)  
+        else:
+            pear0 = 0  
+        pearsonr = np.append(pearsonr,pear0)
+
+        # SCIPY PEARSONr: scipy not logged
+        if mxs != 0  and mys != 0:
+            pear0,pear1 = scipy.stats.pearsonr(this_rho,this_B)  
         else:
             pear0 = 0  
         pearsonr = np.append(pearsonr,pear0)  #otherwise pear0 is taking the same value twice
-        # MANUAL:
+ 
+        # MANUAL PEARSONr: not logged 
+        avB = np.sum(this_B*this_cv)/np.sum(this_cv)
+        varB = np.sum((this_B-avB)**2*this_cv)/np.sum(this_cv)
+        avRho = np.sum(this_rho*this_cv)/np.sum(this_cv)
+        varRho = np.sum((this_rho-avRho)**2*this_cv)/np.sum(this_cv)
+        covar = np.sum((this_B-avB)*(this_rho-avRho)*this_cv)/np.sum(this_cv)
+        if varB != 0 and varRho != 0:
+            pearson_r = covar/(np.sqrt(varB)*np.sqrt(varRho)) 
+        else:
+            pearson_r = 0
+        pearson_mr = np.append(pearson_mr,pearson_r) 
+
+        # MANUAL PEARSONr: logged parameters
+        l_avB = np.sum(Y * Z) / np.sum(Z)
+        l_varB = np.sum((Y - l_avB)**2 * Z) / np.sum(Z)
+        l_avRho = np.sum(X * Z) / np.sum(Z)
+        l_varRho = np.sum((X - l_avRho)**2 * Z) / np.sum(Z)
+        l_covar = np.sum((Y-l_avB) * (X-l_avRho) * Z) / np.sum(Z)
+        #if l_varB <=0  or l_varRho <= 0:
+        if l_varB != 0 and l_varRho != 0:  # TEST
+            pearsonR = l_covar / (np.sqrt(l_varB) * np.sqrt(l_varRho))  
+            #if np.isnan(pearsonR):  # or if a != a ...true = problem
+            #    pdb.set_trace()
+        else:
+            pearsonR = 0 
+        pearson_lmr = np.append(pearson_lmr,pearsonR)
+
 
 
         # B = B0 rho^beta --> lnB = ln(B_0*rho^beta) -->
         # lnB = beta*ln(rho) + lnB_0
 
-        # CURVE-FIT attempt:
-        def testing(X, a, b):
-            return 10 ** (a * XX + b)
+        # CURVE-FIT:  -revise!
+        def testing(x, a, b):
+            return a*x+b 
         param, param_cov = curve_fit(testing, X, Y)
-        YY = 10 ** (param[0] * XX + param[1])
-        beta_cov = param[0]
+        Y_B = 10 ** (param[0]*X + param[1])
+        beta_curve = param[0]
 
         # POLY-FITTING:
         pfit = np.polyfit(X,Y,1) 
@@ -208,7 +273,7 @@ for nc,core_id in enumerate(core_list):
 
         #if n_time == 15:  #FOR ALL TIME ONLY
         betarr = np.append(betarr,beta)  #unindent if per frame
-        #beta_covarr = np.append(beta_covarr, beta_cov)
+        beta_curvarr = np.append(beta_curvarr, beta_curve)
 
         # THE NEGATIVE OUTLIERS
         if beta < 0:
@@ -254,26 +319,43 @@ for nc,core_id in enumerate(core_list):
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 0:
+        if 1:
             if n_time == 15:              
-                bear2 = np.append(bear2,betarr[0])
-                bear3 = np.append(bear3,betarr[1]) 
-                bear4 = np.append(bear4,betarr[2]) 
-                bear5 = np.append(bear5,betarr[3]) 
-                bear6 = np.append(bear6,betarr[4]) 
-                bear7 = np.append(bear7,betarr[5]) 
-                bear8 = np.append(bear8,betarr[6])  
-                bear9 = np.append(bear9,betarr[7]) 
-                bear10 = np.append(bear10,betarr[8]) 
-                bear11 = np.append(bear11,betarr[9]) 
-                bear12 = np.append(bear12,betarr[10]) 
-                bear13 = np.append(bear13,betarr[11]) 
-                bear14 = np.append(bear14,betarr[12]) 
-                bear15 = np.append(bear15,betarr[13])   
+                pear2 = np.append(pear2,pearson_lmr[0])
+                pear3 = np.append(pear3,pearson_lmr[1]) 
+                pear4 = np.append(pear4,pearson_lmr[2]) 
+                pear5 = np.append(pear5,pearson_lmr[3]) 
+                pear6 = np.append(pear6,pearson_lmr[4]) 
+                pear7 = np.append(pear7,pearson_lmr[5]) 
+                pear8 = np.append(pear8,pearson_lmr[6])  
+                pear9 = np.append(pear9,pearson_lmr[7]) 
+                pear10 = np.append(pear10,pearson_lmr[8]) 
+                pear11 = np.append(pear11,pearson_lmr[9]) 
+                pear12 = np.append(pear12,pearson_lmr[10]) 
+                pear13 = np.append(pear13,pearson_lmr[11]) 
+                pear14 = np.append(pear14,pearson_lmr[12]) 
+                pear15 = np.append(pear15,pearson_lmr[13])   
               
+                cbear2 = np.append(cbear2,beta_curvarr[0])
+                cbear3 = np.append(cbear3,beta_curvarr[1]) 
+                cbear4 = np.append(cbear4,beta_curvarr[2]) 
+                cbear5 = np.append(cbear5,beta_curvarr[3]) 
+                cbear6 = np.append(cbear6,beta_curvarr[4]) 
+                cbear7 = np.append(cbear7,beta_curvarr[5]) 
+                cbear8 = np.append(cbear8,beta_curvarr[6])  
+                cbear9 = np.append(cbear9,beta_curvarr[7]) 
+                cbear10 = np.append(cbear10,beta_curvarr[8]) 
+                cbear11 = np.append(cbear11,beta_curvarr[9]) 
+                cbear12 = np.append(cbear12,beta_curvarr[10]) 
+                cbear13 = np.append(cbear13,beta_curvarr[11]) 
+                cbear14 = np.append(cbear14,beta_curvarr[12]) 
+                cbear15 = np.append(cbear15,beta_curvarr[13])   
+
                 # comment on / off as needed
-                #pearsonr = np.empty([0],dtype=float)
-                #betarr = np.empty([0],dtype=float)
+                pearson_lmr = np.empty([0],dtype=float)
+                pearsonr = np.empty([0],dtype=float) 
+                betarr = np.empty([0],dtype=float)
+                beta_curvarr = np.empty([0],dtype=float)
 
                 if 0: 
                     #plt.clf()
@@ -302,9 +384,10 @@ for nc,core_id in enumerate(core_list):
         print("saved "+outname)
         plt.close(fig)
 
-bears = [bear2,bear3,bear4,bear5,bear6,bear7,bear8,\
-         bear9,bear10,bear11,bear12,bear13,bear14,bear15]
-
+pears = [pear2,pear3,pear4,pear5,pear6,pear7,pear8,\
+         pear9,pear10,pear11,pear12,pear13,pear14,pear15]
+cbears = [cbear2,cbear3,cbear4,cbear5,cbear6,cbear7,cbear8,\
+         cbear9,cbear10,cbear11,cbear12,cbear13,cbear14,cbear15]
 # - - - - - SCATTER_PLOT FOR ALL FRAMES - revise
 if 0:
     newbetas = np.empty([0],dtype=float)
@@ -320,7 +403,7 @@ if 0:
 
 # - - - - - BOXPLOT FOR ALL FRAMES
 # NOTE: for PearsonR, nan values are not accepted
-if 0:  
+if 1:  
     count = 0 #temp
     Pears = {}
     index = []
@@ -349,9 +432,9 @@ if 0:
     ax1.xaxis.set_major_locator(plt.MultipleLocator(2))
 
     ax1.set_ylim(-1.25,1.25)
-    ax1.set_ylabel('Pearson R')
-    ax1.set_xlabel(r'$t_{\rm{ff}}$')  #TEST 
-    fig.savefig('PearsBoxplot')
+    ax1.set_ylabel('r') #r'$\beta$', r: pearson r coeffiecient
+    ax1.set_xlabel(r'$t_{\rm{ff}}$')
+    fig.savefig('ManualPearsBoxplot_Logged')
     print("saved")
     plt.close(fig)
 
@@ -365,7 +448,7 @@ if 0:
     fig, ax1 = plt.subplots()
 
     ax1.hist(betarr, 50, density=False, histtype='step', color='g')
-    ax1.set_xlabel('Beta Value')
+    ax1.set_xlabel(r'\beta')  #test
     ax1.set_ylabel('PDF')
 
     y_vals = ax1.get_yticks()

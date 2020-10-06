@@ -8,16 +8,14 @@ In conjuction with: Brho_particles66.py
 
 
 A SCRIPT FOR PROFILES,PHASES,PLOT
-/scratch2/luzlourdes/simulations/u05grav/GravPotential, faulty disk
+DATA: try this or that
+/scratch2/luzlourdes/simulations/u05grav/GravPotential, faulty disk, careful
+/archive2/dcollins4096/Paper19/u05-r4-l4-128
 """
 from starter2 import *
 from starter1 import *
 import Brho_particles66 as brp 
 
-
-if 0:
-    ds = yt.load('/scratch2/luzlourdes/simulations/u05grav/GravPotential/DD0001/data0001')
-    ad = ds.all_data()
 
 def _BoverRho(field,data):
     return data['magnetic_field_strength']/data['density']
@@ -31,7 +29,7 @@ frame_list=[1,10,20,30,40,50,60,70,80,90,100,110,120,125]
 fields=['density']
      
 if 'this_looper' not in dir():
-    directory = '/scratch1/dcollins/Paper19/u05-r4-l4-128'  #double check before using
+    directory = '/archive2/dcollins4096/Paper19/u05-r4-l4-128'
     this_looper = looper.core_looper(directory= directory,
                                      derived=[],
                                      sim_name = 'u05',

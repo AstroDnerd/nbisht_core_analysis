@@ -18,6 +18,8 @@ import trackage
 reload(trackage)
 #from core_dump import *
 
+import loop_tools
+reload(loop_tools)
 
 import looper
 reload(looper)

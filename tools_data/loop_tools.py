@@ -16,7 +16,11 @@ from yt.data_objects.level_sets.clump_handling import \
             find_clumps, \
             get_lowest_clumps
 
-def get_leaf_indices(ds,c_min=None,c_max=None,step=100,h5_name="",pickle_name=None, 
+'''
+EDITED using Stampede's 'get_peaks.py', where get_leaf_indices function here
+is turned into two functions, findclumps and get get_leaf_indices
+'''
+def get_leaf_indices(ds,c_min=None,c_max=None,step=100,h5_name='',pickle_name=None, 
                      subset=None, peak_radius=1.5,bad_particle_list=None):
     """get all the leaf indices for peaks in *ds*.
     If *pickle_name* is supplied, load from that, or if it doesn't exist, save to that.
@@ -24,43 +28,48 @@ def get_leaf_indices(ds,c_min=None,c_max=None,step=100,h5_name="",pickle_name=No
     """
     if not os.path.exists(h5_name):
         print("WARNING: clump finding not tested.")
-        print("You're probably missing the file u05_0125_peaklist.h5")
-        raise
+        print("You're probably missing the file usim_peaklist.h5")
+        #raise  WHY PUT THIS HERE, I thin, this is not necessary
+
         ad = ds.all_data()
-        #ad  = ds.sphere([0.52075195, 0.74682617, 0.01196289], 0.1)
         master_clump = Clump(ad,('gas','density'))
         master_clump.add_validator("min_cells", 8)
+
         c_min = 1 #ad["gas", "density"].min()
         #c_max = 534069645. # ad["gas", "density"].max()
         c_max = ad["gas", "density"].max()
+        
         step = 100
         find_clumps(master_clump, c_min, c_max, step)
-    # Write a text file of only the leaf nodes.
-        #write_clumps(master_clump,0, "%s_clumps.txt" % ds)
-
-        leaf_clumps = get_lowest_clumps(master_clump)
-    
+        leaf_clumps = get_lowest_clumps(master_clump) 
 
         peak_list=[]
-        den_max=[]
         x_max=[]
         y_max=[]
         z_max=[]
-        for i in range(len(leaf_clumps)):
-            den_max.append(leaf_clumps[i][('gas','density')].max())
-            x_max.append(leaf_clumps[i]['x'][np.where(leaf_clumps[i]['gas','density']==den_max[i])])
-            y_max.append(leaf_clumps[i]['y'][np.where(leaf_clumps[i]['gas','density']==den_max[i])])
-            z_max.append(leaf_clumps[i]['z'][np.where(leaf_clumps[i]['gas','density']==den_max[i])])
-  
-            a= float(x_max[i])
-            b= float(y_max[i])
-            c= float(z_max[i])
+
+        for l in range(len(leaf_clumps)):
+            index=[]
+            index.append(np.argmax(leaf_clumps[l][('gas','density')]))
+            if len(index) > 1:
+                index = index[0]
+
+            x_max.append(leaf_clumps[l]['x'][index])
+            y_max.append(leaf_clumps[l]['y'][index])
+            z_max.append(leaf_clumps[l]['z'][index])
+
+            # uncertain if these are really necessary
+            a= float(x_max[l])
+            b= float(y_max[l])
+            c= float(z_max[l])
+
             this_peak = ds.arr([a,b,c],'code_length')
             peak_list.append(this_peak)
-        #fPickle.dump(peak_list, pickle_name)
-        fptr=h5py.File("NEW_PEAKS.h5",'w')
+
+        fptr=h5py.File("u10_082_peaklist.h5",'w')
         fptr.create_dataset('peaks',data=np.array(peak_list))
         fptr.close()
+
     else:
         fptr = h5py.File(h5_name,'r')
         peak_list = fptr['peaks'][:]
@@ -86,20 +95,24 @@ def get_leaf_indices(ds,c_min=None,c_max=None,step=100,h5_name="",pickle_name=No
         region = ds.region(center     = this_clump,
                            left_edge  = this_clump-peak_radius*min_dx, 
                            right_edge = this_clump+peak_radius*min_dx)
-        indices = region['particle_index'].astype('int64')
-        if bad_particles is not None:
-            mask = np.ones_like(indices,dtype='bool')
-            for ni,i in enumerate(indices):
-                #there's certainly a better way to do this than a loop.
-                if i in bad_particles:
-                    mask[ni]=False
-            indices=indices[mask]
-                    
+
+        try:
+            indices = region['particle_index'].astype('int64')
+            if bad_particles is not None:
+                mask = np.ones_like(indices,dtype='bool')
+                for ni,i in enumerate(indices):
+                    #there's certainly a better way to do this than a loop.
+                    if i in bad_particles:
+                        mask[ni]=False
+                indices=indices[mask]
+        except:
+            leaf_indices[clump]=indices
+
         leaf_indices[clump]=indices
+    
     return leaf_indices
-    #for nc,indices in enumerate(leaf_indices):
-     #   pw_full.annotate_select_particles(1.0, col='r', indices=indices)
-   # pw_full.save(fname)
+  
+
 def shift_particles(ds=None, position=None,shift = np.zeros(3),shiftRight = False,grid_quan=None):
     """Shifts a periodically separated clump by the domain width.
     Looks for gaps in the positions larger than max('dx'), shifts one group
