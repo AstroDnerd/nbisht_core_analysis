@@ -8,9 +8,8 @@ In conjuction with: Brho_particles66.py
 
 
 A SCRIPT FOR PROFILES,PHASES,PLOT
-DATA: try this or that
+NOTE on DATA:
 /scratch2/luzlourdes/simulations/u05grav/GravPotential, faulty disk, careful
-/archive2/dcollins4096/Paper19/u05-r4-l4-128
 """
 from starter2 import *
 from starter1 import *
