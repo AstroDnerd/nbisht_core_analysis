@@ -43,6 +43,63 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
             self.proj.annotate_select_particles(1.0, col='r', indices=self.target_indices[core_number])
             outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
         print( self.proj.save(outname))
+import annotate_particles_3
+reload(annotate_particles_3)
+from scipy.spatial import ConvexHull
+@looper.frame_loop
+def proj_cores2(self, axis_list=[0,1,2],core_list=[], field='density',color='r'):
+    """Full projections of the data, with core particles marked."""
+    for snapshot in self.snaps[self.current_frame].values():
+        if snapshot.R_centroid is None:
+            snapshot.get_all_properties()
+    for axis in axis_list:
+        ds = self.ds_list[self.current_frame]
+        proj_center = ds.arr([0.12768555, 0.4987793 , 0.17797852], 'code_length')
+        proj_center = ds.arr([0.6,0.6,0.6], 'code_length')
+
+        center = self.ds.arr(nar([0.5]*3),'code_length')
+        print("poot")
+        self.proj = yt.ProjectionPlot(self.ds, axis=axis, fields=[field])#, center=center)
+        self.proj.set_cmap(field,'Greys')
+        radius_from_core = [] 
+        core_label = ""
+        for nc,core_number in enumerate(core_list):
+            ms = trackage.mini_scrubber(self.tr,core_number)
+            frame_ind = np.where(self.tr.frames == self.current_frame)[0]
+            this_x=ds.arr(ms.raw_x[:,frame_ind],"code_length")
+            this_y=ds.arr(ms.raw_y[:,frame_ind],"code_length")
+            this_z=ds.arr(ms.raw_z[:,frame_ind],"code_length")
+            points3d = this_x,this_y,this_z
+
+            snapshot = self.snaps[self.current_frame][core_number]
+            center = ds.arr(snapshot.R_centroid,'code_length')
+            print("Core %d center %s"%(core_number, str(center)))
+            core_label += "c%04d_"%core_number
+            self.proj.annotate_select_particles4(1.0, col='r', indices=self.target_indices[core_number])
+            outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
+            reload( annotate_particles_3)
+            self.proj.annotate_text(center,
+                             "%d"%snapshot.core_id,text_args={'color':color}, 
+                             inset_box_args={'visible':False},
+                             coord_system='data')
+            self.proj.annotate_convex_hull_1(1,points=points3d)
+        print( self.proj.save(outname))
+
+
+@looper.frame_loop
+def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
+    """Full projections of the data, with core particles marked."""
+    for axis in axis_list:
+        center = self.ds.arr(nar([0.5]*3),'code_length')
+        self.proj = self.ds.proj(field,axis,center=center)
+        self.proj = yt.ProjectionPlot(self.ds, axis=axis, fields=[field], center=center)
+        radius_from_core = []
+        core_label = ""
+        for nc,core_number in enumerate(core_list):
+            core_label += "c%04d_"%core_number
+            self.proj.annotate_select_particles(1.0, col='r', indices=self.target_indices[core_number])
+            outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
+        print( self.proj.save(outname))
 
 @looper.frame_loop
 def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
@@ -56,6 +113,7 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
         outname = '%s_select_n%04d'%(looper.out_prefix,looper.current_frame)
         print(outname)
         print( pw.save(outname))
+
 
 @looper.core_loop
 def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100):
@@ -119,4 +177,27 @@ def proj_cores_with_annotations(self, axis_list=[0,1,2], color_dict={}):
                              coord_system='data')
             pw.annotate_select_particles(1.0, col=color, indices=self.target_indices[core_number])
         outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
+        print( pw.save(outname))
+
+@looper.frame_loop
+def proj_with_species(self, field='density',axis_list=[0,1,2], color_dict={}, core_list=None):
+    """Full projections, with particles plotted.  Also plots the radius and number for each core.
+    Colors can be passed in through a dictionary, indexed by core_id"""
+    if core_list is None:
+        core_list = self.target_indices.keys()
+    for axis in axis_list:
+        proj = self.ds.proj(field,axis,center='c')
+        pw = proj.to_pw(center = 'c',width=(1.0,'code_length'), origin='domain')
+        pw.set_cmap('density','gray')
+        for nc,core_number in enumerate(core_list):
+            this_snapshot = self.make_snapshot(self.current_frame,core_number)
+            if this_snapshot.R_centroid is None:
+                this_snapshot.get_all_properties()
+            center = this_snapshot.R_centroid
+            color = color_dict.get(core_number,'r')
+            pw.annotate_text(cbump(center),
+                             "%d"%core_number,text_args={'color':color}, 
+                             inset_box_args={'visible':False},
+                             coord_system='data')
+        outname = '%s_proj_regime_n%04d'%(self.out_prefix,self.current_frame)
         print( pw.save(outname))

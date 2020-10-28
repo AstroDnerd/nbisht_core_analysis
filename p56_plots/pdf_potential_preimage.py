@@ -13,8 +13,7 @@ from scipy.optimize import curve_fit
 #
 #
 
-if 'this_simname' not in dir():
-    this_simname = 'u11'
+#this_simname = 'u11'
 
 
 frame_list=[0]# range(0,130,10)
@@ -22,10 +21,12 @@ core_list=looper.get_all_nonzero(dl.n_particles[this_simname])
 fields=['density']  
 #Look for app_test.h5 and read from that.
 #If not, make a new looper and write app_test.h5.
-save_field = '../Datasets/all_cores_n0000.h5'
-save_field = '../Datasets/u10_primitives_cXXXX_n0000.h5'
-save_field = '../Datasets/u11_primitives_cXXXX_n0000.h5'
-if 'this_looper' not in dir() and os.path.exists(save_field) and True:
+#save_field = '../Datasets/all_cores_n0000.h5'
+#this_simname = 'u10'
+#save_field = '../Datasets/u10_primitives_cXXXX_n0000.h5'
+#save_field = '../Datasets/u11_primitives_cXXXX_n0000.h5'
+save_field = '../Datasets/%s_prim_phi_cXXXX_n0000.h5'%this_simname
+if 'this_looper' not in dir() and os.path.exists(save_field):
     directory = dl.sims[this_simname]
     this_looper = looper.core_looper(directory= directory,savefile=save_field)
     this_looper.derived = [xtra_energy.add_force_terms] #for some reason derived quantities aren't saved.
@@ -71,42 +72,22 @@ if 1:
     deposit_tuple = ("deposit","target_particle_volume")
     #ad[deposit_tuple]
         
-if 'prof_mask_vel' not in dir():
+if 'prof_all_pot' not in dir():
     all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list])
     ad.set_field_parameter('target_indices',all_target_indices)
     ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
-    #bins={'velocity_x':np.linspace(-25,25,64)}
+    bins={'PotentialField':np.linspace(-32,32,64)}
     #bins['PotentialField']= np.linspace(-50,50,64)
-    bins=None
-    prof_all_vel  = yt.create_profile(ad,bin_fields=['velocity_magnitude'],fields=['cell_volume'],weight_field=None, override_bins=bins)
-    prof_mask_vel = yt.create_profile(ad,bin_fields=['velocity_magnitude'],fields=[deposit_tuple],weight_field=None, override_bins=bins)
-
-if 'vrms' not in dir():
-    ad = ds.all_data()
-    vx = ad['velocity_x']
-    vy = ad['velocity_y']
-    vz = ad['velocity_z']
-    vrms = np.sqrt( (vx**2+vy**2+vz**2).mean() )/np.sqrt(3)
+    #bins=None
+    prof_all_pot  = yt.create_profile(ad,bin_fields=['PotentialField'],fields=['cell_volume'],weight_field=None, override_bins=bins)
+    prof_mask_pot = yt.create_profile(ad,bin_fields=['PotentialField'],fields=[deposit_tuple],weight_field=None, override_bins=bins)
+    prof_all_pot.save_as_dataset('%s_potential_pdf_all_n0000.h5'%this_simname)
+    prof_mask_pot.save_as_dataset('%s_potential_pdf_mask_n0000.h5'%this_simname)
 
 if 1:
     plt.close('all')
-    bbb1, bcen1, vals1, db= toplot(prof_all_vel)
-    bbb2, bcen2, vals2, db = toplot(prof_mask_vel,quan=deposit_tuple[1])
-
-if 1:
-    fig2, ax2=plt.subplots(1,1)
-    cuml_all  = np.cumsum(vals1)
-    cuml_mask = np.cumsum(vals2)
-    ax2.plot( bcen1, cuml_all/cuml_all[-1], c='k')
-    ax2.plot( bcen2, cuml_mask/cuml_mask[-1], 'k--')
-    #ax2.plot( bcen1,vals1,c='k')
-    #ax2.plot( bcen2,vals2,'k--')
-    axbonk(ax2,xlabel=r'$\rho$',ylabel=r'$\int V(rho)$',xscale='log',yscale='log')
-    outname = 'plots_to_sort/%s_cuml_v_n%04d.pdf'%(this_simname,frame)
-    fig2.savefig(outname)
-    print(outname)
-
-if 1:
+    bbb1, bcen1, vals1, db= toplot(prof_all_pot)
+    bbb2, bcen2, vals2, db = toplot(prof_mask_pot,quan=deposit_tuple[1])
     fig,ax=plt.subplots(1,1)
 
     ok1 = vals1>0
@@ -114,18 +95,9 @@ if 1:
     ax.plot( bcen1[ok1],vals1[ok1],'k',linewidth=2, label=r'$V(v)$')
 
 
-    ax.plot( bcen2[ok2],vals2[ok2],'k--',linewidth=2, label=r'$V(v|*)$')
-
-if 1:
-    #maxwellian
-    particle_fraction_scale= all_target_indices.size/128.**3
-    v = bcen1[ok2]
-    sigmav = vrms
-    maxwell = 1./(2*np.pi*sigmav**2)*v**2*np.exp(-(v-0)**2/(2*sigmav**2))
-    maxwell *= particle_fraction_scale
-    ok3 = maxwell > 1e-7
-    ax.plot( v[ok3], maxwell[ok3] , label=r'$\sigma_{v,1d}=%0.1f$'%vrms, linestyle='--',c=[0.5]*4)
-
+    mass_fraction = 1./128**3*211  
+    particle_fraction_scale= 1# all_target_indices.size/128.**3
+    ax.plot( bcen2[ok2],vals2[ok2]/particle_fraction_scale,'k--',linewidth=2, label=r'$V(v|*)$')
 
 if 1:
     #comput and plot the ratio
@@ -134,41 +106,34 @@ if 1:
     ok = np.logical_and(ratio>0, ok)
     ax.plot( bcen1[ratio>0], ratio[ratio>0],label=r"$V(*|v)$",c=[0.5]*4)
 
-if 1:
-
-    if 'prof_mask_veln' not in dir():
-        prof_mask_veln = {}
-        adn={}
-if 0:   
-    for n in [10,20,30,40,50,60,70,80,90,100]:
-        if n not in prof_mask_veln:
-            if n not in adn:
-                ds = this_looper.load(frame=n,derived=[em.add_tracer_density])
-                em.add_tracer_density(ds)
-            if n not in adn:
-                adn[n] = ds.all_data()
-                adn[n].set_field_parameter('target_indices',all_target_indices)
-                adn[n].set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
-            this_ad = adn.get(n,ds.all_data())
-
-            prof_mask_veln[n] = yt.create_profile(this_ad,bin_fields=['velocity_magnitude'],fields=[deposit_tuple],\
-                                                  weight_field=None, override_bins=bins)
-    for n in prof_mask_veln:
-        bbbx, bcenx, valsx, dbx= toplot(prof_mask_veln[n],quan=deposit_tuple[1])
-        dx = bbbx[1:]-bbbx[:-1]
-        total = (dx*valsx).sum()
-        print("TOTAL",total)
-        ax.plot( bcenx[ok1],valsx[ok1],linewidth=2, label=r'$V(v)$')
+if 0:
+    #fit powerlaw for ratio
+    #note this doesn't work.
+    from scipy.optimize import curve_fit
+    def powerlaw(r,rho0, r0, alpha):
+        return alpha*np.log10(r/r0) + np.log10(rho0)
+    popt, pcov = curve_fit(powerlaw, bcen1[ok], np.log10(ratio[ok]), p0=[1,1,-2])
+    ax.plot( bcen1[ok], 10**powerlaw(bcen1[ok], popt[0], popt[1],popt[2]),label=r'play %0.2f'%(popt[2]))
 
 
 if 1:
     #ax.plot( bcen2,vals2*vals1.max()/vals2.max(),'r:')
-    outname = "plots_to_sort/%s_pdf_velocity_preimage_fits.pdf"%this_simname
+    outname = "plots_to_sort/%s_pdf_potential_preimage_fits.pdf"%this_simname
     #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='log',yscale='log')
     #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='linear',yscale='linear')
-    axbonk(ax,xlabel=r'$||v||$',ylabel=r'$V(||v||)$',xscale='log',yscale='log')
+    axbonk(ax,xlabel=r'$\Phi$',ylabel=r'$V(\Phi)$',xscale='linear',yscale='log')
     ax.legend(loc=3)
     fig.savefig(outname)
     print(outname)
     plt.close(fig)
     
+if 1:
+    fig2, ax2=plt.subplots(1,1)
+    cuml_phi_all  = np.cumsum(vals1)
+    cuml_phi_mask = np.cumsum(vals2)
+    ax2.plot( bcen1, cuml_phi_all, c='k')
+    ax2.plot( bcen2, cuml_phi_mask/cuml_phi_mask[-1], 'k--')
+    #ax2.plot( bcen1, vals1, c='k')
+    #ax2.plot( bcen2, vals2, 'k--')
+    axbonk(ax2,xlabel=r'$\Phi$',ylabel=r'$\int P(\Phi)$',xscale='linear',yscale='log')
+    fig2.savefig('plots_to_sort/%s_cuml_phi_n%04d.pdf'%(this_simname,frame))

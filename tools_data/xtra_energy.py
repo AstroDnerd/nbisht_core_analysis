@@ -23,12 +23,8 @@ def grad(data,fieldname,direction):
     out[all_all] = (data[fieldname][ Right ]- data[fieldname][ Left]) *dxi[direction]
     return out
 
-def _grav_pot_grad(field,data):
-    gx = grad(data,'PotentialField',0)
-    gy = grad(data,'PotentialField',1)
-    gz = grad(data,'PotentialField',2)
 def add_energies(obj):
-    if obj.parameters['SelfGravity'] and False:
+    if obj.parameters['SelfGravity']:
         def grav_energy(field,data):
             gx =data.ds.arr(grad(data,'PotentialField',0),'code_length/code_time**2')
             gy =data.ds.arr(grad(data,'PotentialField',1),'code_length/code_time**2')
@@ -51,31 +47,8 @@ def add_energies(obj):
         return therme
     obj.add_field('therm_energy',therm_energy,
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
-def add_test_energies(obj):
-    def gx(field,data):
-        gx =data.ds.arr(grad(data,'PotentialField',0),'code_length/code_time**2')
-        return gx
-    obj.add_field('gx',gx,validators=[yt.ValidateGridType()],
-                 units='code_length/code_time**2',sampling_type='cell')
-    def gy(field,data):
-        gy =data.ds.arr(grad(data,'PotentialField',1),'code_length/code_time**2')
-        return gy
-    obj.add_field('gy',gy,validators=[yt.ValidateGridType()],
-                 units='code_length/code_time**2',sampling_type='cell')
-    def gz(field,data):
-        gz =data.ds.arr(grad(data,'PotentialField',2),'code_length/code_time**2')
-        return gz
-    obj.add_field('gz',gz,validators=[yt.ValidateGridType()],
-                 units='code_length/code_time**2',sampling_type='cell')
 
 def add_force_terms(obj):
-    def momentum_flux(field,data):
-        f1 =xo.gradf(0.5*data['x-velocity']*data['kinetic_energy'],0,data.dds)
-        f2 =xo.gradf(0.5*data['y-velocity']*data['kinetic_energy'],1,data.dds)
-        f3 =xo.gradf(0.5*data['z-velocity']*data['kinetic_energy'],2,data.dds)
-        return (f1+f2+f3)
-    obj.add_field('momentum_flux',momentum_flux, validators=kinetic_validators, sampling_type='cell',
-                  units='dyne/(cm**2*s)')
     work_units='erg/(cm**3*s)'
     def gas_pressure(field,data):
         return data['density']*data.ds.quan(1,'code_velocity')**2
@@ -125,7 +98,7 @@ def add_force_terms(obj):
                 gi =(data['x-velocity']*data['grav_x']+
                     data['y-velocity']*data['grav_y']+
                     data['z-velocity']*data['grav_z'])
-                gi = gi*data['density']
+                gi = -gi*data['density']
             except:
                 return np.zeros_like(data['density'])
             

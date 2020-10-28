@@ -6,9 +6,6 @@ import numpy as np
 nar = np.array
 import time
 from importlib import reload
-import pyximport; pyximport.install()
-import particle_ops
-import particle_grid_mask
 import h5py
 import copy 
 import pdb
@@ -114,7 +111,7 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        particle_ids = copy.copy(snapshot.target_indices)
+        particle_ids = copy.copy(self.my_loop.target_indices[snapshot.core_id])
         if snapshot.core_id not in self.core_ids:
             #this might not be the best place for the parent step.
             core_ids = np.ones_like(particle_ids) * snapshot.core_id
@@ -272,9 +269,13 @@ class mini_scrubber():
             self.cov_v2 = (self.raw_vx-self.mean_vx)**2+\
                           (self.raw_vy-self.mean_vy)**2+\
                           (self.raw_vx-self.mean_vz)**2
-            self.rx_hat = self.rx_rel/self.r
-            self.ry_hat = self.ry_rel/self.r
-            self.rz_hat = self.rz_rel/self.r
+            self.rx_hat = np.zeros_like(self.rx_rel)
+            self.ry_hat = np.zeros_like(self.rx_rel)
+            self.rz_hat = np.zeros_like(self.rx_rel)
+            ok = self.r > 0
+            self.rx_hat[ok]= self.rx_rel[ok]/self.r[ok]
+            self.ry_hat[ok]= self.ry_rel[ok]/self.r[ok]
+            self.rz_hat[ok]= self.rz_rel[ok]/self.r[ok]
             self.vr_raw = self.rx_hat*self.raw_vx+\
                       self.ry_hat*self.raw_vy+\
                       self.rz_hat*self.raw_vz

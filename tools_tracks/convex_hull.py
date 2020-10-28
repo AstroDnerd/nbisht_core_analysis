@@ -2,29 +2,37 @@
 from starter2 import *
 import matplotlib.image as mpimg
 
+import matplotlib.patches as patches
 import data_locations as dl
 reload(dl)
 plt.close('all')
 
-file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
-out_prefix = 'CHANGE_THIS_PREFIX'
+#file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
+file_list=glob.glob("../Datasets/u10_primitives_cXXXX_n0000.h5")
+this_simname = 'u10'
+out_prefix = this_simname
 
-out_prefix='test'
-file_list = file_list[:2]
+#file_list = file_list[:2]
 
 #import tools_tracks.alpha_properties as ap 
-import p56_plots.all_pdf as ap
-this_looper=ap.this_looper
-thtr=this_looper.tr
-thtr.sort_time()
+#import p56_plots.all_pdf as ap
+#this_looper=ap.this_looper
+#thtr=this_looper.tr
+#thtr.sort_time()
 
+
+#
+# dear future self:
+#    calling load_loop on the u10 dataset seems to choke.
+#    Reading directly works fine. 
+#
 if 'this_looper' not in dir():
-    this_looper=looper.core_looper(directory=dl.enzo_directory)
-    for nfile,fname in enumerate(file_list):
-        this_looper.load_loop(fname)
-        print( "File %d of %d"%(nfile,len(file_list)))
-    thtr = this_looper.tr
-    thtr.sort_time()
+    this_looper=looper.core_looper(directory=dl.sims[this_simname],savefile=file_list[0])
+    #for nfile,fname in enumerate(file_list):
+    #    this_looper.load_loop(fname)
+    #    print( "File %d of %d"%(nfile,len(file_list)))
+    #thtr = this_looper.tr
+    #thtr.sort_time()
 all_cores = np.unique(thtr.core_ids)
 rm = rainbow_map(len(all_cores))
 core_list = all_cores
@@ -47,13 +55,7 @@ if 'cell_volumes' not in dir():
         dv = rrr[:,1:] - rrr[:,:-1]
         mask = slice(None)# dv[:,1]*dv[:,2] < 0
         for it,nt in enumerate([0]):#asort):
-            nt0 = asort[it-1]
-            ntm2 = asort[it-2]
-            d2v = (rrr[:,nt] - rrr[:,nt0])*(rrr[:,nt0]-rrr[:,ntm2])
-            mask = d2v<0
             mask = slice(None)
-
-            print("NNNN",(d2v < 0).sum())
 
 
             ax_many.clear()
@@ -81,7 +83,7 @@ if 'cell_volumes' not in dir():
             title='t=%0.5f'%thtr.times[nt]
             ax_many.set_title(title)
             ax_many.set_aspect('equal')
-            outname = '%s/hull_3d_t_c%04d_n%04d.png'%(dl.output_directory,core_id,it)
+            outname = '%s/%s_hull_3d_t_c%04d_n%04d.png'%(dl.output_directory,this_simname,core_id,it)
             fig_many.savefig(outname)
             print("Wrote "+outname)
 
@@ -93,7 +95,7 @@ if 1:
     hull_lengths = nar(hull_volumes)**(1./3)
     ax.hist(hull_lengths,histtype='step',color='k')
     axbonk(ax,xlabel=r'$\rm{Hull\ Length}$',ylabel=r'$\rm{N}$')
-    fig.savefig('plots_to_sort/hull_lengths.pdf')
+    fig.savefig('plots_to_sort/%s_hull_lengths.pdf'%this_simname)
     
     ax.clear()
     odd = hull_volumes < cell_volumes
@@ -107,8 +109,20 @@ if 1:
     ext(cell_volumes)
     axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',xlim=ext.minmax,ylim=ext.minmax,
           xscale='log',yscale='log')
-    fig.savefig('plots_to_sort/volume_fractions.pdf')
+    fig.savefig('plots_to_sort/%s_volume_fractions.pdf'%this_simname)
 
-
+if 1:
+    import p56_plots.density_AC as AC
+    #reload(AC)
+    fig,ax=plt.subplots(1,1)
+    #ax.hist(hull_lengths,histtype='step',color='k',normed=True)
+    vals, bins = np.histogram(hull_lengths)
+    bc = 0.5*(bins[1:]+bins[:-1])
+    db = (bins[1:]-bins[:-1])
+    ax.plot(bc,vals/vals.sum())
+    ax.plot(AC.binned[1],AC.binned[2]/AC.binned[2][0],c='r')
+    rect=patches.Rectangle((0,0),AC.L,AC.ACb[0],facecolor=[0.8]*3)
+    ax.add_patch(rect)
+    fig.savefig('plots_to_sort/%s_sizes.pdf'%this_simname)
 
 

@@ -1,29 +1,11 @@
-
-import matplotlib
-matplotlib.use('Agg')
-import yt
-import math
-import matplotlib.pyplot as plt
-import numpy as np
-nar = np.array
-import time
-from importlib import reload
-import pyximport; pyximport.install()
-import particle_ops
-import particle_grid_mask
-import loop_tools
-reload(loop_tools)
-import h5py
-#from yt.analysis_modules.level_sets.api import *
+from starter2 import *
 from yt.data_objects.level_sets import *
-import copy 
-import pdb
-from importlib import reload
 from collections import defaultdict
 import weakref
-import trackage
+import loop_tools
+reload(loop_tools)
 import tracks_read_write
-import os
+reload(tracks_read_write)
 
 def count_particles(fname='tools_data/n_particles.txt'):
     fptr = open(fname,'r')

@@ -1,37 +1,46 @@
 
 from starter2 import *
-import matplotlib.image as mpimg
 
 import data_locations as dl
 reload(dl)
 reload(trackage)
 plt.close('all')
 
-this_simname = 'u11'
-out_prefix='u11'
-form = 'pdf'
-#file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
-#file_list = glob.glob("/scratch1/dcollins/Paper19/Datasets/all_primitives/*h5")
-file_list = ["../Datasets/u11_primitives_cXXXX_n0000.h5"]; out_prefix='u11'
+if 'sim_list' not in dir():
+    this_simname = 'u11'
+    out_prefix='u11'
+    form = 'pdf'
+    files_u05=  glob.glob("/scratch1/dcollins/Paper19/Datasets/all_primitives/*h5")
+    files_u11 = ["../Datasets/u11_primitives_cXXXX_n0000.h5"]; out_prefix='u11'
+    files_u10 = ["../Datasets/u10_primitives_cXXXX_n0000.h5"]; out_prefix='u11'
 
-#file_list = file_list[:2]
+
+    class sim_details():
+        def __init__(self,name,file_list,beta=""):
+            self.name=name
+            self.file_list=file_list
+            self.my_looper=None
+            self.tracker = None
+            self.density_profiles=[]
+            self.velocity_profiles=[]
+            self.means=None
 
 
-if 'this_looper' not in dir():
-    this_looper=looper.core_looper(directory=dl.sims[this_simname])
-    for nfile,fname in enumerate(file_list):
-        this_looper.load_loop(fname)
-        print( "File %d of %d"%(nfile,len(file_list)))
-    thtr = this_looper.tr
-    thtr.sort_time()
-    if  'dmeans' in dir():
-        del dmeans, prof0, prof1, prof_vel
-all_cores = np.unique(thtr.core_ids)
-core_list=all_cores
-rm = rainbow_map(len(all_cores))
+    u05s = sim_details('u05',files_u05,beta=0.2)
+    u10s = sim_details('u10',files_u10,beta=2.0)
+    u11s = sim_details('u11',files_u11,beta=20)
 
-tm = rainbow_map(15)
-#all_cores = all_cores[:10]
+    sim_list=[u05s,u10s,u11s]
+ 
+    for sim in sim_list:
+        if sim.my_looper is None:
+            sim.my_looper=looper.core_looper(directory=dl.sims[this_simname])
+            for nfile,fname in enumerate(sim.file_list):
+                sim.my_looper.load_loop(fname)
+                print( "File %d of %d"%(nfile,len(sim.file_list)))
+            sim.tracker = sim.my_looper.tr
+            sim.tracker.sort_time()
+
 def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_bins=64,extrema=None):
     reg = ds.all_data()
     prof = yt.create_profile(reg,fields[0],fields[1] ,weight_field=weight_field,accumulation=accumulation,
@@ -47,23 +56,18 @@ def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_b
     output['the_x']=the_x
     output['the_y']=the_y
     return output
+#rm = rainbow_map(len(all_cores))
+#tm = rainbow_map(15)
+
 
 plt.clf()
 odir=os.environ['HOME']+'/PigPen/'
 odir = "./plots_to_sort/"
 
-if 'prof0' not in dir():
-    frame = dl.target_frames[this_simname]
-    ds0 = yt.load("%s/DD%04d/data%04d"%(dl.sims[this_simname],0,0))
-    ds1 = yt.load("%s/DD%04d/data%04d"%(dl.sims[this_simname],frame,frame))
-    prof0=make_prof(ds0,['density','cell_volume'])
-    prof1=make_prof(ds1,['density','cell_volume'])
-
-if 'prof_vel' not in dir():
-    prof_vel=make_prof(ds1,['velocity_magnitude','cell_volume'])
-
 class means_etc():
-    def __init__(self,thtr,core_list):
+    def __init__(self,thtr,core_list=None):
+        if core_list is None:
+            core_list = np.unique(thtr.core_ids)
         self.dmeans = np.zeros_like(core_list,dtype='float')
         self.dstds = np.zeros_like(core_list,dtype='float')
         self.d_logmeans = np.zeros_like(core_list,dtype='float')
@@ -72,11 +76,13 @@ class means_etc():
         self.v_logstds  = np.zeros_like(core_list,dtype='float')
         self.vmeans    = np.zeros_like(core_list,dtype='float')
         self.vstds = np.zeros_like(core_list,dtype='float')
+        self.vstds_xyz = np.zeros_like(core_list,dtype='float')
         self.npart = np.zeros_like(core_list,dtype='float')
         self.vrel  =  np.zeros_like(core_list,dtype='float')
         self.volume =  np.zeros_like(core_list,dtype='float')
 
         for i,nc in enumerate(core_list):
+            ms = trackage.mini_scrubber(thtr,int(nc),do_velocity=True)
             this_density = thtr.c(int(nc),'density')[:,0]
             this_vel = thtr.c(int(nc),'velocity_magnitude')[:,0]
             this_volume = thtr.c(int(nc),'cell_volume')[:,0]
@@ -91,6 +97,54 @@ class means_etc():
             self.vmeans[i]= this_vel.mean()
             self.vstds[i] = this_vel.std()
 
+            rvx = ms.rel_vx #vx - <vx>
+            rvy = ms.rel_vy
+            rvz = ms.rel_vz
+            sigma_2 = (rvx**2).sum()/rvx.size+ (rvy**2).sum()/rvx.size+ (rvz**2).sum()/rvx.size
+            self.vstds_xyz[i] =np.sqrt(sigma_2)
+
+for sim in sim_list:
+    if sim.means is None:
+        sim.means = means_etc( sim.tracker )
+if 1:
+    rho_ext = extents()
+    v_ext = extents()
+    only_once=True
+    for sim in sim_list:
+        ok = sim.means.npart > 1
+        kwargs={}
+        kwargs['label']=label=r'$\beta=%0.1f$'%sim.beta
+        kwargs['marker']= {'u05':'*','u10':'v','u11':'^'}[sim.name]
+        cset={'u05':0.0,'u10':0.5,'u11':0.7}
+        kwargs['color'] = [cset[sim.name]]*3
+        if 1:
+            if only_once:
+                ax.plot( [1.0,1.0],[0,100],c=[0.5]*4)
+                ax.plot( [0.1,100],[1,1],c=[0.5]*4)
+                only_once=False
+            ax.scatter(sim.means.dmeans[ok],sim.means.vstds_xyz[ok],**kwargs)
+            rho_ext(sim.means.dmeans[ok])
+            v_ext(sim.means.vstds_xyz[ok])
+            axbonk(ax,yscale='log', xscale='log', ylabel=r'$\sigma_v$', xlabel=r'$\langle\rho\rangle$',
+                   xlim=rho_ext.minmax,ylim=v_ext.minmax)
+            ax.legend(loc=3)
+            fig.savefig(odir+'/%s_pre_rho_mean_v_rms.%s'%(sim.name,form))
+        if 0:
+            ax.scatter(sim.means.dstds[ok],sim.means.vstds[ok])
+            axbonk(ax,yscale='log', xscale='log',  ylabel=r'$\sigma_v$', xlabel=r'$\sigma_{\rho}$')
+            fig.savefig(odir+'/%s_pre_rho_rms_v_rms.%s'%(sim.name,form))
+        if 0:
+            ax.clear()
+            ax.scatter(sim.means.dmeans,sim.means.vmeans)
+            axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
+            fig.savefig(odir+'/%s_pre_rho_v_mean.%s'%(sim.name,form))
+
+        if 0:
+            ax.clear()
+            ax.errorbar(sim.means.d_logmeans,sim.means.v_logmeans, 
+                        xerr=sim.means.d_logstds, yerr=sim.means.v_logstds)
+            axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
+            fig.savefig(odir+'/%s_pre_rho_v_log_errb.%s'%(sim.name,form))
 
 if 0:
     #relative and tangential histograms
@@ -159,8 +213,6 @@ if 0:
     ax1.legend(loc=1)
     ax1.set_title('test')
     fig.savefig('plots_to_sort/vels.png')
-
-core_list = this_looper.core_list
 
 
 if 0:
@@ -257,7 +309,6 @@ if 0:
     axbonk(ax1,yscale='log',xscale='log', xlabel=r'$v$',ylabel=r'$N$')
     fig.savefig(odir+"velocity_pdf.%s"%form)
 
-ok=npart>1
 fig,ax=plt.subplots()
 
 if 0:
@@ -300,28 +351,6 @@ if 0:
         axbonk(ax,xscale='linear',yscale='linear',xlim=x.minmax,ylim=y.minmax, xlabel=r'$\sigma_{\ln \rho}$', ylabel=r'$\sigma_v$')
         fig.savefig(odir+'/pre_logrho_rms_v_rms.%s'%form)
 
-if 1:
-    if 1:
-        ax.clear()
-        ax.scatter(dstds[ok],vstds[ok])
-        axbonk(ax,yscale='log', xscale='log',  ylabel=r'$\sigma_v$', xlabel=r'$\sigma_{\rho}$')
-        fig.savefig(odir+'/pre_rho_rms_v_rms.%s'%form)
-    if 1:
-        ax.clear()
-        ax.scatter(dmeans[ok],vstds[ok])
-        axbonk(ax,yscale='log', xscale='log', ylabel=r'$\sigma_v$', xlabel=r'$\langle\rho\rangle$')
-        fig.savefig(odir+'/pre_rho_mean_v_rms.%s'%form)
-    if 1:
-        ax.clear()
-        ax.scatter(dmeans,vmeans)
-        axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
-        fig.savefig(odir+'/pre_rho_v_mean.%s'%form)
-
-    if 1:
-        ax.clear()
-        ax.errorbar(d_logmeans,v_logmeans, xerr=d_logstds, yerr=v_logstds)
-        axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
-        fig.savefig(odir+'/%s_pre_rho_v_log_errb.%s'%(this_simname,form))
 
 if 0:
     ax.clear()

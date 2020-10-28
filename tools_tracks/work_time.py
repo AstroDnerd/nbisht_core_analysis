@@ -81,55 +81,36 @@ if 1:
 
         frame_stuff = ""
         
-        for n_count,n_time in enumerate(asort):
-            time=thtr.times[n_time]
-            if time == 0:
-                continue
-            cxx=tmap(n_count,ms.nparticles)
-            this_r=ms.r[:,n_time]+0
-            this_r[ this_r<1./2048] = 1./2048
+        for nf,field in enumerate(field_list):
+            c = get_field_color(field)
+            #c = tmap(n_time)
+            this_field = thtr.c([core_id],field)
+            one_label=True
 
-            for nf,field in enumerate(field_list):
-                c = get_field_color(field)
-                #c = tmap(n_time)
-                this_field = thtr.c([core_id],field)
-                all_extents(this_field)
-                arr = this_field[:,n_time]
-                field_growth = arr >= 0
-                field_death  = arr < 0
-                if field_growth.sum() > 0:
-                    bin_means_g, bin_edges_g, binnumber_g=stats.binned_statistic(this_r[field_growth], arr[field_growth], statistic='mean', bins=r_bins)
-                    ok = ~np.isnan(bin_means_g)
-                    print("OK %d %d"%(ok.sum(),ok.size))
+            for npart in list(range(ms.nparticles))[::10]:
+                if one_label:
+                    label=field
+                    one_label=False
+                else:
                     label=None
-                    if n_count == 0:
-                        label=field
-                    axd1.plot( r_centers[ok], bin_means_g[ok],c=c,label=label,linestyle='-')
-                if field_death.sum() > 0:
-                    bin_means_d, bin_edges_d, binnumber_d=stats.binned_statistic(this_r[field_death], arr[field_death], statistic='mean', bins=r_bins)
-                    label=None
-                    axd1.plot( r_centers, bin_means_d,c=c,label=label,linestyle='--')
-                if True:
-                    bin_means_b, bin_edges_b, binnumber_b=stats.binned_statistic(this_r, arr, statistic='mean', bins=r_bins)
-                    print(bin_means_b)
-                    label=None
-                    if n_count == 0:
-                        label=field
-                    axd1.plot( r_centers, bin_means_b,c=c,label=label)
 
-#                axd1.scatter(this_r,arr,c=cxx,label=labels.get(field,field),s=0.1,marker='*')
-                print("N pos %d N neg %d Ntot %d FG %d"%( (arr>=0).sum(), (arr<0).sum(),arr.size, field_growth.sum()))
 
-            #r_un = nar(sorted(np.unique(this_r)))
-            #axd1.plot(r_un, 100*(r_un/1e-2)**-2,c='k',linewidth=0.1)
+                axd1.plot(thtr.times, this_field[npart,:], c=c,label=label)
+            if 0:
+                growth = this_field >= 0
+                death = ~growth
+                axd1.plot(thtr.times, this_field[growth].mean(axis=0),c=c)
+                axd1.plot(thtr.times, this_field[death].mean(axis=0),c=c)
+
+
 
         #davetools.axbonk(axd1,xscale='log',yscale='log',xlabel='r',ylabel=r'$E_G,E_B$', xlim=r_extents.minmax, ylim=all_extents.minmax)
-        davetools.axbonk(axd1,xscale='log',yscale='linear',xlabel='r',ylabel=r'$E_G,E_B$', xlim=[r_min,r_extents.minmax[1]], ylim=all_extents)
-        #axd1.legend(loc=1)
-        axd1.set_yscale('symlog',linthreshy=1e-3)
+        davetools.axbonk(axd1,xscale='linear',yscale='linear',xlabel='t',ylabel=r'$E_G,E_B$')
+        axd1.legend(loc=0)
+        axd1.set_yscale('symlog',linthreshy=1e+1)
         axd1.set_ylim(all_extents.minmax)
         #axd1.legend(loc=0)
-        outname = '%s/%s_radius_c%04d'%(dl.output_directory,output_prefix,core_id)
+        outname = '%s/%s_time_c%04d'%(dl.output_directory,output_prefix,core_id)
         axd1.set_title("core %d %s"%(core_id,frame_stuff))
         fig.savefig(outname)
         print("saved "+outname)

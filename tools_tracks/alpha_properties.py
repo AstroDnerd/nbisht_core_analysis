@@ -39,8 +39,26 @@ r_extents.minmax[0]=0.5/2048
 asort =  np.argsort(thtr.times)
 if (asort != sorted(asort)).any():
     print("Warning: times not sorted.")
-do_all_plots=True
-if 'alpha' not in dir() or True:
+do_all_plots=False
+
+import datasets_small.u05_core_speeds as u05cs
+rate_list = []
+for core_id in core_list:
+    ms = trackage.mini_scrubber(thtr,core_id)
+    if ms.nparticles == 1:
+        continue
+    if core_id in u05cs.fast_cores:
+        rate_list.append('r')
+    elif core_id in u05cs.slow_cores:
+        rate_list.append('g')
+    elif core_id in u05cs.ok_cores:
+        rate_list.append('b')
+    elif core_id in u05cs.small_cores:
+        rate_list.append('c')
+    else:
+        rate_list.append('k')
+    
+if 'alpha' not in dir():
     alpha = []
     mass = []
     density_0=[]
@@ -50,6 +68,7 @@ if 'alpha' not in dir() or True:
     ft_lst_r0=[]
     ft_lst_alpha=[]
     mini_alphas={}
+    collapse_times=[]
 
 
     for nc,core_id in enumerate(core_list):
@@ -60,6 +79,18 @@ if 'alpha' not in dir() or True:
             continue
 
         density = thtr.c([core_id],'density')
+
+        if 1:
+            #collapse time
+            if (density>1e3).any():
+                first_collapse_index = np.where( (density>1e3).sum(axis=0) >0 )[0][0] 
+                t_collapse = thtr.times[first_collapse_index]
+                collapse_times.append(t_collapse)
+            else:
+                t_collapse = -1
+                collapse_times.append(t_collapse)
+
+
 
 
         #Compute alpha
@@ -155,19 +186,59 @@ if 'alpha' not in dir() or True:
             print("saved "+outname)
             plt.close(fig)
 
+
+if 1:
+    mass=nar(mass)
+    fig, axes=plt.subplots(2,2)
+    ax0 = axes[0][0]; ax1=axes[0][1]
+    ax2 = axes[1][0]; ax3=axes[1][1]
+    ax0.scatter(density_0,alpha,c=rate_list)
+    ax1.scatter(mass,alpha,c=rate_list)
+
+    fig2, axes2=plt.subplots(1,1)
+    bx0 = axes2
+    if 'collapse_times' in dir(): #collapse_time can be found from density_time.py
+        ok = nar(collapse_times) > 0
+        t_ok=nar(collapse_times)[ok]
+        ax2.scatter(t_ok, nar(alpha)[ok])
+        ax3.scatter(t_ok, nar(mass)[ok],c=nar(rate_list)[ok])
+        bx0.scatter(t_ok, nar(density_0)[ok])
+        #ax3.scatter(t_ok, nar(density_0)[ok],c=nar(rate_list)[ok])
+        pdb.set_trace()
+
+    davetools.axbonk(ax0,xlabel=r'$\langle \rho \rangle$',ylabel=r'$\alpha$',  xscale='log',yscale='linear')
+    davetools.axbonk(ax1,xlabel=r'$M(t=0)$',              ylabel=r'$\alpha$',   xscale='log',yscale='linear')
+    davetools.axbonk(ax2,xlabel=r'$t_c$',                 ylabel=r'$\alpha$', xscale='log',yscale='linear')
+    davetools.axbonk(ax3,xlabel=r'$t_c$',                 ylabel=r'$M(t=0)$',  xscale='log',yscale='log')
+    davetools.axbonk(bx0,xlabel=r'$t_c$',   ylabel=r'$\langle \rho \rangle$',  xscale='log',yscale='linear')
+    ax3.set_xlim([t_ok.min(),t_ok.max()])
+    ax3.set_ylim(mass.min(),mass.max())
+    ax1.set_xlim(mass.min(),mass.max())
+    outname = '%s/alpha_mass.png'%dl.output_directory
+    fig.savefig(outname)
+    outname2 = '%s/tc_rho.png'%dl.output_directory
+    fig2.savefig(outname2)
+    print(outname)
+
 if 0:
     mass=nar(mass)
-    fig, axes=plt.subplots(1,2)
-    ax0 = axes[0]; ax1=axes[1]
+    fig, axes=plt.subplots(2,2)
+    ax0 = axes[0][0]; ax1=axes[0][1]
+    ax2 = axes[1][0]; ax3=axes[1][1]
     ax0.scatter(density_0,alpha)
     ax1.scatter(mass,alpha)
+    #ax2.scatter(total_volume,alpha)
+    #ax3.scatter(total_volume,mass)
     davetools.axbonk(ax0,ylabel=r'$\alpha$', xlabel=r'$\langle \rho \rangle$', xscale='log',yscale='linear')
     davetools.axbonk(ax1,ylabel=r'$\alpha$', xlabel=r'$M(t=0)$', xscale='log',yscale='linear')
+    #vol_lim=[min(total_volume),max(total_volume)]
+    mass_lim=[min(mass),max(mass)]
+    davetools.axbonk(ax2,ylabel=r'$\alpha$', xlabel=r'$V(t=0)$', xscale='log',yscale='linear',xlim=vol_lim)
+    davetools.axbonk(ax3,ylabel=r'$M(t=0)$', xlabel=r'$V(t=0)$', xscale='log',yscale='log',xlim=vol_lim,ylim=mass_lim)
     ax1.set_xlim(mass.min(),mass.max())
     outname = '%s/alpha_mass.png'%dl.output_directory
     fig.savefig(outname)
     print(outname)
-
 
 
 #plt.clf()
@@ -243,24 +314,5 @@ if 'alpha_proxy' not in dir() and False:
             plt.close(fig)
 
 
-if 1:
-    mass=nar(mass)
-    fig, axes=plt.subplots(2,2)
-    ax0 = axes[0][0]; ax1=axes[0][1]
-    ax2 = axes[1][0]; ax3=axes[1][1]
-    ax0.scatter(density_0,alpha)
-    ax1.scatter(mass,alpha)
-    ax2.scatter(total_volume,alpha)
-    ax3.scatter(total_volume,mass)
-    davetools.axbonk(ax0,ylabel=r'$\alpha$', xlabel=r'$\langle \rho \rangle$', xscale='log',yscale='linear')
-    davetools.axbonk(ax1,ylabel=r'$\alpha$', xlabel=r'$M(t=0)$', xscale='log',yscale='linear')
-    vol_lim=[min(total_volume),max(total_volume)]
-    mass_lim=[min(mass),max(mass)]
-    davetools.axbonk(ax2,ylabel=r'$\alpha$', xlabel=r'$V(t=0)$', xscale='log',yscale='linear',xlim=vol_lim)
-    davetools.axbonk(ax3,ylabel=r'$M(t=0)$', xlabel=r'$V(t=0)$', xscale='log',yscale='log',xlim=vol_lim,ylim=mass_lim)
-    ax1.set_xlim(mass.min(),mass.max())
-    outname = '%s/alpha_mass.png'%dl.output_directory
-    fig.savefig(outname)
-    print(outname)
 
 

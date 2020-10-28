@@ -20,10 +20,7 @@ def rb(kall, power, nbins = 32,bins=None):
     ax.plot(bin_center,power_1d,c='k')
     fig.savefig('p56_binned.png')
 
-
-
-
-    return bin_center, power_1d
+    return bins, bin_center, power_1d
 
 def rb2(kmag, power, nbins = 32,bins=None):    
     dbin = (kmag.max()-kmag.min())/nbins
@@ -44,5 +41,5 @@ def rb2(kmag, power, nbins = 32,bins=None):
     ax.plot(bin_center,power_1d,c='k')
     fig.savefig('plots_to_sort/p56_binned.png')
 
-    return bin_center, power_1d
+    return bins, bin_center, power_1d
 
