@@ -23,13 +23,13 @@ import matplotlib.ticker as mtick
 # - - - - - - - - - - - - - - - - - - - - 
 
 plt.close('all')
-file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
+file_list=glob.glob('%s/*h5'%dl.every_ten['u05'])
 
 # RUN ONCE with ipython -i file_name.py, then this if statement should save you time
 # RUN SECOND time with run -i file_name.py in python shell
 
 if 'this_looper' not in dir():
-    this_looper=looper.core_looper(directory=dl.enzo_directory)
+    this_looper=looper.core_looper(directory=dl.sims['u05'])
     for nfile,fname in enumerate(file_list):
         this_looper.load_loop(fname)
         print( "Reading file %d of %d"%(nfile,len(file_list)))
@@ -155,7 +155,7 @@ for nc,core_id in enumerate(core_list):
 
     # SET-UP FOR PLOTTING!
     # FOR ALL TIMES, turn this "on"
-    if 0:
+    if 1:
         fig, ax1=plt.subplots(1,1) 
     # FOR TWO PANEL SUBPLOTS, turn this "on"
     if 0:
@@ -192,66 +192,66 @@ for nc,core_id in enumerate(core_list):
 
         # FOR ALL TIMES do field only, choose respective fig, and change lplots[n_time] for ax1
         # FOR EACH TIME FRAME, add [:,n_time]
-        X = np.log10(density[:,n_time]).flatten()   
-        Y = np.log10(magfield[:,n_time]).flatten()  
-        Z = np.log10(cellvolume[:,n_time]).flatten()  #ADDED 
+        X = np.log10(density).flatten()   
+        Y = np.log10(magfiel).flatten()  
+        #Z = np.log10(cellvolume[:,n_time]).flatten()  #ADDED 
 
         XX = 10 ** X 
-        #X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
-        X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
+        X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
+        #X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
         XX2 = 10 ** X2 
    
 
 
         # NOTE: the "else" statements are a holder for the pearsonR's that are nans;
         # these need to be accounted for rightfully. suggestion: reverse the time,core loops
-
-        # PEARSONr: scipy vs manual 
-        xs = np.std(X)
-        mxs = np.std(this_rho)
-        ys = np.std(Y)
-        mys = np.std(this_B)
+        if 0:
+        # PEARSONr: SCIPY vs MANUAL 
+            xs = np.std(X)
+            mxs = np.std(this_rho)
+            ys = np.std(Y)
+            mys = np.std(this_B)
 
         # SCIPY PEARSONr: scipy logged
-        if xs != 0 and ys != 0:
-            pear0,pear1 = scipy.stats.pearsonr(X,Y)  
-        else:
-            pear0 = 0  
-        pearsonr = np.append(pearsonr,pear0)
+            if xs != 0 and ys != 0:
+                pear0,pear1 = scipy.stats.pearsonr(X,Y)  
+            else:
+                pear0 = 0  
+            pearsonr = np.append(pearsonr,pear0)
 
         # SCIPY PEARSONr: scipy not logged
-        if mxs != 0  and mys != 0:
-            pear0,pear1 = scipy.stats.pearsonr(this_rho,this_B)  
-        else:
-            pear0 = 0  
-        pearsonr = np.append(pearsonr,pear0)  #otherwise pear0 is taking the same value twice
- 
+            if mxs != 0  and mys != 0:
+                pear0,pear1 = scipy.stats.pearsonr(this_rho,this_B)  
+            else:
+                pear0 = 0  
+            pearsonr = np.append(pearsonr,pear0)  #otherwise pear0 is taking the same value twice
+     
         # MANUAL PEARSONr: not logged 
-        avB = np.sum(this_B*this_cv)/np.sum(this_cv)
-        varB = np.sum((this_B-avB)**2*this_cv)/np.sum(this_cv)
-        avRho = np.sum(this_rho*this_cv)/np.sum(this_cv)
-        varRho = np.sum((this_rho-avRho)**2*this_cv)/np.sum(this_cv)
-        covar = np.sum((this_B-avB)*(this_rho-avRho)*this_cv)/np.sum(this_cv)
-        if varB != 0 and varRho != 0:
-            pearson_r = covar/(np.sqrt(varB)*np.sqrt(varRho)) 
-        else:
-            pearson_r = 0
-        pearson_mr = np.append(pearson_mr,pearson_r) 
+            avB = np.sum(this_B*this_cv)/np.sum(this_cv)
+            varB = np.sum((this_B-avB)**2*this_cv)/np.sum(this_cv)
+            avRho = np.sum(this_rho*this_cv)/np.sum(this_cv)
+            varRho = np.sum((this_rho-avRho)**2*this_cv)/np.sum(this_cv)
+            covar = np.sum((this_B-avB)*(this_rho-avRho)*this_cv)/np.sum(this_cv)
+            if varB != 0 and varRho != 0:
+                pearson_r = covar/(np.sqrt(varB)*np.sqrt(varRho)) 
+            else:
+                pearson_r = 0
+            pearson_mr = np.append(pearson_mr,pearson_r) 
 
         # MANUAL PEARSONr: logged parameters
-        l_avB = np.sum(Y * Z) / np.sum(Z)
-        l_varB = np.sum((Y - l_avB)**2 * Z) / np.sum(Z)
-        l_avRho = np.sum(X * Z) / np.sum(Z)
-        l_varRho = np.sum((X - l_avRho)**2 * Z) / np.sum(Z)
-        l_covar = np.sum((Y-l_avB) * (X-l_avRho) * Z) / np.sum(Z)
-        #if l_varB <=0  or l_varRho <= 0:
-        if l_varB != 0 and l_varRho != 0:  # TEST
-            pearsonR = l_covar / (np.sqrt(l_varB) * np.sqrt(l_varRho))  
-            #if np.isnan(pearsonR):  # or if a != a ...true = problem
-            #    pdb.set_trace()
-        else:
-            pearsonR = 0 
-        pearson_lmr = np.append(pearson_lmr,pearsonR)
+            l_avB = np.sum(Y * Z) / np.sum(Z)
+            l_varB = np.sum((Y - l_avB)**2 * Z) / np.sum(Z)
+            l_avRho = np.sum(X * Z) / np.sum(Z)
+            l_varRho = np.sum((X - l_avRho)**2 * Z) / np.sum(Z)
+            l_covar = np.sum((Y-l_avB) * (X-l_avRho) * Z) / np.sum(Z)
+            #if l_varB <=0  or l_varRho <= 0:
+            if l_varB != 0 and l_varRho != 0:  # TEST
+                pearsonR = l_covar / (np.sqrt(l_varB) * np.sqrt(l_varRho))  
+                #if np.isnan(pearsonR):  # or if a != a ...true = problem
+                #    pdb.set_trace()
+            else:
+                pearsonR = 0 
+            pearson_lmr = np.append(pearson_lmr,pearsonR)
 
 
 
@@ -259,11 +259,11 @@ for nc,core_id in enumerate(core_list):
         # lnB = beta*ln(rho) + lnB_0
 
         # CURVE-FIT:  -revise!
-        def testing(x, a, b):
-            return a*x+b 
-        param, param_cov = curve_fit(testing, X, Y)
-        Y_B = 10 ** (param[0]*X + param[1])
-        beta_curve = param[0]
+        #def testing(x, a, b):
+        #    return a*x+b 
+        #param, param_cov = curve_fit(testing, X, Y)
+        #Y_B = 10 ** (param[0]*X + param[1])
+        #beta_curve = param[0]
 
         # POLY-FITTING:
         pfit = np.polyfit(X,Y,1) 
@@ -272,9 +272,9 @@ for nc,core_id in enumerate(core_list):
         B_o = pfit[1]
        
 
-        #if n_time == 15:  #FOR ALL TIME ONLY
-        betarr = np.append(betarr,beta)  #unindent if per frame
-        beta_curvarr = np.append(beta_curvarr, beta_curve)
+        if n_time == 15:  #FOR ALL TIME ONLY
+            betarr = np.append(betarr,beta)  #unindent if per frame
+        #beta_curvarr = np.append(beta_curvarr, beta_curve)
 
         # THE NEGATIVE OUTLIERS
         if beta < 0:
@@ -320,7 +320,7 @@ for nc,core_id in enumerate(core_list):
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 1:
+        if 0:
             if n_time == 15:              
                 pear2 = np.append(pear2,pearson_lmr[0])
                 pear3 = np.append(pear3,pearson_lmr[1]) 
@@ -404,7 +404,7 @@ if 0:
 
 # - - - - - BOXPLOT FOR ALL FRAMES
 # NOTE: for PearsonR, nan values are not accepted
-if 1:  
+if 0:  
     count = 0 #temp
     Pears = {}
     index = []
@@ -440,7 +440,7 @@ if 1:
     plt.close(fig)
 
 # - - - - - HISTOGRAM FOR ALL CORES FOR ALL TIME
-if 0:
+if 1:
     #BETA ENTRIES, AVERAGE & STD
     betavg = np.mean(betarr)
     betastd = np.std(betarr)
