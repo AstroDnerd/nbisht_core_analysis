@@ -13,6 +13,7 @@ import matplotlib.gridspec as gridspec
 import matplotlib.ticker as mtick
 # - - - - - - - - - -
 
+# NAZARE-an
 directory_05 = '/archive2/dcollins4096/Paper19/u05-r4-l4-128'
 directory_10 = '/archive2/luzlourdes/u10/DD0082/data0082'
 directory_11 = '/archive2/luzlourdes/u11/DD0088/data0088'

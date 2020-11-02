@@ -23,13 +23,13 @@ import matplotlib.ticker as mtick
 # - - - - - - - - - - - - - - - - - - - - 
 
 plt.close('all')
-file_list=glob.glob('%s/*h5'%dl.every_ten['u05'])
 
 # RUN ONCE with ipython -i file_name.py, then this if statement should save you time
 # RUN SECOND time with run -i file_name.py in python shell
 
 if 'this_looper' not in dir():
-    this_looper=looper.core_looper(directory=dl.sims['u05'])
+    file_list=glob.glob(dl.every_ten['u10'])  #TEST
+    this_looper=looper.core_looper(directory=dl.sims['u10'])
     for nfile,fname in enumerate(file_list):
         this_looper.load_loop(fname)
         print( "Reading file %d of %d"%(nfile,len(file_list)))
@@ -45,11 +45,12 @@ core_list=all_cores
 #core_part = parts[128:,0]
 #particle_part = parts[128:,1]
 
-frames = [1] + list(range(10,130,10)) + [125]  
+frames = [1] + list(range(10,130,10)) + [125]  #ONLY FOR u05!  
 G = 1620/(4*np.pi)
 rho_mean = 1
 t_ff = np.sqrt(3*np.pi/(32*G*rho_mean))
-# TFF PERCENTAGE
+# TFF PERCENTAGE: EDIT
+'''
 tff_p = [(thtr.times[2]/t_ff),(thtr.times[3]/t_ff),(thtr.times[4]/t_ff),(thtr.times[5]/t_ff),\
          (thtr.times[6]/t_ff),(thtr.times[7]/t_ff),(thtr.times[8]/t_ff),(thtr.times[9]/t_ff),\
          (thtr.times[10]/t_ff),(thtr.times[11]/t_ff),(thtr.times[12]/t_ff),(thtr.times[13]/t_ff),\
@@ -57,7 +58,7 @@ tff_p = [(thtr.times[2]/t_ff),(thtr.times[3]/t_ff),(thtr.times[4]/t_ff),(thtr.ti
 tff_labels = ['%.2f'%tff_p[0],'%.2f'%tff_p[1],'%.2f'%tff_p[2],'%.2f'%tff_p[3],'%.2f'%tff_p[4],\
               '%.2f'%tff_p[5],'%.2f'%tff_p[6],'%.2f'%tff_p[7],'%.2f'%tff_p[8],'%.2f'%tff_p[9],\
               '%.2f'%tff_p[10],'%.2f'%tff_p[11],'%.2f'%tff_p[12],'%.2f'%tff_p[13]]
-
+'''
 rm = rainbow_map(len(all_cores)) 
 if 'rho_extents' not in dir():
     rho_extents=davetools.extents()
@@ -135,7 +136,7 @@ def labelled(ax,xscale=None,yscale=None,xlabel=None,ylabel=None,\
     ax.set_ylim(ylim)
     ax.set_title(title)
 
-for nc,core_id in enumerate(core_list):
+for nc,core_id in enumerate(core_list):  #WATCH
 
     #miniscrubber computes distance, r^2, several other quantities
     ms = trackage.mini_scrubber(thtr,core_id)
@@ -178,6 +179,7 @@ for nc,core_id in enumerate(core_list):
         fig.subplots_adjust(wspace=0, hspace=0)
 
     for n_count,n_time in enumerate(asort): 
+        print("TESTING_1")
         time=thtr.times[n_time]
         if time == 0:
             continue
@@ -193,7 +195,7 @@ for nc,core_id in enumerate(core_list):
         # FOR ALL TIMES do field only, choose respective fig, and change lplots[n_time] for ax1
         # FOR EACH TIME FRAME, add [:,n_time]
         X = np.log10(density).flatten()   
-        Y = np.log10(magfiel).flatten()  
+        Y = np.log10(magfield).flatten()  
         #Z = np.log10(cellvolume[:,n_time]).flatten()  #ADDED 
 
         XX = 10 ** X 
@@ -254,7 +256,7 @@ for nc,core_id in enumerate(core_list):
             pearson_lmr = np.append(pearson_lmr,pearsonR)
 
 
-
+        # NOTES 
         # B = B0 rho^beta --> lnB = ln(B_0*rho^beta) -->
         # lnB = beta*ln(rho) + lnB_0
 
@@ -266,14 +268,17 @@ for nc,core_id in enumerate(core_list):
         #beta_curve = param[0]
 
         # POLY-FITTING:
+        print('TESTING_2') 
         pfit = np.polyfit(X,Y,1) 
         other = np.poly1d(pfit)
         beta = pfit[0]
         B_o = pfit[1]
        
 
-        if n_time == 15:  #FOR ALL TIME ONLY
+        if n_time == asort[-1]:  #FOR ALL TIME ONLY
             betarr = np.append(betarr,beta)  #unindent if per frame
+            print('TESTING_3') 
+            print(betarr)  #EDIT
         #beta_curvarr = np.append(beta_curvarr, beta_curve)
 
         # THE NEGATIVE OUTLIERS
@@ -285,22 +290,22 @@ for nc,core_id in enumerate(core_list):
 
 
         YY = 10 ** (pfit[0]*X2 + pfit[1]) 
-        if 0: 
-            if n_time in {3,6,8,10,12,14}: 
+        if 1: 
+            #if n_time in {3,6,8,10,12,14}:  #FOR u05 ONLY 
                 # FOR ALL TIME indent 4 left, comment if above, change lplots[n_time] to ax1, & comment out labelled to ax8
-                lplots[n_time].scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)          
-                lplots[n_time].plot(XX2,YY,c='k',linewidth=1.0) #c=c[0] for colors
-                print("plotted")             
+            ax1.scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)          
+            ax1.plot(XX2,YY,c='k',linewidth=1.0) #c=c[0] for colors
+            print("plotted")             
 
-                labelled(lplots[n_time],xscale='log',yscale='log',xlabel=None,ylabel=None,
-                         xlim=rho_extents.minmax, ylim=magfield_extents.minmax)
-                ax2.tick_params(axis='y',labelleft=False)
-                ax4.set_ylabel(r'$\mid B \mid (\mu G)$')
-                ax5.tick_params(axis='y',labelleft=False)
-                ax8.tick_params(axis='y',labelleft=False)
+            #labelled(lplots[n_time],xscale='log',yscale='log',xlabel=None,ylabel=None,
+            #         xlim=rho_extents.minmax, ylim=magfield_extents.minmax)
+            #ax2.tick_params(axis='y',labelleft=False)
+            #ax4.set_ylabel(r'$\mid B \mid (\mu G)$')
+            #ax5.tick_params(axis='y',labelleft=False)
+            #ax8.tick_params(axis='y',labelleft=False)
                 
             # ADD LINEAR FITS FOR CONTRAST
-            if 0: 
+            if 1: 
                 YY_four = 10 ** ((2/5)*X2 + pfit[1])
                 YY_five = 10 ** ((1/2)*X2 + pfit[1])
                 YY_six = 10 ** ((2/3)*X2 + pfit[1]) 
@@ -312,16 +317,16 @@ for nc,core_id in enumerate(core_list):
                 labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu G)$',
                          xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\beta = %.3f$'%beta)
 
-            outname = '%s/BrhoTff_c%04d'%(dl.output_directory,core_id) 
-            if 0:
-                if n_time == 15:
+            outname = '%s/BrhoTff_c%04d'%('sort_plots',core_id) 
+            if 1:
+                if n_time == asort[-1]:
                     plt.savefig(outname)
                     print("saved "+outname)
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
         if 0:
-            if n_time == 15:              
+            if n_time == asort[-1]:              
                 pear2 = np.append(pear2,pearson_lmr[0])
                 pear3 = np.append(pear3,pearson_lmr[1]) 
                 pear4 = np.append(pear4,pearson_lmr[2]) 
@@ -440,24 +445,27 @@ if 0:
     plt.close(fig)
 
 # - - - - - HISTOGRAM FOR ALL CORES FOR ALL TIME
-if 1:
-    #BETA ENTRIES, AVERAGE & STD
+if 0:
+    #BETA ENTRIES, AVERAGE & STD 
     betavg = np.mean(betarr)
     betastd = np.std(betarr)
-    entries = len(betarr)
-
+    entries = len(betarr) 
+  
     fig, ax1 = plt.subplots()
 
-    ax1.hist(betarr, 50, density=False, histtype='step', color='g')
-    ax1.set_xlabel(r'\beta')  #test
+    ax1.hist(betarr, 50, density=False, histtype='step', color='m')  #change color for diff sims
+    ax1.set_xlabel(r'$\beta$') 
     ax1.set_ylabel('PDF')
 
     y_vals = ax1.get_yticks()
     ax1.set_yticklabels(['{:.3f}'.format(x/len(betarr)) for x in y_vals])
 
-    name_save = "BetaHistogramTff" 
+    name_save = "BetaHistogramTff_u11" 
+
     t = 'Cores: %d\n'%entries +  r'Mean $\beta = %.3f$'%betavg + '\n' + r'$\sigma = %.3f$'%betastd
-    ax1.text(0.56, 15, t, color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1')) 
+    #ax1.text(0.56, 15, t, color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u05 
+    #ax1.text(0.47, 13.5, t, color='blue', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u10 
+    ax1.text(0.50, 12.5, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u11 
     plt.savefig(name_save)
     print('saved '+name_save)
    
