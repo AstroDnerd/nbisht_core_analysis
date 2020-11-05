@@ -18,7 +18,7 @@ def count_particles(fname='tools_data/n_particles.txt'):
     pd = dict( zip( parts[:,0], parts[:,1]))
     return pd
 
-def get_all_nonzero(fname='tools_data/n_particles.txt'):
+def get_all_nonzero(fname='tools_data/n_particles.txt'):  #ONLY FOR SIM U05!
     fptr = open(fname,'r')
     lines=fptr.readlines()
     fptr.close()
@@ -27,7 +27,7 @@ def get_all_nonzero(fname='tools_data/n_particles.txt'):
         parts[n] = np.array(line.split(),dtype='int')
     all_nonzero = parts[:,0][ parts[:,1] >0]
     core_list = all_nonzero.astype('int')[::-1]
-    return core_list #parts, all_nonzero, 
+    return core_list 
             
 class core_looper():
     """We want to analyze the core pre-images for a bunch of frames.

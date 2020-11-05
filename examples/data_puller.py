@@ -38,11 +38,11 @@ if 1:
     output_base = "%s_density_only"%this_simname
     derived=[]
 
-if 0:
+if 1:
     """this set of parameters extracts all primitive quantities"""
     core_list = all_nonzero.astype('int')[::-1]
     target_frame = dl.target_frames[this_simname]
-    frame_list = [0]+list(range(10,target_frame,10))+[target_frame]
+    frame_list = list(range(0,target_frame,10))+[target_frame]
     fields = ['x','y','z','velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
@@ -75,7 +75,7 @@ if 1:
                                          derived = derived
                                       )
         this_looper.get_target_indices(h5_name=dl.peak_list[this_simname],
-                                         bad_particle_list=dl.bad_particles[this_simname])
+                                         bad_particle_list=dl.bad_particles.get(this_simname,None))
         this_looper.get_tracks()
         this_looper.save(output_name)
 
