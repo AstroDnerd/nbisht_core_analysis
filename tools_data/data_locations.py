@@ -10,13 +10,17 @@ from starter2 import *
 #
 # guess the computer
 #
-machine = None
-if os.path.exists("/scratch1"):
-    machine = 'Nazare'
-elif  os.path.exists("/data/cb1"):
-    machine = 'Cloudbreak'
-else:
-    print("Bad error: cannot detrmine machine")
+
+machine = os.environ.get('machine',None)
+if machine is None:
+    if os.path.exists("/scratch1"):
+        machine = 'Nazare'
+    elif  os.path.exists("/data/cb1"):
+        machine = 'Cloudbreak'
+    elif 'machine' in os.environ:
+        machine = os.environ['machine']
+    else:
+        print("data_locations.py Bad error: cannot detrmine machine")
 
 output_directory = "./plots_to_sort"
         
@@ -28,7 +32,6 @@ if machine == 'Nazare':
     u05_every_ten ='/scratch1/dcollins/Paper19/Datasets/track_indfix_sixteenframe/*h5'
     u10_every_ten = "/scratch1/dcollins/Paper19/Datasets/u10_every_ten/u10_all_primitives_primitives_c*_nXXX0.h5"
     u11_every_ten = "/scratch1/dcollins/Paper19/Datasets/u11_every_ten/u11_all_primitives_primitives_c*_nXXX0.h5"
-
 
 
 elif machine == 'Cloudbreak':
@@ -47,6 +50,21 @@ elif machine == 'Cloudbreak':
     u101_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u101_every_ten/u101_all_primitives_primitives_c*_nXXX0.h5"
     u102_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u102_every_ten/u102_all_primitives_primitives_c*_nXXX0.h5"
     u103_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u103_every_ten/u103_all_primitives_primitives_c*_nXXX0.h5"
+else:
+    sim_u05 = None
+    sim_u10 = None
+    sim_u11 = None
+
+    u05_every_ten = None
+    u10_every_ten = None
+    u11_every_ten = None
+
+    sim_u101 = None
+    sim_u102 = None
+    sim_u103 = None
+    u101_every_ten = None
+    u102_every_ten = None
+    u103_every_ten = None
 
 sims={'u05':sim_u05,'u10':sim_u10,'u11':sim_u11,'u101':sim_u101,'u102':sim_u102,'u103':sim_u103}
 

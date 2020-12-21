@@ -1,0 +1,186 @@
+<html>
+<head>
+<script>
+string_replace = function(arg1,arguments) {
+        var a = arg1;
+        //for (var k in arguments) {
+        my_reg = /\{0\}/g; // new RegExp('{0}','g');
+        a = a.replace(my_reg, arguments[0]);
+        my_reg = /\{1\}/g; 
+        a = a.replace(my_reg, arguments[1]);
+        my_reg = /\{2\}/g; 
+        a = a.replace(my_reg, arguments[2]);
+        return a;
+    }
+var core_label="";
+var template="";
+function set_image(fname){
+    document.getElementById('myImage').src=fname;
+    //document.getElementById('myImage').src="pic_bulboff.gif";
+}
+function set_image(fname){
+    document.getElementById('myImage').src=fname;
+}
+function ImageExist(url) 
+{
+   var img = new Image();
+      img.src = url;
+         return img.height != 0;
+}
+///
+function doesFileExist(urlToFile) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('HEAD', urlToFile, false);
+    xhr.send();
+     
+    if (xhr.status == "404") {
+        return false;
+    } else {
+        return true;
+    }
+}
+///
+function set_image(image_id,fname){
+    console.log('YOOOOO'+ImageExists(url));
+    document.getElementById(image_id).src=fname;
+
+}
+function find_next_frame(my_id,current_frame_string,offset){
+    var current_index = -47;
+    var current_frame = Number(current_frame_string.substring(1,current_frame_string.length));
+    for ( i=0; i<frame_list_dict[my_id].length; i++){
+        if ( frame_list_dict[my_id][i] == current_frame ){
+        console.log(frame_list_dict[my_id][i], current_frame);
+           current_index = i;
+        }
+    }
+    var next_index = current_index + offset;
+    nframes = frame_list_dict[my_id].length
+
+    next_frame = frame_list_dict[my_id][ next_index ];
+    console.log('Next index '+next_index);
+    console.log('current index '+current_index);
+    if (next_index < 0) {
+       next_frame = frame_list_dict[my_id][ nframes-1];
+    }
+    if (next_index >= nframes) {
+        next_frame = 0;
+    }
+    return next_frame;
+}
+function change_axis(image_id,fname_template,axis,frame){
+    var element = document.getElementById(image_id)
+
+
+    path = element.src.split('/')
+    current_file = path[path.length-1]
+
+    var frame_reg = /n[0-9]{4}/g;
+    var current_frame = current_file.match(frame_reg)[0];
+    var core_reg = /c[0-9]{4}/g;
+    var current_core = current_file.match(core_reg)[0];
+    var axis_reg = /_[xyz]_/g;
+    var current_axis = current_file.match(axis_reg)[0][1];
+
+    if (axis == ""){
+        axis = current_axis;
+    }
+    target_frame=frame
+    if (frame == ""){
+        target_frame = current_frame;
+    }
+    if ( frame == "next"){
+        target_frame_int = find_next_frame(image_id,current_frame,+1);
+        target_frame = "n"+String(target_frame_int).padStart(4,'0'); //javascript sucks.
+    }
+
+    if ( frame == "last"){
+        console.log('last')    
+    }
+
+    new_fname = string_replace(fname_template, [current_core,target_frame,axis]);
+
+    target_fname = new_fname;
+    try{
+    document.getElementById(image_id).src=target_fname;
+    }catch(err){
+    document.getElementById(image_id).src="pic_bulboff.gif";
+    }
+    finally{
+    //document.getElementById(image_id).src="pic_bulboff.gif";
+    }
+
+}
+</script>
+</head><body>
+<table border=2><tr><th> c0000 </th><td><figure><a href="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0000.png"><img src="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0000.png" width=800></a><figcaption>c0000 rho vs r</figcaption></figure></td><td><figure><a href="0000_density_tracks/zoom4/x/c0000/u05_centroids_zoom4_c0000_n0125_Projection_x_density.png"><img id=zoom4_c0000 src="0000_density_tracks/zoom4/x/c0000/u05_centroids_zoom4_c0000_n0125_Projection_x_density.png" width=800></a><figcaption>c0000 zoom4</figcaption></figure><button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','x','');">x</button>
+<button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','y','');">y</button>
+<button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','z','');">z</button>
+<br><button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','last');">LAST</button>
+<button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','next');">NEXT</button>
+<button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0000');">n0000</button>
+<button onclick="change_axis('zoom4_c0000','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0125');">n0125</button>
+</td>
+<br>
+</tr>
+<tr><th> c0001 </th><td><figure><a href="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0001.png"><img src="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0001.png" width=800></a><figcaption>c0001 rho vs r</figcaption></figure></td><td><figure><a href="0000_density_tracks/zoom4/x/c0001/u05_centroids_zoom4_c0001_n0125_Projection_x_density.png"><img id=zoom4_c0001 src="0000_density_tracks/zoom4/x/c0001/u05_centroids_zoom4_c0001_n0125_Projection_x_density.png" width=800></a><figcaption>c0001 zoom4</figcaption></figure><button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','x','');">x</button>
+<button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','y','');">y</button>
+<button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','z','');">z</button>
+<br><button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','last');">LAST</button>
+<button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','next');">NEXT</button>
+<button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0000');">n0000</button>
+<button onclick="change_axis('zoom4_c0001','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0125');">n0125</button>
+</td>
+<br>
+</tr>
+<tr><th> c0002 </th><td><figure><a href="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0002.png"><img src="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0002.png" width=800></a><figcaption>c0002 rho vs r</figcaption></figure></td><td><figure><a href="0000_density_tracks/zoom4/x/c0002/u05_centroids_zoom4_c0002_n0125_Projection_x_density.png"><img id=zoom4_c0002 src="0000_density_tracks/zoom4/x/c0002/u05_centroids_zoom4_c0002_n0125_Projection_x_density.png" width=800></a><figcaption>c0002 zoom4</figcaption></figure><button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','x','');">x</button>
+<button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','y','');">y</button>
+<button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','z','');">z</button>
+<br><button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','last');">LAST</button>
+<button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','next');">NEXT</button>
+<button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0000');">n0000</button>
+<button onclick="change_axis('zoom4_c0002','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0125');">n0125</button>
+</td>
+<br>
+</tr>
+<tr><th> c0007 </th><td><figure><a href="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0007.png"><img src="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0007.png" width=800></a><figcaption>c0007 rho vs r</figcaption></figure></td><td><figure><a href="0000_density_tracks/zoom4/x/c0007/u05_centroids_zoom4_c0007_n0125_Projection_x_density.png"><img id=zoom4_c0007 src="0000_density_tracks/zoom4/x/c0007/u05_centroids_zoom4_c0007_n0125_Projection_x_density.png" width=800></a><figcaption>c0007 zoom4</figcaption></figure><button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','x','');">x</button>
+<button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','y','');">y</button>
+<button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','z','');">z</button>
+<br><button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','last');">LAST</button>
+<button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','next');">NEXT</button>
+<button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0000');">n0000</button>
+<button onclick="change_axis('zoom4_c0007','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0125');">n0125</button>
+</td>
+<br>
+</tr>
+<tr><th> c0008 </th><td><figure><a href="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0008.png"><img src="2019-12-06-alpha-mass/density_radius_fit/density_radius_c0008.png" width=800></a><figcaption>c0008 rho vs r</figcaption></figure></td><td><figure><a href="0000_density_tracks/zoom4/x/c0008/u05_centroids_zoom4_c0008_n0125_Projection_x_density.png"><img id=zoom4_c0008 src="0000_density_tracks/zoom4/x/c0008/u05_centroids_zoom4_c0008_n0125_Projection_x_density.png" width=800></a><figcaption>c0008 zoom4</figcaption></figure><button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','x','');">x</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','y','');">y</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','z','');">z</button>
+<br><button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','last');">LAST</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','next');">NEXT</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0000');">n0000</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0020');">n0020</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0030');">n0030</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0040');">n0040</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0050');">n0050</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0060');">n0060</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0070');">n0070</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0080');">n0080</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0090');">n0090</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0100');">n0100</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0110');">n0110</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0120');">n0120</button>
+<button onclick="change_axis('zoom4_c0008','0000_density_tracks/zoom4/{2}/{0}/u05_centroids_zoom4_{0}_{1}_Projection_{2}_density.png','','n0125');">n0125</button>
+</td>
+<br>
+</tr>
+</table>
+<script>
+var frame_list_dict ={}; 
+  frame_list_dict["zoom4_c0000"]=[0, 125];
+  frame_list_dict["zoom4_c0001"]=[0, 125];
+  frame_list_dict["zoom4_c0002"]=[0, 125];
+  frame_list_dict["zoom4_c0007"]=[0, 125];
+  frame_list_dict["zoom4_c0008"]=[0, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 125];
+</script></body>
+</html>
