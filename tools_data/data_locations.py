@@ -32,7 +32,8 @@ if machine == 'Nazare':
 
 
 elif machine == 'Cloudbreak':
-    sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
+    #sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'  #contains all frames
+    sim_u05 = '/data/cb1/luzlourdes/u05_framelist/GravPotential'  #only contains frames_u05 
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
     sim_u11 = '/data/cb1/Projects/P19_CoreSimulations/u11_r4_l4_128-Beta20/GravPotential'
 
@@ -59,6 +60,11 @@ peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,
 
 
 target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80}
+frames_u05 = [1] + list(range(10,125,10)) + [125]
+frames_u10 = list(range(0,82,10)) + [82]
+frames_u11 = list(range(0,88,10)) + [88]
+frames={'u05':frames_u05,'u10':frames_u10,'u11':frames_u11}
+
 
 every_ten = {'u05':u05_every_ten,'u10':u10_every_ten,'u11':u11_every_ten, 'u101':u101_every_ten,'u102':u102_every_ten,'u103':u103_every_ten}
 

@@ -27,9 +27,12 @@ plt.close('all')
 # RUN ONCE with ipython -i file_name.py, then this if statement should save you time
 # RUN SECOND time with run -i file_name.py in python shell
 
+if 'this_simname' not in dir():
+    this_simname = 'u05'
+
 if 'this_looper' not in dir():
-    file_list=glob.glob(dl.every_ten['u10'])  #TEST
-    this_looper=looper.core_looper(directory=dl.sims['u10'])
+    file_list=glob.glob(dl.every_ten[this_simname]) 
+    this_looper=looper.core_looper(directory=dl.sims[this_simname])
     for nfile,fname in enumerate(file_list):
         this_looper.load_loop(fname)
         print( "Reading file %d of %d"%(nfile,len(file_list)))
@@ -38,14 +41,17 @@ if 'this_looper' not in dir():
     all_cores = np.unique(thtr.core_ids)
 
 core_list=all_cores
-#core_list = [21,70,85,165,275,297]  #chosen for paper
-#core_list = [21,70]
+# FOR PAPER
+#core_list = [21,70,85,165,275,297]  #u05
 
+# TESTING things...
 #cl, p, anz = looper.get_all_nonzero()  #change looper.py for profiles.py, UO5!
 #core_part = parts[128:,0]
 #particle_part = parts[128:,1]
 
-frames = [1] + list(range(10,130,10)) + [125]  #ONLY FOR u05!  
+frames = dl.frames[this_simname]
+
+# GLOBAL TFF 
 G = 1620/(4*np.pi)
 rho_mean = 1
 t_ff = np.sqrt(3*np.pi/(32*G*rho_mean))
@@ -60,14 +66,16 @@ tff_p = [(thtr.times[2]/t_ff),(thtr.times[3]/t_ff),(thtr.times[4]/t_ff),(thtr.ti
 tff_labels = ['%.2f'%tff_p[0],'%.2f'%tff_p[1],'%.2f'%tff_p[2],'%.2f'%tff_p[3],'%.2f'%tff_p[4],\
               '%.2f'%tff_p[5],'%.2f'%tff_p[6],'%.2f'%tff_p[7],'%.2f'%tff_p[8],'%.2f'%tff_p[9],\
               '%.2f'%tff_p[10],'%.2f'%tff_p[11],'%.2f'%tff_p[12],'%.2f'%tff_p[13]]
-'''
-# U10
+
+# U10, U11
+
 tff_p = [(thtr.times[1]/t_ff),(thtr.times[2]/t_ff),(thtr.times[3]/t_ff),(thtr.times[4]/t_ff),\
          (thtr.times[5]/t_ff),(thtr.times[6]/t_ff),(thtr.times[7]/t_ff),(thtr.times[8]/t_ff),\
          (thtr.times[9]/t_ff)]
        
 tff_labels = ['%.2f'%tff_p[0],'%.2f'%tff_p[1],'%.2f'%tff_p[2],'%.2f'%tff_p[3],'%.2f'%tff_p[4],\
               '%.2f'%tff_p[5],'%.2f'%tff_p[6],'%.2f'%tff_p[7],'%.2f'%tff_p[8]]
+'''
 
 rm = rainbow_map(len(all_cores)) 
 if 'rho_extents' not in dir():
@@ -100,7 +108,6 @@ pearson_mr = np.empty([0],dtype=float)
 spearmanr = np.empty([0],dtype=float)
 
 # TRYNG TO AVOID MORE LOOPS FOR NOW...
-# change to pears for the pearsonR boxplot
 pear2 = np.empty([0],dtype=float)
 pear3 = np.empty([0],dtype=float)
 pear4 = np.empty([0],dtype=float)
@@ -145,6 +152,7 @@ def labelled(ax,xscale=None,yscale=None,xlabel=None,ylabel=None,\
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
     ax.set_title(title)
+
 
 for nc,core_id in enumerate(core_list):  #WATCH
 
@@ -209,8 +217,8 @@ for nc,core_id in enumerate(core_list):  #WATCH
         #Z = np.log10(cellvolume[:,n_time]).flatten()  #ADDED 
 
         XX = 10 ** X 
-        X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
-        #X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
+        #X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
+        X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
         XX2 = 10 ** X2 
    
 
@@ -288,7 +296,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
         #if n_time == asort[-1]:  #FOR ALL TIME ONLY
         betarr = np.append(betarr,beta)  #unindent if per frame
         print('TESTING_3') 
-        print(betarr)  #EDIT
+        #print(betarr) 
         #beta_curvarr = np.append(beta_curvarr, beta_curve)
 
         # THE NEGATIVE OUTLIERS
@@ -328,14 +336,14 @@ for nc,core_id in enumerate(core_list):  #WATCH
                          xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\beta = %.3f$'%beta)
 
             outname = '%s/BrhoTff_c%04d'%('sort_plots',core_id) 
-            if 0:
+            if 0:  #WHEN should I turn this on?
                 if n_time == asort[-1]:
                     plt.savefig(outname)
                     print("saved "+outname)
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 1:
+        if 0:
             if n_time == asort[-1]:              
                 #pear2 = np.append(pear2,pearson_lmr[0])
                 #pear3 = np.append(pear3,pearson_lmr[1]) 
@@ -361,17 +369,17 @@ for nc,core_id in enumerate(core_list):  #WATCH
                 bear8 = np.append(bear8,betarr[6])  
                 bear9 = np.append(bear9,betarr[7]) 
                 bear10 = np.append(bear10,betarr[8]) 
-                #bear11 = np.append(bear11,betarr[9]) 
-                #bear12 = np.append(bear12,betarr[10]) 
-                #bear13 = np.append(bear13,betarr[11]) 
-                #bear14 = np.append(bear14,betarr[12]) 
+                bear11 = np.append(bear11,betarr[9])  #start commenting for u10 & u11 
+                bear12 = np.append(bear12,betarr[10]) 
+                bear13 = np.append(bear13,betarr[11]) 
+                bear14 = np.append(bear14,betarr[12]) 
                 #bear15 = np.append(bear15,betarr[13])   
 
                 # comment on / off as needed
                 pearson_lmr = np.empty([0],dtype=float)
                 pearsonr = np.empty([0],dtype=float) 
                 betarr = np.empty([0],dtype=float)
-                beta_curvarr = np.empty([0],dtype=float)
+                #beta_curvarr = np.empty([0],dtype=float)
 
                 if 0: 
                     #plt.clf()
@@ -400,10 +408,10 @@ for nc,core_id in enumerate(core_list):  #WATCH
         print("saved "+outname)
         plt.close(fig)
 
-pears = [pear2,pear3,pear4,pear5,pear6,pear7,pear8,\
-         pear9,pear10,pear11,pear12,pear13,pear14,pear15]
+#pears = [pear2,pear3,pear4,pear5,pear6,pear7,pear8,\
+#         pear9,pear10,pear11,pear12,pear13,pear14,pear15]
 bears = [bear2,bear3,bear4,bear5,bear6,bear7,bear8,\
-         bear9,bear10,bear11,bear12,bear13,bear14,bear15]
+         bear9,bear10,bear11,bear12,bear13,bear14]#,bear15]
 # - - - - - SCATTER_PLOT FOR ALL FRAMES - revise
 if 0:
     newbetas = np.empty([0],dtype=float)
@@ -439,19 +447,22 @@ if 0:
         data.append(val)
 
     fig, ax1=plt.subplots(1,1)    
-    ax1.plot([0,14],[0,0],c=[0.5]*4) 
+    #ax1.plot([0,14],[0,0],c=[0.5]*4)  #U05 
+    ax1.plot([0,9],[0,0],c=[0.5]*4)  #U10,U11 
     # trying to find how to use 'position' suitingly as to match time...
     bp = ax1.boxplot(data)  #bp is now a dictionary     
     
-    tff_mod = [0.0,0.0,0.07,0.23,0.38,0.53,0.68,0.82,0.95]  #must match MultipleLocator: modify for Pears?
-    ax1.xaxis.set_major_locator(plt.MultipleLocator(2))  #order swapped
-    ax1.set_xticklabels(tff_mod)    
-    #ax1.xaxis.set_major_locator(plt.MultipleLocator(2))
+    #tff_mod = [0.0,0.0,0.07,0.23,0.38,0.53,0.68,0.82,0.95]  #U05 - must match MultipleLocator: modify for Pears?
+    #ax1.xaxis.set_major_locator(plt.MultipleLocator(2))  #U05 order swapped with set_xticklabels
+    #tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.49,0.58,0.66,0.67]  #U10
+    tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.75]  #U11
+    ax1.xaxis.set_major_locator(plt.MultipleLocator(1))  #U10,U11
+    ax1.set_xticklabels(tff_mod)     
 
     ax1.set_ylim(-1.25,1.25)
     ax1.set_ylabel(r'$\beta$') #r: pearson r coeffiecient
     ax1.set_xlabel(r'$t_{\rm{ff}}$')
-    fig.savefig('BearsBoxplot_u05')
+    fig.savefig('BearsBoxplot_u11b')
     print("saved")
     plt.close(fig)
 
@@ -464,34 +475,44 @@ if 0:
   
     fig, ax1 = plt.subplots()
 
-    ax1.hist(betarr, 50, density=False, histtype='step', color='m')  #change color for diff sims
+    ax1.hist(betarr, 50, density=False, histtype='step', color='g')  #change color for diff sims
     ax1.set_xlabel(r'$\beta$') 
     ax1.set_ylabel('PDF')
 
     y_vals = ax1.get_yticks()
     ax1.set_yticklabels(['{:.3f}'.format(x/len(betarr)) for x in y_vals])
 
-    name_save = "BetaHistogramTff_u11" 
+    name_save = "BetaHistogramTff_u101b" 
 
     t = 'Cores: %d\n'%entries +  r'Mean $\beta = %.3f$'%betavg + '\n' + r'$\sigma = %.3f$'%betastd
     #ax1.text(0.56, 15, t, color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u05 
+    ax1.text(-0.3, 3, t, color='green', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u101 
     #ax1.text(0.47, 13.5, t, color='blue', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u10 
-    ax1.text(0.50, 12.5, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u11 
+    #ax1.text(0.43, 17.5, t, color='blue', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u102 
+    #ax1.text(0.50, 12.5, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u11 
+    #ax1.text(0.48,11, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u103 
     plt.savefig(name_save)
     print('saved '+name_save)
    
 # - - - - - HISTOGRAM FOR ALL CORES PER TIME FRAME   
 if 0: 
-    for i,vals in enumerate(spears): 
-        i = i+2
-        plt.hist(vals, 50, density=False, histtype='step', color='g')
-        plt.xlabel('Spear Value')
-        plt.ylabel('Ocurrence')
-        plt.title('Frame %d'%i)   
-        spear_outname = 'Spearman_frame_histogram%d'%i
-        plt.savefig(spear_outname)
-        print("saved "+spear_outname)
-        plt.clf()
+    for i,vals in enumerate(bears): 
+        i = i+2 
+        fig, ax1 = plt.subplots()
+        
+        ax1.hist(vals, 50, density=False, histtype='step', color='g')
+        ax1.set_xlim(-1.5,1.5)  #best to find max and min of betas.
+        ax1.set_xlabel(r'$\beta$')
+        
+        ax1.set_ylabel('Ocurrence')
+        y_vals = ax1.get_yticks()
+        ax1.set_yticklabels(['{:.3f}'.format(x/len(vals)) for x in y_vals])
+        
+        ax1.set_title('Frame %d'%i)   
+        outname = 'u05cut_Bear_histogram%d'%i
+        plt.savefig(outname)
+        print("saved "+outname) 
+        plt.clf()  #OR? plt.close(fig)
 
 
 # - - - - - SCATTTER PLOT FOR PROFILES66.PY 
@@ -521,6 +542,10 @@ def plot_particles(axes,frame):
             Y = np.log10(magfield[:,n_time]).flatten()  
             
             if n_time == frame:
+                print('NTIME')
+                print(n_time)
+                print('FRAME')
+                print(frame)
                 axes.scatter(density[:,n_time],magfield[:,n_time],c='b',label=thtr.times[n_time],s=0.1)           
     return
 
