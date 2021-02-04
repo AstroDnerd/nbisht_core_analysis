@@ -38,7 +38,8 @@ elif machine == 'Cloudbreak':
     #sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'  #contains all frames
     sim_u05 = '/data/cb1/luzlourdes/u05_framelist/GravPotential'  #only contains frames_u05 
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
-    sim_u11 = '/data/cb1/Projects/P19_CoreSimulations/u11_r4_l4_128-Beta20/GravPotential'
+    #sim_u11 = '/data/cb1/luzlourdes/u11_107/GravPotential' #u11 to 107!
+    sim_u11 = '/data/cb1/Projects/P19_CoreSimulations/u11_r4_l4_128-Beta20/GravPotential'  
 
     u05_every_ten = '/data/cb1/Projects/P19_CoreSimulations/CoreSets/u05_every_ten/*h5'
     u10_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u10_every_ten/u10_all_primitives_primitives_c*_nXXX0.h5"

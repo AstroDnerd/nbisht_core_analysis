@@ -28,7 +28,7 @@ plt.close('all')
 # RUN SECOND time with run -i file_name.py in python shell
 
 if 'this_simname' not in dir():
-    this_simname = 'u05'
+    this_simname = 'u11'
 
 if 'this_looper' not in dir():
     file_list=glob.glob(dl.every_ten[this_simname]) 
@@ -343,7 +343,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 0:
+        if 1:
             if n_time == asort[-1]:              
                 #pear2 = np.append(pear2,pearson_lmr[0])
                 #pear3 = np.append(pear3,pearson_lmr[1]) 
@@ -373,7 +373,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
                 bear12 = np.append(bear12,betarr[10]) 
                 bear13 = np.append(bear13,betarr[11]) 
                 bear14 = np.append(bear14,betarr[12]) 
-                #bear15 = np.append(bear15,betarr[13])   
+                bear15 = np.append(bear15,betarr[13])  #CHECK: for some reason this needs to be commented off   
 
                 # comment on / off as needed
                 pearson_lmr = np.empty([0],dtype=float)
@@ -411,7 +411,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
 #pears = [pear2,pear3,pear4,pear5,pear6,pear7,pear8,\
 #         pear9,pear10,pear11,pear12,pear13,pear14,pear15]
 bears = [bear2,bear3,bear4,bear5,bear6,bear7,bear8,\
-         bear9,bear10,bear11,bear12,bear13,bear14]#,bear15]
+         bear9,bear10,bear11,bear12,bear13,bear14,bear15]
 # - - - - - SCATTER_PLOT FOR ALL FRAMES - revise
 if 0:
     newbetas = np.empty([0],dtype=float)
@@ -427,7 +427,7 @@ if 0:
 
 # - - - - - BOXPLOT FOR ALL FRAMES
 # NOTE: for PearsonR, nan values are not accepted
-if 0:  
+if 1:  
     count = 0 #temp
     Bears = {}
     index = []
@@ -516,7 +516,7 @@ if 0:
 
 
 # - - - - - SCATTTER PLOT FOR PROFILES66.PY 
-def plot_particles(axes,frame):  
+def plot_particles(axes,nframe):  
     for core_id in all_cores:
         ms = trackage.mini_scrubber(thtr,core_id)
         tmap=rainbow_map(ms.ntimes)
@@ -541,11 +541,7 @@ def plot_particles(axes,frame):
             X = np.log10(density[:,n_time]).flatten()   
             Y = np.log10(magfield[:,n_time]).flatten()  
             
-            if n_time == frame:
-                print('NTIME')
-                print(n_time)
-                print('FRAME')
-                print(frame)
+            if n_time == nframe: 
                 axes.scatter(density[:,n_time],magfield[:,n_time],c='b',label=thtr.times[n_time],s=0.1)           
     return
 
