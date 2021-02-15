@@ -1,3 +1,22 @@
+"""
+Getting peaks and particles on new sims.
+All of this process should get streamlines.
+1.)  In data_locations, fill out
+    a.) target_frames
+    b.) sims
+    c.) peak_list (this will get made by get_peaks.py)
+2.) Run get_peaks
+3.) Move peaklist.h5 to its home.
+4.) Run count_particles.py
+5.) Make sure ??_n_particles.txt gets put in datasets_small.py
+6.) Put ??_n_particless.txt in data_locations
+6.) Now you should be mostly set.
+7.) Run data_puller.
+8.) Move the h5 files to /data/cb1/Projects/P19_CoreSimulations/CoreSets/
+"""
+
+
+
 from starter2 import *
 
 

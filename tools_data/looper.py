@@ -373,7 +373,7 @@ class snapshot():
 
         if self.field_values is None:
             self.field_values={}
-        fields_to_get = np.unique(self.loop.fields_from_grid + field_list)
+        fields_to_get = np.unique(list(self.loop.fields_from_grid) + list(field_list))
         number_of_new_fields=0
 
         for field in fields_to_get:

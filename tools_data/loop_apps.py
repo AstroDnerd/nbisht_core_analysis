@@ -85,6 +85,50 @@ def proj_cores2(self, axis_list=[0,1,2],core_list=[], field='density',color='r')
             self.proj.annotate_convex_hull_1(1,points=points3d)
         print( self.proj.save(outname))
 
+def proj_select_particles(this_looper, frame_list=None, axis_list=[0,1,2],core_list=[], field='density',color='r'):
+    """Full projections of the data, with core particles marked."""
+    rm = rainbow_map(len(core_list))
+    if frame_list is None:
+        frame_list = this_looper.frame_list
+
+    for frame in frame_list:
+
+        for snapshot in this_looper.snaps[frame].values():
+            if snapshot.R_centroid is None:
+                snapshot.get_all_properties()
+        for axis in axis_list:
+            ds = this_looper.load(frame)
+            proj_center = ds.arr([0.12768555, 0.4987793 , 0.17797852], 'code_length')
+            proj_center = ds.arr([0.6,0.6,0.6], 'code_length')
+
+            center = this_looper.ds.arr(nar([0.5]*3),'code_length')
+            print("poot")
+            this_looper.proj = yt.ProjectionPlot(this_looper.ds, axis=axis, fields=[field])#, center=center)
+            this_looper.proj.set_cmap(field,'Greys')
+            core_label = ""
+            mean_center=0
+            for nc,core_number in enumerate(core_list):
+                c=rm(nc)
+                snapshot = this_looper.snaps[frame][core_number]
+                center = ds.arr(snapshot.R_centroid,'code_length')
+                mean_center = center + mean_center
+                print("Core %d center %s"%(core_number, str(center)))
+                core_label += "c%04d_"%core_number
+                this_looper.proj.annotate_select_particles4(1.0, indices=this_looper.target_indices[core_number],col=c)
+                reload( annotate_particles_3)
+                this_looper.proj.annotate_text(center,
+                                 "%d"%snapshot.core_id,text_args={'color':c}, 
+                                 inset_box_args={'visible':False},
+                                 coord_system='data')
+            mean_center /= len(core_list)
+            plot_x = [1,2,0][axis]
+            plot_y = [2,0,1][axis]
+            this_center = mean_center[plot_x],mean_center[plot_y]
+            this_looper.proj.set_center(this_center)
+            this_looper.proj.zoom(4)
+
+            outname = 'plots_to_sort/%s_full_particles_%sn%04d'%(this_looper.out_prefix,"cores_10_11_",frame)
+            print( this_looper.proj.save(outname))
 
 @looper.frame_loop
 def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
@@ -116,7 +160,27 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
 
 
 @looper.core_loop
-def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100):
+def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
+                    core_list=None,frame_list=None):
+    if core_list is not None:
+        if snapshot.core_id not in core_list:
+            return
+    if frame_list is not None:
+        if snapshot.frame not in frame_list:
+            return
+    ###horrible stuff.
+    all_png = glob.glob("*png")
+    outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,snapshot.core_id,snapshot.frame)
+    got_one = False
+    for i in all_png:
+        if i.startswith(outname):
+            print(i)
+            got_one=True
+    if got_one:
+        print("GOT ONE")
+        return
+    if snapshot.core_id not in looper.target_indices.keys():
+        return
     if snapshot.R_centroid is None:
         snapshot.get_all_properties()
     ds = snapshot.get_ds()
@@ -138,6 +202,7 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
                          inset_box_args={'visible':False},
                          coord_system='data')
         pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
+        pw.annotate_grids()
         outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,snapshot.core_id,snapshot.frame)
         print(pw.save(outname))
 
@@ -201,3 +266,31 @@ def proj_with_species(self, field='density',axis_list=[0,1,2], color_dict={}, co
                              coord_system='data')
         outname = '%s_proj_regime_n%04d'%(self.out_prefix,self.current_frame)
         print( pw.save(outname))
+
+def phase_with_preimage(this_looper,frame,fields,weight_field=None, bins=None, xlim=None,ylim=None,zlim=None):
+    print('yay')
+    ds = this_looper.load(frame)
+    ad = ds.all_data()
+    phase_all = yt.create_profile(ad,fields[:2], fields[2],weight_field=None, override_bins=bins)
+    p = yt.ParticlePhasePlot.from_profile(phase_all)
+    if xlim:
+        p.set_xlim(xlim[0],xlim[1])
+    if ylim:
+        p.set_ylim(ylim[0],ylim[1])
+    if zlim:
+        p.set_zlim(fields[2],zlim[0],zlim[1])
+
+    #this save is important.
+    p.save("plots_to_sort/%s"%this_looper.out_prefix)
+    tr=this_looper.tr
+    location = np.where(tr.frames==frame)[0][0]
+    the_x = tr.track_dict[fields[0]][:,location]
+    the_y = tr.track_dict[fields[1]][:,location]
+    cell_plot = p.plots['cell_volume']
+    this_axes = cell_plot.axes
+    this_axes.scatter(the_x,the_y,c='k',s=0.5)
+    print(p.save("plots_to_sort/%s_n%04d"%(this_looper.out_prefix,frame)))
+
+
+
+
