@@ -1,0 +1,14 @@
+
+
+If you encounter a number at the end of a .py file, it means there is a better version somewhere else.
+Use the largest number of the .py files that have 0#.
+
+Pipeline for extracting data from new data sets:
+(check in with directory 'examples' to see if there are any updates)
+/examples/get_peaks.py
+/count_particles.py
+/data_puller.py
+
+
+TO-DO:
+make a directory in scratch for u203 files

@@ -43,7 +43,7 @@ fields=['density']
 #frame_list = [82]
 
 
-# WILL REPLACING THIS WITH THE ABOVE WORK?? 
+# WILL REPLACING THIS WITH THE ABOVE WORK?? YES, data_puller.py does the process below once and for all to save us time 
 '''
 if 'this_looper' not in dir():
     directory = dl.sims[this_simname]
