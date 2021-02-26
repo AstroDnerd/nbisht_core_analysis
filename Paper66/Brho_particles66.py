@@ -28,7 +28,7 @@ plt.close('all')
 # RUN SECOND time with run -i file_name.py in python shell
 
 if 'this_simname' not in dir():
-    this_simname = 'u11'
+    this_simname = 'u203'
 
 if 'this_looper' not in dir():
     file_list=glob.glob(dl.every_ten[this_simname]) 
@@ -343,7 +343,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
                     plt.close(fig) 
  
         # FOR HISTOGRAMS PER FRAME, SCATTER BETA, AND BOX PLOTS
-        if 1:
+        if 0:
             if n_time == asort[-1]:              
                 #pear2 = np.append(pear2,pearson_lmr[0])
                 #pear3 = np.append(pear3,pearson_lmr[1]) 
@@ -427,7 +427,7 @@ if 0:
 
 # - - - - - BOXPLOT FOR ALL FRAMES
 # NOTE: for PearsonR, nan values are not accepted
-if 1:  
+if 0:  
     count = 0 #temp
     Bears = {}
     index = []

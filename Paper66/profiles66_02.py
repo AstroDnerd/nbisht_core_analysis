@@ -22,7 +22,7 @@ yt.add_field('_BoverRho',function=_BoverRho,sampling_type='cell',units='cm**3*ga
 
 
 if 'this_simname' not in dir():
-    this_simname = 'u11'
+    this_simname = 'u05'
     
 if 'this_looper' not in dir():
     file_list=glob.glob(dl.every_ten[this_simname])
@@ -87,14 +87,14 @@ valsC = []
 
 print("READY")
 for index,frame in enumerate(frame_list):
-    if 1: 
+    if 0: 
         ds = this_looper.load(frame=frame,derived=[em.add_tracer_density])
         em.add_tracer_density(ds)  
         ad = ds.all_data()
         # test new fields here with ad['field']
         deposit_tuple = ("deposit","target_particle_volume") 
         
-    if 1:
+    if 0:
         all_target_indices = np.concatenate([this_looper.target_indices[core_id] for core_id in core_list])
         ad.set_field_parameter('target_indices',all_target_indices)
         ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32')) 
@@ -135,7 +135,7 @@ for index,frame in enumerate(frame_list):
             plt.close(fig)
 
         # 4 PLOTS PER FRAME (all_data, core_data, phase-all_data + scatter plot) 
-        if 1:
+        if 0:
             p = yt.ParticlePhasePlot.from_profile(phase_all)
             p.set_xlim(1e-3,1e7)
             p.set_ylim(1e-1,1e4)  

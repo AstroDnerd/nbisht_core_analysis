@@ -81,9 +81,9 @@ Q! how does having a 3 by 3 make sense in terms of an interval...
 BETTER ATTEMPT:
 '''
 # chosen randomly from the number of particles in the respecive core
-pt_a = 200
-pt_b = 400 
-pt_c = 600
+pt_a = 50
+pt_b = 150 
+pt_c = 249
 
 point_0 = this_looper.snaps[f_0][core_id].pos
 point_1 = this_looper.snaps[f_1][core_id].pos

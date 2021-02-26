@@ -41,6 +41,7 @@ if 0:
 if 1:
     """this set of parameters extracts all primitive quantities"""
     core_list = all_nonzero.astype('int')[::-1]
+    #core_list = [165]
     target_frame = dl.target_frames[this_simname]
     frame_list = dl.frames[this_simname] 
     #frame_list = [10,11]
@@ -60,10 +61,8 @@ if 0:
     output_base = 'mag_work_only'
 
 #Pull a whole list for each core, saving each core to its own file
-if 1:
-    for core in core_list:
-    #for num,i in enumerate(core_list):
-    #    if i == 165:
+if 0:
+    for core in core_list[138:]:  # EDIT!
         output_name = '%s_primitives_c%04d_nXXX0.h5'%(output_base,core)
         if os.path.exists(output_name):
             print("File exists, skipping "+output_name)
@@ -79,7 +78,7 @@ if 1:
                                          derived = derived
                                       )
         this_looper.get_target_indices(h5_name=dl.peak_list[this_simname],
-                                         bad_particle_list=dl.bad_particles.get(this_simname,None))
+                                         bad_particle_list=dl.bad_particles[this_simname]) #check!
         this_looper.get_tracks()
         this_looper.save(output_name)
 
@@ -101,3 +100,7 @@ if 0:
                                          bad_particle_list=dl.bad_particles[this_simname])
         this_looper.get_tracks()
         this_looper.save(output_name)
+
+
+# ORIGINALLY
+# bad_particle_list=dl.bad_particles.get(this_simname,None)) #check!
