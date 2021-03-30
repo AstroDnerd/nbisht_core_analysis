@@ -31,7 +31,7 @@ plt.close('all')
 # RUN SECOND time with run -i file_name.py in python shell
 
 if 'this_simname' not in dir():
-    this_simname = 'u203' 
+    this_simname = 'u05' 
 
 def testforEleven(loop,location):
     if 11 in loop.tr.frames:
@@ -71,7 +71,7 @@ t_ff = np.sqrt(3*np.pi/(32*G*rho_mean))
 
 #~~~~~~~~~~ TFF PERCENTAGE: EDIT for bears and pears respectively
 
-tff_p = thtr.times/t_ff  #thtr.times[1:] for u05
+tff_p = thtr.times[1:]/t_ff  #thtr.times[1:] for u05
 tff_labels = ['%.2f'%s for s in tff_p]
 
 
@@ -205,7 +205,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
 
 #~~~~~~~~~~ TIMELOOP
     for n_count,n_time in enumerate(asort):  
-        print("TIME begin",n_time)
+        #print("TIME begin",n_time)
         #time=thtr.times[n_time]  #EDITED: already taken care of by defining asort
         #if time == 0:
         #    continue
@@ -244,11 +244,11 @@ for nc,core_id in enumerate(core_list):  #WATCH
         # SCIPY PEARSONr: scipy logged
             if xs != 0 and ys != 0:
                 pearX,pearY = scipy.stats.pearsonr(X,Y)  
-                print("TIME",n_time)
+                #print("TIME",n_time)
             else:
                 print("A zero encountered!!",xs,ys)
                 pearX = 0  
-            pearsonr = np.append(pearsonr,pearX)
+            pearsonr = np.append(pearsonr,pearX)  # REMIND SELF HOW TO FIX THIS OR HOW THIS MAY BE OK
 
         # SCIPY PEARSONr: scipy not logged
             #if mxs != 0  and mys != 0:
@@ -368,9 +368,9 @@ for nc,core_id in enumerate(core_list):  #WATCH
                 pear9 = np.append(pear9,pearsonr[9]) 
                 pear10 = np.append(pear10,pearsonr[10]) 
                 pear11 = np.append(pear11,pearsonr[11]) 
-                #pear12 = np.append(pear12,pearsonr[12]) 
-                #pear13 = np.append(pear13,pearsonr[13])   
-                #pear14 = np.append(pear13,pearsonr[14])   
+                pear12 = np.append(pear12,pearsonr[12]) 
+                pear13 = np.append(pear13,pearsonr[13])   
+                pear14 = np.append(pear13,pearsonr[14])   
               
                 #bear0 = np.append(bear2,betarr[0])
                 #bear1 = np.append(bear3,betarr[1]) 
@@ -421,7 +421,7 @@ for nc,core_id in enumerate(core_list):  #WATCH
         plt.close(fig)
 
 pears = [pear0,pear1,pear2,pear3,pear4,pear5,pear6,\
-         pear7,pear8,pear9,pear10,pear11]#,pear12,pear13,pear14]
+         pear7,pear8,pear9,pear10,pear11,pear12,pear13,pear14]
 #bears = [bear2,bear3,bear4,bear5,bear6,bear7,bear8,\
 #         bear9,bear10,bear11,bear12,bear13]#,bear14,bear15]
 
@@ -440,7 +440,7 @@ if 0:
 
 # - - - - - BOXPLOT FOR ALL FRAMES
 # NOTE: for PearsonR, nan values are not accepted
-print("BEFORE BOXPLOT")
+print("BEFORE BOXVIOPLOT")
 if 1:  
     count = 0 #temp
     Pears = {}
@@ -461,30 +461,30 @@ if 1:
         data.append(val)
 
     fig, ax1=plt.subplots(1,1)    
-    #ax1.plot([0,14],[0,0],c=[0.5]*4)  #U05 
-    #ax1.plot([0,9],[0,0],c=[0.5]*4)  #U10,U11  
+
+    #To compare boxplot or violinplots with a zero, however I think this is affecting the position of the plots
+    ax1.plot([0,14],[0,0],c=[0.5]*4)  #U05  
     #ax1.plot([0,11],[0,0],c=[0.5]*4)  #U203 
-    ax1.plot([0,12],[0,0],c=[0.5]*4)  #U202
+    #ax1.plot([0,12],[0,0],c=[0.5]*4)  #U202
+
     # trying to find how to use 'position' suitingly as to match time...
-
-    bp = ax1.boxplot(data)  #bp is now a dictionary     
-     
-    #tff_mod = [0.0,0.1,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89,0.95]  #U05
-    #ax1.xaxis.set_major_locator(plt.MultipleLocator(2))  #U05 order swapped with set_xticklabels
-
-    #tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.49,0.58,0.66,0.67]  #U10
-    #tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.75]  #U11
-    tff_mod = [0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86,0.91]  #U203
-    #tff_mod = [0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90,0.97]  #U202
+    if 0:
+        bp = ax1.boxplot(data)  #bp is now a dictionary     
+    if 1:
+        vp = ax1.violinplot(data)  
+    tff_mod = [0.0,0.0,0.1,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89,0.95]  #U05 
+    #tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86,0.91]  #U203
+    #tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90,0.97]  #U202
     
-    #ax1.xaxis.set_major_locator(plt.MultipleLocator(1))  #U10,U11
+    #ax1.xaxis.set_major_locator(plt.MultipleLocator(2))  #U05 order swapped with set_xticklabels
+    ax1.xaxis.set_major_locator(plt.MultipleLocator(1))  #U10,U11
 
     ax1.set_xticklabels(tff_mod)     
     ax1.set_ylim(-1.25,1.25)
     ax1.set_ylabel('Pearson R') #r: pearson r coeffiecient, beta: r'$\beta$'
     ax1.set_xlabel(r'$t_{\rm{ff}}$')
-    fig.savefig('PearsBoxplotTen_u203')
-    print("saved")
+    fig.savefig('PearsViolinplotTen_u05')
+    print("SAVED")
     plt.close(fig)
 
 # - - - - - HISTOGRAM FOR ALL CORES FOR ALL TIME

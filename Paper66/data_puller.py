@@ -14,7 +14,7 @@ reload(dl)
 # set sim
 #
 if 'this_simname' not in dir():
-    this_simname = 'u203'
+    this_simname = 'u202'
 all_nonzero = looper.get_all_nonzero(dl.n_particles[this_simname])
 
 output_base = "%s_cores"%this_simname
@@ -41,13 +41,14 @@ if 0:
 if 1:
     """this set of parameters extracts all primitive quantities"""
     core_list = all_nonzero.astype('int')[::-1]
-    #core_list = [165]
+    #core_list = [211]
     target_frame = dl.target_frames[this_simname]
     frame_list = dl.frames[this_simname] 
-    #frame_list = [10,11]
+    #frame_list = [10]
     fields = ['x','y','z','velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
+    fields += ['vorticity_magnitude']  #ADDED
     #fields += ['PotentialField']
     output_base = "%s_all_primitives"%this_simname
     derived=[]
@@ -61,9 +62,9 @@ if 0:
     output_base = 'mag_work_only'
 
 #Pull a whole list for each core, saving each core to its own file
-if 0:
-    for core in core_list[138:]:  # EDIT!
-        output_name = '%s_primitives_c%04d_nXXX0.h5'%(output_base,core)
+if 1:
+    for core in core_list:
+        output_name = '/archive1/luzlourdes/u202/%s_primitives_c%04d_nXXX0.h5'%(output_base,core)  # EDIT!!!
         if os.path.exists(output_name):
             print("File exists, skipping "+output_name)
             continue

@@ -9,7 +9,7 @@ if 'looper1' not in dir():
     thtr = looper1.tr
     looper1.out_prefix='u05'
     thtr.sort_time()
-
+'''
 if 'looper2' not in dir():
     looper2=looper.core_looper(directory=dl.sims['u10'])
     file_list=glob.glob(dl.every_ten['u10'])
@@ -25,3 +25,4 @@ if 'looper3' not in dir():
         looper3.load_loop(fname)
         print( "File %d of %d"%(nfile,len(file_list)))
     looper3.out_prefix='u11'
+'''

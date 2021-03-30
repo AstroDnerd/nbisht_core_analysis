@@ -18,14 +18,14 @@ def count_particles(fname='tools_data/n_particles.txt'):
     pd = dict( zip( parts[:,0], parts[:,1]))
     return pd
 
-def get_all_nonzero(fname='tools_data/n_particles.txt'):  #ONLY FOR SIM U05!
+def get_all_nonzero(fname=None):  # this should only be a place holder...TEST:yep 
     fptr = open(fname,'r')
     lines=fptr.readlines()
     fptr.close()
     parts = np.zeros([len(lines),2])
     for n,line in enumerate(lines):
         parts[n] = np.array(line.split(),dtype='int')
-    all_nonzero = parts[:,0][ parts[:,1] >0]
+    all_nonzero = parts[:,0][ parts[:,1] >10]  #originally 0
     core_list = all_nonzero.astype('int')[::-1]
     return core_list 
             

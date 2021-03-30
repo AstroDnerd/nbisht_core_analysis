@@ -4,13 +4,13 @@ import xtra_energy
 import data_locations as dl
 reload(dl)
 if 'this_simname' not in dir():
-    this_simname = 'u203'
+    this_simname = 'u202'
 
 frame_list=[0]
 fields=['density']
 
 # to get this range, do h5ls on the .h5
-core_list=range(401)
+core_list=range(408)
 if 1:
     this_looper = looper.core_looper(directory= dl.sims[this_simname],
                                      sim_name = this_simname,
@@ -26,6 +26,6 @@ if 1:
 def count_particles(this_looper,fname='n_particles.txt'):
     fptr = open(fname,'w')
     for core in this_looper.target_indices:
-        fptr.write("%d %d\n"%(core, len( this_looper.target_indices[core])))
+        fptr.write("%d %d\n"%(core, len(this_looper.target_indices[core])))
     fptr.close()
 count_particles(this_looper,'%s_n_particles.txt'%this_simname)
