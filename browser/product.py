@@ -36,6 +36,8 @@ class product():
         self.fname=fname
         if style=='single':
             self.render = self.single_render
+        elif style == 'core_id':
+            self.render = self.core_id_render
         elif style == 'frames':
             self.render = self.frame_render
         elif style == 'value':
@@ -78,6 +80,8 @@ class product():
 #                   break
 #           self.plots[core_id] = sorted( self.plots[core_id],key= lambda plot : plot.parameters[sort_key])
 
+    def core_id_render(self,core_id):
+        return "<td>%s</td>"%core_id
     def frame_render(self,core_id):
         if len( self.plots[core_id]) == 0:
             img = "x"
