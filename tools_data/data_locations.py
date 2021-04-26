@@ -57,7 +57,7 @@ elif machine == 'cloudbreak':
     sim_u202 = '/data/cb1/Projects/P19_CoreSimulations/u202-Beta2/GravPotential'  
     sim_u203 = '/data/cb1/Projects/P19_CoreSimulations/u203-Beta20/GravPotential' 
 
-    u201_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u201/*h5"
+    u201_every_ten = u05_every_ten #"/data/cb1/Projects/P19_CoreSimulations/CoreSets/u201/*h5"
     u202_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u202/*h5"
     u203_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u203/*h5"
 else:
