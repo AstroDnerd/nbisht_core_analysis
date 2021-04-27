@@ -11,7 +11,8 @@ plt.close('all')
 class mass_tool():
     def __init__(self,this_looper):
         self.this_looper=this_looper
-        self.mass=defaultdict(list)
+        self.unique_mass=defaultdict(list)
+        self.total_mass=defaultdict(list)
         self.dof =defaultdict(list)
         self.cores_used=[]
     def run(self,core_list=None):
@@ -35,22 +36,15 @@ class mass_tool():
             self.cores_used.append(core_id)
             self.times = thtr.times
 
+
             for nf,frame in enumerate(thtr.frames):
-                ix =np.floor(thtr.c([core_id],'x')/dx)[:,nf]
-                iy =np.floor(thtr.c([core_id],'y')/dx)[:,nf]
-                iz =np.floor(thtr.c([core_id],'z')/dx)[:,nf]
                 density = thtr.c([core_id],'density')[:,nf]
                 cell_volume = thtr.c([core_id],'cell_volume')[:,nf]
-                index = ix + nx*(iy * nx*iz)
-                ar = np.argsort(index)
-                rs = np.argsort(ar)
-                isorted=index[ar]
-                mask = np.ones_like(density,dtype='bool')
-                mask[1:] = isorted[1:]-isorted[:-1] != 0
-                mask2 = mask[ rs]
-                #mass = (density[mask2]*cell_volume[mask2]).sum()
-                mass = (density*cell_volume).sum()
-                self.mass[core_id].append(mass)
+                mask2 = ms.compute_unique_mask(core_id, dx=1./2048,frame=nf)
+                unique_mass = (density[mask2]*cell_volume[mask2]).sum()
+                total_mass =  (density*cell_volume).sum() 
+                self.total_mass[core_id].append( total_mass)
+                self.unique_mass[core_id].append(unique_mass)
                 self.dof[core_id].append( mask2.sum())
 
 import three_loopers_1tff as tl
@@ -77,15 +71,15 @@ if 1:
         ncores = len(tool.cores_used)
         masses = np.zeros([ntimes,ncores])
         these_times = tool.times/tff_global
+        outname='plots_to_sort/mass_time_heatmap_unique_particles.pdf'
+        this_mass = tool.unique_mass[core_id]
         for ncore,core_id in enumerate(tool.cores_used):
-            masses[:,ncore]=tool.mass[core_id]/nar(tool.mass[core_id][:6]).mean()
+            masses[:,ncore]=this_mass/nar(this_mass[:6]).mean()
 
         nc = len(tool.cores_used)
         take_a_few = ((nc-1)*np.random.random(10)).astype('int')
         print(take_a_few)
         for ncore,core_id in enumerate(nar(tool.cores_used)[take_a_few]):
-            #rel_mass = (tool.mass[core_id]-tool.mass[core_id][0])/tool.mass[core_id][0]
-            #rel_mass=tool.mass[core_id]/nrm#/tool.mass[core_id][-1]
             rel_mass=masses[:,ncore]
 
             axes[nt].plot(these_times, rel_mass,c=[0.5]*4)
@@ -111,7 +105,8 @@ if 1:
         axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
         axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
         axbonk(axes[nt],ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='log')
-    axes[0].set_ylabel(r'$\rho/\bar{\rho_{\rm{early}}}$')
+    axes[0].set_ylabel(r'$M/\bar{M_{\rm{early}}}$')
     fig.colorbar(ploot)
-    fig.savefig('plots_to_sort/mass_time_heatmap.pdf')
+    fig.savefig(outname)
+    print(outname)
 
