@@ -37,15 +37,15 @@ if machine == 'Nazare':
     u05_every_ten ='/scratch1/dcollins/Paper19/Datasets/track_indfix_sixteenframe/*h5'
     u10_every_ten = "/scratch1/dcollins/Paper19/Datasets/u10_every_ten/u10_all_primitives_primitives_c*_nXXX0.h5"
     u11_every_ten = "/scratch1/dcollins/Paper19/Datasets/u11_every_ten/u11_all_primitives_primitives_c*_nXXX0.h5"
-
+ 
+    u201_every_ten = u05_every_ten  #'/archive1/luzlourdes/u201/u201_all_primitives_primitives_c*_nXXX0.h5' 
     u202_every_ten = '/archive1/luzlourdes/u202/u202_all_primitives_primitives_c*_nXXX0.h5' 
     u203_every_ten = '/archive1/luzlourdes/u203/u203_all_primitives_primitives_c*_nXXX0.h5' 
 
 elif machine == 'Cloudbreak':
     #sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'  #contains all frames
     sim_u05 = '/data/cb1/luzlourdes/u05_framelist/GravPotential'  #only contains frames_u05 
-    sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
-    #sim_u11 = '/data/cb1/luzlourdes/u11_107/GravPotential' #u11 to 107!
+    sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential' 
     sim_u11 = '/data/cb1/Projects/P19_CoreSimulations/u11_r4_l4_128-Beta20/GravPotential'  
 
     u05_every_ten = '/data/cb1/Projects/P19_CoreSimulations/CoreSets/u05_every_ten/*h5'
@@ -76,45 +76,52 @@ else:
     u103_every_ten = None
 
 
-sims={'u05':sim_u05, 'u10':sim_u10, 'u11':sim_u11, 'u202':sim_u202, 'u203':sim_u203}
+sims={'u05':sim_u05, 'u10':sim_u10, 'u11':sim_u11, 'u201':sim_u201, 'u202':sim_u202, 'u203':sim_u203}
 every_ten = {'u05':u05_every_ten, 'u10':u10_every_ten, 'u11':u11_every_ten,\
-             'u203':u203_every_ten,'u202':u202_every_ten} 
-
+             'u203':u203_every_ten,'u202':u202_every_ten,'u201':u201_every_ten} 
+#'u201':u201_every_ten,
 
 peaks_u05 = 'datasets_small/u05_0125_peaklist.h5'
 peaks_u10 = 'datasets_small/u10_0082_peaklist.h5'
 peaks_u11 = 'datasets_small/u11_0088_peaklist.h5'
+
 peaks_u101 = 'datasets_small/u101_0080_peaklist.h5'
 peaks_u102 = 'datasets_small/u102_0080_peaklist.h5'
 peaks_u103 = 'datasets_small/u103_0080_peaklist.h5'
 
 
-peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'  #check!
+peaks_u201 = peaks_u05  #'datasets_small/u201_0100_peaklist.h5'
+peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'
 peaks_u203 = 'datasets_small/u203_0107_peaklist.h5'
 peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103,\
-             'u202':peaks_u202, 'u203':peaks_u203}
+             'u201':peaks_u201,'u202':peaks_u202, 'u203':peaks_u203}
 
 
-target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u202':118,'u203':107}
+target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u201':100,'u202':118,'u203':107}
 frames_u05 = [1] + list(range(10,125,10)) + [125]
 frames_u10 = list(range(0,82,10)) + [82]
 frames_u11 = list(range(0,88,10)) + [88]
 
-frames_u202 = list(range(0,119,10)) + [118]  #check!
+frames_u201 = frames_u05  #list(range(0,110,10))
+frames_u202 = list(range(0,119,10)) + [118]
 frames_u203 = list(range(0,107,10)) + [107]
-frames={'u05':frames_u05,'u10':frames_u10,'u11':frames_u11,'u202':frames_u202,'u203':frames_u203}
+frame_list={'u05':frames_u05,'u10':frames_u10,'u11':frames_u11,'u201':frames_u201,'u202':frames_u202,'u203':frames_u203}
 
 
 bad_particles_u05='datasets_small/u05_bad_particles.h5'
-bad_particles={'u05':bad_particles_u05, 'u10':None, 'u11':None, 'u202':None, 'u203':None}
+bad_particles={'u05':bad_particles_u05, 'u10':None, 'u11':None,'u201':None,'u202':None, 'u203':None}
 
 
 n_particles={'u05':'datasets_small/u05_n_particles.txt',
              'u10':'datasets_small/u10_n_particles.txt',
              'u11':'datasets_small/u11_n_particles.txt',
+
              'u101':'datasets_small/u101_n_particles.txt',
              'u102':'datasets_small/u102_n_particles.txt',
              'u103':'datasets_small/u103_n_particles.txt',
+
+             #'u201':'datasets_small/u201_n_particles.txt',
+             'u201':'datasets_small/u05_n_particles.txt',
              'u202':'datasets_small/u202_n_particles.txt',
              'u203':'datasets_small/u203_n_particles.txt'}
 

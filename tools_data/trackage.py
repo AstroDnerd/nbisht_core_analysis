@@ -6,6 +6,9 @@ import numpy as np
 nar = np.array
 import time
 from importlib import reload
+import pyximport; pyximport.install()
+import particle_ops
+import particle_grid_mask
 import h5py
 import copy 
 import pdb
@@ -44,12 +47,13 @@ class track_manager():
         self.shape=(0,0) #particles, frames
     def sort_time(self):
         """fix up the time ordering of the members"""
+        #pdb.set_trace()
         asort =  np.argsort(self.times)
         if (asort != sorted(asort)).any():
             for k in self.track_dict:
                 self.track_dict[k]=self.track_dict[k][:,asort]
             self.times = self.times[asort]
-            self.frames= self.frames[asort]
+            self.frames = self.frames[asort]
 
     def write(self,fname):
         fptr = h5py.File(fname,'w')
@@ -111,7 +115,7 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        particle_ids = copy.copy(self.my_loop.target_indices[snapshot.core_id])
+        particle_ids = copy.copy(snapshot.target_indices)
         if snapshot.core_id not in self.core_ids:
             #this might not be the best place for the parent step.
             core_ids = np.ones_like(particle_ids) * snapshot.core_id
@@ -138,8 +142,18 @@ class track_manager():
             new_slice = (slice(particle_start,particle_end),
                          slice(frame_id,frame_id+1))
             nuggle=np.array(snapshot.field_values[field])
+            #print("this is nuggle")
+            #print(nuggle)
+            #print("this is the snapshot")
+            #print(snapshot.field_values[field])
+            #print("this is my field")
+            #print(field)
             nuggle.shape=(particle_ids.size,1)
+            #print("this is nuggle.shape")
+            #print(nuggle.shape)
             temp_frame[new_slice]=nuggle
+            #print("this is temp_frame")
+            #print(temp_frame)
             self[field]=temp_frame
 
 
@@ -208,20 +222,39 @@ def shift_down(pos):
     return out#,delta
         
 class mini_scrubber():
-    def __init__(self,trk,core_id,do_velocity=False):
+    def __init__(self,trk,core_id,do_velocity=True):
         self.trk=trk
         self.scrub(core_id,do_velocity=do_velocity)
         self.axis=0
                 
-    def scrub(self,core_id, axis=0, do_velocity=False):
+
+    def compute_unique_mask(self,core_id, dx,frame):
+        """Computes the unique particle mask.
+        Code note: we should get this tool to figure out dx by itself."""
+        nx = int(1/dx)
+        ix =np.floor(self.trk.c([core_id],'x')/dx)[:,frame]
+        iy =np.floor(self.trk.c([core_id],'y')/dx)[:,frame]
+        iz =np.floor(self.trk.c([core_id],'z')/dx)[:,frame]
+        index = ix + nx*(iy * nx*iz)
+        ar = np.argsort(index)
+        rs = np.argsort(ar)
+        isorted=index[ar]
+        mask = np.ones_like(ix,dtype='bool')
+        mask[1:] = isorted[1:]-isorted[:-1] != 0
+        mask2 = mask[ rs]
+        return mask2
+    def scrub(self,core_id, axis=0, do_velocity=True):
         self.raw_x = self.trk.c([core_id],'x')
         self.raw_y = self.trk.c([core_id],'y')
         self.raw_z = self.trk.c([core_id],'z')
 
         self.density = self.trk.c([core_id],'density')
         self.cell_volume = self.trk.c([core_id],'cell_volume')
+        self.velocity_div = self.trk.c([core_id],'velocity_divergence')
+        #self.vorticity = self.trk.c([core_id],'vorticity_magnitude')
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
+        self.density_tot = self.density.sum(axis=0)
         #this_x=raw_x
         #this_y=raw_y
         if 1:
@@ -234,62 +267,119 @@ class mini_scrubber():
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
-        self.mean_x = np.sum(self.this_x*self.mass,axis=0)/self.mass_total
-        self.mean_y = np.sum(self.this_y*self.mass,axis=0)/self.mass_total
-        self.mean_z = np.sum(self.this_z*self.mass,axis=0)/self.mass_total
+        print("kludge: raw mean")
+        self.mean_x = np.mean(self.this_x,axis=0)
+        self.mean_y = np.mean(self.this_y,axis=0)
+        self.mean_z = np.mean(self.this_z,axis=0)
+        #self.mean_x = np.sum(self.this_x*self.mass,axis=0)/self.mass_total
+        #self.mean_y = np.sum(self.this_y*self.mass,axis=0)/self.mass_total
+        #self.mean_z = np.sum(self.this_z*self.mass,axis=0)/self.mass_total
+        self.mean_xc = np.sum(self.this_x*self.density,axis=0)/self.density_tot
+        self.mean_yc = np.sum(self.this_y*self.density,axis=0)/self.density_tot
+        self.mean_zc = np.sum(self.this_z*self.density,axis=0)/self.density_tot
+
+
         self.nparticles,self.ntimes=self.this_x.shape
         self.meanx2 = np.tile(self.mean_x,(self.raw_x.shape[0],1))
         self.meany2 = np.tile(self.mean_y,(self.raw_x.shape[0],1))
         self.meanz2 = np.tile(self.mean_z,(self.raw_z.shape[0],1))
+        self.meanx2c = np.tile(self.mean_xc,(self.raw_x.shape[0],1))
+        self.meany2c = np.tile(self.mean_yc,(self.raw_x.shape[0],1))
+        self.meanz2c = np.tile(self.mean_zc,(self.raw_z.shape[0],1))
+
         self.rx_rel=self.this_x-self.meanx2
         self.ry_rel=self.this_y-self.meany2
         self.rz_rel=self.this_z-self.meanz2
+        self.rx_relc=self.this_x-self.meanx2c
+        self.ry_relc=self.this_y-self.meany2c
+        self.rz_relc=self.this_z-self.meanz2c
+
         self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
+        self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
+
+        self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
+        self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
+        self.moment_of_inertia_y = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum(axis=0)
+        self.moment_of_inertia_xy = self.moment_of_inertia_yx = -(self.mass*(self.rx_rel*self.ry_rel)).sum(axis = 0)
+        self.moment_of_inertia_yz = self.moment_of_inertia_zy = -(self.mass*(self.ry_rel*self.rz_rel)).sum(axis = 0)
+        self.moment_of_inertia_xz = self.moment_of_inertia_zx = - (self.mass*(self.rx_rel*self.rz_rel)).sum(axis = 0) 
+        self.moment_of_inertia_zii = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum()
+        self.moment_of_inertia_xii = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum()
+        self.moment_of_inertia_yii = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum()
+        self.moment_of_inertia_xyii = self.moment_of_inertia_yxii = -(self.mass*(self.rx_rel*self.ry_rel)).sum()
+        self.moment_of_inertia_yzii = self.moment_of_inertia_zyii = -(self.mass*(self.ry_rel*self.rz_rel)).sum()
+        self.moment_of_inertia_xzii = self.moment_of_inertia_zxii = - (self.mass*(self.rx_rel*self.rz_rel)).sum() 
+
+
         self.r=np.sqrt(self.r2)
+        self.rc=np.sqrt(self.r2c)
         self.rmax = np.max(self.r,axis=0)
         self.max_track = np.where( self.r[:,0] == self.rmax[0])
         self.rmax_fat=np.tile(self.rmax,(self.raw_x.shape[0],1))
         self.rms = np.sqrt( np.mean(self.r2,axis=0))
 
+        self.I_ii = self.mass*(self.r**2)
+
         if do_velocity:
             self.raw_vx = self.trk.c([core_id],'velocity_x')
             self.raw_vy = self.trk.c([core_id],'velocity_y')
             self.raw_vz = self.trk.c([core_id],'velocity_z')
-            self.mean_vx = np.sum(self.raw_vx*self.mass,axis=0)/self.mass_total
-            self.mean_vy = np.sum(self.raw_vy*self.mass,axis=0)/self.mass_total
-            self.mean_vz = np.sum(self.raw_vz*self.mass,axis=0)/self.mass_total
             self.sqr_vx = np.sum(self.raw_vx**2,axis=0)
             self.sqr_vy = np.sum(self.raw_vy**2,axis=0)
             self.sqr_vz = np.sum(self.raw_vz**2,axis=0)
             self.raw_v2 = self.raw_vx**2+self.raw_vy**2+self.raw_vz**2
+            print("KLUDGE: using raw mean for velocity")
+            self.mean_vx = np.mean(self.raw_vx,axis=0)
+            self.mean_vy = np.mean(self.raw_vy,axis=0)
+            self.mean_vz = np.mean(self.raw_vz,axis=0)
+            self.mass_mean_vx = np.sum(self.raw_vx*self.mass,axis=0)/self.mass_total
+            self.mass_mean_vy = np.sum(self.raw_vy*self.mass,axis=0)/self.mass_total
+            self.mass_mean_vz = np.sum(self.raw_vz*self.mass,axis=0)/self.mass_total
             self.rel_vx = self.raw_vx-self.mean_vx
             self.rel_vy = self.raw_vy-self.mean_vy
             self.rel_vz = self.raw_vz-self.mean_vz
-            self.rel_v2 = self.rel_vx**2+self.rel_vy**2+self.rel_vz**2
+            self.rel_vmag = (self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)**(0.5)
             self.cov_v2 = (self.raw_vx-self.mean_vx)**2+\
                           (self.raw_vy-self.mean_vy)**2+\
-                          (self.raw_vx-self.mean_vz)**2
-            self.rx_hat = np.zeros_like(self.rx_rel)
-            self.ry_hat = np.zeros_like(self.rx_rel)
-            self.rz_hat = np.zeros_like(self.rx_rel)
-            ok = self.r > 0
-            self.rx_hat[ok]= self.rx_rel[ok]/self.r[ok]
-            self.ry_hat[ok]= self.ry_rel[ok]/self.r[ok]
-            self.rz_hat[ok]= self.rz_rel[ok]/self.r[ok]
+                          (self.raw_vz-self.mean_vz)**2
+            self.rx_hat = self.rx_rel/self.r
+            self.ry_hat = self.ry_rel/self.r
+            self.rz_hat = self.rz_rel/self.r
+            self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
+            self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
+            self.angular_v_z = ((self.rx_rel*self.rel_vy - self.ry_rel*self.rel_vx)/self.r**2)
+            self.angular_moment_x = self.I_ii*self.angular_v_x 
+            self.angular_moment_y = self.I_ii*self.angular_v_y
+            self.angular_moment_z = self.I_ii*self.angular_v_z
+            self.linear_momentum_rel_x = self.mass*(self.rel_vx)
+            self.linear_momentum_rel_y = self.mass*(self.rel_vy)
+            self.linear_momentum_rel_z = self.mass*(self.rel_vz)
+            self.angular_momentum_rel_x = self.ry_rel*self.linear_momentum_rel_z-self.rz_rel*self.linear_momentum_rel_y
+            self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
+            self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
+            self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+
+
+
+            self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
             self.vr_raw = self.rx_hat*self.raw_vx+\
                       self.ry_hat*self.raw_vy+\
                       self.rz_hat*self.raw_vz
             self.vr_rel = self.rx_hat*self.rel_vx+\
                       self.ry_hat*self.rel_vy+\
                       self.rz_hat*self.rel_vz
+            self.vr_x = self.vr_rel*self.rx_hat
+            self.vr_y = self.vr_rel*self.ry_hat
+            self.vr_z = self.vr_rel*self.rz_hat
             self.vt2_raw = (self.raw_vx-self.vr_raw*self.rx_hat)**2+\
                        (self.raw_vy-self.vr_raw*self.ry_hat)**2+\
                        (self.raw_vz-self.vr_raw*self.rz_hat)**2
             self.vt2_rel = (self.rel_vx-self.vr_rel*self.rx_hat)**2+\
                        (self.rel_vy-self.vr_rel*self.ry_hat)**2+\
                        (self.rel_vz-self.vr_rel*self.rz_hat)**2
-            self.zero_raw = self.vt2_raw + self.vr_raw**2 - self.raw_v2
-            self.zero_rel = self.vt2_rel + self.vr_rel**2 - self.rel_v2
+            self.vt_x = self.rel_vx-self.vr_rel*self.rx_hat
+            self.vt_y = self.rel_vy-self.vr_rel*self.ry_hat
+            self.vt_z = self.rel_vz-self.vr_rel*self.rz_hat
 
 
         self.axis = axis
@@ -308,3 +398,25 @@ class mini_scrubber():
             self.h_label='x'
             self.this_v = self.this_y
             self.v_label='y'
+    def get_central_velocity(self,core_id,nt):
+
+        this_r = self.r[:,nt]
+        vx = self.trk.c([core_id],'velocity_x')[:,nt]
+        vy = self.trk.c([core_id],'velocity_y')[:,nt]
+        vz = self.trk.c([core_id],'velocity_z')[:,nt]
+
+        asort = np.argsort(this_r)
+        ind_min = asort[0]
+
+        vxc = vx[ind_min]
+        vyc = vy[ind_min]
+        vzc = vz[ind_min]
+
+        self.cen_vx = self.raw_vx-vxc
+        self.cen_vy = self.raw_vy-vyc
+        self.cen_vz = self.raw_vz-vzc
+        self.cen_vmag = (self.cen_vx**2+self.cen_vy**2+self.cen_vz**2)**(0.5)
+
+        self.rc_vmag = self.rx_hat*self.cen_vx+\
+                       self.ry_hat*self.cen_vy+\
+                       self.rz_hat*self.cen_vz

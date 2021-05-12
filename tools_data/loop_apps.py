@@ -29,20 +29,7 @@ def print_centroid(looper,snapshot): #here's a function, needs to take at least 
     print("Core %d frame %d centroid (%s)"%(
           snapshot.core_id, snapshot.frame, str( snapshot.R_centroid)))
 
-@looper.frame_loop
-def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
-    """Full projections of the data, with core particles marked."""
-    for axis in axis_list:
-        center = self.ds.arr(nar([0.5]*3),'code_length')
-        self.proj = self.ds.proj(field,axis,center=center)
-        self.proj = yt.ProjectionPlot(self.ds, axis=axis, fields=[field], center=center)
-        radius_from_core = []
-        core_label = ""
-        for nc,core_number in enumerate(core_list):
-            core_label += "c%04d_"%core_number
-            self.proj.annotate_select_particles(1.0, col='r', indices=self.target_indices[core_number])
-            outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
-        print( self.proj.save(outname))
+
 import annotate_particles_3
 reload(annotate_particles_3)
 from scipy.spatial import ConvexHull
@@ -87,16 +74,17 @@ def proj_cores2(self, axis_list=[0,1,2],core_list=[], field='density',color='r')
 
 def proj_select_particles(this_looper, frame_list=None, axis_list=[0,1,2],core_list=[], field='density',color='r'):
     """Full projections of the data, with core particles marked."""
-    rm = rainbow_map(len(core_list))
+    print("entering") 
     if frame_list is None:
         frame_list = this_looper.frame_list
 
     for frame in frame_list:
-
+        print("for frame in frame_list")
         for snapshot in this_looper.snaps[frame].values():
             if snapshot.R_centroid is None:
                 snapshot.get_all_properties()
         for axis in axis_list:
+            print("one axis")
             ds = this_looper.load(frame)
             proj_center = ds.arr([0.12768555, 0.4987793 , 0.17797852], 'code_length')
             proj_center = ds.arr([0.6,0.6,0.6], 'code_length')
@@ -107,27 +95,28 @@ def proj_select_particles(this_looper, frame_list=None, axis_list=[0,1,2],core_l
             this_looper.proj.set_cmap(field,'Greys')
             core_label = ""
             mean_center=0
-            for nc,core_number in enumerate(core_list):
-                c=rm(nc)
+            for nc,core_number in enumerate(this_looper.core_list):
+                print("one core")
+                #c=rm(nc)
                 snapshot = this_looper.snaps[frame][core_number]
                 center = ds.arr(snapshot.R_centroid,'code_length')
                 mean_center = center + mean_center
                 print("Core %d center %s"%(core_number, str(center)))
-                core_label += "c%04d_"%core_number
-                this_looper.proj.annotate_select_particles4(1.0, indices=this_looper.target_indices[core_number],col=c)
-                reload( annotate_particles_3)
-                this_looper.proj.annotate_text(center,
-                                 "%d"%snapshot.core_id,text_args={'color':c}, 
-                                 inset_box_args={'visible':False},
-                                 coord_system='data')
-            mean_center /= len(core_list)
+                #core_label += "c%04d_"%core_number
+                this_looper.proj.annotate_select_particles(1.0, indices=this_looper.target_indices[core_number],col='r')
+                #reload( annotate_particles_3)
+                #this_looper.proj.annotate_text(center,
+                #                 "%d"%snapshot.core_id,text_args={'color':c}, 
+                #                 inset_box_args={'visible':False},
+                #                 coord_system='data')
+            mean_center /= len(this_looper.core_list)
             plot_x = [1,2,0][axis]
             plot_y = [2,0,1][axis]
             this_center = mean_center[plot_x],mean_center[plot_y]
             this_looper.proj.set_center(this_center)
-            this_looper.proj.zoom(4)
+            #this_looper.proj.zoom(4)
 
-            outname = 'plots_to_sort/%s_full_particles_%sn%04d'%(this_looper.out_prefix,"cores_10_11_",frame)
+            outname = '%s_full_particles_%04d'%(this_looper.out_prefix,frame)
             print( this_looper.proj.save(outname))
 
 @looper.frame_loop
@@ -143,7 +132,7 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
             core_label += "c%04d_"%core_number
             self.proj.annotate_select_particles(1.0, col='r', indices=self.target_indices[core_number])
             outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
-        print( self.proj.save(outname))
+        print(self.proj.save(outname))
 
 @looper.frame_loop
 def select_particles(looper,these_particles=None,axis_list=[0,1,2]):

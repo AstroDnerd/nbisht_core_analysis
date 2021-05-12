@@ -1,5 +1,12 @@
 
+OTHER FILES THAT HAVE BEEN MODIFIED
+BUT NEED TO BE IN THEIR RESPECTIVE PLACE:
+tools_data/data_locations.py
+tools_data/looper.py
+examples/core_proj_follow_three.py
 
+
+- - - - - - - -
 If you encounter a number at the end of a .py file, and there is no other .py file by the same name,
 it means there is a better version somewhere else.
 Use the largest number of the .py files that have 0#.
@@ -11,6 +18,10 @@ Pipeline for extracting data from new data sets:
 /data_puller.py
 
 
-TO-DO:
-[X] make a directory in scratch for u203 files
-[ ] make a directory in scratch for u202 files
+- - - - - - - -
+There's the original copy with all initial ideas:
+/Brho_particles_1.py
+and the final code for all paper 1 plots:
+/AlphaBAnalysis_2.py
+
+

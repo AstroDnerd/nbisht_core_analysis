@@ -4,13 +4,13 @@ import xtra_energy
 import data_locations as dl
 reload(dl)
 if 'this_simname' not in dir():
-    this_simname = 'u202'
+    this_simname = 'u201'
 
 frame_list=[0]
 fields=['density']
 
 # to get this range, do h5ls on the .h5
-core_list=range(408)
+core_list=range(279)
 if 1:
     this_looper = looper.core_looper(directory= dl.sims[this_simname],
                                      sim_name = this_simname,

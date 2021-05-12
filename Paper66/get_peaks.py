@@ -8,11 +8,12 @@ All of this process should get streamlines.
 2.) Run get_peaks
 3.) Move peaklist.h5 to its home.
 4.) Run count_particles.py
-5.) Make sure ??_n_particles.txt gets put in datasets_small.py
+5.) Make sure ??_n_particles.txt gets put in datasets_small
 6.) Put ??_n_particless.txt in data_locations
 6.) Now you should be mostly set.
 7.) Run data_puller.
 8.) Move the h5 files to /data/cb1/Projects/P19_CoreSimulations/CoreSets/
+9.) Add sim_every_ten to every_ten dict in data_locations if needed for scripts
 """
 
 
@@ -36,7 +37,7 @@ import loop_tools
 reload(loop_tools)
 
 if 'this_simname' not in dir():
-    this_simname='u202'
+    this_simname='u201'
 
 #directory = 'u05-r4-l4-128-Beta0.2  u10_r4_l4_128-Beta2  u11_r4_l4_128-Beta20'
 frame = dl.target_frames[this_simname]
