@@ -267,7 +267,7 @@ class mini_scrubber():
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
-        print("kludge: raw mean")
+        #print("kludge: raw mean")
         self.mean_x = np.mean(self.this_x,axis=0)
         self.mean_y = np.mean(self.this_y,axis=0)
         self.mean_z = np.mean(self.this_z,axis=0)

@@ -70,12 +70,15 @@ class BRho_tool():
         self.bear11 = np.empty([0],dtype=float)
         self.bear12 = np.empty([0],dtype=float)
         self.bear13 = np.empty([0],dtype=float)
-        self.bear14 = np.empty([0],dtype=float)
+        #self.bear14 = np.empty([0],dtype=float)
 
+        self.pears = [] 
+        self.bears = []
+   
 
+    # SO FAR WORKS ONLY FOR SCATTER :---/ OH! add BRho_tool, capital R!
     def labelled(ax,xscale=None,yscale=None,xlabel=None,ylabel=None,\
-                 xlim=None,ylim=None,title=None,linthreshx=0.1,linthreshy=0.1):
-        # !!! make object in code and edit anything that calls labelled
+                 xlim=None,ylim=None,title=None,linthreshx=0.1,linthreshy=0.1):  
         ax.set_xscale(xscale)
         ax.set_yscale(yscale)
         if xscale == 'symlog':
@@ -89,35 +92,9 @@ class BRho_tool():
         ax.set_title(title)
 
 
-    def run(self,name,thtr,core_list=None):
-
-        def setscatter(num):
-            # FOR ALL TIMES
-            if num == 1:
-                fig, ax1=plt.subplots(1,1) 
-            # FOR TWO PANEL SUBPLOTS, turn this "on"
-            if num == 2:
-                fig, (ax1,ax2)=plt.subplots(1,2)
-            # FOR MULTIPLE PANELS, turn this "on" 
-            if num == 3:
-                fig = plt.figure()
-                # exploring a common axis with fig.text OR ax = fig.add_subplot(111) 
-                fig.text(0.365,0.03,r'$\rho/\rho_{o}$')#, ha='center', va='center') 
-
-                ax1 = plt.subplot(331)
-                ax2 = plt.subplot(332)
-                ax4 = plt.subplot(334)
-                ax5 = plt.subplot(335)
-                ax7 = plt.subplot(337)
-                ax8 = plt.subplot(338)
-
-                ax3 = plt.subplot(133)  #`ax6, ax9` 
-                #lplots = [0,ax1,0,ax2,0,ax4,0,0,ax5,0,ax7,0,ax8,0]  #for u05  
-                #lplots = [0,ax1,0,ax2,0,ax4,0,ax5,0,ax7,0,ax8,0]  #for u202  
-                lplots = [0,ax1,0,ax2,0,ax4,ax5,0,ax7,0,ax8,0]  #for u203 
-                fig.subplots_adjust(wspace=0, hspace=0)
-                # END OF CALLING PLOTTING
-                # - - - - - - - - - - - - - - - - - - - - 
+    def run(self,name,thtr,timing,typeplot,
+            fig=None,ax1=None,ax2=None,ax3=None,ax4=None,ax5=None,ax7=None,ax8=None,
+            lplots=None,core_list=None,simframes=None):
 
         def pearsonR(the_x, the_y):
             # LOGGED
@@ -134,152 +111,147 @@ class BRho_tool():
                 pearX = 0  
             self.pearsonr = np.append(self.pearsonr,pearX)
 
-            if 0:
-                # MANUAL PEARSONr: probably re-calc the following
-                l_avB = np.sum(Y * Z) / np.sum(Z)
-                l_varB = np.sum((Y - l_avB)**2 * Z) / np.sum(Z)
-                l_avRho = np.sum(X * Z) / np.sum(Z)
-                l_varRho = np.sum((X - l_avRho)**2 * Z) / np.sum(Z)
-                l_covar = np.sum((Y-l_avB) * (X-l_avRho) * Z) / np.sum(Z)
-                #if l_varB <=0  or l_varRho <= 0:
-                if l_varB != 0 and l_varRho != 0:  # TEST
-                    pearsonR = l_covar / (np.sqrt(l_varB) * np.sqrt(l_varRho))  
-                    #if np.isnan(pearsonR):  # or if a != a ...true = problem
-                    #    pdb.set_trace()
-                else:
-                    pearsonR = 0 
-                pearson_lmr = np.append(pearson_lmr,pearsonR)
-              # END OF PEARSONR
-              # - - - - - - - - - - - - - - - - - - - - 
 
-        def scatterplots():
-            if sim_name == 'sim_name':  
-                #if n_time in {1,3,5,6,8,10}:  # EDIT for diff sims 
-                    # FOR ALL TIME indent 4 left, comment if above, change lplots[n_time] to ax1, & comment out labelled to ax8
+        def scatterplots(fig=None,ax1=None,ax2=None,ax3=None,ax4=None,ax5=None,ax7=None,ax8=None,
+                         lplots=None,xx2=None,yy=None):
+           
+            if typeplot == 'scatter_plot':
+
                 ax1.scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times          
                 ax1.plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
-                print("plotted")             
+                
+                BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu g)$',
+                                   xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\alpha_{b\rho} = %.3f$'%beta)
 
-                    #labelled(lplots[n_time],xscale='log',yscale='log',xlabel=none,ylabel=none,
-                    #         xlim=rho_extents.minmax, ylim=magfield_extents.minmax)
-                    #ax2.tick_params(axis='y',labelleft=false)
-                    #ax4.set_ylabel(r'$\mid b \mid (\mu g)$')
-                    #ax5.tick_params(axis='y',labelleft=false)
-                    #ax8.tick_params(axis='y',labelleft=false)
+                if n_time == asort[-1]:
+                    outname = 'brhotff_all_c%04d_%s'%(core_id,name)  
+                    plt.savefig(outname)  # CAREFUL WITH FIG VS PLT
+                    print("saved "+outname)
+                    plt.close(fig)  
                     
-                # add linear fits for contrast
-                if 0: 
-                    #yy_four = 10 ** ((2/5)*x2 + pfit[1])
-                    #yy_five = 10 ** ((1/2)*x2 + pfit[1])
-                    #yy_six = 10 ** ((2/3)*x2 + pfit[1]) 
-              
-                    #ax1.plot(xx2,yy_four,c='r',linewidth=0.5)
-                    #ax1.plot(xx2,yy_five,c='b',linewidth=0.5)
-                    #ax1.plot(xx2,yy_six,c='g',linewidth=0.5) 
-        
-                    labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid b \mid (\mu g)$',
-                             xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\alpha_{b\rho} = %.3f$'%beta)
-
-                outname = 'brhotff_c%04d'%(core_id) 
-                if 0:  #when should i turn this on?
-                    if n_time == asort[-1]:
-                        plt.savefig(outname)
-                        print("saved "+outname)
-                        plt.close(fig) 
-     
-            # for histograms per frame, scatter beta, and box plots
-            if 0:
-                if n_time == asort[-1]:              
-                    #pear0 = np.append(pear0,self.pearsonr[0])
-                    #pear1 = np.append(pear1,self.pearsonr[1]) 
-                    #pear2 = np.append(pear2,self.pearsonr[2]) 
-                    #pear3 = np.append(pear3,self.pearsonr[3]) 
-                    #pear4 = np.append(pear4,self.pearsonr[4]) 
-                    #pear5 = np.append(pear5,self.pearsonr[5]) 
-                    #pear6 = np.append(pear6,self.pearsonr[6])  
-                    #pear7 = np.append(pear7,self.pearsonr[7]) 
-                    #pear8 = np.append(pear8,self.pearsonr[8]) 
-                    #pear9 = np.append(pear9,self.pearsonr[9]) 
-                    #pear10 = np.append(pear10,self.pearsonr[10]) 
-                    #pear11 = np.append(pear11,self.pearsonr[11])  #final u203 pear contains nans 
-                    #pear12 = np.append(pear12,self.pearsonr[12])  #final u202 pear, but want to discard final frame   
-                    #pear13 = np.append(pear13,self.pearsonr[13]) 
-                    #pear14 = np.append(pear14,self.pearsonr[14]) 
+            if typeplot == 'frame_scatters':
+                if n_time in simframes:  
+                    lplots[n_time].scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times          
+                    lplots[n_time].plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
+                    print("scatters plotted")             
                   
-                    bear0 = np.append(bear0,self.betarr[0])
-                    bear1 = np.append(bear1,self.betarr[1]) 
-                    bear2 = np.append(bear2,self.betarr[2]) 
-                    bear3 = np.append(bear3,self.betarr[3]) 
-                    bear4 = np.append(bear4,self.betarr[4]) 
-                    bear5 = np.append(bear5,self.betarr[5]) 
-                    bear6 = np.append(bear6,self.betarr[6])  
-                    bear7 = np.append(bear7,self.betarr[7]) 
-                    bear8 = np.append(bear8,self.betarr[8]) 
-                    bear9 = np.append(bear9,self.betarr[9])
-                    bear10 = np.append(bear10,self.betarr[10])  #for u203
-                    bear11 = np.append(bear11,self.betarr[11])  #for u202 
-                    #bear12 = np.append(bear12,self.betarr[12])    
-                    #bear13 = np.append(bear13,self.betarr[13])
-                    #bear14 = np.append(bear14,self.betarr[14])
+                    BRho_tool.labelled(lplots[n_time],xscale='log',yscale='log',xlabel=None,ylabel=None,
+                                       xlim=rho_extents.minmax, ylim=magfield_extents.minmax)
 
-                    # comment off/on as needed
-                    #pearson_lmr = np.empty([0],dtype=float)
-                    #self.pearsonr = np.empty([0],dtype=float) 
-                    #self.betarr = np.empty([0],dtype=float)
-                    #beta_curvarr = np.empty([0],dtype=float)
+                    ax2.tick_params(axis='y',labelleft=False)
+                    ax4.set_ylabel(r'$\mid B \mid (\mu g)$')
+                    ax5.tick_params(axis='y',labelleft=False)
+                    ax8.tick_params(axis='y',labelleft=False) 
+     
+                if n_time == asort[-1]:                
+                    tmap2 = rainbow_map(len(self.betarr)) 
+                    c2 = [tmap2(n) for n in range(len(self.betarr))] 
 
-                    if 0: 
-                        #plt.clf()
-                        tmap2 = rainbow_map(len(self.betarr)) 
-                        c2 = [tmap2(n) for n in range(len(self.betarr))] 
-                        #(np.arange(0,1,0.075)  #u05
-                        #(np.arange(0.075,1,0.075)  #u202
-                        ax3.scatter(np.arange(0.075,0.9,0.075),self.betarr,c=c2)  
-                        ax3.plot(np.arange(0.075,0.9,0.075),self.betarr,c='k',linewidth=1.0)  
-                        ax3.plot([0,1],[0,0],c=[0.5]*4)
-                     
-                        tff_mod = [0.0,0.0,0.3,0.6,0.9]  #this should match multiplelocator
-                        ax3.set_xticklabels(tff_mod)   
-                        ax3.xaxis.set_major_locator(plt.multiplelocator(0.3))
+                    if name == 'u201':
+                        tmap2 = rainbow_map(len(self.betarr[2:])) 
+                        c2 = [tmap2(n) for n in range(len(self.betarr[2:]))] 
+                        the_range = np.arange(0,1,0.075) 
+                        ax3.scatter(the_range,self.betarr[2:],c=c2)   
+                        ax3.plot(the_range,self.betarr[2:],c='k',linewidth=1.0)  
+                    if name == 'u202':
+                        the_range = np.arange(0.075,1,0.075) 
+                        ax3.scatter(the_range,self.betarr,c=c2)  
+                        ax3.plot(the_range,self.betarr,c='k',linewidth=1.0)  
+                    if name == 'u203':
+                        the_range = np.arange(0.075,0.9,0.075) 
+                        ax3.scatter(the_range,self.betarr,c=c2)  
+                        ax3.plot(the_range,self.betarr,c='k',linewidth=1.0)   
+                    ax3.plot([0,1],[0,0],c=[0.5]*4)
+                 
+                    tff_mod = [0.0,0.0,0.3,0.6,0.9]  #this should match multiplelocator
+                    ax3.set_xticklabels(tff_mod)   
+                    ax3.xaxis.set_major_locator(plt.MultipleLocator(0.3))
 
-                        ax3.yaxis.tick_right()
-                        ax3.set_xlabel(r'$t_{\rm{ff}}$')  #\rm{  },to avoid italization 
-                        ax3.set_yscale('linear')
-                        ax3.set_ylim(-0.5,0.5)     
-                        ax3.set_title(r"$\alpha_{b}$")#, p=%.3f, s=%.3f"%(p1,s1)) 
-              
-                        #spearmanr = np.empty([0],dtype=float)
-                        self.betarr = np.empty([0],dtype=float)
+                    ax3.yaxis.tick_right()
+                    ax3.set_xlabel(r'$t_{\rm{ff}}$')  #\rm{  },to avoid italization 
+                    ax3.set_yscale('linear')
+                    ax3.set_ylim(-0.5,0.5)
+                    ax3.set_title(r"$\alpha_{b}$")
+           
+                    self.betarr = np.empty([0],dtype=float)
+   
+                    outname = 'brhotff_c%04d_%s'%(core_id,name)  
+                    plt.savefig(outname)  # CAREFUL WITH FIG VS PLT
+                    print("saved "+outname)
+                    plt.close(fig)  
 
-    # UNSURE WHERE TO PLACE THESE, here or at the end of RUN
-    #if 0:
-    #    #plt.tight_layout()
-    #    fig.savefig(outname)
-    #    print("saved "+outname)
-    #    plt.close(fig)
-            # END OF SCATTER PLOTS
-            # - - - - - - - - - - - - - - - - - - - - 
 
-        #all_cores = np.unique(thtr.core_ids) 
+            if typeplot == 'box_plot' and n_time == asort[-1]:  
+                self.bear0 = np.append(self.bear0,self.betarr[0])
+                self.bear1 = np.append(self.bear1,self.betarr[1]) 
+                self.bear2 = np.append(self.bear2,self.betarr[2]) 
+                self.bear3 = np.append(self.bear3,self.betarr[3]) 
+                self.bear4 = np.append(self.bear4,self.betarr[4]) 
+                self.bear5 = np.append(self.bear5,self.betarr[5]) 
+                self.bear6 = np.append(self.bear6,self.betarr[6])  
+                self.bear7 = np.append(self.bear7,self.betarr[7]) 
+                self.bear8 = np.append(self.bear8,self.betarr[8]) 
+                self.bear9 = np.append(self.bear9,self.betarr[9])
+                self.bear10 = np.append(self.bear10,self.betarr[10]) 
+                self.bear11 = np.append(self.bear11,self.betarr[11])
+                if name == 'u201':
+                    self.bear12 = np.append(self.bear12,self.betarr[12])    
+                    self.bear13 = np.append(self.bear13,self.betarr[13])
+                    #self.bear14 = np.append(self.bear14,self.betarr[14])  
+                self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
+                              self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]#,self.bear14]
+                self.betarr = np.empty([0],dtype=float) 
+ 
+            if typeplot == 'vio_plot' and n_time == asort[-1]:    
+                print('NTIME_in',n_time) 
+                self.pear0 = np.append(self.pear0,self.pearsonr[0])
+                self.pear1 = np.append(self.pear1,self.pearsonr[1]) 
+                self.pear2 = np.append(self.pear2,self.pearsonr[2]) 
+                self.pear3 = np.append(self.pear3,self.pearsonr[3]) 
+                self.pear4 = np.append(self.pear4,self.pearsonr[4]) 
+                self.pear5 = np.append(self.pear5,self.pearsonr[5]) 
+                self.pear6 = np.append(self.pear6,self.pearsonr[6])  
+                self.pear7 = np.append(self.pear7,self.pearsonr[7]) 
+                self.pear8 = np.append(self.pear8,self.pearsonr[8]) 
+                self.pear9 = np.append(self.pear9,self.pearsonr[9]) 
+                self.pear10 = np.append(self.pear10,self.pearsonr[10]) 
+                self.pear11 = np.append(self.pear11,self.pearsonr[11])  #final u203 pear contains nans 
+                if name == 'u201':
+                    self.pear12 = np.append(self.pear12,self.pearsonr[12])  #final u202 pear, but want to discard final frame   
+                    self.pear13 = np.append(self.pear13,self.pearsonr[13]) 
+                    self.pear14 = np.append(self.pear14,self.pearsonr[14]) 
+
+                self.pears = [self.pear0,self.pear1,self.pear2,self.pear3,self.pear4,self.pear5,self.pear6,\
+                             self.pear7,self.pear8,self.pear9,self.pear10,self.pear11,self.pear12,self.pear13,self.pear14]
+                self.pearsonr = np.empty([0],dtype=float)  
+       
+        # - - - - - - - - - - - - - - - - - - - - 
+        # CONTINUE RUN DEFINITION  
+        all_cores = np.unique(thtr.core_ids) 
         if core_list is None:
-            #core_list = all_cores 
-
+            # core_list = all_cores  # OR 
             # CAREFUL, check looper.py if chosing this option! particles > 10
-            core_list = looper.get_all_nonzero(dl.n_particles[name]) 
-            print("10 particles",core_list)
-            print('length',len(core_list))
-        rm = rainbow_map(len(core_list))  # or all_cores?? 
-
-        # CHECK these following lines, where do they go?
+            core_list = looper.get_all_nonzero(dl.n_particles[name])  
+        #rm = rainbow_map(len(core_list))  # or all_cores, needed??  
         rho_extents=davetools.extents()
         magfield_extents = davetools.extents() 
+        
+        #for nc,core_id in enumerate(core_list):  
+        #see density radius.py for idea on limits!!!  ATTEMPT, but doesn't seem to fix it!!
+        #for nc,core_id in enumerate(core_list):  
+        #    ms = trackage.mini_scrubber(thtr,core_id,do_velocity=False)
+        #    if ms.nparticles == 1:
+        #        continue
+        #    density = thtr.c([core_id],'density')
+        #    magfield = thtr.c([core_id],'magnetic_field_strength')
+        #    rho_extents(density)
+        #    magfield_extents(magfield)
 
 
         # - - - - - - - - - - - - - - - - - - - - 
         # CORELOOP
         for nc,core_id in enumerate(core_list):  
-            # THIS DISCARDS THE FAULTY CORES
-            print("NAME",name)
+            # THIS DISCARDS THE FAULTY CORES OF THE SIMS 
             if name == 'u201':  
                 if core_id == 166:  
                     continue   
@@ -293,82 +265,72 @@ class BRho_tool():
                 if core_id == 211:
                     continue
 
-            # WHEN IS THIS NEEDED ???
-            #ms = trackage.mini_scrubber(thtr,core_id)
-            #tmap=rainbow_map(ms.ntimes)
-            #if ms.nparticles == 1:
-            #    continue
+            ms = trackage.mini_scrubber(thtr,core_id,do_velocity=False) 
+            tmap=rainbow_map(ms.ntimes) 
 
-            density = thtr.c([core_id],'density')
-            print("DENSITY",density,core_id)
-            zeroes = density[0][0]
-            if zeroes == 0:
-                print(':------(',location)
-            #magfield_z = abs(thtr.c([core_id],'magnetic_field_z'))
-            #magfield_y = abs(thtr.c([core_id],'magnetic_field_y'))
-            #magfield_x = abs(thtr.c([core_id],'magnetic_field_x'))
+            density = thtr.c([core_id],'density') 
             magfield = thtr.c([core_id],'magnetic_field_strength')
             cellvolume = thtr.c([core_id],'cell_volume')
 
             rho_extents(density)
             magfield_extents(magfield) 
-            asort =  np.argsort(thtr.times)  #EDIT
+            asort =  np.argsort(thtr.times)
             if (asort != sorted(asort)).any():
                 print("Warning: times not sorted.") 
 
-
             # - - - - - - - - - - - - - - - - - - - - 
-            # TIMELOOP: CODE SO THAT ONE DOESN'T NEED TO COMMENT/UN-COMMENT
-            for n_count,n_time in enumerate(asort):    
-                time=thtr.times[n_time]  #these next three lines for ALL TIME only
-                if time == 0:
-                    continue
-                # WILL I NEED THIS NEXT LINE ???
-                #c=tmap(n_count,ms.nparticles)
-
-            # FOR ALL TIMES do field only, choose respective fig, and change lplots[n_time] for ax1
-            # FOR EACH TIME FRAME, add [:,n_time] 
-                X = np.log10(density).flatten()   
-                XX = 10 ** X 
-                X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
-                #X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
+            # TIMELOOP:
+            for n_count,n_time in enumerate(asort):      
+                mask = ms.compute_unique_mask(core_id, dx=1./2048,frame=n_time)  
+                c=tmap(n_count,ms.nparticles)
+                if timing == 'per_frame':  
+                    X = np.log10(density[:,n_time]).flatten()  # want [mask,n_time]
+                    Y = np.log10(magfield[:,n_time]).flatten()
+                if timing == 'all_time':      
+                    time=thtr.times[n_time]
+                    if time == 0:
+                        continue
+                    X = np.log10(density).flatten() #OR [mask,n_time]
+                    Y = np.log10(magfield).flatten()
+ 
+                if timing == 'all_time':
+                    X2 = np.linspace(X.min()+2,X.max()-3,num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
+                if timing == 'per_frame':
+                    X2 = np.linspace(X.min(),X.max(),num=len(X)) # FOR PER FRAME, MULTIPLE PANEL PLOTS 
                 XX2 = 10 ** X2 
-
-                Y = np.log10(magfield).flatten()  
                
                 # POLY-FITTING:
                 pfit = np.polyfit(X,Y,1) 
                 other = np.poly1d(pfit)
                 beta = pfit[0]
                 B_o = pfit[1]  
-
                 YY = 10 ** (pfit[0]*X2 + pfit[1]) 
 
-                if n_time == asort[-1]:  #FOR ALL TIME ONLY
-                    self.betarr = np.append(self.betarr,beta)  #unindent if per frame  
-
+                if timing == 'all_time': 
+                    if n_time == asort[-1]:
+                        self.betarr = np.append(self.betarr,beta)
+                else:
+                    self.betarr = np.append(self.betarr,beta) 
                 # THE NEGATIVE OUTLIERS
                 if beta < 0: 
                     self.time_stamp = np.append(self.time_stamp,n_time)
- 
-                # CALL PEARSON R DEFINTION
-                #pearsonR(X,Y)  # TEST
-                # CALL SCATTER PLOT SETUP
-                #setscatter(num)  #EDIT, call a number from Main!!
-                # CALL SCATTER PLOTS
-                #scatterplots()  #EDIT the calling, this also would call boxes and violins
-                # Pass the time frames needed if at a particular sim
-                # 1,3,5,8,10,12: u05
-                # 1,3,5,7,9,11:  u202
+
+                # CALL PEARSON R
+                if typeplot == 'vio_plot':  
+                    pearsonR(X,Y)
+                    if n_time == asort[-1]:
+                        scatterplots()
+                        break  #TEMPORARY FIX to get violin plots :-/
+                # CALL SCATTER
+                if typeplot == 'frame_scatters' or 'scatter_plot': 
+                    scatterplots(fig,ax1,ax2,ax3,ax4,ax5,ax7,ax8,lplots,XX2,YY)
+      
 
 
     def histograms(self,num,figs,plts):
     # HISTOGRAM FOR ALL CORES FOR ALL TIME
-    # had to TURN ON 4 SWTICHES FOR ALL CORE TIMES
-    # READ READ READ: want to overlay! look at profiles66.py
 
         #BETA ENTRIES, AVERAGE & STD 
-        print("ARRAY",self.betarr)
         betavg = np.mean(self.betarr)
         betastd = np.std(self.betarr)
         entries = len(self.betarr) 
@@ -394,63 +356,99 @@ class BRho_tool():
             #ax1.text(0.43, 17.5, t, color='blue', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u102 
             #ax1.text(0.50, 12.5, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u11 
             #ax1.text(0.48,11, t, color='m', bbox=dict(facecolor='none', edgecolor='black', boxstyle='round,pad=1'))  #u103  
-            
+        
+            # COULD CALL LABELLED!
             name_save = "BetaHistogramTff"  
             figs.savefig(name_save) 
             print('saved ',name_save)
             plt.close(figs)  
 
 
-    def boxesviolins(self):
-    # NOTE: for PearsonR, nan values are not accepted
-        count = 0 #temp
-        Pears = {}
+    def boxes(self,num,name,tff_lab):
+        Bears = {}
         index = []
-        data = []
-        #tsorted = tsorted[2:] 
-        for i,num in enumerate(tff_labels):         
-            Pears[tff_labels[i]] = pears[i]  #TEST, previously "frames" 
-        for j, (key, val) in enumerate(Pears.items()):
-        #    for one, two in enumerate(val):  # DOUBLE CHECK if this does what I want, and if necessary, maybe 0 vals are already ignored
-        #        print(two)
-        #        count = count + 1
-        #        if two == 0:
-        #            continue
-            #if val == 0:  #EDIT: val is an entire array, sort through each value
-            #gives ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all() 
+        data = [] 
+        for i,num in enumerate(tff_lab):             
+            print(name)
+            Bears[tff_lab[i]] = self.bears[i]
+        for j, (key, val) in enumerate(Bears.items()):
             index.append(key)
             data.append(val)
 
         fig, ax1=plt.subplots(1,1)    
+ 
+        bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  #bparts is now a dictionary      
 
-        #To compare boxplot or violinplots with a zero, however I think this is affecting the position of the plots
-        ax1.plot([1,14],[0,0],c=[0.5]*4)  #U05  
-        #ax1.plot([1,11],[0,0],c=[0.5]*4)  #U203 
-        #ax1.plot([1,12],[0,0],c=[0.5]*4)  #U202
+        #To compare boxplot with a zero, affects the position of the plots
+        if nt == 0:
+            ax1.plot([1,14],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.01,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            title = r'$\beta = 0.2$'
+        if nt == 1:
+            ax1.plot([1,12],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            title = r'$\beta = 2.0$'
+        if nt == 2:
+            ax1.plot([1,11],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
+            title = r'$\beta = 20$'
 
-        # trying to find how to use 'position' suitingly as to match time...
-        if 0:
-            bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  #bp is now a dictionary     
-        if 0:
-            vparts = ax1.violinplot(data,showmeans=True, showextrema=True, showmedians=True)
-            vparts['cmeans'].set_color('r')   
-        tff_mod = [0.0,0.0,0.01,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95]  #U05 add a 0.0 
-        #tff_mod = [0.0,0.0,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75]  #U201 
-        #tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91]  #U203
-        #tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97]  #U202
-        
-        #ax1.xaxis.set_major_locator(plt.MultipleLocator(2))  #U05 order swapped with set_xticklabels
-        ax1.xaxis.set_major_locator(plt.MultipleLocator(1))  #U10,U11
-
-        ax1.set_xticklabels(tff_mod)     
+        ax1.set_xticklabels(tff_mod)      
+        #BRho_tool.labelled(ax1,xlabel=r'$t_{\rm{ff}}$',ylabel=r'$\alpha_B$',ylim=ylim,title=title)
         ax1.set_xlabel(r'$t_{\rm{ff}}$')
-        #ax1.set_ylim(-1.10,1.10)  #EDIT: pearsonR
+        ax1.set_ylabel(r'$\alpha_B$')
         ax1.set_ylim(-1.0,1.0)
-        #ax1.set_ylim(-1.25,1.25) 
-        #ax1.set_ylabel(r'$\alpha_B$')
+        ax1.set_title(title)
+               
+        fig.savefig('BearsBoxplotTen_%s'%name)
+        print("BOX SAVED")
+        plt.close(fig)
+      
+
+    def violins(self,num,name,tff_lab):
+    # NOTE: for PearsonR, nan values are not accepted 
+        Pears = {}
+        index = []
+        data = []  
+        for i,num in enumerate(tff_lab):
+            Pears[tff_lab[i]] = self.pears[i] 
+        for j, (key, val) in enumerate(Pears.items()):
+            index.append(key)
+            data.append(val)
+
+        fig, ax1=plt.subplots(1,1)    
+ 
+        vparts = ax1.violinplot(data,showmeans=True, showextrema=True, showmedians=True)
+        vparts['cmeans'].set_color('r')   
+
+        #To compare violinplots with a zero, affects the position of the plots
+        if nt == 0:
+            ax1.plot([1,14],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.01,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            title = r'$\beta = 0.2$'
+        if nt == 1:
+            ax1.plot([1,12],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            title = r'$\beta = 2.0$'
+        if nt == 2:
+            ax1.plot([1,11],[0,0],c=[0.5]*4) 
+            tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
+            title = r'$\beta = 20$'
+ 
+        ax1.set_xticklabels(tff_mod)      
+        #BRho_tool.labelled(ax1,xlabel=r'$t_{\rm{ff}}$',ylabel=r'$r_{B\rho}$',ylim=ylim,title=title)
+        ax1.set_xlabel(r'$t_{\rm{ff}}$')
         ax1.set_ylabel(r'$r_{B\rho}$')
-        ax1.set_title(r'$\beta = 0.2$')  # EDIT
-        fig.savefig('PearsBoxplotTen_%s'%this_simname)
+        ax1.set_ylim(-1.0,1.0)
+        ax1.set_title(title)
+         
+        fig.savefig('PearsViolinTen_%s'%name)
         print("SAVED")
         plt.close(fig)
 
@@ -467,7 +465,7 @@ if 'clobber' not in dir():
 if 'BRho_tool1' not in dir() or clobber:
     BRho_tool1=BRho_tool(tl.looper1)
     simname1 = tl.looper1.out_prefix   
-    
+
 if 'BRho_tool2' not in dir() or clobber:
     BRho_tool2=BRho_tool(tl.looper2)
     simname2 = tl.looper2.out_prefix
@@ -482,36 +480,77 @@ print("GREETINGS")
 
 if 1:
     for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]): 
-        thtr = tool.this_looper.tr
+
+        # TYPE OF PLOT: 'scatter_plot' OR 'frame_scatters' 
+        # OR 'box_plot' OR 'vio_plot'?
+        which_plot = 'vio_plot'
+        # ALL TIME: 'all_time', OR PER FRAME: 'per_frame'?
+        which_time = 'per_frame'
 
         # GLOBAL TFF 
         G = 1620/(4*np.pi)
         rho_mean = 1
         t_ff = np.sqrt(3*np.pi/(32*G*rho_mean)) 
 
-        # TFF PERCENTAGE:
-        tff_p = thtr.times[:2]/t_ff  #MUST be editted for suitable time steps 
-        print("TIME ",thtr.times)  #CHECK TIMES
+        # TFF PERCENTAGE & DESIRED FRAMES, DESIRED CORES
+        # FOR SCATTER PLOTS, comment 'core_list' if all cores: 
+        thtr = tool.this_looper.tr
+        if nt == 0:
+            tff_p = thtr.times[1:-1]/t_ff
+            frames = [1,3,5,8,10,12]  
+            core_list = [70]#,165,275,297]
+        if nt == 1:
+            tff_p = thtr.times[:-1]/t_ff 
+            frames = [1,3,5,7,9,11] 
+            core_list = [32]#,114,190,192]
+        if nt == 2:
+            tff_p = thtr.times[:-1]/t_ff 
+            frames = [1,3,5,6,8,10] 
+            core_list = [98]#,98,124,165]
+        
+        simframes = set(frames) 
         tff_labels = ['%.2f'%s for s in tff_p]
+        
 
-        tool.run(simnames[nt],thtr)
-        if 1:        
-            # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME 
+        if which_plot == 'scatter_plot':
+            fig, ax1=plt.subplots(1,1)   
+        if which_plot == 'frame_scatters': 
+            fig = plt.figure() 
+            fig.text(0.365,0.03,r'$\rho/\rho_{o}$')
+
+            ax1 = plt.subplot(331)
+            ax2 = plt.subplot(332)
+            ax4 = plt.subplot(334)
+            ax5 = plt.subplot(335)
+            ax7 = plt.subplot(337)
+            ax8 = plt.subplot(338)
+
+            ax3 = plt.subplot(133)  #`ax6, ax9` 
+            fig.subplots_adjust(wspace=0, hspace=0)
+            
+            if nt == 0:
+                lplots = [0,ax1,0,ax2,0,ax4,0,0,ax5,0,ax7,0,ax8,0] 
+            if nt == 1:
+                lplots = [0,ax1,0,ax2,0,ax4,0,ax5,0,ax7,0,ax8,0] 
+            if nt == 2:
+                lplots = [0,ax1,0,ax2,0,ax4,ax5,0,ax7,0,ax8,0] 
+ 
+        # input the respective parameters to None
+        tool.run(simnames[nt],thtr,which_time,which_plot,
+                 fig=None,ax1=None,ax2=None,ax3=None,ax4=None,ax5=None,ax7=None,ax8=None,
+                 lplots=None,core_list=None,simframes=None)
+        if 0:        
+            # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME
             if nt == 0:
                 fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-
-        #if 0: 
-            # CALL BOXPLOTS/VIOLINPLOTS
-            #tool.boxesviolins()
-        
-
-        # I THINK THE FOLLOWING SHOULD BE RETURNED FROM ABOVE
-        #pears = [pear0,pear1,pear2,pear3,pear4,pear5,pear6,\
-        #         pear7,pear8,pear9,pear10,pear11,pear12,pear13,pear14]
-        #bears = [bear0,bear1,bear2,bear3,bear4,bear5,bear6,\
-        #         bear7,bear8,bear9,bear10,bear11,bear12,bear13,bear14]
-       
+        if 0: 
+            # CALL BOXPLOTS  
+            tool.boxes(nt,simnames[nt],tff_labels)
+        if 1: 
+            # CALL VIOLINPLOTS              
+            tool.violins(nt,simnames[nt],tff_labels)
+     
 print("GOOD-BYE")
 
-# NEXT: see where I loose the betarrrrrr, do BRho_tool#.betarr
+
