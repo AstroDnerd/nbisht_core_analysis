@@ -11,7 +11,7 @@ fields=['density']
 
 
 def proj_cores_annotate_zoom(this_looper, axis_list=[0,1,2],core_list=None, center_cores=[],field='density',color='r',
-                            zoom_level=4,cb_label=None, frame_list=None,plot_dir="./plots_to_sort"):
+                            zoom_level=4,cb_label=None, frame_list=None,plot_dir="./plots_to_sort", annotate_particles=False):
     """Full projections of the data, with core particles marked."""
     if frame_list is None:
         frame_list = [this_looper.target_frame]
@@ -23,6 +23,15 @@ def proj_cores_annotate_zoom(this_looper, axis_list=[0,1,2],core_list=None, cent
         center_cores = core_list
     if center_cores == "one":
         center_cores = core_list[0:1]
+    do_peak_proj=False
+    if center_cores == [] or center_cores == 'center':
+        #make sure it saves
+        do_peak_proj=True
+    do_center_proj = False
+    if center_cores == 'center':
+        center_cores = []
+        do_center_proj = True
+
     for frame in frame_list:
         print("%s %d"%(this_looper.out_prefix,frame))
         for snapshot in this_looper.snaps[frame].values():
@@ -49,6 +58,19 @@ def proj_cores_annotate_zoom(this_looper, axis_list=[0,1,2],core_list=None, cent
                                  "%d"%snapshot.core_id,text_args={'color':color}, 
                                  inset_box_args={'visible':False},
                                  coord_system='data')
+                if annotate_particles:
+                    this_looper.proj.annotate_select_particles4(1.0, col='r', indices=this_looper.target_indices[core_number])
+            if do_center_proj or do_peak_proj:
+                outname = '%s/%s_core_zoom_annotate_n%04d'%(plot_dir,this_looper.out_prefix,frame)
+                if do_center_proj:
+                    center = ds.arr([0.5]*3,'code_length')
+                else:
+                    maxval, center = ds.find_max('density')
+                plot_x = [1,2,0][axis]
+                plot_y = [2,0,1][axis]
+                this_center = center[plot_x],center[plot_y]
+                this_looper.proj.set_center(this_center)
+                print( this_looper.proj.save(outname))
 
             for core_number in center_cores:
                 snapshot = this_looper.snaps[frame][core_number]
@@ -62,8 +84,28 @@ def proj_cores_annotate_zoom(this_looper, axis_list=[0,1,2],core_list=None, cent
                 this_looper.proj.set_center(this_center)
                 print( this_looper.proj.save(outname))
 
-import three_loopers as tl
+import three_loopers_1tff as tl
+if 0:
+    #full projections
+    for this_looper in [tl.looper1,tl.looper2,tl.looper3]:
+        proj_cores_annotate_zoom(this_looper,axis_list=[0],core_list=[],center_cores=[],cb_label='density',
+                                plot_dir="./plots_to_sort", zoom_level=1)
+if 0:
+    #Core 8 and its neighbors
+    core_list = [7,8,9,12,252,251,253,10,11,248,248,247,250,133,135]
+    center_cores = [8]
+    for this_looper in [tl.looper1]:
+        proj_cores_annotate_zoom(this_looper,axis_list=[0],core_list=core_list,center_cores=center_cores,cb_label='density',
+                                plot_dir="./plots_to_sort", zoom_level=4)
 if 1:
+    #Core 8 and its neighbors: pre-image, with particles
+    core_list = [7,8,9,12,252,251,253,10,11,248,248,247,250,133,135]
+    center_cores = [8]
+    for this_looper in [tl.looper1]:
+        proj_cores_annotate_zoom(this_looper,axis_list=[0],core_list=core_list,center_cores='center',cb_label='density',
+                                plot_dir="./plots_to_sort", zoom_level=1, annotate_particles=True, frame_list=[1])
+
+if 0:
 
     for this_looper in [tl.looper1,tl.looper2,tl.looper3]:
         proj_cores_annotate_zoom(this_looper,axis_list=[0],core_list=None,center_cores=None,cb_label='density',
