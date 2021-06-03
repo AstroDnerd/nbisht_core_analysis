@@ -1,3 +1,4 @@
+
 """
 
 THIS ALMOST WORKS.
@@ -40,8 +41,8 @@ class trial():
         if do_plot:
             fig,ax=plt.subplots(1,1)
         rmin, rmax = 1./2048, 0.4
-        vmin, vmax = 0, 8
-        nx=ny=32
+        vmin, vmax = 0, 100
+        nx=ny=64
         self.rbins = np.logspace(np.log10(rmin), np.log10(vmax),nx+1)
         self.vbins = np.linspace(0, vmax, ny+1)
         self.hist = np.zeros([nx,ny])
@@ -57,7 +58,7 @@ class trial():
         for core_id in core_list:
             ms = trackage.mini_scrubber(thtr,core_id)
             tmap=rainbow_map(ms.ntimes)
-            if ms.nparticles < 15:
+            if ms.nparticles < 100:
                 continue
             print('go ', core_id)
             self.cores_used.append(core_id)
@@ -75,50 +76,39 @@ class trial():
             self.r.append(rsort)
             dv = cell_volume[asort]
 
+            ms.get_central_velocity(core_id,nt)
             if 0:
+                self.lab='rel'
                 vr = ms.vr_rel[:,nt]  #the radial one, works ok
-                vrs = vr[asort]
-                sigma_vr2 = np.cumsum(vrs**2*dv)/np.cumsum(dv)
-            if 1:
+            if 0:
+                self.lab='mag'
                 vr = ms.rel_vmag[:,nt]  #testing
-                vrs = vr[asort]
-                sigma_vr2 = np.cumsum(vrs**2*dv)/np.cumsum(dv)
+            if 1:
+                self.lab='cen'
+                vr = ms.cen_vmag[:,nt]  #testing
+            if 1:
+                self.lab='RC'
+                vr = ms.rc_vmag[:,nt]  #testing
+            vrs = vr[asort]
+            sigma_vr2 = np.cumsum(vrs**2*dv)/np.cumsum(dv)
             self.vr.append(sigma_vr2)
 
             v2_sorted=self.vr[-1]
 
-
-
-            if do_plot:
-                ax.plot(rsort,sigma_vr2, c=tmap(nt))
 
             this_hist, xedge, yedge= np.histogram2d(rsort, v2_sorted, bins=[self.rbins,self.vbins])
             self.hist+= this_hist.astype('float')
             #rquan = np.digitize(rsort, rbins)
             #vquan = np.digitize(sigma_vr, vbins)
             #self.hist[rquan,vquan] += 1
-        
-
-        if do_plot:
-            axbonk(ax,xlabel='r',ylabel=r'$\sigma_v(r)$',xscale='log',xlim=[rmin,0.4], ylim=[0,10])
-            #ax.set_yscale('symlog',linthresh=10)
-
-            outname = "%s/%s_sigma_vr%04d.png"%(dl.output_directory, self.this_looper.out_prefix, frame)
-            print(outname)
-            fig.savefig(outname)
-            fig,ax=plt.subplots(1,1)
-
-            ax.pcolormesh(self.rbins, self.vbins, self.hist)
-            fig.savefig("%s/%s_hist_cXXXX_n%04d.png"%(dl.output_directory, self.this_looper.out_prefix, frame))
-
-            plt.close('all')
 
 
 if 'do_all_plots' not in dir():
     do_all_plots = False
 
 
-import three_loopers as TL
+#import three_loopers as TL
+import three_loopers_1tffPlus as TL
 import sf2
 frame=0
 if 1:
@@ -139,28 +129,67 @@ def plot(self,frame, my_sf2=None):
     cmap = copy.copy(mpl.cm.get_cmap("viridis"))
     cmap.set_under('w')
     minmin = pdf[pdf>0].min()
+    vr_max = max([v.max() for v in self.vr])
     norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
     for r,v in zip(self.r,self.vr):
-        ax.plot(r,v,c=[0.5,0.5,0.5,0.3],lw=0.1)
-    for r,v in zip(self.r,self.vr):
+        ax.plot(r,v,c=[0.5,0.5,0.5,0.6],lw=0.1)
+    for nc,rv in enumerate(zip(self.r,self.vr)):
+        r,v=rv
+        core_id = self.cores_used[nc]
         ax.scatter(r[0],v[0],c='k')
+        ax.text(r[0],v[0],"%d"%core_id)
     #ax.plot( self.rbins, [1.0]*self.rbins.size,c=[0.5]*3)
-    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.5)
-    axbonk(ax,yscale='linear',xscale='log', xlim=[1./2048,0.4], ylim=[0,9], ylabel=r'\sigma_{v,total}^2',xlabel=r'$r$')
+    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2)
+    axbonk(ax,yscale='linear',xscale='log', xlim=[1./2048,0.4], ylim=[0,vr_max], ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
     fig.colorbar(ploot,ax=ax)
     if my_sf2 is not None:
         ax.plot(my_sf2[0],my_sf2[1],c='k')
     ax.set_title('TAKE 3')
-    fig.savefig("%s/test_%s_hist_cXXXX_n%04d.png"%(dl.output_directory, self.this_looper.out_prefix, frame))
+    fig.savefig("%s/velocity_sf_%s_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory,self.lab, self.this_looper.out_prefix, frame))
     plt.close(fig)
 
+def plot_each_line(self,frame, my_sf2=None):
+    pdf = self.hist/(self.dv)
+    ok = pdf>0
+    pdf[ok] /= (pdf[ok]*self.dv[ok]).sum()
+    fig,ax=plt.subplots(1,1)
+    cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+    cmap.set_under('w')
+    minmin = pdf[pdf>0].min()
+    norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
+    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2)
+    axbonk(ax,yscale='linear',xscale='log', xlim=[1./2048,0.4], ylim=[0,10], ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
+    self.vr=nar(self.vr)
+    vr_max = max([v.max() for v in self.vr])
+    if my_sf2 is not None:
+        ax.plot(my_sf2[0],my_sf2[1],c='k')
+    for nc,rv in enumerate(zip(self.r,self.vr)):
+        r,v=rv
+        core_id=self.cores_used[nc]
+        ax.clear()
+        ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2,shading='nearest')
+        axbonk(ax,yscale='linear',xscale='log', xlim=[1./2048,0.4], ylim=[0,vr_max], ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
+        ax.plot(my_sf2[0],my_sf2[1],c='k')
+        #ax.plot(r,v,c=[0.5,0.5,0.5,0.6],lw=0.1)
+        ax.plot(r,v,c='k')
+        ax.scatter(r[0],v[0],c='k')
+        outname = "%s/velocity_sf_%s_hist_c%04d_n%04d.png"%(dl.output_directory, self.this_looper.out_prefix, core_id,frame)
+        print(outname)
+        fig.savefig(outname)
+    #ax.plot( self.rbins, [1.0]*self.rbins.size,c=[0.5]*3)
+    fig.colorbar(ploot,ax=ax)
+    ax.set_title('TAKE 3')
+    outname="%s/velocity_sf_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory, self.this_looper.out_prefix, frame)
+    print(outname)
+    fig.savefig(outname)
+    plt.close(fig)
 import sf2
 reload( sf2)
-for run in [run1, run2, run3]:
+for this_run in [run1, run2, run3]:
     if 'msf' not in dir() or True:
-        msf = sf2.make_sf(run.this_looper,0)
+        msf = sf2.make_sf(this_run.this_looper,0)
         rbins,SS = msf.bin_take3(); SS/=2*np.pi
         #rbins,SS = msf.bin_kludged()
-
-    plot(run,0, my_sf2=[rbins,SS])
+    #plot_each_line(this_run,0, my_sf2=[rbins,SS])
+    plot(this_run,0, my_sf2=[rbins,SS])
 #plot(run1,0, my_sf2=[rbins,SS])

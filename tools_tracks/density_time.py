@@ -124,16 +124,25 @@ class trial():
 
                 ax.legend(loc=0)
                 ylim = [thtr.track_dict['density'].min(), thtr.track_dict['density'].max()]
-                xlim = [0, 0.05]
+                xlim = [0,thtr.times.max()]
 
                 axbonk(ax,xscale='linear',yscale='log',xlabel='t',ylabel=r'$\rho$', ylim=ylim,xlim=xlim)
                 oname = "%s/%s_density_6_c%04d"%(dl.output_directory,self.this_looper.out_prefix,core_id)
+                print(oname)
                 fig.savefig(oname)
                 print("Saved "+oname)
 
 if 'do_all_plots' not in dir():
     do_all_plots = False
 
+
+if 'dt14' not in dir() or True:
+    print('wut')
+    import looper_u14
+    reload(looper_u14)
+
+    dt14=trial(looper_u14.looper14)
+    dt14.run(do_all_plots=True)
 
 if do_all_plots:
     out_prefix="u05u10u11"

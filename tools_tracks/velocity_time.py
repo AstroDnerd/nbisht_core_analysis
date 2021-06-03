@@ -47,10 +47,12 @@ class tool_velocity():
             print("doing velocity extents")
             for nc,core_id in enumerate(core_list):
                 ms = trackage.mini_scrubber(thtr,core_id,do_velocity=True)
+                sigma2 = np.sqrt((ms.rel_vx**2 + ms.rel_vy**2 + ms.rel_vx**2).mean(axis=0))
+                self.vel_ext(sigma2)
                 self.vel_ext(ms.rel_vx)
                 self.vel_ext(ms.rel_vy)
                 self.vel_ext(ms.rel_vz)
-                self.vel_ext(ms.rel_v2**0.5)
+                self.vel_ext(ms.rel_vmag)
 
         print('make plots')
         for nc,core_id in enumerate(core_list):
@@ -87,40 +89,26 @@ class tool_velocity():
                 r_un = nar(sorted(np.unique(this_r)))
                 this_t = thtr.times
                 c=[0.5]*3
+                outname4 = '%s/%s_vi_t_rel_volume_centroid_c%04d'%(dl.output_directory,self.this_looper.out_prefix,core_id)
+                ax40.plot(this_t, ms.rel_vx[npart,:], c=c,lw=.1)
+                ax41.plot(this_t, ms.rel_vy[npart,:], c=c,lw=.1)
+                ax42.plot(this_t, ms.rel_vz[npart,:], c=c,lw=.1)
+                
+                ax43.plot(this_t, ms.rel_vmag[npart,:], c=c,lw=.1)
 
-                if 0:
-                    axd1.scatter(ms.vr_rel,ms.rel_v2**0.5,c=c[0:1],label=thtr.times[n_time],s=0.1)
-                if  1:
-                    outname4 = '%s/%s_vi_t_rel_c%04d'%(dl.output_directory,self.this_looper.out_prefix,core_id)
-                    ax40.plot(this_t, ms.rel_vx[npart,:], c=c,lw=.1)
-                    ax41.plot(this_t, ms.rel_vy[npart,:], c=c,lw=.1)
-                    ax42.plot(this_t, ms.rel_vz[npart,:], c=c,lw=.1)
-                    
-                    ax43.plot(this_t, ms.rel_v2[npart,:]**0.5, c=c,lw=.1)
 
-                if 0:
-                    #axd1.scatter(ms.rel_v2[:,n_time],ms.vr_rel[:,n_time],c=c,label=thtr.times[n_time],s=0.1)
-                    abs_vr = np.abs(ms.vr_rel[:,n_time])
-                    #axd1.scatter(this_r,abs_vr,c=c,label=thtr.times[n_time],s=0.1)
-                    axd1.scatter(ms.vr_rel, ms.vr_rel/ms.rel_v2**0.5,c=c[0:1],label=thtr.times[n_time],s=0.1)
-                    harmonic_r =  10**( np.mean( np.log10(this_r)))
-                    mean_vr = np.mean(abs_vr)
-                    
+            mean_vmag = np.mean(ms.rel_vmag,axis=0)
+            sigma2 = np.sqrt((ms.rel_vx**2 + ms.rel_vy**2 + ms.rel_vx**2).mean(axis=0))
+            ax43.plot(this_t, mean_vmag, c='r')
+            ax43.plot(this_t, sigma2, 'r:')
 
-                    v_radial_average = np.mean( ms.vr_rel[:,n_time])
-                    rel_vx_mean = np.mean(ms.rel_vx[:,n_time])
-                    rel_vy_mean = np.mean(ms.rel_vy[:,n_time])
-                    rel_vz_mean = np.mean(ms.rel_vz[:,n_time])
-                    v_total_average = np.sqrt(rel_vx_mean**2+rel_vy_mean**2+rel_vz_mean**2)
-                    print(v_total_average)
-                    rat = v_radial_average/v_total_average
-                    if rat<-1:
-                        pdb.set_trace()
-                    ratarray.append(rat)
-                    axd1.scatter(v_radial_average, rat, marker='s',c='k')
-                    #axd1.plot([-10,0],[10,0],c='k')
-                    #axd1.scatter( harmonic_r, mean_vr, c=c[0:1], marker='*')
-            ax43.plot(this_t, np.mean(ms.rel_v2,axis=0)**0.5, c='r')
+            unique_mask = ms.compute_unique_mask(core_id, dx=1./2048)
+            um = unique_mask
+            mean_vmag = np.mean(ms.rel_vmag[um],axis=0)
+            sigma2 = np.sqrt((ms.rel_vx[um]**2 + ms.rel_vy[um]**2 + ms.rel_vx[um]**2).mean(axis=0))
+            ax43.plot(this_t, mean_vmag, c='g')
+            ax43.plot(this_t, sigma2, 'g:')
+
             ax43.plot(this_t, np.mean(np.abs(ms.vr_rel),axis=0), c='b')
 
             #axd1.plot([ms.r.min(),ms.r.max()], [1,1], c=[0.5]*4)
@@ -157,11 +145,11 @@ class tool_velocity():
             print("saved "+outname4)
             plt.close(fig4)
 
-import three_loopers as TL
+import three_loopers_1tff as TL
 
 tv1 = tool_velocity( TL.looper1 )
-tv2 = tool_velocity( TL.looper2 )
-tv3 = tool_velocity( TL.looper3 )
-#tv1.run()
+#tv2 = tool_velocity( TL.looper2 )
+#tv3 = tool_velocity( TL.looper3 )
+tv1.run(core_list=[32])
 #tv2.run()
-tv3.run()
+#tv3.run()
