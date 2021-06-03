@@ -49,6 +49,8 @@ def save_loop(self,fname):
                             "frame",
                             "mask",
                             "pos",
+                            "ind",
+                            "vel",
                             "R_centroid",
                             "R_vec",
                             "R_mag",
