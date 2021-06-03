@@ -11,14 +11,11 @@ def rb(kall, power, nbins = 32,bins=None):
     dig=np.digitize(kmag,bins)
     
     power_1d = np.array([ power[ dig==this_bin].sum() for this_bin in range(1,nbins+1)])
+    if np.isnan(power_1d).any():
+        pdb.set_trace()
     k2 = np.array([ (dig==this_bin).sum() for this_bin in range(1,nbins+1)])
     power_1d/=k2
 
-
-    fig,ax=plt.subplots(1,1,figsize=(12,12))
-
-    ax.plot(bin_center,power_1d,c='k')
-    fig.savefig('p56_binned.png')
 
     return bins, bin_center, power_1d
 
@@ -36,10 +33,10 @@ def rb2(kmag, power, nbins = 32,bins=None):
     power_1d/=k2
 
 
-    fig,ax=plt.subplots(1,1,figsize=(12,12))
+    #fig,ax=plt.subplots(1,1,figsize=(12,12))
 
-    ax.plot(bin_center,power_1d,c='k')
-    fig.savefig('plots_to_sort/p56_binned.png')
+    #ax.plot(bin_center,power_1d,c='k')
+    #fig.savefig('plots_to_sort/p56_binned.png')
 
     return bins, bin_center, power_1d
 
