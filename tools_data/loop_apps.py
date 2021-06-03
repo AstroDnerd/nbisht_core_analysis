@@ -161,7 +161,7 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
 
 @looper.core_loop
 def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
-                    core_list=None,frame_list=None):
+                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False):
     if core_list is not None:
         if snapshot.core_id not in core_list:
             return
@@ -176,8 +176,8 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
         if i.startswith(outname):
             print(i)
             got_one=True
-    if got_one:
-        print("GOT ONE")
+    if got_one and not clobber:
+        print("File exists, skipping")
         return
     if snapshot.core_id not in looper.target_indices.keys():
         return
@@ -188,22 +188,33 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
         center = ds.arr(snapshot.R_centroid,'code_length')
         Rmax = snapshot.R_mag.max()
         scale_min = ds.arr(0.05,'code_length')
-        scale = max([Rmax, scale_min])
+        scale = 2*max([Rmax, scale_min]).v
+        scale = min([scale,1])
         sph = ds.sphere(center,scale)
         proj = ds.proj(field,ax,center=center, data_source = sph) 
-        pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
-        pw.zoom(1./(2*scale.v))
+        looper.proj=proj
+        if moving_center:
+            #not quite working.
+            pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
+            pw.set_center([center[0],center[1]])
+        else:
+            pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+        
+        if zoom:
+            pw.zoom(1./(scale))
         pw.set_cmap(field,'gray')
         if force_log is not None:
             pw.set_log(field,force_log,linthresh=linthresh)
-        pw.annotate_sphere(center,Rmax, circle_args={'color':color} ) #R_mag.max())
-        pw.annotate_text(center,
-                         "%d"%snapshot.core_id,text_args={'color':color}, 
-                         inset_box_args={'visible':False},
-                         coord_system='data')
-        pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
-        pw.annotate_grids()
-        outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,snapshot.core_id,snapshot.frame)
+        if particles:
+            pw.annotate_sphere(center,Rmax, circle_args={'color':color} ) #R_mag.max())
+            pw.annotate_text(center,
+                             "%d"%snapshot.core_id,text_args={'color':color}, 
+                             inset_box_args={'visible':False},
+                             coord_system='data')
+            pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
+        if grids:
+            pw.annotate_grids()
+        outname = "%s/%s_c%04d_n%04d_centered"%(looper.plot_directory,looper.out_prefix,snapshot.core_id,snapshot.frame)
         print(pw.save(outname))
 
 @looper.core_loop
