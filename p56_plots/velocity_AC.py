@@ -6,7 +6,7 @@ figsize = None #(12,12)
 import tools.radial_binner as rb
 reload(rb)
 from scipy.optimize import curve_fit
-import spectra_tools as st
+import tools_spectra.spectra_tools as st
 reload(st)
 def powerlaw(r,rho0, r0, alpha):
     return alpha*np.log10(r/r0) + np.log10(rho0)
@@ -17,7 +17,8 @@ axis=0
 twopi = np.pi*2
 
 if 'vx' not in dir():
-    directory = '/scratch2/dcollins/Paper19_48/B02/u05-r4-l4-128/GravPotential'
+    #directory = '/scratch2/dcollins/Paper19_48/B02/u05-r4-l4-128/GravPotential'
+    directory = "/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential"
     ds = yt.load("%s/DD%04d/data%04d"%(directory,0,0))
     left=[0.0]*3
     resolution = ds['TopGridDimensions'] 
@@ -86,11 +87,11 @@ if 0:
 #
 # check normalizations of rho/rhohat and rhohat^2/ AC with parseval's thm.
 #
-if 0:
+if 1:
     sigma_vxhat = (ac_x.rhohat*ac_x.rhohat.conj()).real.sum()/ac_x.rhohat.size/twopi
     sigma_vxhatn = twopi*sigma_vxhat/128**3
     sigma_vx_m = (ac_x.rho**2).sum()/ac_x.rho.size
-    parseval_error = 1-(sigma_vxhatn)/sigma_vx
+    parseval_error = 1-(sigma_vxhatn)/sigma_vx_m
     print("Sum_rhohat %0.1e sum_rho %0.1e error %0.2e"%( sigma_vxhatn,sigma_vx_m,parseval_error ))
 
 if 0:
@@ -130,7 +131,7 @@ if 0:
     a22.plot(kspace, kolmog,c=[0.5]*4)
     axbonk(a22, xlabel='k',ylabel='P_v', xscale='log',yscale='log')
 
-if 1:
+if 0:
 
 
     hathat = np.fft.ifft(power_1d)
