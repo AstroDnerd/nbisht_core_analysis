@@ -253,7 +253,7 @@ class snapshot():
         region = self.ds.all_data()
         return region
 
-    def get_current_mask(self):
+    def get_current_mask_old(self):
         """get the particle mask that relates particles for this core_id and this frame
         to the particles in the target_indices from the target_frame"""
         these_pids=self.target_indices.astype('int64')
@@ -265,6 +265,26 @@ class snapshot():
         found_any, mask = particle_ops.mask_particles(these_pids,my_indices,mask_to_get)
         self.mask = mask
         return found_any, mask
+    def get_current_mask(self):
+        """get the particle mask that relates particles for this core_id and this frame
+        to the particles in the target_indices from the target_frame"""
+        core_ids=self.target_indices.astype('int64')
+        if type(core_ids) == yt.units.yt_array:
+            core_ids = core_ids.v
+        data_region = self.get_region(self.frame)
+        mask_to_get=np.zeros(core_ids.shape,dtype='int32')
+        all_indices = data_region['particle_index'].astype('int64')
+
+        
+        core_order = np.argsort( core_ids)
+        sorted_cores = core_ids[core_order]
+        all_order = np.argsort(all_indices)
+        all_return = np.argsort(all_order)
+        sorted_all = all_indices[all_order]
+        found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_cores,sorted_all,mask_to_get)
+
+        self.mask = all_mask[all_return]
+        return found_any, self.mask
         
     def check_and_fix_bad_particles(self,mask):
         if mask.sum() == self.target_indices.size:
@@ -388,20 +408,21 @@ class snapshot():
             return
 
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
+        particle_exclude = np.zeros(good_index_sort_np.size,dtype='int32') #prevent extra checks once a particle has been found.
         for grid in self.ds.index.grids[-1::-1]:
             grid_selector = np.zeros([3,good_index_sort_np.size],dtype='int32') #grid i,j,k index selector.
             particle_selector = np.zeros(good_index_sort_np.size,dtype='int32') #mask between all particles and this grid.
             mask_to_get_3 = np.zeros(good_index_sort_np.shape, dtype='int32')   #particles in this grid.  This is only for existence checking.
             #this gives the particles that live in _this grid._
-            found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
-            if found_any_g:
-                particle_grid_mask.particle_grid_mask_go_i2(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
-                                                            grid.LeftEdge, grid.dds, 
-                                                            grid.ActiveDimensions,grid.child_mask, 
-                                                            grid_selector,
-                                                            particle_selector)
+            #found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
+            particle_grid_mask.particle_grid_mask_go_i3(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
+                                                        grid.LeftEdge, grid.dds, 
+                                                        grid.ActiveDimensions,grid.child_mask, 
+                                                        grid_selector,
+                                                        particle_selector, particle_exclude)
+            if particle_selector.max() > 0:  #if we have found any particles
 
-                particle_selector = particle_selector==1
+                particle_selector = particle_selector.astype('bool')
                 if particle_selector.sum() == 0:
                     continue
                 for field in self.field_values:
