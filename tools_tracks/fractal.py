@@ -59,12 +59,14 @@ def fractal_dimension(Z, threshold=0.9):
     sizes=nar(sizes)
     counts=nar(counts)
     ok = counts > 1
-    coeffs = np.polyfit(np.log(sizes[ok]), np.log(counts[ok]), 1)
+    if ok.sum():
+        coeffs = np.polyfit(np.log(sizes[ok]), np.log(counts[ok]), 1)
+    else:
+        coeffs = [0,0]
     #plt.clf()
     #plt.plot(np.log(sizes), np.log(counts),c='k',marker='x')
     #plt.plot(np.log(sizes), coeffs[0]*np.log(sizes)+coeffs[1])
-    #nfractal=len(glob.glob("plots_to_sort/nfractal*"))
-    #plt.savefig("plots_to_sort/nfractal_%s.png"%nfractal)
+    #nfractal=len(glob.glob("plots_to_sort/nfractal*")) #plt.savefig("plots_to_sort/nfractal_%s.png"%nfractal)
     return -coeffs[0], {'counts':counts,'sizes':sizes, 'coeffs':coeffs}
 
 dx=1./128
@@ -102,6 +104,10 @@ class fractal_tool():
 
             image_size=[x.max()+1,y.max()+1,z.max()+1]
             image = np.zeros([128,128,128])
+            mask = (x < 128)*(y<128)*(z<128)
+            x = x[ mask]
+            y = y[ mask]
+            z = z[ mask]
             #image = np.zeros( image_size)
             print("image size",core_id,image_size)
             image[(x,y,z)]=1
@@ -125,7 +131,7 @@ class fractal_tool():
                 plt.savefig('plots_to_sort/%s_counts_c%04d.png'%(self.this_looper.out_prefix,core_id))
 
 
-
+import three_loopers_1tff as tl
 
 if 'ft1' not in dir() or clobber:
     ft1=fractal_tool(tl.looper1)
@@ -140,13 +146,69 @@ if 'ft3' not in dir() or clobber:
 plt.clf()
 color={'u05':'r','u10':'g','u11':'b', 'u201':'r', 'u202':'g','u203':'b'}
 
-for nf,ft in enumerate([ft1,ft2,ft3]):
-    name=ft.this_looper.out_prefix
-    plt.hist(ft.fractal_dim,histtype='step',bins=10,color=color[name],label=name)
-    plt.savefig("plots_to_sort/wtf_%d.png"%nf)
+if 0:
+    for nf,ft in enumerate([ft1,ft2,ft3]):
+        name=ft.this_looper.out_prefix
+        plt.hist(ft.fractal_dim,histtype='step',bins=10,color=color[name],label=name)
+        plt.savefig("plots_to_sort/wtf_%d.png"%nf)
 
-plt.legend(loc=0)
-plt.savefig('plots_to_sort/fractal_dist.png')
+    plt.legend(loc=0)
+    plt.savefig('plots_to_sort/fractal_dist.png')
+
+
+if 'toolshed' not in dir():
+    toolshed = {}
+
+framelist=[0,1,2,3,4,5,6,7,8]
+if 0:
+    looper_list = [tl.looper1,tl.looper2,tl.looper3][1:2]
+    
+    for looper in looper_list:
+        name =  looper.out_prefix
+        toolshed[ name ] = {}
+        toolshed[ name ]['looper'] = looper
+        for nframe, frame in enumerate(frames):
+            if nframe not in framelist:
+                continue
+            if frame in toolshed[ name]:
+                continue
+            toolshed[name][frame] = fractal_tool( looper )
+            toolshed[name][frame].run(nf=nframe)
+
+if 1:
+    rm = rainbow_map(10)
+    for name in toolshed:
+        dims = []
+        #mylooper=looper_list[0]
+        mylooper=toolshed[name]['looper']
+        for nframe,frame in enumerate(toolshed[name]):
+            tool = toolshed[name][frame]
+            lab=ft.this_looper.out_prefix + " %s"%frame
+            plt.hist(tool.fractal_dim,histtype='step',bins=10,color=rm(nframe),label=lab)
+            dims.append(tool.fractal_dim)
+        plt.savefig("plots_to_sort/wtf_%d.png"%nf)
+        plt.savefig('plots_to_sort/fractal_dist.png')
+        fig,ax=plt.subplots(1,1)
+        ax.violinplot(dims)
+        fig.savefig('plots_to_sort/violin_test.png')
+        plt.close(fig)
+        fig,axes=plt.subplots(1,2)
+        dims=nar(dims)
+
+        cores_used = tool.cores_used
+        OverAchievers = []
+        for nb,b in enumerate(dims.transpose()):
+            core_id = cores_used[nb]
+            if (b > 2.5).any():
+                OverAchievers.append(core_id)
+            nparticles=mylooper.snaps[0][core_id].target_indices.size
+            if nparticles < 10:
+                continue
+
+            axes[0].plot(mylooper.tr.times[framelist], b/b[0:3].mean())
+            axes[1].plot(mylooper.tr.times[framelist], b)
+        fig.savefig('plots_to_sort/streams.png')
+
 #FFF=fractal_dimension(image)
 
 #Z=image
