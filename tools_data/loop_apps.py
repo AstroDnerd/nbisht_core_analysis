@@ -161,7 +161,8 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
 
 @looper.core_loop
 def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
-                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False):
+                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
+                    only_sphere=True, center_on_sphere=True, slab=None):
     if core_list is not None:
         if snapshot.core_id not in core_list:
             return
@@ -185,13 +186,25 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
         snapshot.get_all_properties()
     ds = snapshot.get_ds()
     for ax in axis_list:
-        center = ds.arr(snapshot.R_centroid,'code_length')
+        if center_on_sphere:
+            center = ds.arr(snapshot.R_centroid,'code_length')
+        else:
+            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
         Rmax = snapshot.R_mag.max()
         scale_min = ds.arr(0.05,'code_length')
         scale = 2*max([Rmax, scale_min]).v
         scale = min([scale,1])
-        sph = ds.sphere(center,scale)
-        proj = ds.proj(field,ax,center=center, data_source = sph) 
+        if only_sphere:
+            sph = ds.sphere(center,scale)
+            proj = ds.proj(field,ax,center=center, data_source = sph) 
+        elif slab is not None:
+            left = nar([ 0, 0, slab['zmin']])
+            right = nar([ 1, 1, slab['zmax']])
+            center = 0.5*(left+right)
+            sph = ds.region(center,left,right)
+            proj = ds.proj(field,ax,center=center, data_source = sph) 
+        else:
+            proj = ds.proj(field,ax,center=center)
         looper.proj=proj
         if moving_center:
             #not quite working.
@@ -214,6 +227,7 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
             pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
         if grids:
             pw.annotate_grids()
+        looper.pw = pw
         outname = "%s/%s_c%04d_n%04d_centered"%(looper.plot_directory,looper.out_prefix,snapshot.core_id,snapshot.frame)
         print(pw.save(outname))
 
