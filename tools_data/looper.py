@@ -6,7 +6,7 @@ import loop_tools
 reload(loop_tools)
 import tracks_read_write
 reload(tracks_read_write)
-
+verbose=True
 def count_particles(fname='tools_data/n_particles.txt'):
     fptr = open(fname,'r')
     lines=fptr.readlines()
@@ -369,9 +369,15 @@ class snapshot():
         else:
             self.R_centroid = yt.units.yt_array([0,0,0],'cm')
             self.V_bulk =    yt.units.yt_array([0,0,0],'cm/s')
-        for dim in range(3):
-            self.R_centroid[dim] = (shifted[:,dim]*self.field_values['density']).sum()/m
-            self.V_bulk[dim] = (self.vel[:,dim]*self.field_values['density']).sum()/m
+        centroid_tmp =  np.array([(shifted[:,dim]*self.field_values['density']).sum()/m for dim in range(3)])
+        vbulk_tmp = [ (self.vel[:,dim]*self.field_values['density']).sum()/m for dim in range(3)]
+        if self.ds is not None:
+            self.R_centroid = self.ds.arr(centroid_tmp,'code_length')
+            self.V_bulk = self.ds.arr(vbulk_tmp,'code_velocity')
+        else:
+            self.R_centroid = yt.units.yt_array(centroid_tmp,'cm')
+            self.V_bulk =    yt.units.yt_array(vbulk_tmp,'cm/s')
+
         self.R_vec = shifted - self.R_centroid
         self.R_mag = (self.R_vec**2).sum(axis=1)**0.5
         self.N_vec = np.zeros_like(self.R_vec)
@@ -407,19 +413,33 @@ class snapshot():
         if number_of_new_fields == 0:
             return
 
+        verbose=True
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
-        particle_exclude = np.zeros(good_index_sort_np.size,dtype='int32') #prevent extra checks once a particle has been found.
-        for grid in self.ds.index.grids[-1::-1]:
+        gridlist = self.ds.index.grids[-1::-1]
+        for ngrid, grid in enumerate(gridlist):
+            if verbose:
+                print("grid %d / %d"%(ngrid, len(gridlist)))
             grid_selector = np.zeros([3,good_index_sort_np.size],dtype='int32') #grid i,j,k index selector.
             particle_selector = np.zeros(good_index_sort_np.size,dtype='int32') #mask between all particles and this grid.
             mask_to_get_3 = np.zeros(good_index_sort_np.shape, dtype='int32')   #particles in this grid.  This is only for existence checking.
             #this gives the particles that live in _this grid._
             #found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
-            particle_grid_mask.particle_grid_mask_go_i3(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
-                                                        grid.LeftEdge, grid.dds, 
-                                                        grid.ActiveDimensions,grid.child_mask, 
-                                                        grid_selector,
-                                                        particle_selector, particle_exclude)
+
+            Nxyz = grid.ActiveDimensions
+            i =((self.pos[:,0] - grid.LeftEdge[0])/grid.dds[0]).astype('int32')
+            j =((self.pos[:,1] - grid.LeftEdge[1])/grid.dds[1]).astype('int32')
+            k =((self.pos[:,2] - grid.LeftEdge[2])/grid.dds[2]).astype('int32')
+            particle_selector = (i >= 0 ) * ( j >= 0) * ( k >= 0 ) * ( i < Nxyz[0])*(j<Nxyz[1])*(k<Nxyz[2])
+            if particle_selector.sum() == 0:
+                continue
+            grid_selector = [i,j,k]
+            subgrid_mask = grid.child_mask[[grid_selector[i][particle_selector] for i in [0,1,2]]]
+            particle_selector[particle_selector] = particle_selector[particle_selector]*subgrid_mask
+            #particle_grid_mask.particle_grid_mask_go_i3(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
+            #                                            grid.LeftEdge, grid.dds, 
+            #                                            grid.ActiveDimensions,grid.child_mask, 
+            #                                            grid_selector,
+            #                                            particle_selector, particle_exclude)
             if particle_selector.max() > 0:  #if we have found any particles
 
                 particle_selector = particle_selector.astype('bool')
