@@ -60,6 +60,7 @@ elif machine == 'cloudbreak':
     u201_every_ten = u05_every_ten #"/data/cb1/Projects/P19_CoreSimulations/CoreSets/u201/*h5"
     u202_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u202/*h5"
     u203_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u203/*h5"
+    every_ten_compact_base = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/every_ten_u20x_compact"
 else:
     sim_u05 = None
     sim_u10 = None
@@ -101,6 +102,7 @@ peak_list['u14']=peaks_u14
 
 
 target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u14':25}
+target_frames.update({'u201':125,'u202':118,'u203':107})
 
 every_ten = {'u05':u05_every_ten,'u10':u10_every_ten,'u11':u11_every_ten, 'u101':u101_every_ten,'u102':u102_every_ten,'u103':u103_every_ten}
 every_ten.update({'u201':u201_every_ten,'u202':u202_every_ten,'u203':u203_every_ten})
@@ -118,3 +120,7 @@ n_particles={'u05':'datasets_small/u05_n_particles.txt',
              'u103':'datasets_small/u103_n_particles.txt',
              'u14':'datasets_small/u14_n_particles.txt'}
 
+
+energy_vorticity_files = {'u05':"/data/cb1/Projects/P19_CoreSimulations/CoreSets/energy_vorticity_primitives/u05/*",
+                          "u10":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/energy_vorticity_primitives/u10/*",
+                          "u11":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/energy_vorticity_primitives/u11/*"}
