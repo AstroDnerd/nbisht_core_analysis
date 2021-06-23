@@ -9,324 +9,21 @@ plt.close('all')
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
 
-from scipy.spatial import Delaunay
-def in_hull(p, hull):
-    """
-    Test if points in `p` are in `hull`
-
-    `p` should be a `NxK` coordinates of `N` points in `K` dimensions
-    `hull` is either a scipy.spatial.Delaunay object or the `MxK` array of the 
-    coordinates of `M` points in `K`dimensions for which Delaunay triangulation
-    will be computed
-	from https://stackoverflow.com/questions/16750618/whats-an-efficient-way-to-find-if-a-point-lies-in-the-convex-hull-of-a-point-cl
-    also see this
-    https://stackoverflow.com/questions/64310174/in-scipy-spatial-delaunay-what-does-find-simplex-method-return
-    """
-    #from scipy.spatial import Delaunay
-    if not isinstance(hull,Delaunay):
-        hull = Delaunay(hull)
-
-    simplex = hull.find_simplex(p)
-
-    good = simplex >=0
-    return good
-
-class hull_tool():
-    def __init__(self,this_looper):
-        self.this_looper=this_looper
-        self.cell_volumes=[]
-        self.hull_volumes=[]
-        self.hulls={}
-        self.points_3d={}
-        self.cores_used=[]
-    def check_hull_overlap(self,core_1, core_2, do_plots=False):
-        hull_1 =  self.hulls[core_1]
-        hull_2 =  self.hulls[core_2]
-        vert_1 = self.points_3d[core_1][hull_1.vertices,:]
-        vert_2 = self.points_3d[core_2][hull_2.vertices,:]
-        points_1 = self.points_3d[core_1]
-        points_2 = self.points_3d[core_2]
-
-        in_1_2 = in_hull(points_1, vert_2)
-        fraction =  in_1_2.sum()/points_1.shape[0]
-
-        if do_plots:
-            print(in_1_2.shape)
-            fig_many, ax_many = plt.subplots(2,2,figsize=(8,8))
-            ax_all = [ax_many[0][0], ax_many[0][1], ax_many[1][0]]
-            for ax in ax_all:
-                ax.clear()
-                ax.set_aspect('equal')
-                #ax.plot([0,1,1,0,0],[0,0,1,1,0])
-            c1 = nar(['k']*points_1.shape[0])
-            c1[in_1_2<=0] = 'r'
-            for LOS in [0,1,2]:
-                x = [0,2,0][LOS]
-                y = [1,1,2][LOS]
-                xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
-                ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
-
-                ax_all[LOS].scatter(points_1[:,x], points_1[:,y],s=0.1,c=c1)
-
-            outname="plots_to_sort/overlap_test_%s_c%04d_c%04d.png"%(self.this_looper.out_prefix,core_1,core_2)
-            fig_many.savefig(outname)
-            print(outname)
-            plt.close(fig)
-        return fraction
-
-    def make_hulls(self,do_3d_plots=False,core_list=None,frames=[0]):
-
-        thtr = self.this_looper.tr
-        all_cores = np.unique(thtr.core_ids)
-        rm = rainbow_map(len(all_cores))
-        if frames is None:
-            frames = thtr.frames
-
-        if core_list is None:
-            core_list = all_cores
-        if core_list == "short":
-            core_list = all_cores[:10]
-        for core_id in core_list:
-            ms = trackage.mini_scrubber(thtr,core_id)
-            if ms.r.shape[0] <= 10:
-                continue
-            print("hull on ", core_id)
-            self.cores_used.append(core_id)
-            asort =  np.argsort(thtr.times)
-            delta=0.1
-
-            mask = slice(None)
-            for it,nt in enumerate(frames):#asort):
-
-                this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
-                this_p = [this_x,this_y,this_z]
-
-                self.points_3d[core_id] = np.array(list(zip(this_x,this_y,this_z)))
-                hull_3d = ConvexHull(self.points_3d[core_id])
-                self.hulls[core_id]=hull_3d
-                self.hull_volumes.append(hull_3d.volume)
-                self.cell_volumes.append( thtr.c([core_id],'cell_volume')[mask,nt].sum())
-
-                if do_3d_plots:
-                    plt.clf()
-                    plt.scatter( this_x, this_y)
-                    vert_x = self.points_3d[core_id][hull_3d.vertices,0]
-                    vert_y = self.points_3d[core_id][hull_3d.vertices,1]
-                    plt.plot(vert_x,vert_y,c='r')
-                    outname="plots_to_sort/%s_hull3d_c%04d_n%04d"%(this_looper.out_prefix,core_id,frame)
-                    plt.savefig(outname)
-                    print(outname)
-
-def plot_2d_full(htool,core_list=None,accumulate=False,frames=[0]):
-
-    thtr = htool.this_looper.tr
-    all_cores = np.unique(thtr.core_ids)
-    rm = rainbow_map(len(all_cores))
-    if frames is None:
-        frames = thtr.frames
-    if core_list is None:
-        core_list = all_cores
-    fig_many, ax_many = plt.subplots(2,2,figsize=(8,8))
-    ax_all = [ax_many[0][0], ax_many[0][1], ax_many[1][0]]
-    ax4 = ax_many[1][1]
-    for ncore,core_id in enumerate(core_list):
-        ms = trackage.mini_scrubber(thtr,core_id)
-        if ms.r.shape[0] <= 4:
-            continue
-        delta=0.1
-
-        mask = slice(None)
-        for it,frame in enumerate(frames):#asort):
-            nt= np.where( nar(thtr.frames) == frame)[0][0]
-
-            if not accumulate:
-                for ax in ax_all:
-                    ax.clear()
-                    ax.set_aspect('equal')
-                    ax.plot([0,1,1,0,0],[0,0,1,1,0])
-                ax4.clear()
-            this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
-
-            do_hull = True
-            if np.unique(this_x).size < 4  or\
-               np.unique(this_y).size < 4  or\
-               np.unique(this_z).size < 4 :
-                print("Not enough degrees of freedom")
-                ax4.text(0,0,"Not enought DOF")
-                do_hull = False
-
-            this_p = [this_x,this_y,this_z]
-
-
-            for LOS in [0,1,2]:
-                print("WARNING these LOS are wrong")
-                x = [0,2,0][LOS]
-                y = [1,1,2][LOS]
-                xlab='xyz'[x]
-                ylab='yzx'[y]
-
-
-
-                ax_all[LOS].scatter(this_p[x], this_p[y],s=0.1)
-
-                if do_hull:
-                    points_2d = np.array(list(zip(this_p[x],this_p[y])))
-                    hull_2d = ConvexHull(points_2d)
-                    vert_x = points_2d[hull_2d.vertices,0]
-                    vert_y = points_2d[hull_2d.vertices,1]
-                    vert_x = np.concatenate([vert_x,vert_x[0:1]])
-                    vert_y = np.concatenate([vert_y,vert_y[0:1]])
-                    ax_all[LOS].plot(vert_x, vert_y, 'k')
-
-                x_min = min([this_p[x].min(), -delta])
-                x_max = max([this_p[x].max(), 1+delta])
-                y_min = min([this_p[y].min(), -delta])
-                y_max = max([this_p[y].max(), 1+delta])
-
-
-                axbonk(ax_all[LOS],xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
-                #ax_many.set_title(title)
-            cumltext=""
-            if accumulate:
-                cumltext="%04d"%ncore
-            outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
-            fig_many.savefig(outname)
-            print("Wrote "+outname)
-
-
-def plot_2d(htool,core_list=None,accumulate=False,frames=[0]):
-
-    thtr = htool.this_looper.tr
-    all_cores = np.unique(thtr.core_ids)
-    rm = rainbow_map(len(all_cores))
-    if frames is None:
-        frames = thtr.frames
-    if core_list is None:
-        core_list = all_cores
-    fig_many, ax = plt.subplots(1,1,figsize=(8,8))
-    for ncore,core_id in enumerate(core_list):
-        ms = trackage.mini_scrubber(thtr,core_id)
-        if ms.r.shape[0] <= 4:
-            continue
-        delta=0.1
-
-        mask = slice(None)
-        for it,frame in enumerate(frames):#asort):
-            nt= np.where( nar(thtr.frames) == frame)[0][0]
-
-            if not accumulate:
-                for ax in ax_all:
-                    ax.clear()
-                    ax.set_aspect('equal')
-                    ax.plot([0,1,1,0,0],[0,0,1,1,0])
-                ax4.clear()
-            this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
-
-            do_hull = True
-            if np.unique(this_x).size < 4  or\
-               np.unique(this_y).size < 4  or\
-               np.unique(this_z).size < 4 :
-                print("Not enough degrees of freedom")
-                ax4.text(0,0,"Not enought DOF")
-                do_hull = False
-
-            this_p = [this_x,this_y,this_z]
-
-
-            for LOS in [2]:#,1,2]:
-                x = [1,0,0][LOS]
-                y = [2,2,1][LOS]
-                xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
-                ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
-                this_ax = ax
-                this_ax.scatter(this_p[x], this_p[y],s=2)
-
-                if do_hull:
-                    points_2d = np.array(list(zip(this_p[x],this_p[y])))
-                    hull_2d = ConvexHull(points_2d)
-                    vert_x = points_2d[hull_2d.vertices,0]
-                    vert_y = points_2d[hull_2d.vertices,1]
-                    vert_x = np.concatenate([vert_x,vert_x[0:1]])
-                    vert_y = np.concatenate([vert_y,vert_y[0:1]])
-                    this_ax.plot(vert_x, vert_y, 'k')
-
-                x_min = min([this_p[x].min(), -delta])
-                x_max = max([this_p[x].max(), 1+delta])
-                y_min = min([this_p[y].min(), -delta])
-                y_max = max([this_p[y].max(), 1+delta])
-
-
-                axbonk(this_ax,xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
-                #ax_many.set_title(title)
-            cumltext=""
-            if accumulate:
-                cumltext="%04d"%ncore
-            outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
-            fig_many.savefig(outname)
-            print("Wrote "+outname)
-
-def image_overlap(self,core_1, core_2, do_plots=False):
-    hull_1 =  self.hulls[core_1]
-    hull_2 =  self.hulls[core_2]
-    vert_1 = self.points_3d[core_1][hull_1.vertices,:]
-    vert_2 = self.points_3d[core_2][hull_2.vertices,:]
-    points_1 = self.points_3d[core_1]
-    points_2 = self.points_3d[core_2]
-
-    in_1_2 = in_hull(points_1, vert_2)
-    in_2_1 = in_hull(points_2, vert_1)
-    fraction =  in_1_2.sum()/points_1.shape[0]
-
-    print(in_1_2.shape)
-    fig_many, ax_many = plt.subplots(2,2,figsize=(8,8))
-    ax_all = [ax_many[0][0], ax_many[0][1], ax_many[1][0]]
-    for ax in ax_all:
-        ax.clear()
-        ax.set_aspect('equal')
-        #ax.plot([0,1,1,0,0],[0,0,1,1,0])
-    c1 = nar(['b']*points_1.shape[0])
-    c2 = nar(['g']*points_2.shape[0])
-    c1[in_1_2<=0] = 'r'
-    c2[in_2_1<=0] = 'm'
-    for LOS in [0,1,2]:
-        x = [0,2,0][LOS]
-        y = [1,1,2][LOS]
-        xlab='xyz'[x]
-        ylab='yzx'[y]
-
-        dx = 1./128/2
-        scatter_x = np.random.random(points_1.shape[0])*dx
-        scatter_y = np.random.random(points_1.shape[0])*dx
-        ax_all[LOS].scatter(points_1[:,x]+scatter_x, points_1[:,y]+scatter_y,s=0.1,c=c1)
-        scatter_x = np.random.random(points_2.shape[0])*dx
-        scatter_y = np.random.random(points_2.shape[0])*dx
-        ax_all[LOS].scatter(points_2[:,x]+scatter_x, points_2[:,y]+scatter_y,s=0.1,c=c2)
-
-    outname="plots_to_sort/overlap_test_%s_c%04d_c%04d.pdf"%(self.this_looper.out_prefix,core_1,core_2)
-    fig_many.savefig(outname)
-    print(outname)
-    plt.close(fig)
-    return fraction
-
-def get_overlapping_cores(self,core_id):
-    with_overlap = nar(self.overlaps[core_id]) > 0
-    used_with = nar(self.cores_used)[with_overlap]
-    overlap_with = nar(self.overlaps[core_id])[with_overlap]
-    argsort = np.argsort(overlap_with)
-    return overlap_with[argsort], used_with[argsort]
-
+import convex_hull_tools as CHT
+reload(CHT)
 
 import three_loopers_1tff as tl
 
-clobber=False
+if 'clobber' not in dir():
+    clobber=False
 
 if 'ht1' not in dir() or clobber: 
-    ht1 = hull_tool(tl.looper1)
+    ht1 = CHT.hull_tool(tl.looper1)
 if 'ht2' not in dir() or clobber:
-    ht2 = hull_tool(tl.looper2)
-    ht2.plot_2d(frames=[0])
+    ht2 = CHT.hull_tool(tl.looper2)
+    #ht2.plot_2d(frames=[0])
 if 'ht3' not in dir() or clobber:
-    ht3 = hull_tool(tl.looper3)
+    ht3 = CHT.hull_tool(tl.looper3)
 
 if 0:
     plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
@@ -342,7 +39,7 @@ if 0:
     #
     # Compute overlaps
     #
-    frame=0
+    frame=10
     for htool in [ht1, ht2, ht3]:
         htool.overlaps=defaultdict(list)
         htool.make_hulls(frames=[frame])
@@ -359,9 +56,12 @@ if 0:
     #
     # Distribution of Next Overlap
     #
-    fig3,ax3=plt.subplots(2,1)
-    ax3a=ax3[0]
-    ax3b=ax3[1]
+    #fig3,ax3=plt.subplots(2,1, sharex=True)
+    fig3,ax3=plt.subplots(1,1, sharex=True)
+    ax3a=ax3
+    #fig3.subplots_adjust(wspace=0, hspace=0)
+    #ax3a=ax3[0]
+    #ax3b=ax3[1]
     for htool in [ht1, ht2, ht3]:
         c=color[ htool.this_looper.out_prefix]
         next_fraction=[]
@@ -376,18 +76,22 @@ if 0:
         print( "all ", all_overlap)
         print("no overlap",no_overlap)
         ax3a.hist( next_fraction, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=16)
-        ax3b.hist( next_fraction, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=16, cumulative=True)
+        #ax3b.hist( next_fraction, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=16, cumulative=True, density=True)
         ax3a.scatter([0],[no_overlap],c=c,marker="*")#,s=1.)
-        ax3a.scatter([1],[all_overlap],c=c,marker="*")#,s=1.)
+        #ax3a.scatter([1],[all_overlap],c=c,marker="*")#,s=1.)
         ax3a.legend(loc=2)
-        axbonk(ax3a,ylabel=r'$N_{\rm{overlap}}$',xlabel=r'$f_{\rm{overlap}}$',ylim=[0,70])
+        #axbonk(ax3b,xlabel=r'$\rm{Overlap\ fraction\ with\ nearest\ neighbor}$',ylabel=r'$f_{\rm{cores}}$')
+        axbonk(ax3a,xlabel=r'$\rm{Overlap\ fraction\ with\ nearest\ neighbor}$',ylabel=r'$N_{\rm{cores}}$',ylim=[0,70])
         #fig.savefig('plots_to_sort/%s_overlaps.png'%htool.this_looper.out_prefix)
     fig3.savefig('plots_to_sort/next_overlap_dist_n%04d.png'%frame)
                 
-if 0:
+if 1:
     #
     # Number of neghbors with more than X
     #
+    frame=0
+    for htool in [ht1, ht2, ht3]:
+        htool.make_hulls(frames=[frame])
 
     if 1:
         fig3,ax3=plt.subplots(3,1, figsize=(4,12))
@@ -472,10 +176,17 @@ if 0:
     #
     # Hull volume vs total cell volume
     #
-    fig,ax=plt.subplots(1,1)
+    frame = 10
+    fig,axess=plt.subplots(1,3)
     if 'ext_hull' not in dir():
         ext_hull=extents()
     for nrun,ht in enumerate([ht1,ht2,ht3]):
+        if nrun != 2:
+            continue
+        ax=axess[nrun]
+        ax.clear()
+        name = ht.this_looper.out_prefix
+        ht.make_hulls(frames=[frame])
         odd = nar(ht.hull_volumes) < nar(ht.cell_volumes)
         not_odd = nar(ht.hull_volumes) >= nar(ht.cell_volumes)
         ax.scatter(ht.hull_volumes,ht.cell_volumes,c='k')
@@ -487,6 +198,86 @@ if 0:
         ax.plot(ext_hull.minmax, ext_hull.minmax,c='g')
         axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',
                xlim=ext_hull.minmax,ylim=ext_hull.minmax, xscale='log',yscale='log')
+    fig.savefig("plots_to_sort/hull_volume_n%04d.png"%(frame))
+
+if 0:
+    #
+    # Hull volume vs total cell volume
+    #
+    hull_by_frame = {}
+    hullvol = defaultdict(list)
+    cellvol = defaultdict(list)
+    looper_list=[tl.looper1,tl.looper2,tl.looper3]
+    loopers = dict(zip([ looper.out_prefix for looper in looper_list], looper_list))
+
+    for loop in looper_list:
+        name = loop.out_prefix
+        hull_by_frame[name]={}
+        if name != 'u201':
+            continue
+        hvol = []
+        cvol = []
+        for nframe, frame in enumerate(loop.tr.frames):
+            if name != 'u201':
+                continue
+            hull_by_frame[name][frame]=CHT.hull_tool(loop)
+            hull_by_frame[name][frame].make_hulls(frames=[nframe])
+            hvol.append( hull_by_frame[name][frame].hull_volumes)
+            cvol.append( hull_by_frame[name][frame].cell_volumes)
+        hullvol[name]=nar(hvol).transpose()
+        cellvol[name]=nar(cvol).transpose()
+
+if 0:
+    #
+    # Volumes and ratios by time.  
+    #
+    for name in hull_by_frame:
+        fig,ax = plt.subplots(1,3)
+        if name != 'u201':
+            continue
+        for nparticle, vols in enumerate(zip(hullvol[name],cellvol[name])):
+            hvol,cvol = vols
+            ax[0].plot( loopers[name].tr.times, hvol/hvol[0])
+            ax[1].plot( loopers[name].tr.times, cvol/cvol[0])
+            rat = hvol/cvol
+            rat /= rat[:-2].mean()
+
+            ax[2].plot( loopers[name].tr.times, rat)
+        axbonk(ax[0],yscale='log')#, ylim=[1e-9,1e-1])
+        axbonk(ax[1],yscale='log')#, ylim=[1e-9,1e-1])
+        axbonk(ax[2],yscale='log')
+        fig.savefig('plots_to_sort/ratio_time.png')
+
+
+
+
+
+if 0:
+    fig,axess=plt.subplots(1,3)
+    if 'ext_hull' not in dir():
+        ext_hull=extents()
+    for nrun,ht in enumerate([ht1,ht2,ht3]):
+        if nrun != 2:
+            continue
+        ax=axess[nrun]
+        ax.clear()
+        name = ht.this_looper.out_prefix
+        ht.make_hulls(frames=[frame])
+        odd = nar(ht.hull_volumes) < nar(ht.cell_volumes)
+        not_odd = nar(ht.hull_volumes) >= nar(ht.cell_volumes)
+        ax.scatter(ht.hull_volumes,ht.cell_volumes,c='k')
+        ax.scatter(nar(ht.hull_volumes)[odd],nar(ht.cell_volumes)[odd],c='r')
+        ax.set_aspect('equal')
+        #axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',xlim=[0,0.07],ylim=[0,0.07])
+        ext_hull(nar(ht.hull_volumes))
+        ext_hull(nar(ht.cell_volumes))
+        ax.plot(ext_hull.minmax, ext_hull.minmax,c='g')
+        axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',
+               xlim=ext_hull.minmax,ylim=ext_hull.minmax, xscale='log',yscale='log')
+    fig.savefig("plots_to_sort/hull_volume_n%04d.png"%(frame))
+
+
+
 
 
 
