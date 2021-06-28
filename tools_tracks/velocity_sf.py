@@ -77,16 +77,16 @@ class trial():
             dv = cell_volume[asort]
 
             ms.get_central_velocity(core_id,nt)
-            if 0:
+            if 1:
                 self.lab='rel'
                 vr = ms.vr_rel[:,nt]  #the radial one, works ok
             if 0:
                 self.lab='mag'
                 vr = ms.rel_vmag[:,nt]  #testing
-            if 1:
+            if 0:
                 self.lab='cen'
                 vr = ms.cen_vmag[:,nt]  #testing
-            if 1:
+            if 0:
                 self.lab='RC'
                 vr = ms.rc_vmag[:,nt]  #testing
             vrs = vr[asort]
@@ -108,7 +108,7 @@ if 'do_all_plots' not in dir():
 
 
 #import three_loopers as TL
-import three_loopers_1tffPlus as TL
+import three_loopers_1tff as TL
 import sf2
 frame=0
 if 1:
@@ -188,7 +188,7 @@ reload( sf2)
 for this_run in [run1, run2, run3]:
     if 'msf' not in dir() or True:
         msf = sf2.make_sf(this_run.this_looper,0)
-        rbins,SS = msf.bin_take3(); SS/=2*np.pi
+        rbins,SS = msf.bin_sf2(); SS/=2*np.pi
         #rbins,SS = msf.bin_kludged()
     #plot_each_line(this_run,0, my_sf2=[rbins,SS])
     plot(this_run,0, my_sf2=[rbins,SS])
