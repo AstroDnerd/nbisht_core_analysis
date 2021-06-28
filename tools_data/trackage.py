@@ -23,7 +23,13 @@ trackage.
 the tool package to get history for individual particles
 """
 
-
+def is_sorted(array):
+    zero = np.abs(array-np.sort(array)).sum()
+    if zero > 0:
+        print("False")
+        pdb.set_trace()
+        return
+    print("True")
 class track_manager():
     """Manages tracks.
     track_manager[field] returns a list of [particle, time]
@@ -115,7 +121,7 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        particle_ids = copy.copy(snapshot.target_indices)
+        particle_ids = copy.copy(snapshot.ind)
         if snapshot.core_id not in self.core_ids:
             #this might not be the best place for the parent step.
             core_ids = np.ones_like(particle_ids) * snapshot.core_id
@@ -168,17 +174,25 @@ class track_manager():
                 output= np.append(output, parts,axis=0)
         return output
     def c(self,core_list,field):
-        if type(core_list) is int:
-            core_list = [core_list]
-        nf = self.frames.size
-        output = None
-        for core in core_list:
-            loc = self.core_ids == core
-            core_values = self[field][loc,:]
-            if output is None:
-                output = core_values
-            else:
-                output = np.append(output,core_values,axis=0)
+        if field in ['particle_id']:
+            for ncore, core_id in enumerate(core_list):
+                these_pids = self.particle_ids[ self.core_ids == core_id]
+                if ncore == 0:
+                    output = these_pids
+                else:
+                    output = np.append(output, these_pids)
+        else:
+            if type(core_list) is int:
+                core_list = [core_list]
+            nf = self.frames.size
+            output = None
+            for core in core_list:
+                loc = self.core_ids == core
+                core_values = self[field][loc,:]
+                if output is None:
+                    output = core_values
+                else:
+                    output = np.append(output,core_values,axis=0)
         return output
     def __getitem__(self,item):
         output = None
