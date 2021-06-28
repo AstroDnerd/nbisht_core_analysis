@@ -121,7 +121,14 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        particle_ids = copy.copy(snapshot.ind)
+        if hasattr(snapshot,'ind'):
+            #This is the thing that should be done.
+            particle_ids = copy.copy(snapshot.ind)
+        else:
+            #THis is a stop-gap for some old datasets that were written wrong.
+            #It is actually incorrect and can possibly lead to errors, espectially when
+            #using the new shift tool.
+            particle_ids = copy.copy(snapshot.target_indices)
         if snapshot.core_id not in self.core_ids:
             #this might not be the best place for the parent step.
             core_ids = np.ones_like(particle_ids) * snapshot.core_id
