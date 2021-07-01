@@ -50,6 +50,8 @@ if 0:
     #
     core_list =  [0]
     frame_list = [0, dl.target_frames[this_simname]]
+
+    #frame_list = list(range(0, dl.target_frames[this_simname],10))+[dl.target_frames[this_simname]]
     fields = ['x','y','z','density','velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
