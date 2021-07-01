@@ -158,7 +158,6 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
         print(outname)
         print( pw.save(outname))
 
-
 @looper.core_loop
 def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
                     core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
@@ -229,6 +228,99 @@ def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color=
             pw.annotate_grids()
         looper.pw = pw
         outname = "%s/%s_c%04d_n%04d_centered"%(looper.plot_directory,looper.out_prefix,snapshot.core_id,snapshot.frame)
+        print(pw.save(outname))
+
+import annotate_particles_3
+reload(annotate_particles_3)
+def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
+                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
+                    only_sphere=True, center_on_sphere=True, slab=None, fields=False, velocity=False, code_length=True, lic=False):
+    if core_list is None:
+        core_list = looper.core_list
+    if frame_list is None:
+        frame_list = looper.frame_list
+    all_png = glob.glob("*png")
+    tr = looper.tr
+    for frame in frame_list:
+        ds = looper.load(frame)
+
+        # Check to see if the image was made already,
+        # and skips it if it has.
+        outname = "%s/%s_n%04d_multi"%(looper.plot_directory,looper.out_prefix, frame)
+        got_one = False
+        for i in all_png:
+            if i.startswith(outname):
+                print(i)
+                got_one=True
+        if got_one and not clobber:
+            print("File exists, skipping")
+            return
+        #get extents and bounding region
+        left =  np.array([1,1,1])
+        right = np.array([0,0,0])
+        for core_id in core_list:
+            snapshot = looper.snaps[frame][core_id]
+            if snapshot.R_centroid is None:
+                snapshot.get_all_properties()
+            this_left =  snapshot.pos.min(axis=0)
+            this_right = snapshot.pos.max(axis=0)
+            left = np.row_stack([this_left,left]).min(axis=0)
+            right = np.row_stack([this_right,right]).max(axis=0)
+        center = 0.5*(left+right)
+        left = ds.arr(left,'code_length')
+        right = ds.arr(right,'code_length')
+        center = ds.arr(center,'code_length')
+
+        for ax in axis_list:
+            Rmax = np.sqrt( ( (right-left)**2).sum(axis=0)).max()
+            scale_min = ds.arr(0.05,'code_length')
+            scale = Rmax.v #2*max([Rmax, scale_min]).v
+            scale = min([scale,1])
+            if only_sphere:
+                sph = ds.region(center,left,right)
+                proj = ds.proj(field,ax,center=center, data_source = sph) 
+            else:
+                proj = ds.proj(field,ax,center=center)
+            looper.proj=proj
+            if moving_center:
+                #not quite working.
+                pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
+                pw.set_center([center[0],center[1]])
+            else:
+                pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+            
+            if zoom:
+                pw.zoom(1./(scale))
+            pw.set_cmap(field,'gray')
+            if force_log is not None:
+                pw.set_log(field,force_log,linthresh=linthresh)
+            for core_id in core_list:
+                snapshot = looper.snaps[frame][core_id]
+                color=color_dict[core_id]
+                if particles:
+                    #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
+                    pw.annotate_text(snapshot.R_centroid.v,
+                                     "%d"%snapshot.core_id,text_args={'color':color}, 
+                                     inset_box_args={'visible':False},
+                                     coord_system='data')
+                    #pw.annotate_select_particles(1.0, col=[color], indices=snapshot.target_indices)
+                    pw.annotate_these_particles2(1.0, col=[color], positions=snapshot.pos)
+                    #print("SNAP STATS", snapshot.pos.min(), snapshot.pos.max())
+        if lic:
+            pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
+        if fields:
+            #pw.annotate_magnetic_field(plot_args={'color':'b'})
+            pw.annotate_streamlines("magnetic_field_x","magnetic_field_y",plot_args={'color':'b'})
+        if velocity:
+            pw.annotate_velocity()
+        if grids:
+            pw.annotate_grids()
+        if code_length:
+            pw.set_axes_unit('code_length')
+        if field in ['MagVelAngle']:
+            pw.set_cmap('MagVelAngle','hsv')
+            pw.set_zlim('MagVelAngle',0,180)
+        looper.pw = pw
         print(pw.save(outname))
 
 @looper.core_loop
