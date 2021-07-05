@@ -96,8 +96,11 @@ peaks_u11 = 'datasets_small/u11_0088_peaklist.h5'
 peaks_u101 = 'datasets_small/u101_0080_peaklist.h5'
 peaks_u102 = 'datasets_small/u102_0080_peaklist.h5'
 peaks_u103 = 'datasets_small/u103_0080_peaklist.h5'
+peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'
+peaks_u203 = 'datasets_small/u203_0107_peaklist.h5'
 peaks_u14  = 'datasets_small/u14_0025_peaklist.h5'
 peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103}
+peak_list.update( {'u202':peaks_u202, 'u203':peaks_u203})
 peak_list['u14']=peaks_u14
 
 
