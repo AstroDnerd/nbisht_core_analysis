@@ -102,7 +102,7 @@ class TheseParticles(PlotCallback):
                 gg &= (self.region[pt, "particle_mass"] >= self.minimum_mass)
                 if gg.sum() == 0: return
             px, py = [particle_x[gg][::self.stride], particle_y[gg][::self.stride]]
-            px, py = self._convert_to_plot(plot, [px, py])
+        px, py = self._convert_to_plot(plot, [px, py])
         plot._axes.scatter(px, py, edgecolors='None', marker=self.marker,
                            s=self.p_size, c=self.color,alpha=self.alpha)
         plot._axes.set_xlim(xx0,xx1)
