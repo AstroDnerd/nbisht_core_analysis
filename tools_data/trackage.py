@@ -295,13 +295,10 @@ class mini_scrubber():
 
         self.density = self.trk.c([core_id],'density')
         self.cell_volume = self.trk.c([core_id],'cell_volume')
-        #self.velocity_div = self.trk.c([core_id],'velocity_divergence')
-        #self.vorticity = self.trk.c([core_id],'vorticity_magnitude')
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
         self.density_tot = self.density.sum(axis=0)
-        #this_x=raw_x
-        #this_y=raw_y
+
         if 1:
             #do the shift
             self.this_x = shift_4(self.raw_x)
@@ -342,28 +339,12 @@ class mini_scrubber():
         self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
         self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
 
-        self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
-        self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
-        self.moment_of_inertia_y = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum(axis=0)
-        self.moment_of_inertia_xy = self.moment_of_inertia_yx = -(self.mass*(self.rx_rel*self.ry_rel)).sum(axis = 0)
-        self.moment_of_inertia_yz = self.moment_of_inertia_zy = -(self.mass*(self.ry_rel*self.rz_rel)).sum(axis = 0)
-        self.moment_of_inertia_xz = self.moment_of_inertia_zx = - (self.mass*(self.rx_rel*self.rz_rel)).sum(axis = 0) 
-        self.moment_of_inertia_zii = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum()
-        self.moment_of_inertia_xii = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum()
-        self.moment_of_inertia_yii = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum()
-        self.moment_of_inertia_xyii = self.moment_of_inertia_yxii = -(self.mass*(self.rx_rel*self.ry_rel)).sum()
-        self.moment_of_inertia_yzii = self.moment_of_inertia_zyii = -(self.mass*(self.ry_rel*self.rz_rel)).sum()
-        self.moment_of_inertia_xzii = self.moment_of_inertia_zxii = - (self.mass*(self.rx_rel*self.rz_rel)).sum() 
-
-
         self.r=np.sqrt(self.r2)
         self.rc=np.sqrt(self.r2c)
         self.rmax = np.max(self.r,axis=0)
-        self.max_track = np.where( self.r[:,0] == self.rmax[0])
-        self.rmax_fat=np.tile(self.rmax,(self.raw_x.shape[0],1))
+
         self.rms = np.sqrt( np.mean(self.r2,axis=0))
 
-        self.I_ii = self.mass*(self.r**2)
 
         if do_velocity:
             self.raw_vx = self.trk.c([core_id],'velocity_x')
@@ -384,27 +365,10 @@ class mini_scrubber():
             self.rel_vy = self.raw_vy-self.mean_vy
             self.rel_vz = self.raw_vz-self.mean_vz
             self.rel_vmag = (self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)**(0.5)
-            self.cov_v2 = (self.raw_vx-self.mean_vx)**2+\
-                          (self.raw_vy-self.mean_vy)**2+\
-                          (self.raw_vz-self.mean_vz)**2
+
             self.rx_hat = self.rx_rel/self.r
             self.ry_hat = self.ry_rel/self.r
             self.rz_hat = self.rz_rel/self.r
-            self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
-            self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
-            self.angular_v_z = ((self.rx_rel*self.rel_vy - self.ry_rel*self.rel_vx)/self.r**2)
-            self.angular_moment_x = self.I_ii*self.angular_v_x 
-            self.angular_moment_y = self.I_ii*self.angular_v_y
-            self.angular_moment_z = self.I_ii*self.angular_v_z
-            self.linear_momentum_rel_x = self.mass*(self.rel_vx)
-            self.linear_momentum_rel_y = self.mass*(self.rel_vy)
-            self.linear_momentum_rel_z = self.mass*(self.rel_vz)
-            self.angular_momentum_rel_x = self.ry_rel*self.linear_momentum_rel_z-self.rz_rel*self.linear_momentum_rel_y
-            self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
-            self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
-            self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
-
-
 
             self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
             self.vr_raw = self.rx_hat*self.raw_vx+\
@@ -465,3 +429,33 @@ class mini_scrubber():
         self.rc_vmag = self.rx_hat*self.cen_vx+\
                        self.ry_hat*self.cen_vy+\
                        self.rz_hat*self.cen_vz
+    def Moment(self):
+        self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
+        self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
+        self.moment_of_inertia_y = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum(axis=0)
+        self.moment_of_inertia_xy = self.moment_of_inertia_yx = -(self.mass*(self.rx_rel*self.ry_rel)).sum(axis = 0)
+        self.moment_of_inertia_yz = self.moment_of_inertia_zy = -(self.mass*(self.ry_rel*self.rz_rel)).sum(axis = 0)
+        self.moment_of_inertia_xz = self.moment_of_inertia_zx = - (self.mass*(self.rx_rel*self.rz_rel)).sum(axis = 0) 
+        self.moment_of_inertia_zii = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum()
+        self.moment_of_inertia_xii = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum()
+        self.moment_of_inertia_yii = (self.mass*(self.rz_rel**2+self.rx_rel**2)).sum()
+        self.moment_of_inertia_xyii = self.moment_of_inertia_yxii = -(self.mass*(self.rx_rel*self.ry_rel)).sum()
+        self.moment_of_inertia_yzii = self.moment_of_inertia_zyii = -(self.mass*(self.ry_rel*self.rz_rel)).sum()
+        self.moment_of_inertia_xzii = self.moment_of_inertia_zxii = - (self.mass*(self.rx_rel*self.rz_rel)).sum() 
+
+        self.I_ii = self.mass*(self.r**2)
+    def momenta(self):
+        self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
+        self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
+        self.angular_v_z = ((self.rx_rel*self.rel_vy - self.ry_rel*self.rel_vx)/self.r**2)
+        self.angular_moment_x = self.I_ii*self.angular_v_x 
+        self.angular_moment_y = self.I_ii*self.angular_v_y
+        self.angular_moment_z = self.I_ii*self.angular_v_z
+        self.linear_momentum_rel_x = self.mass*(self.rel_vx)
+        self.linear_momentum_rel_y = self.mass*(self.rel_vy)
+        self.linear_momentum_rel_z = self.mass*(self.rel_vz)
+        self.angular_momentum_rel_x = self.ry_rel*self.linear_momentum_rel_z-self.rz_rel*self.linear_momentum_rel_y
+        self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
+        self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
+        self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+
