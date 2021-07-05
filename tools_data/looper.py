@@ -64,7 +64,7 @@ class core_looper():
                  frame_list=[], core_list=[], target_frame=0,
                  fields_from_grid = [], 
                  individual_particle_tracks=False,
-                 derived=[]):
+                 derived=[], do_shift=True):
         #set defaults and/or arguments.
         self.current_frame = None
         self.data_template = data_template
@@ -92,7 +92,7 @@ class core_looper():
         self.all_data={}
         self.derived=derived
 
-        self.shift = True
+        self.shift = do_shift
 
         if savefile is not None:
             if not os.path.exists(savefile):
@@ -385,9 +385,9 @@ class snapshot():
             self.N_vec[:,dim] = self.R_vec[:,dim]/self.R_mag
         self.V_relative = self.vel - self.V_bulk
         self.V_radial = (self.V_relative * self.N_vec).sum(axis=1)
-        self.field_values['V_radial']=self.V_radial
+        #self.field_values['V_radial']=self.V_radial
         #self.field_values['V_mag']=((self.V_relative*self.V_relative).sum())**0.5
-        self.field_values['R_mag']=self.R_mag
+        #self.field_values['R_mag']=self.R_mag
         #self.field_values['V_radial']=self.V_radial
         #self.field_values['V_relative']=self.V_relative
 
@@ -413,7 +413,7 @@ class snapshot():
         if number_of_new_fields == 0:
             return
 
-        verbose=True
+        verbose=False
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
         gridlist = self.ds.index.grids[-1::-1]
         for ngrid, grid in enumerate(gridlist):
