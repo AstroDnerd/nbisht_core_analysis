@@ -34,22 +34,25 @@ if 'loop_dict' not in dir():
         loop_dict = {'u201':tl.looper1, 'u202':tl.looper2, 'u203':tl.looper3}
     else:
         loop_dict = {}
-        core_set={'u201':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/all_cores_n0000.h5',
-                  'u202':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u10_primitives_cXXXX_n0000.h5',
-                  'u203':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u11_primitives_cXXXX_n0000.h5'}
-    for this_simname in  ['u201','u202','u203']:
+        core_list={}
+        core_set={'u05':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/all_cores_n0000.h5',
+                  'u10':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u10_primitives_cXXXX_n0000.h5',
+                  'u11':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u11_primitives_cXXXX_n0000.h5'}
+    for this_simname in ['u05','u10','u11']:
         directory = dl.sims[this_simname]
         save_field = core_set[this_simname]
         print("LOAD", this_simname)
         loop_dict[this_simname] = looper.core_looper(directory= directory,savefile=save_field)
+        core_list[this_simname] =looper.get_all_nonzero(dl.n_particles[this_simname])
 
 
 
 
 vrms = {'u201':5.2, 'u202':5.1, 'u203':5.4}
+vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 
-for this_simname in ['u201','u202','u203']:
-    #if this_simname != 'u201' and skipper==True:
+for this_simname in ['u05','u10','u11']:# ['u201','u202','u203']:
+    #if this_simname != 'u11':# and skipper==True:
     #    continue
 
     this_looper = loop_dict[this_simname]
@@ -59,7 +62,10 @@ for this_simname in ['u201','u202','u203']:
     #FIELD = 'velocity_magnitude'
     FIELD = 'magnetic_field_strength'
     #FIELD = 'PotentialField'
-    eta1 = 0.040253639221191406 # = number of core particles / total
+    #eta1 = 0.040253639221191406 # = number of core particles / total
+    all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list[this_simname]])
+    eta1 = len(all_target_indices)/128**3
+    print("ETA 1 %s %0.4f"%(this_simname, eta1))
         #for core in this_looper.target_indices:
         #    n+=this_looper.target_indices[core].size
         #eta1 = n/128**3
@@ -68,7 +74,7 @@ for this_simname in ['u201','u202','u203']:
     xscale = {'PotentialField':'linear'} 
 
     prof_dir = "."
-    version = 't1_'
+    version = 't2_'
     version = ''
     prof_full_fname = "%s/%spreimage_pdf_full_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD, frame)
     prof_part_fname = "%s/%spreimage_pdf_part_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD, frame)
@@ -83,7 +89,7 @@ for this_simname in ['u201','u202','u203']:
             em.add_tracer_density(ds)
             ad = ds.all_data() #ds.region([0.5]*3,[0.4]*3,[0.6]*3)
         #ad[deposit_tuple]
-        all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in this_looper.target_indices])
+        all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list[this_simname]])
         ad.set_field_parameter('target_indices',all_target_indices)
         ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
         #bins={'velocity_x':np.linspace(-25,25,64)}
