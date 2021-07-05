@@ -209,7 +209,7 @@ def plot_2d_full(htool,core_list=None,accumulate=False,frames=[0], all_plots=Fal
         print("Wrote "+outname)
 
 
-def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False):
+def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[]):
 
     thtr = htool.this_looper.tr
     all_cores = np.unique(thtr.core_ids)
@@ -219,6 +219,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False):
     if core_list is None:
         core_list = all_cores
     fig_many, ax = plt.subplots(1,1,figsize=(8,8))
+    x_min, x_max, y_min, y_max = [1,0,1,0]
     for ncore,core_id in enumerate(core_list):
         ms = trackage.mini_scrubber(thtr,core_id)
         if ms.r.shape[0] <= 4:
@@ -245,7 +246,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False):
             this_p = [this_x,this_y,this_z]
 
 
-            for LOS in [2]:#,1,2]:
+            for LOS in [0]:#,1,2]:
                 x = [1,0,0][LOS]
                 y = [2,2,1][LOS]
                 xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
@@ -262,10 +263,12 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False):
                     vert_y = np.concatenate([vert_y,vert_y[0:1]])
                     this_ax.plot(vert_x, vert_y, 'k')
 
-                x_min = min([this_p[x].min(), -delta])
-                x_max = max([this_p[x].max(), 1+delta])
-                y_min = min([this_p[y].min(), -delta])
-                y_max = max([this_p[y].max(), 1+delta])
+                if core_id in label_cores or -1 in label_cores:
+                    this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
+                x_min = min([x_min,this_p[x].min(), -delta])
+                x_max = max([x_max,this_p[x].max(), 1+delta])
+                y_min = min([y_min,this_p[y].min(), -delta])
+                y_max = max([y_max,this_p[y].max(), 1+delta])
 
                 this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
 
