@@ -26,7 +26,13 @@ if 'ht3' not in dir() or clobber:
     ht3 = CHT.hull_tool(tl.looper3)
 
 if 0:
-    plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
+    CHT.plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
+if 1:
+    CHT.plot_2d(ht1,frames=[0], accumulate=True, label_cores=[323])
+if 0:
+    CHT.plot_2d(ht2,frames=[0], accumulate=True)
+if 0:
+    CHT.plot_2d(ht3,frames=[0], accumulate=True)
 
 if 0:
     fractions,cores=get_overlapping_cores(ht3,185)
@@ -35,11 +41,14 @@ if 0:
     ht3b = hull_tool(tl.looper3)
     ht3b.plot_2d(core_list = cores, accumulate=True)
 
-if 0:
+if 'did_hulls' not in dir():
+    did_hulls = False
+if not did_hulls:
+    did_hulls = True
     #
     # Compute overlaps
     #
-    frame=10
+    frame=0
     for htool in [ht1, ht2, ht3]:
         htool.overlaps=defaultdict(list)
         htool.make_hulls(frames=[frame])
@@ -85,7 +94,7 @@ if 0:
         #fig.savefig('plots_to_sort/%s_overlaps.png'%htool.this_looper.out_prefix)
     fig3.savefig('plots_to_sort/next_overlap_dist_n%04d.png'%frame)
                 
-if 1:
+if 0:
     #
     # Number of neghbors with more than X
     #
