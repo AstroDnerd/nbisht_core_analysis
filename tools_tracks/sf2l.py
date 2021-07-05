@@ -19,7 +19,7 @@ reload(st)
 #print(np.roll(a,(0,1,0),axis=(0,1,2)))
 #print("=====")
 #print(np.roll(a,(0,0,1),axis=(0,1,2)))
-def get_sf2l(ad,subset=1):
+def get_sf2l(ad,subset=1,name=""):
     vx=ad['velocity_x']
     vy=ad['velocity_y']
     vz=ad['velocity_z']
@@ -33,6 +33,9 @@ def get_sf2l(ad,subset=1):
         Half = int(Nx//4)
         hunt_range=range(-Half,Half,4)
     elif subset == 2:
+        Half = int(Nx//4)
+        hunt_range=range(-Half,Half,1)
+    elif subset == 3:
         Half = int(Nx//8)
         hunt_range=range(-Half,Half,4)
     else:
@@ -47,7 +50,7 @@ def get_sf2l(ad,subset=1):
                 if ThisRmag == 0:
                     continue
                 Rhat = R/ThisRmag
-                print(R, Rhat)
+                print(name,i,j,k,R, Rhat)
                 dvx= vx - np.roll(vx,R,axis=(0,1,2))
                 dvy= vy - np.roll(vy,R,axis=(0,1,2))
                 dvz= vz - np.roll(vz,R,axis=(0,1,2))
