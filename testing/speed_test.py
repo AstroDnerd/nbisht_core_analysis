@@ -44,6 +44,9 @@ if 0:
     fname = "current_mask_0.txt"
     #cProfile.run("test_snapshot.get_current_mask()",fname)
     cProfile.run("this_looper.get_tracks()", fname)
+    #visualize this with:
+    #gprof2dot.py -f pstats output.pstats | dot -Tpng -o output.png
+    # https://stackoverflow.com/questions/843671/profiling-in-python-who-called-the-function
     #this_looper.get_tracks()
     #this_looper.save(output_name)
 
