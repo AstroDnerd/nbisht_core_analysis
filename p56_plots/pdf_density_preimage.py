@@ -25,6 +25,7 @@ fields=['density']
 save_field = '../Datasets/all_cores_n0000.h5'
 save_field = '../Datasets/u10_primitives_cXXXX_n0000.h5'
 save_field = '../Datasets/u11_primitives_cXXXX_n0000.h5'
+save_field = '/data/cb1/Projects/P19_CoreSimulations/CoreSets/u11_primitives_cXXXX_n0000.h5'
 if 'this_looper' not in dir() and os.path.exists(save_field):
     directory = dl.sims[this_simname]
     this_looper = looper.core_looper(directory= directory,savefile=save_field)
