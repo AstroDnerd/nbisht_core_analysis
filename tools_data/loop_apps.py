@@ -158,77 +158,84 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
         print(outname)
         print( pw.save(outname))
 
-@looper.core_loop
-def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
+def core_proj_follow_b(looper, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
                     core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
-                    only_sphere=True, center_on_sphere=True, slab=None):
-    if core_list is not None:
-        if snapshot.core_id not in core_list:
-            return
-    if frame_list is not None:
-        if snapshot.frame not in frame_list:
-            return
+                    only_sphere=True, center_on_sphere=True, slab=None, annotate=True):
+    if core_list is None:
+        core_list = looper.core_list
+    if frame_list is None:
+        frame_list = looper.frame_list
     ###horrible stuff.
-    all_png = glob.glob("*png")
-    outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,snapshot.core_id,snapshot.frame)
-    got_one = False
-    for i in all_png:
-        if i.startswith(outname):
-            print(i)
-            got_one=True
-    if got_one and not clobber:
-        print("File exists, skipping")
-        return
-    if snapshot.core_id not in looper.target_indices.keys():
-        return
-    if snapshot.R_centroid is None:
-        snapshot.get_all_properties()
-    ds = snapshot.get_ds()
-    for ax in axis_list:
-        if center_on_sphere:
-            center = ds.arr(snapshot.R_centroid,'code_length')
-        else:
-            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
-        Rmax = snapshot.R_mag.max()
-        scale_min = ds.arr(0.05,'code_length')
-        scale = 2*max([Rmax, scale_min]).v
-        scale = min([scale,1])
-        if only_sphere:
-            sph = ds.sphere(center,scale)
-            proj = ds.proj(field,ax,center=center, data_source = sph) 
-        elif slab is not None:
-            left = nar([ 0, 0, slab['zmin']])
-            right = nar([ 1, 1, slab['zmax']])
-            center = 0.5*(left+right)
-            sph = ds.region(center,left,right)
-            proj = ds.proj(field,ax,center=center, data_source = sph) 
-        else:
-            proj = ds.proj(field,ax,center=center)
-        looper.proj=proj
-        if moving_center:
-            #not quite working.
-            pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
-            pw.set_center([center[0],center[1]])
-        else:
-            pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
-        
-        if zoom:
-            pw.zoom(1./(scale))
-        pw.set_cmap(field,'gray')
-        if force_log is not None:
-            pw.set_log(field,force_log,linthresh=linthresh)
-        if particles:
-            pw.annotate_sphere(center,Rmax, circle_args={'color':color} ) #R_mag.max())
-            pw.annotate_text(center,
-                             "%d"%snapshot.core_id,text_args={'color':color}, 
-                             inset_box_args={'visible':False},
-                             coord_system='data')
-            pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
-        if grids:
-            pw.annotate_grids()
-        looper.pw = pw
-        outname = "%s/%s_c%04d_n%04d_centered"%(looper.plot_directory,looper.out_prefix,snapshot.core_id,snapshot.frame)
-        print(pw.save(outname))
+    for frame in frame_list:
+        for core_id in core_list:
+            snapshot = looper.snaps[frame][core_id]
+            all_png = glob.glob("*png")
+            outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,core_id,frame)
+            got_one = False
+            ms = trackage.mini_scrubber( looper.tr, core_id)
+            frame_ind = np.where(looper.tr.frames == frame)[0]
+            pos = np.column_stack( [ms.this_x[:,frame_ind], ms.this_y[:,frame_ind], ms.this_z[:,frame_ind]])
+            for i in all_png:
+                if i.startswith(outname):
+                    print(i)
+                    got_one=True
+            if got_one and not clobber:
+                print("File exists, skipping")
+                return
+            if snapshot.core_id not in looper.target_indices.keys():
+                return
+            if snapshot.R_centroid is None:
+                snapshot.get_all_properties()
+            ds = snapshot.get_ds()
+            for ax in axis_list:
+                if center_on_sphere:
+                    center = ds.arr(pos.mean(axis=0),'code_length')
+                else:
+                    center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
+                    if zoom:
+                        print("WARNING ODD BEHAVIOR with center_on_sphere off and zoom on.")
+                Rmax = ds.arr(ms.r.max(), 'code_length')
+                scale_min = ds.arr(0.05,'code_length')
+                scale = 2*max([Rmax, scale_min]).v
+                scale = min([scale,1])
+                if only_sphere:
+                    sph = ds.sphere(center,scale)
+                    proj = ds.proj(field,ax,center=center, data_source = sph) 
+                elif slab is not None:
+                    left = nar([ 0, 0, slab['zmin']])
+                    right = nar([ 1, 1, slab['zmax']])
+                    center = 0.5*(left+right)
+                    sph = ds.region(center,left,right)
+                    proj = ds.proj(field,ax,center=center, data_source = sph) 
+                else:
+                    proj = ds.proj(field,ax,center=center)
+                looper.proj=proj
+                if moving_center:
+                    #not quite working.
+                    pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
+                    pw.set_center([center[0],center[1]])
+                else:
+                    pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+                
+                if zoom:
+                    pw.zoom(1./(scale))
+                pw.set_cmap(field,'gray')
+                if force_log is not None:
+                    pw.set_log(field,force_log,linthresh=linthresh)
+                if annotate:
+                    pw.annotate_sphere(center,Rmax, circle_args={'color':color} ) #R_mag.max())
+                    pw.annotate_text(center,
+                                     "%d"%snapshot.core_id,text_args={'color':color}, 
+                                     inset_box_args={'visible':False},
+                                     coord_system='data')
+                if particles:
+                    print("N PARTICLES", snapshot.pos.size)
+                    pw.annotate_these_particles2(1.0, col=[color], positions=pos)
+                if grids:
+                    pw.annotate_grids()
+                looper.pw = pw
+                outname = "%s/%s_c%04d_n%04d_centered"%(looper.plot_directory,looper.out_prefix,snapshot.core_id,snapshot.frame)
+                print(pw.save(outname))
 
 import annotate_particles_3
 reload(annotate_particles_3)
