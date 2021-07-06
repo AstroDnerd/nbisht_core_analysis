@@ -27,12 +27,12 @@ if 'ht3' not in dir() or clobber:
 
 if 0:
     CHT.plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
-if 1:
+if 0:
     CHT.plot_2d(ht1,frames=[0], accumulate=True, label_cores=[323])
+if 1:
+    CHT.plot_2d(ht2,frames=[0], accumulate=True, label_cores=[-1])
 if 0:
-    CHT.plot_2d(ht2,frames=[0], accumulate=True)
-if 0:
-    CHT.plot_2d(ht3,frames=[0], accumulate=True)
+    CHT.plot_2d(ht3,frames=[0], accumulate=True, label_cores=[])
 
 if 0:
     fractions,cores=get_overlapping_cores(ht3,185)
