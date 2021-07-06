@@ -220,6 +220,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
         core_list = all_cores
     fig_many, ax = plt.subplots(1,1,figsize=(8,8))
     x_min, x_max, y_min, y_max = [1,0,1,0]
+    color_dict = make_core_cmap( core_list)
     for ncore,core_id in enumerate(core_list):
         ms = trackage.mini_scrubber(thtr,core_id)
         if ms.r.shape[0] <= 4:
@@ -252,7 +253,8 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
                 ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
                 this_ax = ax
-                this_ax.scatter(this_p[x], this_p[y],s=2)
+                n_particles = len(this_p[0])
+                this_ax.scatter(this_p[x], this_p[y],s=2, c=color_dict[core_id]*n_particles)
 
                 if do_hull:
                     points_2d = np.array(list(zip(this_p[x],this_p[y])))
@@ -261,7 +263,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     vert_y = points_2d[hull_2d.vertices,1]
                     vert_x = np.concatenate([vert_x,vert_x[0:1]])
                     vert_y = np.concatenate([vert_y,vert_y[0:1]])
-                    this_ax.plot(vert_x, vert_y, 'k')
+                    this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
 
                 if core_id in label_cores or -1 in label_cores:
                     this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
