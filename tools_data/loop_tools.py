@@ -15,28 +15,32 @@ dbg = 0
 from yt.data_objects.level_sets.clump_handling import \
             Clump, \
             find_clumps, \
-            find_clumps_linear, \
             get_lowest_clumps
 
 def get_leaf_clumps(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
-                     subset=None, peak_radius=1.5,bad_particle_list=None, small_test=False):
+                     subset=None, peak_radius=1.5,bad_particle_list=None, small_test=False, master_region=None):
     """get all the leaf indices for peaks in *ds*.
     If *pickle_name* is supplied, load from that, or if it doesn't exist, save to that.
     *subset*, if supplied, will restrict the indices returned.
     """
+    print("GLC: region")
     if small_test:
         #center = ds.arr([0.07104492, 0.05688477, 0.1862793 ],'code_length')
         peak,center=ds.find_max('density')
         ad = ds.sphere(center,0.1)
+    elif master_region:
+        ad = master_region
     else:
         ad = ds.all_data()
     #ad  = ds.sphere([0.52075195, 0.74682617, 0.01196289], 0.1)
+    print("GLC: master")
     master_clump = Clump(ad,('gas','density'))
     master_clump.add_validator("min_cells", 8)
     c_min = 10 #ad["gas", "density"].min()
     #c_max = 534069645. # ad["gas", "density"].max()
     c_max = ad["gas", "density"].max()
     step = 100
+    print("GLC: start")
     find_clumps(master_clump, c_min, c_max, step)
 # Write a text file of only the leaf nodes.
     #write_clumps(master_clump,0, "%s_clumps.txt" % ds)
