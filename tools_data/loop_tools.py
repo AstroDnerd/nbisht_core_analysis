@@ -15,6 +15,7 @@ dbg = 0
 from yt.data_objects.level_sets.clump_handling import \
             Clump, \
             find_clumps, \
+            find_clumps_linear, \
             get_lowest_clumps
 
 def get_leaf_clumps(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
@@ -107,10 +108,61 @@ def get_leaf_indices(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5
     #for nc,indices in enumerate(leaf_indices):
      #   pw_full.annotate_select_particles(1.0, col='r', indices=indices)
    # pw_full.save(fname)
+def re_shift_snaps(loop):
+    #
+    #  Periodic shift of particles is done relative to its final loation.
+    #  This is done in trackage.mini_scrubber.scrub.
+    #  Here we use the reuslt from the mini scrubber to update the particle positions.
+    #
+    #  ms: the miniscrubber that takes care of center-of-mass shifts 
+    #  ms.this_x, ms.this_y, ms.this_z: shifted GRID positions
+    #  snap.pos:  Initially unshifted PARTICLE positions.  These get updated.
+    #  pos2:  snap.pos arranged in a single array for easy operations.
+    #
+
+    for frame in loop.snaps:
+        for core_id in loop.snaps[frame]:
+
+            #Get the objects
+            snap = loop.snaps[frame][core_id]
+            snap.ds = loop.load(frame)
+            tr = loop.tr
+            ms = trackage.mini_scrubber( tr, core_id, do_velocity=False)
+            ms_index = np.where( tr.frames == frame )[0]
+            particle_ids = loop.tr.c([core_id],'particle_id')
+            if hasattr(particle_ids,'v'):
+                particle_ids = particle_ids.v
+            total_particle_index_error = np.abs( particle_ids  - snap.ind.v).sum()
+            if total_particle_index_error > 0:
+                raise("SORT ERROR")
+            pos2 = np.concatenate([ms.this_x[:,ms_index], ms.this_y[:,ms_index], ms.this_z[:,ms_index]], axis=1)
+
+            #The difference between the particle positions (snap.pos) and the shifted grid positions (pos2) 
+            #gives the direction of the shift.
+            maxshift = np.abs( snap.pos.v - pos2).max() 
+            if maxshift > 0.1:
+                shift =  pos2 - snap.pos.v
+                shift_amount = snap.ds.arr(np.sign(shift), 'code_length')
+                to_shift = np.abs( shift) > 0.25
+                #if to_shift.sum():
+                #    pdb.set_trace()
+                snap.pos[ to_shift ] += shift_amount[ to_shift ]
+
+            #Compute the new centroid.
+            density = snap.field_values['density']
+            volume = snap.field_values['cell_volume']
+            m = (density*volume).sum()
+            centroid_tmp =  np.array([(snap.pos[:,dim]*density*volume).sum()/m for dim in range(3)])
+            snap.R_centroid = snap.ds.arr(centroid_tmp,'cm')
+import trackage
 def shift_particles(ds=None, position=None,shift = np.zeros(3),shiftRight = False,grid_quan=None):
     """Shifts a periodically separated clump by the domain width.
     Looks for gaps in the positions larger than max('dx'), shifts one group
-    to the right (left if shiftRight=Flase) to be spatially contiguous."""
+    to the right (left if shiftRight=Flase) to be spatially contiguous.
+    This is not a very good technique, use 
+    re_shift_snaps
+    instead, if applicable"""
+
     #max_dx may not be computed in the most efficient way.
     if ds is not None:  
         DomainLeft = ds.domain_left_edge
