@@ -1,0 +1,9513 @@
+GREETINGS
+TIME 0
+len 10341
+TIME 1
+len 10341
+TIME 2
+len 9937
+TIME 3
+len 7796
+TIME 4
+len 8111
+TIME 5
+len 8248
+TIME 6
+len 8000
+TIME 7
+len 7758
+TIME 8
+len 7231
+TIME 9
+len 6615
+TIME 10
+len 5498
+TIME 11
+len 4552
+TIME 12
+len 2157
+TIME 13
+len 1069
+TIME 14
+len 552
+TIME 15
+len 5
+TIME 0
+len 5902
+TIME 1
+len 5902
+TIME 2
+len 5931
+TIME 3
+len 5418
+TIME 4
+len 5390
+TIME 5
+len 5412
+TIME 6
+len 5490
+TIME 7
+len 5243
+TIME 8
+len 5131
+TIME 9
+len 4934
+TIME 10
+len 4897
+TIME 11
+len 4724
+TIME 12
+len 4447
+TIME 13
+len 3748
+TIME 14
+len 2189
+TIME 15
+len 7
+TIME 0
+len 4901
+TIME 1
+len 4901
+TIME 2
+len 4830
+TIME 3
+len 4473
+TIME 4
+len 4376
+TIME 5
+len 4449
+TIME 6
+len 4361
+TIME 7
+len 4226
+TIME 8
+len 4146
+TIME 9
+len 4078
+TIME 10
+len 3833
+TIME 11
+len 3998
+TIME 12
+len 4015
+TIME 13
+len 3919
+TIME 14
+len 2220
+TIME 15
+len 11
+TIME 0
+len 2456
+TIME 1
+len 2456
+TIME 2
+len 2451
+TIME 3
+len 2339
+TIME 4
+len 2235
+TIME 5
+len 2254
+TIME 6
+len 2262
+TIME 7
+len 2227
+TIME 8
+len 2195
+TIME 9
+len 2100
+TIME 10
+len 2182
+TIME 11
+len 2204
+TIME 12
+len 2250
+TIME 13
+len 2029
+TIME 14
+len 1643
+TIME 15
+len 10
+TIME 0
+len 1805
+TIME 1
+len 1805
+TIME 2
+len 1800
+TIME 3
+len 1723
+TIME 4
+len 1756
+TIME 5
+len 1734
+TIME 6
+len 1665
+TIME 7
+len 1743
+TIME 8
+len 1703
+TIME 9
+len 1591
+TIME 10
+len 1568
+TIME 11
+len 1244
+TIME 12
+len 902
+TIME 13
+len 627
+TIME 14
+len 251
+TIME 15
+len 6
+TIME 0
+len 1793
+TIME 1
+len 1793
+TIME 2
+len 1753
+TIME 3
+len 1339
+TIME 4
+len 1032
+TIME 5
+len 1389
+TIME 6
+len 1254
+TIME 7
+len 1315
+TIME 8
+len 1311
+TIME 9
+len 1437
+TIME 10
+len 1204
+TIME 11
+len 890
+TIME 12
+len 772
+TIME 13
+len 549
+TIME 14
+len 376
+TIME 15
+len 13
+TIME 0
+len 1672
+TIME 1
+len 1672
+TIME 2
+len 1672
+TIME 3
+len 1636
+TIME 4
+len 1606
+TIME 5
+len 1574
+TIME 6
+len 1451
+TIME 7
+len 1407
+TIME 8
+len 1262
+TIME 9
+len 1163
+TIME 10
+len 1072
+TIME 11
+len 908
+TIME 12
+len 834
+TIME 13
+len 733
+TIME 14
+len 509
+TIME 15
+len 8
+TIME 0
+len 1467
+TIME 1
+len 1467
+TIME 2
+len 1461
+TIME 3
+len 1340
+TIME 4
+len 1264
+TIME 5
+len 1196
+TIME 6
+len 1301
+TIME 7
+len 1243
+TIME 8
+len 1190
+TIME 9
+len 1012
+TIME 10
+len 853
+TIME 11
+len 838
+TIME 12
+len 793
+TIME 13
+len 515
+TIME 14
+len 284
+TIME 15
+len 13
+TIME 0
+len 1292
+TIME 1
+len 1292
+TIME 2
+len 1272
+TIME 3
+len 1004
+TIME 4
+len 717
+TIME 5
+len 994
+TIME 6
+len 1145
+TIME 7
+len 1229
+TIME 8
+len 1286
+TIME 9
+len 979
+TIME 10
+len 735
+TIME 11
+len 610
+TIME 12
+len 475
+TIME 13
+len 291
+TIME 14
+len 140
+TIME 15
+len 9
+TIME 0
+len 1303
+TIME 1
+len 1303
+TIME 2
+len 1302
+TIME 3
+len 1250
+TIME 4
+len 1230
+TIME 5
+len 1264
+TIME 6
+len 1263
+TIME 7
+len 1242
+TIME 8
+len 1131
+TIME 9
+len 934
+TIME 10
+len 815
+TIME 11
+len 691
+TIME 12
+len 526
+TIME 13
+len 350
+TIME 14
+len 183
+TIME 15
+len 12
+TIME 0
+len 1210
+TIME 1
+len 1210
+TIME 2
+len 1239
+TIME 3
+len 1135
+TIME 4
+len 1017
+TIME 5
+len 986
+TIME 6
+len 894
+TIME 7
+len 811
+TIME 8
+len 670
+TIME 9
+len 850
+TIME 10
+len 844
+TIME 11
+len 816
+TIME 12
+len 557
+TIME 13
+len 273
+TIME 14
+len 161
+TIME 15
+len 9
+TIME 0
+len 1207
+TIME 1
+len 1207
+TIME 2
+len 1172
+TIME 3
+len 1026
+TIME 4
+len 889
+TIME 5
+len 756
+TIME 6
+len 875
+TIME 7
+len 878
+TIME 8
+len 751
+TIME 9
+len 880
+TIME 10
+len 1016
+TIME 11
+len 787
+TIME 12
+len 582
+TIME 13
+len 452
+TIME 14
+len 269
+TIME 15
+len 5
+TIME 0
+len 1164
+TIME 1
+len 1164
+TIME 2
+len 1158
+TIME 3
+len 890
+TIME 4
+len 830
+TIME 5
+len 969
+TIME 6
+len 915
+TIME 7
+len 824
+TIME 8
+len 730
+TIME 9
+len 885
+TIME 10
+len 786
+TIME 11
+len 863
+TIME 12
+len 741
+TIME 13
+len 331
+TIME 14
+len 184
+TIME 15
+len 6
+TIME 0
+len 1093
+TIME 1
+len 1093
+TIME 2
+len 1051
+TIME 3
+len 866
+TIME 4
+len 978
+TIME 5
+len 927
+TIME 6
+len 901
+TIME 7
+len 819
+TIME 8
+len 780
+TIME 9
+len 699
+TIME 10
+len 647
+TIME 11
+len 607
+TIME 12
+len 555
+TIME 13
+len 396
+TIME 14
+len 148
+TIME 15
+len 7
+TIME 0
+len 1030
+TIME 1
+len 1030
+TIME 2
+len 998
+TIME 3
+len 739
+TIME 4
+len 943
+TIME 5
+len 807
+TIME 6
+len 697
+TIME 7
+len 790
+TIME 8
+len 778
+TIME 9
+len 591
+TIME 10
+len 353
+TIME 11
+len 285
+TIME 12
+len 225
+TIME 13
+len 188
+TIME 14
+len 147
+TIME 15
+len 6
+
+TIME 0
+len 1050
+TIME 1
+len 1050
+TIME 2
+len 1043
+TIME 3
+len 992
+TIME 4
+len 997
+TIME 5
+len 994
+TIME 6
+len 957
+TIME 7
+len 975
+TIME 8
+len 945
+TIME 9
+len 976
+TIME 10
+len 977
+TIME 11
+len 971
+TIME 12
+len 890
+TIME 13
+len 704
+TIME 14
+len 488
+TIME 15
+len 7
+TIME 0
+len 989
+TIME 1
+len 989
+TIME 2
+len 951
+TIME 3
+len 830
+TIME 4
+len 678
+TIME 5
+len 819
+TIME 6
+len 764
+TIME 7
+len 704
+TIME 8
+len 585
+TIME 9
+len 802
+TIME 10
+len 772
+TIME 11
+len 864
+TIME 12
+len 701
+TIME 13
+len 531
+TIME 14
+len 293
+TIME 15
+len 11
+TIME 0
+len 975
+TIME 1
+len 975
+TIME 2
+len 946
+TIME 3
+len 793
+TIME 4
+len 684
+TIME 5
+len 548
+TIME 6
+len 489
+TIME 7
+len 755
+TIME 8
+len 676
+TIME 9
+len 483
+TIME 10
+len 553
+TIME 11
+len 711
+TIME 12
+len 714
+TIME 13
+len 385
+TIME 14
+len 205
+TIME 15
+len 12
+TIME 0
+len 903
+TIME 1
+len 903
+TIME 2
+len 865
+TIME 3
+len 702
+TIME 4
+len 555
+TIME 5
+len 552
+TIME 6
+len 543
+TIME 7
+len 401
+TIME 8
+len 315
+TIME 9
+len 273
+TIME 10
+len 240
+TIME 11
+len 164
+TIME 12
+len 285
+TIME 13
+len 509
+TIME 14
+len 106
+TIME 15
+len 10
+TIME 0
+len 893
+TIME 1
+len 893
+TIME 2
+len 891
+TIME 3
+len 873
+TIME 4
+len 858
+TIME 5
+len 856
+TIME 6
+len 861
+TIME 7
+len 846
+TIME 8
+len 825
+TIME 9
+len 826
+TIME 10
+len 799
+TIME 11
+len 827
+TIME 12
+len 831
+TIME 13
+len 772
+TIME 14
+len 517
+TIME 15
+len 10
+TIME 0
+len 830
+TIME 1
+len 830
+TIME 2
+len 803
+TIME 3
+len 633
+TIME 4
+len 488
+TIME 5
+len 335
+TIME 6
+len 575
+TIME 7
+len 640
+TIME 8
+len 597
+TIME 9
+len 564
+TIME 10
+len 698
+TIME 11
+len 555
+TIME 12
+len 315
+TIME 13
+len 207
+TIME 14
+len 126
+TIME 15
+len 12
+TIME 0
+len 824
+TIME 1
+len 824
+TIME 2
+len 844
+TIME 3
+len 797
+TIME 4
+len 757
+TIME 5
+len 711
+TIME 6
+len 636
+TIME 7
+len 616
+TIME 8
+len 658
+TIME 9
+len 705
+TIME 10
+len 733
+TIME 11
+len 763
+TIME 12
+len 621
+TIME 13
+len 340
+TIME 14
+len 207
+TIME 15
+len 8
+TIME 0
+len 852
+TIME 1
+len 852
+TIME 2
+len 848
+TIME 3
+len 655
+TIME 4
+len 796
+TIME 5
+len 743
+TIME 6
+len 629
+TIME 7
+len 728
+TIME 8
+len 753
+TIME 9
+len 544
+TIME 10
+len 416
+TIME 11
+len 347
+TIME 12
+len 296
+TIME 13
+len 182
+TIME 14
+len 85
+TIME 15
+len 4
+TIME 0
+len 791
+TIME 1
+len 791
+TIME 2
+len 774
+TIME 3
+len 676
+TIME 4
+len 572
+TIME 5
+len 490
+TIME 6
+len 405
+TIME 7
+len 322
+TIME 8
+len 525
+TIME 9
+len 403
+TIME 10
+len 272
+TIME 11
+len 183
+TIME 12
+len 328
+TIME 13
+len 480
+TIME 14
+len 468
+TIME 15
+len 14
+TIME 0
+len 731
+TIME 1
+len 731
+TIME 2
+len 706
+TIME 3
+len 481
+TIME 4
+len 313
+TIME 5
+len 255
+TIME 6
+len 410
+TIME 7
+len 488
+TIME 8
+len 360
+TIME 9
+len 329
+TIME 10
+len 468
+TIME 11
+len 320
+TIME 12
+len 224
+TIME 13
+len 153
+TIME 14
+len 80
+TIME 15
+len 11
+TIME 0
+len 741
+TIME 1
+len 741
+TIME 2
+len 700
+TIME 3
+len 637
+TIME 4
+len 541
+TIME 5
+len 502
+TIME 6
+len 554
+TIME 7
+len 487
+TIME 8
+len 526
+TIME 9
+len 454
+TIME 10
+len 429
+TIME 11
+len 431
+TIME 12
+len 495
+TIME 13
+len 504
+TIME 14
+len 203
+TIME 15
+len 14
+TIME 0
+len 743
+TIME 1
+len 743
+TIME 2
+len 737
+TIME 3
+len 702
+TIME 4
+len 704
+TIME 5
+len 697
+TIME 6
+len 660
+TIME 7
+len 563
+TIME 8
+len 628
+TIME 9
+len 521
+TIME 10
+len 454
+TIME 11
+len 567
+TIME 12
+len 471
+TIME 13
+len 250
+TIME 14
+len 128
+TIME 15
+len 8
+TIME 0
+len 714
+TIME 1
+len 714
+TIME 2
+len 687
+TIME 3
+len 635
+TIME 4
+len 564
+TIME 5
+len 483
+TIME 6
+len 418
+TIME 7
+len 607
+TIME 8
+len 537
+TIME 9
+len 616
+TIME 10
+len 634
+TIME 11
+len 607
+TIME 12
+len 604
+TIME 13
+len 329
+TIME 14
+len 141
+TIME 15
+len 9
+TIME 0
+len 679
+TIME 1
+len 679
+TIME 2
+len 651
+TIME 3
+len 570
+TIME 4
+len 502
+TIME 5
+len 435
+TIME 6
+len 451
+TIME 7
+len 473
+TIME 8
+len 440
+TIME 9
+len 450
+TIME 10
+len 470
+TIME 11
+len 520
+TIME 12
+len 405
+TIME 13
+len 299
+TIME 14
+len 172
+TIME 15
+len 10
+TIME 0
+len 703
+TIME 1
+len 703
+TIME 2
+len 700
+TIME 3
+len 582
+TIME 4
+len 503
+TIME 5
+len 414
+TIME 6
+len 584
+TIME 7
+len 475
+TIME 8
+len 391
+TIME 9
+len 494
+TIME 10
+len 505
+TIME 11
+len 513
+TIME 12
+len 352
+TIME 13
+len 165
+TIME 14
+len 78
+TIME 15
+len 8
+TIME 0
+len 666
+TIME 1
+len 666
+TIME 2
+len 668
+TIME 3
+len 625
+TIME 4
+len 584
+TIME 5
+len 627
+TIME 6
+len 638
+TIME 7
+len 625
+TIME 8
+len 616
+TIME 9
+len 593
+TIME 10
+len 623
+TIME 11
+len 469
+TIME 12
+len 368
+TIME 13
+len 293
+TIME 14
+len 185
+TIME 15
+len 13
+TIME 0
+len 652
+TIME 1
+len 652
+TIME 2
+len 628
+TIME 3
+len 520
+TIME 4
+len 467
+TIME 5
+len 516
+TIME 6
+len 458
+TIME 7
+len 412
+TIME 8
+len 324
+TIME 9
+len 453
+TIME 10
+len 378
+TIME 11
+len 546
+TIME 12
+len 238
+TIME 13
+len 101
+TIME 14
+len 94
+TIME 15
+len 5
+TIME 0
+len 622
+TIME 1
+len 622
+TIME 2
+len 622
+TIME 3
+len 492
+TIME 4
+len 390
+TIME 5
+len 285
+TIME 6
+len 435
+TIME 7
+len 357
+TIME 8
+len 497
+TIME 9
+len 550
+TIME 10
+len 447
+TIME 11
+len 300
+TIME 12
+len 231
+TIME 13
+len 169
+TIME 14
+len 105
+TIME 15
+len 9
+TIME 0
+len 633
+TIME 1
+len 633
+TIME 2
+len 633
+TIME 3
+len 549
+TIME 4
+len 454
+TIME 5
+len 374
+TIME 6
+len 548
+TIME 7
+len 433
+TIME 8
+len 376
+TIME 9
+len 447
+TIME 10
+len 419
+TIME 11
+len 450
+TIME 12
+len 242
+TIME 13
+len 346
+TIME 14
+len 313
+TIME 15
+len 12
+TIME 0
+len 529
+TIME 1
+len 529
+TIME 2
+len 603
+TIME 3
+len 603
+TIME 4
+len 558
+TIME 5
+len 483
+TIME 6
+len 415
+TIME 7
+len 486
+TIME 8
+len 462
+TIME 9
+len 459
+TIME 10
+len 517
+TIME 11
+len 321
+TIME 12
+len 139
+TIME 13
+len 85
+TIME 14
+len 53
+TIME 15
+len 4
+TIME 0
+len 614
+TIME 1
+len 614
+TIME 2
+len 610
+TIME 3
+len 588
+TIME 4
+len 582
+TIME 5
+len 584
+TIME 6
+len 571
+TIME 7
+len 546
+TIME 8
+len 519
+TIME 9
+len 506
+TIME 10
+len 505
+TIME 11
+len 517
+TIME 12
+len 530
+TIME 13
+len 446
+TIME 14
+len 345
+TIME 15
+len 10
+TIME 0
+len 599
+TIME 1
+len 599
+TIME 2
+len 584
+TIME 3
+len 438
+TIME 4
+len 508
+TIME 5
+len 510
+TIME 6
+len 437
+TIME 7
+len 384
+TIME 8
+len 442
+TIME 9
+len 443
+TIME 10
+len 298
+TIME 11
+len 221
+TIME 12
+len 203
+TIME 13
+len 160
+TIME 14
+len 118
+TIME 15
+len 8
+TIME 0
+len 569
+TIME 1
+len 569
+TIME 2
+len 567
+TIME 3
+len 541
+TIME 4
+len 506
+TIME 5
+len 487
+TIME 6
+len 494
+TIME 7
+len 488
+TIME 8
+len 470
+TIME 9
+len 446
+TIME 10
+len 418
+TIME 11
+len 450
+TIME 12
+len 464
+TIME 13
+len 283
+TIME 14
+len 117
+TIME 15
+len 10
+TIME 0
+len 501
+TIME 1
+len 501
+TIME 2
+len 496
+TIME 3
+len 369
+TIME 4
+len 275
+TIME 5
+len 366
+TIME 6
+len 351
+TIME 7
+len 305
+TIME 8
+len 382
+TIME 9
+len 404
+TIME 10
+len 385
+TIME 11
+len 385
+TIME 12
+len 258
+TIME 13
+len 142
+TIME 14
+len 82
+TIME 15
+len 7
+TIME 0
+len 467
+TIME 1
+len 467
+TIME 2
+len 466
+TIME 3
+len 457
+TIME 4
+len 434
+TIME 5
+len 440
+TIME 6
+len 434
+TIME 7
+len 411
+TIME 8
+len 407
+TIME 9
+len 392
+TIME 10
+len 402
+TIME 11
+len 408
+TIME 12
+len 404
+TIME 13
+len 346
+TIME 14
+len 171
+TIME 15
+len 11
+TIME 0
+len 472
+TIME 1
+len 472
+TIME 2
+len 452
+TIME 3
+len 381
+TIME 4
+len 409
+TIME 5
+len 339
+TIME 6
+len 220
+TIME 7
+len 157
+TIME 8
+len 379
+TIME 9
+len 227
+TIME 10
+len 213
+TIME 11
+len 189
+TIME 12
+len 365
+TIME 13
+len 157
+TIME 14
+len 105
+TIME 15
+len 8
+TIME 0
+len 461
+TIME 1
+len 461
+TIME 2
+len 446
+TIME 3
+len 400
+TIME 4
+len 340
+TIME 5
+len 288
+TIME 6
+len 403
+TIME 7
+len 366
+TIME 8
+len 309
+TIME 9
+len 404
+TIME 10
+len 350
+TIME 11
+len 421
+TIME 12
+len 197
+TIME 13
+len 93
+TIME 14
+len 81
+TIME 15
+len 8
+TIME 0
+len 468
+TIME 1
+len 468
+TIME 2
+len 463
+TIME 3
+len 435
+TIME 4
+len 420
+TIME 5
+len 443
+TIME 6
+len 434
+TIME 7
+len 388
+TIME 8
+len 333
+TIME 9
+len 380
+TIME 10
+len 325
+TIME 11
+len 260
+TIME 12
+len 325
+TIME 13
+len 187
+TIME 14
+len 82
+TIME 15
+len 10
+TIME 0
+len 434
+TIME 1
+len 434
+TIME 2
+len 417
+TIME 3
+len 371
+TIME 4
+len 301
+TIME 5
+len 265
+TIME 6
+len 225
+TIME 7
+len 168
+TIME 8
+len 271
+TIME 9
+len 191
+TIME 10
+len 148
+TIME 11
+len 118
+TIME 12
+len 205
+TIME 13
+len 138
+TIME 14
+len 267
+TIME 15
+len 17
+TIME 0
+len 412
+TIME 1
+len 412
+TIME 2
+len 410
+TIME 3
+len 384
+TIME 4
+len 362
+TIME 5
+len 365
+TIME 6
+len 368
+TIME 7
+len 348
+TIME 8
+len 312
+TIME 9
+len 347
+TIME 10
+len 276
+TIME 11
+len 213
+TIME 12
+len 160
+TIME 13
+len 165
+TIME 14
+len 91
+TIME 15
+len 6
+TIME 0
+len 407
+TIME 1
+len 407
+TIME 2
+len 406
+TIME 3
+len 397
+TIME 4
+len 396
+TIME 5
+len 397
+TIME 6
+len 396
+TIME 7
+len 387
+TIME 8
+len 385
+TIME 9
+len 376
+TIME 10
+len 383
+TIME 11
+len 380
+TIME 12
+len 367
+TIME 13
+len 282
+TIME 14
+len 202
+TIME 15
+len 9
+TIME 0
+len 382
+TIME 1
+len 382
+TIME 2
+len 382
+TIME 3
+len 338
+TIME 4
+len 307
+TIME 5
+len 347
+TIME 6
+len 305
+TIME 7
+len 348
+TIME 8
+len 358
+TIME 9
+len 344
+TIME 10
+len 262
+TIME 11
+len 235
+TIME 12
+len 224
+TIME 13
+len 190
+TIME 14
+len 102
+TIME 15
+len 8
+TIME 0
+len 355
+TIME 1
+len 355
+TIME 2
+len 368
+TIME 3
+len 296
+TIME 4
+len 324
+TIME 5
+len 269
+TIME 6
+len 252
+TIME 7
+len 232
+TIME 8
+len 216
+TIME 9
+len 255
+TIME 10
+len 200
+TIME 11
+len 251
+TIME 12
+len 240
+TIME 13
+len 90
+TIME 14
+len 37
+TIME 15
+len 12
+TIME 0
+len 350
+TIME 1
+len 350
+TIME 2
+len 351
+TIME 3
+len 320
+TIME 4
+len 315
+TIME 5
+len 332
+TIME 6
+len 343
+TIME 7
+len 318
+TIME 8
+len 330
+TIME 9
+len 312
+TIME 10
+len 321
+TIME 11
+len 332
+TIME 12
+len 188
+TIME 13
+len 113
+TIME 14
+len 58
+TIME 15
+len 6
+TIME 0
+len 349
+TIME 1
+len 349
+TIME 2
+len 349
+TIME 3
+len 345
+TIME 4
+len 333
+TIME 5
+len 331
+TIME 6
+len 327
+TIME 7
+len 296
+TIME 8
+len 323
+TIME 9
+len 327
+TIME 10
+len 233
+TIME 11
+len 170
+TIME 12
+len 147
+TIME 13
+len 115
+TIME 14
+len 58
+TIME 15
+len 6
+TIME 0
+len 323
+TIME 1
+len 323
+TIME 2
+len 340
+TIME 3
+len 328
+TIME 4
+len 315
+TIME 5
+len 327
+TIME 6
+len 323
+TIME 7
+len 332
+TIME 8
+len 266
+TIME 9
+len 194
+TIME 10
+len 146
+TIME 11
+len 109
+TIME 12
+len 97
+TIME 13
+len 81
+TIME 14
+len 46
+TIME 15
+len 4
+TIME 0
+len 335
+TIME 1
+len 335
+TIME 2
+len 337
+TIME 3
+len 296
+TIME 4
+len 323
+TIME 5
+len 295
+TIME 6
+len 256
+TIME 7
+len 225
+TIME 8
+len 259
+TIME 9
+len 258
+TIME 10
+len 244
+TIME 11
+len 300
+TIME 12
+len 212
+TIME 13
+len 151
+TIME 14
+len 100
+TIME 15
+len 7
+TIME 0
+len 327
+TIME 1
+len 327
+TIME 2
+len 323
+TIME 3
+len 298
+TIME 4
+len 295
+TIME 5
+len 269
+TIME 6
+len 271
+TIME 7
+len 283
+TIME 8
+len 301
+TIME 9
+len 218
+TIME 10
+len 191
+TIME 11
+len 184
+TIME 12
+len 171
+TIME 13
+len 140
+TIME 14
+len 117
+TIME 15
+len 4
+TIME 0
+len 262
+TIME 1
+len 262
+TIME 2
+len 261
+TIME 3
+len 255
+TIME 4
+len 269
+TIME 5
+len 259
+TIME 6
+len 230
+TIME 7
+len 189
+TIME 8
+len 166
+TIME 9
+len 115
+TIME 10
+len 176
+TIME 11
+len 134
+TIME 12
+len 127
+TIME 13
+len 194
+TIME 14
+len 154
+TIME 15
+len 11
+TIME 0
+len 298
+TIME 1
+len 298
+TIME 2
+len 295
+TIME 3
+len 280
+TIME 4
+len 273
+TIME 5
+len 235
+TIME 6
+len 240
+TIME 7
+len 231
+TIME 8
+len 241
+TIME 9
+len 254
+TIME 10
+len 251
+TIME 11
+len 258
+TIME 12
+len 279
+TIME 13
+len 248
+TIME 14
+len 154
+TIME 15
+len 6
+TIME 0
+len 300
+TIME 1
+len 300
+TIME 2
+len 291
+TIME 3
+len 280
+TIME 4
+len 284
+TIME 5
+len 266
+TIME 6
+len 228
+TIME 7
+len 179
+TIME 8
+len 236
+TIME 9
+len 116
+TIME 10
+len 195
+TIME 11
+len 149
+TIME 12
+len 247
+TIME 13
+len 80
+TIME 14
+len 26
+TIME 15
+len 6
+TIME 0
+len 293
+TIME 1
+len 293
+TIME 2
+len 293
+TIME 3
+len 275
+TIME 4
+len 261
+TIME 5
+len 209
+TIME 6
+len 237
+TIME 7
+len 245
+TIME 8
+len 246
+TIME 9
+len 139
+TIME 10
+len 102
+TIME 11
+len 75
+TIME 12
+len 49
+TIME 13
+len 30
+TIME 14
+len 23
+TIME 15
+len 1
+AlphaBAnalysis_2.py:547: RankWarning: Polyfit may be poorly conditioned
+  lplots=None,core_list=None,simframes=None
+TIME 0
+len 11
+TIME 1
+len 11
+TIME 2
+len 11
+TIME 3
+len 11
+TIME 4
+len 11
+TIME 5
+len 11
+TIME 6
+len 11
+TIME 7
+len 11
+TIME 8
+len 11
+TIME 9
+len 11
+TIME 10
+len 11
+TIME 11
+len 11
+TIME 12
+len 11
+TIME 13
+len 11
+TIME 14
+len 11
+TIME 15
+len 9
+BOX SAVED
+TIME 0
+len 507
+TIME 1
+len 495
+TIME 2
+len 476
+TIME 3
+len 461
+TIME 4
+len 438
+TIME 5
+len 408
+TIME 6
+len 449
+TIME 7
+len 307
+TIME 8
+len 120
+TIME 9
+len 64
+TIME 10
+len 39
+TIME 11
+len 17
+TIME 12
+len 8
+TIME 0
+len 33
+TIME 1
+len 33
+TIME 2
+len 33
+TIME 3
+len 31
+TIME 4
+len 32
+TIME 5
+len 30
+TIME 6
+len 33
+TIME 7
+len 28
+TIME 8
+len 32
+TIME 9
+len 31
+TIME 10
+len 30
+TIME 11
+len 32
+TIME 12
+len 9
+TIME 0
+len 1450
+TIME 1
+len 1445
+TIME 2
+len 1394
+TIME 3
+len 1278
+TIME 4
+len 1319
+TIME 5
+len 1217
+TIME 6
+len 1012
+TIME 7
+len 899
+TIME 8
+len 904
+TIME 9
+len 753
+TIME 10
+len 476
+TIME 11
+len 267
+TIME 12
+len 5
+TIME 0
+len 315
+TIME 1
+len 285
+TIME 2
+len 308
+TIME 3
+len 297
+TIME 4
+len 284
+TIME 5
+len 258
+TIME 6
+len 226
+TIME 7
+len 276
+TIME 8
+len 242
+TIME 9
+len 223
+TIME 10
+len 245
+TIME 11
+len 131
+TIME 12
+len 11
+TIME 0
+len 15
+TIME 1
+len 13
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 14
+TIME 5
+len 14
+TIME 6
+len 13
+TIME 7
+len 11
+TIME 8
+len 12
+TIME 9
+len 14
+TIME 10
+len 13
+TIME 11
+len 14
+TIME 12
+len 11
+TIME 0
+len 414
+TIME 1
+len 346
+TIME 2
+len 354
+TIME 3
+len 381
+TIME 4
+len 360
+TIME 5
+len 348
+TIME 6
+len 312
+TIME 7
+len 322
+TIME 8
+len 294
+TIME 9
+len 320
+TIME 10
+len 308
+TIME 11
+len 161
+TIME 12
+len 10
+TIME 0
+len 751
+TIME 1
+len 720
+TIME 2
+len 713
+TIME 3
+len 725
+TIME 4
+len 712
+TIME 5
+len 700
+TIME 6
+len 703
+TIME 7
+len 707
+TIME 8
+len 666
+TIME 9
+len 681
+TIME 10
+len 571
+TIME 11
+len 201
+TIME 12
+len 7
+TIME 0
+len 122
+TIME 1
+len 122
+TIME 2
+len 122
+TIME 3
+len 121
+TIME 4
+len 120
+TIME 5
+len 118
+TIME 6
+len 117
+TIME 7
+len 111
+TIME 8
+len 102
+TIME 9
+len 111
+TIME 10
+len 108
+TIME 11
+len 109
+TIME 12
+len 6
+TIME 0
+len 784
+TIME 1
+len 759
+TIME 2
+len 755
+TIME 3
+len 759
+TIME 4
+len 683
+TIME 5
+len 572
+TIME 6
+len 447
+TIME 7
+len 424
+TIME 8
+len 298
+TIME 9
+len 265
+TIME 10
+len 199
+TIME 11
+len 128
+TIME 12
+len 13
+TIME 0
+len 3992
+TIME 1
+len 3508
+TIME 2
+len 3527
+TIME 3
+len 3664
+TIME 4
+len 3633
+TIME 5
+len 3498
+TIME 6
+len 3502
+TIME 7
+len 3200
+TIME 8
+len 2360
+TIME 9
+len 1567
+TIME 10
+len 942
+TIME 11
+len 396
+TIME 12
+len 9
+TIME 0
+len 129
+TIME 1
+len 127
+TIME 2
+len 123
+TIME 3
+len 123
+TIME 4
+len 122
+TIME 5
+len 121
+TIME 6
+len 118
+TIME 7
+len 123
+TIME 8
+len 120
+TIME 9
+len 119
+TIME 10
+len 116
+TIME 11
+len 70
+TIME 12
+len 11
+TIME 0
+len 18
+TIME 1
+len 17
+TIME 2
+len 17
+TIME 3
+len 15
+TIME 4
+len 17
+TIME 5
+len 16
+TIME 6
+len 17
+TIME 7
+len 18
+TIME 8
+len 14
+TIME 9
+len 16
+TIME 10
+len 15
+TIME 11
+len 12
+TIME 12
+len 8
+TIME 0
+len 13
+TIME 1
+len 13
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 13
+TIME 5
+len 12
+TIME 6
+len 13
+TIME 7
+len 13
+TIME 8
+len 13
+TIME 9
+len 11
+TIME 10
+len 11
+TIME 11
+len 10
+TIME 12
+len 7
+TIME 0
+len 16
+TIME 1
+len 16
+TIME 2
+len 15
+TIME 3
+len 16
+TIME 4
+len 15
+TIME 5
+len 16
+TIME 6
+len 16
+TIME 7
+len 13
+TIME 8
+len 10
+TIME 9
+len 9
+TIME 10
+len 11
+TIME 11
+len 11
+TIME 12
+len 11
+TIME 0
+len 1038
+TIME 1
+len 924
+TIME 2
+len 862
+TIME 3
+len 814
+TIME 4
+len 690
+TIME 5
+len 571
+TIME 6
+len 715
+TIME 7
+len 617
+TIME 8
+len 558
+TIME 9
+len 330
+TIME 10
+len 221
+TIME 11
+len 175
+TIME 12
+len 9
+TIME 0
+len 1484
+TIME 1
+len 1352
+TIME 2
+len 1176
+TIME 3
+len 1000
+TIME 4
+len 877
+TIME 5
+len 683
+TIME 6
+len 994
+TIME 7
+len 973
+TIME 8
+len 944
+TIME 9
+len 781
+TIME 10
+len 432
+TIME 11
+len 247
+TIME 12
+len 11
+TIME 0
+len 377
+TIME 1
+len 362
+TIME 2
+len 344
+TIME 3
+len 295
+TIME 4
+len 232
+TIME 5
+len 337
+TIME 6
+len 233
+TIME 7
+len 179
+TIME 8
+len 112
+TIME 9
+len 76
+TIME 10
+len 42
+TIME 11
+len 33
+TIME 12
+len 3
+TIME 0
+len 4904
+TIME 1
+len 4474
+TIME 2
+len 4095
+TIME 3
+len 4008
+TIME 4
+len 3663
+TIME 5
+len 4197
+TIME 6
+len 4141
+TIME 7
+len 3699
+TIME 8
+len 3224
+TIME 9
+len 3111
+TIME 10
+len 2122
+TIME 11
+len 881
+TIME 12
+len 10
+TIME 0
+len 2904
+TIME 1
+len 2606
+TIME 2
+len 2380
+TIME 3
+len 2430
+TIME 4
+len 2496
+TIME 5
+len 2499
+TIME 6
+len 2259
+TIME 7
+len 2175
+TIME 8
+len 1982
+TIME 9
+len 2413
+TIME 10
+len 2282
+TIME 11
+len 1366
+TIME 12
+len 10
+TIME 0
+len 698
+TIME 1
+len 599
+TIME 2
+len 533
+TIME 3
+len 470
+TIME 4
+len 614
+TIME 5
+len 572
+TIME 6
+len 624
+TIME 7
+len 587
+TIME 8
+len 614
+TIME 9
+len 408
+TIME 10
+len 279
+TIME 11
+len 114
+TIME 12
+len 6
+TIME 0
+len 30
+TIME 1
+len 27
+TIME 2
+len 27
+TIME 3
+len 28
+TIME 4
+len 26
+TIME 5
+len 25
+TIME 6
+len 22
+TIME 7
+len 19
+TIME 8
+len 17
+TIME 9
+len 23
+TIME 10
+len 22
+TIME 11
+len 12
+TIME 12
+len 13
+TIME 0
+len 404
+TIME 1
+len 324
+TIME 2
+len 263
+TIME 3
+len 215
+TIME 4
+len 213
+TIME 5
+len 252
+TIME 6
+len 201
+TIME 7
+len 148
+TIME 8
+len 91
+TIME 9
+len 121
+TIME 10
+len 115
+TIME 11
+len 60
+TIME 12
+len 10
+TIME 0
+len 15
+TIME 1
+len 15
+TIME 2
+len 15
+TIME 3
+len 15
+TIME 4
+len 15
+TIME 5
+len 15
+TIME 6
+len 15
+TIME 7
+len 15
+TIME 8
+len 14
+TIME 9
+len 15
+TIME 10
+len 14
+TIME 11
+len 10
+TIME 12
+len 7
+TIME 0
+len 16
+TIME 1
+len 16
+TIME 2
+len 16
+TIME 3
+len 16
+TIME 4
+len 16
+TIME 5
+len 16
+TIME 6
+len 16
+TIME 7
+len 16
+TIME 8
+len 14
+TIME 9
+len 15
+TIME 10
+len 15
+TIME 11
+len 12
+TIME 12
+len 8
+TIME 0
+len 664
+TIME 1
+len 603
+TIME 2
+len 614
+TIME 3
+len 623
+TIME 4
+len 564
+TIME 5
+len 495
+TIME 6
+len 512
+TIME 7
+len 510
+TIME 8
+len 540
+TIME 9
+len 422
+TIME 10
+len 242
+TIME 11
+len 68
+TIME 12
+len 5
+TIME 0
+len 720
+TIME 1
+len 641
+TIME 2
+len 683
+TIME 3
+len 643
+TIME 4
+len 616
+TIME 5
+len 525
+TIME 6
+len 597
+TIME 7
+len 567
+TIME 8
+len 544
+TIME 9
+len 497
+TIME 10
+len 367
+TIME 11
+len 119
+TIME 12
+len 9
+TIME 0
+len 22
+TIME 1
+len 22
+TIME 2
+len 22
+TIME 3
+len 22
+TIME 4
+len 22
+TIME 5
+len 22
+TIME 6
+len 22
+TIME 7
+len 22
+TIME 8
+len 19
+TIME 9
+len 21
+TIME 10
+len 20
+TIME 11
+len 19
+TIME 12
+len 6
+TIME 0
+len 311
+TIME 1
+len 326
+TIME 2
+len 289
+TIME 3
+len 297
+TIME 4
+len 300
+TIME 5
+len 279
+TIME 6
+len 295
+TIME 7
+len 310
+TIME 8
+len 237
+TIME 9
+len 165
+TIME 10
+len 77
+TIME 11
+len 44
+TIME 12
+len 4
+TIME 0
+len 85
+TIME 1
+len 84
+TIME 2
+len 85
+TIME 3
+len 82
+TIME 4
+len 83
+TIME 5
+len 80
+TIME 6
+len 73
+TIME 7
+len 67
+TIME 8
+len 81
+TIME 9
+len 80
+TIME 10
+len 12
+TIME 11
+len 11
+TIME 12
+len 5
+TIME 0
+len 2564
+TIME 1
+len 2515
+TIME 2
+len 2432
+TIME 3
+len 2343
+TIME 4
+len 2375
+TIME 5
+len 2144
+TIME 6
+len 1615
+TIME 7
+len 1150
+TIME 8
+len 593
+TIME 9
+len 391
+TIME 10
+len 260
+TIME 11
+len 143
+TIME 12
+len 10
+TIME 0
+len 955
+TIME 1
+len 938
+TIME 2
+len 901
+TIME 3
+len 867
+TIME 4
+len 887
+TIME 5
+len 783
+TIME 6
+len 706
+TIME 7
+len 617
+TIME 8
+len 482
+TIME 9
+len 410
+TIME 10
+len 290
+TIME 11
+len 179
+TIME 12
+len 4
+TIME 0
+len 605
+TIME 1
+len 568
+TIME 2
+len 537
+TIME 3
+len 491
+TIME 4
+len 467
+TIME 5
+len 458
+TIME 6
+len 444
+TIME 7
+len 460
+TIME 8
+len 451
+TIME 9
+len 461
+TIME 10
+len 415
+TIME 11
+len 239
+TIME 12
+len 5
+TIME 0
+len 717
+TIME 1
+len 503
+TIME 2
+len 340
+TIME 3
+len 238
+TIME 4
+len 192
+TIME 5
+len 148
+TIME 6
+len 111
+TIME 7
+len 280
+TIME 8
+len 235
+TIME 9
+len 161
+TIME 10
+len 313
+TIME 11
+len 285
+TIME 12
+len 16
+TIME 0
+len 864
+TIME 1
+len 634
+TIME 2
+len 499
+TIME 3
+len 689
+TIME 4
+len 607
+TIME 5
+len 417
+TIME 6
+len 444
+TIME 7
+len 618
+TIME 8
+len 283
+TIME 9
+len 139
+TIME 10
+len 74
+TIME 11
+len 11
+TIME 12
+len 5
+TIME 0
+len 11
+TIME 1
+len 11
+TIME 2
+len 11
+TIME 3
+len 11
+TIME 4
+len 11
+TIME 5
+len 11
+TIME 6
+len 11
+TIME 7
+len 11
+TIME 8
+len 11
+TIME 9
+len 11
+TIME 10
+len 11
+TIME 11
+len 11
+TIME 12
+len 4
+TIME 0
+len 55
+TIME 1
+len 54
+TIME 2
+len 55
+TIME 3
+len 55
+TIME 4
+len 55
+TIME 5
+len 55
+TIME 6
+len 54
+TIME 7
+len 53
+TIME 8
+len 54
+TIME 9
+len 53
+TIME 10
+len 43
+TIME 11
+len 12
+TIME 12
+len 7
+TIME 0
+len 156
+TIME 1
+len 155
+TIME 2
+len 151
+TIME 3
+len 154
+TIME 4
+len 153
+TIME 5
+len 150
+TIME 6
+len 150
+TIME 7
+len 144
+TIME 8
+len 139
+TIME 9
+len 145
+TIME 10
+len 137
+TIME 11
+len 130
+TIME 12
+len 12
+TIME 0
+len 18
+TIME 1
+len 18
+TIME 2
+len 17
+TIME 3
+len 18
+TIME 4
+len 15
+TIME 5
+len 15
+TIME 6
+len 14
+TIME 7
+len 16
+TIME 8
+len 14
+TIME 9
+len 13
+TIME 10
+len 11
+TIME 11
+len 10
+TIME 12
+len 11
+TIME 0
+len 97
+TIME 1
+len 93
+TIME 2
+len 90
+TIME 3
+len 82
+TIME 4
+len 70
+TIME 5
+len 73
+TIME 6
+len 60
+TIME 7
+len 60
+TIME 8
+len 61
+TIME 9
+len 63
+TIME 10
+len 46
+TIME 11
+len 47
+TIME 12
+len 14
+TIME 0
+len 184
+TIME 1
+len 169
+TIME 2
+len 169
+TIME 3
+len 178
+TIME 4
+len 169
+TIME 5
+len 156
+TIME 6
+len 150
+TIME 7
+len 123
+TIME 8
+len 166
+TIME 9
+len 173
+TIME 10
+len 117
+TIME 11
+len 28
+TIME 12
+len 9
+TIME 0
+len 1917
+TIME 1
+len 1488
+TIME 2
+len 1224
+TIME 3
+len 1236
+TIME 4
+len 1410
+TIME 5
+len 1264
+TIME 6
+len 1066
+TIME 7
+len 1319
+TIME 8
+len 1586
+TIME 9
+len 1425
+TIME 10
+len 1056
+TIME 11
+len 367
+TIME 12
+len 11
+TIME 0
+len 12
+TIME 1
+len 12
+TIME 2
+len 12
+TIME 3
+len 12
+TIME 4
+len 12
+TIME 5
+len 12
+TIME 6
+len 12
+TIME 7
+len 10
+TIME 8
+len 12
+TIME 9
+len 12
+TIME 10
+len 12
+TIME 11
+len 12
+TIME 12
+len 9
+TIME 0
+len 1592
+TIME 1
+len 1319
+TIME 2
+len 1126
+TIME 3
+len 1247
+TIME 4
+len 1100
+TIME 5
+len 1185
+TIME 6
+len 1145
+TIME 7
+len 1093
+TIME 8
+len 1241
+TIME 9
+len 1062
+TIME 10
+len 696
+TIME 11
+len 380
+TIME 12
+len 10
+TIME 0
+len 5361
+TIME 1
+len 4837
+TIME 2
+len 4863
+TIME 3
+len 4587
+TIME 4
+len 4461
+TIME 5
+len 4100
+TIME 6
+len 3619
+TIME 7
+len 3693
+TIME 8
+len 3618
+TIME 9
+len 2570
+TIME 10
+len 1485
+TIME 11
+len 380
+TIME 12
+len 5
+TIME 0
+len 1511
+TIME 1
+len 1481
+TIME 2
+len 1439
+TIME 3
+len 1386
+TIME 4
+len 1403
+TIME 5
+len 1338
+TIME 6
+len 1372
+TIME 7
+len 1327
+TIME 8
+len 1265
+TIME 9
+len 1026
+TIME 10
+len 567
+TIME 11
+len 181
+TIME 12
+len 8
+TIME 0
+len 37
+TIME 1
+len 36
+TIME 2
+len 36
+TIME 3
+len 37
+TIME 4
+len 36
+TIME 5
+len 37
+TIME 6
+len 35
+TIME 7
+len 37
+TIME 8
+len 37
+TIME 9
+len 35
+TIME 10
+len 35
+TIME 11
+len 35
+TIME 12
+len 5
+TIME 0
+len 74
+TIME 1
+len 74
+TIME 2
+len 74
+TIME 3
+len 74
+TIME 4
+len 73
+TIME 5
+len 74
+TIME 6
+len 74
+TIME 7
+len 74
+TIME 8
+len 74
+TIME 9
+len 73
+TIME 10
+len 69
+TIME 11
+len 42
+TIME 12
+len 6
+TIME 0
+len 3327
+TIME 1
+len 2964
+TIME 2
+len 2867
+TIME 3
+len 2699
+TIME 4
+len 2854
+TIME 5
+len 2707
+TIME 6
+len 2107
+TIME 7
+len 2364
+TIME 8
+len 2329
+TIME 9
+len 2162
+TIME 10
+len 1694
+TIME 11
+len 1208
+TIME 12
+len 14
+TIME 0
+len 68
+TIME 1
+len 67
+TIME 2
+len 66
+TIME 3
+len 62
+TIME 4
+len 67
+TIME 5
+len 66
+TIME 6
+len 62
+TIME 7
+len 58
+TIME 8
+len 58
+TIME 9
+len 57
+TIME 10
+len 63
+TIME 11
+len 62
+TIME 12
+len 7
+TIME 0
+len 1009
+TIME 1
+len 911
+TIME 2
+len 950
+TIME 3
+len 906
+TIME 4
+len 822
+TIME 5
+len 979
+TIME 6
+len 968
+TIME 7
+len 888
+TIME 8
+len 791
+TIME 9
+len 619
+TIME 10
+len 369
+TIME 11
+len 207
+TIME 12
+len 10
+TIME 0
+len 191
+TIME 1
+len 179
+TIME 2
+len 167
+TIME 3
+len 172
+TIME 4
+len 175
+TIME 5
+len 170
+TIME 6
+len 134
+TIME 7
+len 110
+TIME 8
+len 68
+TIME 9
+len 73
+TIME 10
+len 56
+TIME 11
+len 65
+TIME 12
+len 17
+TIME 0
+len 21
+TIME 1
+len 21
+TIME 2
+len 20
+TIME 3
+len 18
+TIME 4
+len 19
+TIME 5
+len 19
+TIME 6
+len 17
+TIME 7
+len 15
+TIME 8
+len 13
+TIME 9
+len 17
+TIME 10
+len 12
+TIME 11
+len 6
+TIME 12
+len 10
+TIME 0
+len 64
+TIME 1
+len 62
+TIME 2
+len 61
+TIME 3
+len 62
+TIME 4
+len 61
+TIME 5
+len 58
+TIME 6
+len 56
+TIME 7
+len 53
+TIME 8
+len 51
+TIME 9
+len 57
+TIME 10
+len 33
+TIME 11
+len 16
+TIME 12
+len 13
+TIME 0
+len 31
+TIME 1
+len 31
+TIME 2
+len 31
+TIME 3
+len 31
+TIME 4
+len 30
+TIME 5
+len 27
+TIME 6
+len 30
+TIME 7
+len 31
+TIME 8
+len 30
+TIME 9
+len 27
+TIME 10
+len 19
+TIME 11
+len 10
+TIME 12
+len 5
+TIME 0
+len 19
+TIME 1
+len 19
+TIME 2
+len 19
+TIME 3
+len 19
+TIME 4
+len 19
+TIME 5
+len 19
+TIME 6
+len 19
+TIME 7
+len 18
+TIME 8
+len 17
+TIME 9
+len 18
+TIME 10
+len 18
+TIME 11
+len 18
+TIME 12
+len 5
+TIME 0
+len 40
+TIME 1
+len 40
+TIME 2
+len 40
+TIME 3
+len 40
+TIME 4
+len 40
+TIME 5
+len 40
+TIME 6
+len 40
+TIME 7
+len 38
+TIME 8
+len 37
+TIME 9
+len 33
+TIME 10
+len 23
+TIME 11
+len 20
+TIME 12
+len 5
+TIME 0
+len 65
+TIME 1
+len 62
+TIME 2
+len 62
+TIME 3
+len 63
+TIME 4
+len 57
+TIME 5
+len 54
+TIME 6
+len 63
+TIME 7
+len 61
+TIME 8
+len 62
+TIME 9
+len 62
+TIME 10
+len 60
+TIME 11
+len 62
+TIME 12
+len 7
+TIME 0
+len 2119
+TIME 1
+len 1551
+TIME 2
+len 1215
+TIME 3
+len 1431
+TIME 4
+len 1171
+TIME 5
+len 954
+TIME 6
+len 703
+TIME 7
+len 543
+TIME 8
+len 402
+TIME 9
+len 710
+TIME 10
+len 413
+TIME 11
+len 661
+TIME 12
+len 14
+TIME 0
+len 184
+TIME 1
+len 165
+TIME 2
+len 166
+TIME 3
+len 178
+TIME 4
+len 160
+TIME 5
+len 141
+TIME 6
+len 135
+TIME 7
+len 165
+TIME 8
+len 171
+TIME 9
+len 149
+TIME 10
+len 120
+TIME 11
+len 66
+TIME 12
+len 11
+TIME 0
+len 48
+TIME 1
+len 44
+TIME 2
+len 39
+TIME 3
+len 31
+TIME 4
+len 31
+TIME 5
+len 34
+TIME 6
+len 28
+TIME 7
+len 23
+TIME 8
+len 17
+TIME 9
+len 37
+TIME 10
+len 21
+TIME 11
+len 20
+TIME 12
+len 4
+TIME 0
+len 3656
+TIME 1
+len 3037
+TIME 2
+len 2780
+TIME 3
+len 3143
+TIME 4
+len 3069
+TIME 5
+len 2918
+TIME 6
+len 2940
+TIME 7
+len 2678
+TIME 8
+len 2352
+TIME 9
+len 2055
+TIME 10
+len 1176
+TIME 11
+len 449
+TIME 12
+len 12
+TIME 0
+len 1464
+TIME 1
+len 1320
+TIME 2
+len 1072
+TIME 3
+len 1110
+TIME 4
+len 1042
+TIME 5
+len 848
+TIME 6
+len 878
+TIME 7
+len 879
+TIME 8
+len 1088
+TIME 9
+len 756
+TIME 10
+len 408
+TIME 11
+len 227
+TIME 12
+len 7
+TIME 0
+len 271
+TIME 1
+len 210
+TIME 2
+len 240
+TIME 3
+len 254
+TIME 4
+len 255
+TIME 5
+len 143
+TIME 6
+len 102
+TIME 7
+len 60
+TIME 8
+len 42
+TIME 9
+len 35
+TIME 10
+len 18
+TIME 11
+len 13
+TIME 12
+len 5
+TIME 0
+len 118
+TIME 1
+len 106
+TIME 2
+len 116
+TIME 3
+len 109
+TIME 4
+len 104
+TIME 5
+len 89
+TIME 6
+len 84
+TIME 7
+len 71
+TIME 8
+len 104
+TIME 9
+len 104
+TIME 10
+len 86
+TIME 11
+len 90
+TIME 12
+len 10
+TIME 0
+len 25
+TIME 1
+len 25
+TIME 2
+len 20
+TIME 3
+len 18
+TIME 4
+len 14
+TIME 5
+len 14
+TIME 6
+len 15
+TIME 7
+len 16
+TIME 8
+len 15
+TIME 9
+len 22
+TIME 10
+len 16
+TIME 11
+len 13
+TIME 12
+len 9
+TIME 0
+len 99
+TIME 1
+len 97
+TIME 2
+len 99
+TIME 3
+len 95
+TIME 4
+len 97
+TIME 5
+len 95
+TIME 6
+len 98
+TIME 7
+len 99
+TIME 8
+len 95
+TIME 9
+len 96
+TIME 10
+len 98
+TIME 11
+len 95
+TIME 12
+len 9
+TIME 0
+len 1795
+TIME 1
+len 1549
+TIME 2
+len 1392
+TIME 3
+len 1502
+TIME 4
+len 1405
+TIME 5
+len 1296
+TIME 6
+len 1316
+TIME 7
+len 1442
+TIME 8
+len 1333
+TIME 9
+len 1266
+TIME 10
+len 1192
+TIME 11
+len 447
+TIME 12
+len 6
+TIME 0
+len 692
+TIME 1
+len 590
+TIME 2
+len 623
+TIME 3
+len 568
+TIME 4
+len 513
+TIME 5
+len 438
+TIME 6
+len 500
+TIME 7
+len 493
+TIME 8
+len 466
+TIME 9
+len 545
+TIME 10
+len 542
+TIME 11
+len 339
+TIME 12
+len 10
+TIME 0
+len 2668
+TIME 1
+len 2059
+TIME 2
+len 1918
+TIME 3
+len 2162
+TIME 4
+len 1805
+TIME 5
+len 1461
+TIME 6
+len 1957
+TIME 7
+len 2013
+TIME 8
+len 1942
+TIME 9
+len 1895
+TIME 10
+len 880
+TIME 11
+len 379
+TIME 12
+len 9
+TIME 0
+len 265
+TIME 1
+len 255
+TIME 2
+len 248
+TIME 3
+len 244
+TIME 4
+len 239
+TIME 5
+len 207
+TIME 6
+len 184
+TIME 7
+len 239
+TIME 8
+len 216
+TIME 9
+len 169
+TIME 10
+len 211
+TIME 11
+len 154
+TIME 12
+len 15
+TIME 0
+len 442
+TIME 1
+len 428
+TIME 2
+len 363
+TIME 3
+len 323
+TIME 4
+len 308
+TIME 5
+len 263
+TIME 6
+len 214
+TIME 7
+len 400
+TIME 8
+len 231
+TIME 9
+len 125
+TIME 10
+len 54
+TIME 11
+len 19
+TIME 12
+len 7
+TIME 0
+len 27
+TIME 1
+len 27
+TIME 2
+len 27
+TIME 3
+len 26
+TIME 4
+len 25
+TIME 5
+len 26
+TIME 6
+len 27
+TIME 7
+len 23
+TIME 8
+len 27
+TIME 9
+len 27
+TIME 10
+len 23
+TIME 11
+len 13
+TIME 12
+len 5
+TIME 0
+len 45
+TIME 1
+len 45
+TIME 2
+len 45
+TIME 3
+len 44
+TIME 4
+len 45
+TIME 5
+len 45
+TIME 6
+len 40
+TIME 7
+len 37
+TIME 8
+len 34
+TIME 9
+len 34
+TIME 10
+len 26
+TIME 11
+len 18
+TIME 12
+len 15
+TIME 0
+len 64
+TIME 1
+len 60
+TIME 2
+len 59
+TIME 3
+len 57
+TIME 4
+len 54
+TIME 5
+len 47
+TIME 6
+len 55
+TIME 7
+len 46
+TIME 8
+len 36
+TIME 9
+len 27
+TIME 10
+len 37
+TIME 11
+len 34
+TIME 12
+len 7
+TIME 0
+len 1308
+TIME 1
+len 946
+TIME 2
+len 619
+TIME 3
+len 361
+TIME 4
+len 562
+TIME 5
+len 432
+TIME 6
+len 312
+TIME 7
+len 221
+TIME 8
+len 435
+TIME 9
+len 441
+TIME 10
+len 382
+TIME 11
+len 40
+TIME 12
+len 10
+TIME 0
+len 13
+TIME 1
+len 13
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 13
+TIME 5
+len 13
+TIME 6
+len 13
+TIME 7
+len 13
+TIME 8
+len 11
+TIME 9
+len 11
+TIME 10
+len 10
+TIME 11
+len 12
+TIME 12
+len 4
+TIME 0
+len 579
+TIME 1
+len 447
+TIME 2
+len 521
+TIME 3
+len 427
+TIME 4
+len 486
+TIME 5
+len 341
+TIME 6
+len 298
+TIME 7
+len 255
+TIME 8
+len 353
+TIME 9
+len 410
+TIME 10
+len 216
+TIME 11
+len 69
+TIME 12
+len 8
+TIME 0
+len 1117
+TIME 1
+len 1065
+TIME 2
+len 962
+TIME 3
+len 820
+TIME 4
+len 643
+TIME 5
+len 775
+TIME 6
+len 816
+TIME 7
+len 797
+TIME 8
+len 693
+TIME 9
+len 606
+TIME 10
+len 377
+TIME 11
+len 153
+TIME 12
+len 12
+TIME 0
+len 260
+TIME 1
+len 255
+TIME 2
+len 241
+TIME 3
+len 234
+TIME 4
+len 218
+TIME 5
+len 225
+TIME 6
+len 234
+TIME 7
+len 218
+TIME 8
+len 233
+TIME 9
+len 226
+TIME 10
+len 234
+TIME 11
+len 156
+TIME 12
+len 6
+TIME 0
+len 888
+TIME 1
+len 673
+TIME 2
+len 812
+TIME 3
+len 721
+TIME 4
+len 623
+TIME 5
+len 483
+TIME 6
+len 423
+TIME 7
+len 361
+TIME 8
+len 540
+TIME 9
+len 503
+TIME 10
+len 215
+TIME 11
+len 80
+TIME 12
+len 7
+TIME 0
+len 265
+TIME 1
+len 230
+TIME 2
+len 214
+TIME 3
+len 210
+TIME 4
+len 152
+TIME 5
+len 200
+TIME 6
+len 152
+TIME 7
+len 96
+TIME 8
+len 54
+TIME 9
+len 139
+TIME 10
+len 135
+TIME 11
+len 43
+TIME 12
+len 7
+TIME 0
+len 394
+TIME 1
+len 360
+TIME 2
+len 357
+TIME 3
+len 360
+TIME 4
+len 331
+TIME 5
+len 353
+TIME 6
+len 321
+TIME 7
+len 239
+TIME 8
+len 166
+TIME 9
+len 250
+TIME 10
+len 188
+TIME 11
+len 94
+TIME 12
+len 15
+TIME 0
+len 15
+TIME 1
+len 15
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 14
+TIME 5
+len 14
+TIME 6
+len 15
+TIME 7
+len 13
+TIME 8
+len 13
+TIME 9
+len 10
+TIME 10
+len 11
+TIME 11
+len 12
+TIME 12
+len 10
+TIME 0
+len 34
+TIME 1
+len 33
+TIME 2
+len 33
+TIME 3
+len 34
+TIME 4
+len 34
+TIME 5
+len 32
+TIME 6
+len 34
+TIME 7
+len 29
+TIME 8
+len 28
+TIME 9
+len 22
+TIME 10
+len 18
+TIME 11
+len 18
+TIME 12
+len 8
+TIME 0
+len 50
+TIME 1
+len 50
+TIME 2
+len 50
+TIME 3
+len 50
+TIME 4
+len 50
+TIME 5
+len 50
+TIME 6
+len 50
+TIME 7
+len 50
+TIME 8
+len 49
+TIME 9
+len 50
+TIME 10
+len 49
+TIME 11
+len 41
+TIME 12
+len 2
+TIME 0
+len 189
+TIME 1
+len 188
+TIME 2
+len 189
+TIME 3
+len 186
+TIME 4
+len 189
+TIME 5
+len 184
+TIME 6
+len 185
+TIME 7
+len 181
+TIME 8
+len 176
+TIME 9
+len 177
+TIME 10
+len 171
+TIME 11
+len 135
+TIME 12
+len 9
+TIME 0
+len 66
+TIME 1
+len 66
+TIME 2
+len 66
+TIME 3
+len 66
+TIME 4
+len 66
+TIME 5
+len 66
+TIME 6
+len 65
+TIME 7
+len 66
+TIME 8
+len 66
+TIME 9
+len 66
+TIME 10
+len 62
+TIME 11
+len 52
+TIME 12
+len 8
+TIME 0
+len 909
+TIME 1
+len 668
+TIME 2
+len 790
+TIME 3
+len 715
+TIME 4
+len 627
+TIME 5
+len 648
+TIME 6
+len 308
+TIME 7
+len 351
+TIME 8
+len 396
+TIME 9
+len 462
+TIME 10
+len 144
+TIME 11
+len 47
+TIME 12
+len 11
+TIME 0
+len 386
+TIME 1
+len 363
+TIME 2
+len 333
+TIME 3
+len 337
+TIME 4
+len 326
+TIME 5
+len 333
+TIME 6
+len 303
+TIME 7
+len 197
+TIME 8
+len 263
+TIME 9
+len 166
+TIME 10
+len 116
+TIME 11
+len 79
+TIME 12
+len 11
+TIME 0
+len 66
+TIME 1
+len 66
+TIME 2
+len 66
+TIME 3
+len 66
+TIME 4
+len 65
+TIME 5
+len 65
+TIME 6
+len 65
+TIME 7
+len 65
+TIME 8
+len 64
+TIME 9
+len 62
+TIME 10
+len 59
+TIME 11
+len 56
+TIME 12
+len 13
+TIME 0
+len 12
+TIME 1
+len 12
+TIME 2
+len 12
+TIME 3
+len 12
+TIME 4
+len 11
+TIME 5
+len 12
+TIME 6
+len 11
+TIME 7
+len 11
+TIME 8
+len 11
+TIME 9
+len 11
+TIME 10
+len 11
+TIME 11
+len 6
+TIME 12
+len 7
+TIME 0
+len 40
+TIME 1
+len 40
+TIME 2
+len 39
+TIME 3
+len 38
+TIME 4
+len 38
+TIME 5
+len 37
+TIME 6
+len 39
+TIME 7
+len 39
+TIME 8
+len 35
+TIME 9
+len 38
+TIME 10
+len 39
+TIME 11
+len 34
+TIME 12
+len 11
+TIME 0
+len 22
+TIME 1
+len 21
+TIME 2
+len 22
+TIME 3
+len 22
+TIME 4
+len 20
+TIME 5
+len 19
+TIME 6
+len 18
+TIME 7
+len 17
+TIME 8
+len 16
+TIME 9
+len 15
+TIME 10
+len 11
+TIME 11
+len 20
+TIME 12
+len 9
+TIME 0
+len 22
+TIME 1
+len 22
+TIME 2
+len 22
+TIME 3
+len 22
+TIME 4
+len 22
+TIME 5
+len 22
+TIME 6
+len 21
+TIME 7
+len 20
+TIME 8
+len 21
+TIME 9
+len 19
+TIME 10
+len 19
+TIME 11
+len 19
+TIME 12
+len 7
+TIME 0
+len 12
+TIME 1
+len 12
+TIME 2
+len 12
+TIME 3
+len 11
+TIME 4
+len 12
+TIME 5
+len 11
+TIME 6
+len 12
+TIME 7
+len 11
+TIME 8
+len 11
+TIME 9
+len 10
+TIME 10
+len 11
+TIME 11
+len 11
+TIME 12
+len 8
+TIME 0
+len 11
+TIME 1
+len 11
+TIME 2
+len 11
+TIME 3
+len 11
+TIME 4
+len 11
+TIME 5
+len 10
+TIME 6
+len 11
+TIME 7
+len 9
+TIME 8
+len 9
+TIME 9
+len 10
+TIME 10
+len 9
+TIME 11
+len 9
+TIME 12
+len 5
+TIME 0
+len 21
+TIME 1
+len 21
+TIME 2
+len 20
+TIME 3
+len 20
+TIME 4
+len 20
+TIME 5
+len 20
+TIME 6
+len 20
+TIME 7
+len 19
+TIME 8
+len 19
+TIME 9
+len 20
+TIME 10
+len 20
+TIME 11
+len 20
+TIME 12
+len 6
+TIME 0
+len 464
+TIME 1
+len 423
+TIME 2
+len 393
+TIME 3
+len 341
+TIME 4
+len 346
+TIME 5
+len 412
+TIME 6
+len 410
+TIME 7
+len 334
+TIME 8
+len 362
+TIME 9
+len 385
+TIME 10
+len 324
+TIME 11
+len 106
+TIME 12
+len 9
+TIME 0
+len 302
+TIME 1
+len 269
+TIME 2
+len 257
+TIME 3
+len 272
+TIME 4
+len 221
+TIME 5
+len 193
+TIME 6
+len 116
+TIME 7
+len 215
+TIME 8
+len 236
+TIME 9
+len 233
+TIME 10
+len 118
+TIME 11
+len 54
+TIME 12
+len 8
+TIME 0
+len 11
+TIME 1
+len 11
+TIME 2
+len 9
+TIME 3
+len 9
+TIME 4
+len 10
+TIME 5
+len 11
+TIME 6
+len 10
+TIME 7
+len 10
+TIME 8
+len 8
+TIME 9
+len 10
+TIME 10
+len 8
+TIME 11
+len 6
+TIME 12
+len 6
+TIME 0
+len 305
+TIME 1
+len 273
+TIME 2
+len 261
+TIME 3
+len 279
+TIME 4
+len 236
+TIME 5
+len 209
+TIME 6
+len 159
+TIME 7
+len 212
+TIME 8
+len 292
+TIME 9
+len 171
+TIME 10
+len 88
+TIME 11
+len 27
+TIME 12
+len 9
+TIME 0
+len 78
+TIME 1
+len 59
+TIME 2
+len 50
+TIME 3
+len 32
+TIME 4
+len 49
+TIME 5
+len 40
+TIME 6
+len 30
+TIME 7
+len 26
+TIME 8
+len 27
+TIME 9
+len 47
+TIME 10
+len 25
+TIME 11
+len 25
+TIME 12
+len 5
+TIME 0
+len 341
+TIME 1
+len 247
+TIME 2
+len 203
+TIME 3
+len 224
+TIME 4
+len 196
+TIME 5
+len 157
+TIME 6
+len 99
+TIME 7
+len 201
+TIME 8
+len 211
+TIME 9
+len 72
+TIME 10
+len 40
+TIME 11
+len 19
+TIME 12
+len 7
+TIME 0
+len 306
+TIME 1
+len 273
+TIME 2
+len 256
+TIME 3
+len 256
+TIME 4
+len 254
+TIME 5
+len 245
+TIME 6
+len 258
+TIME 7
+len 276
+TIME 8
+len 292
+TIME 9
+len 293
+TIME 10
+len 209
+TIME 11
+len 99
+TIME 12
+len 7
+TIME 0
+len 65
+TIME 1
+len 65
+TIME 2
+len 65
+TIME 3
+len 65
+TIME 4
+len 65
+TIME 5
+len 65
+TIME 6
+len 65
+TIME 7
+len 65
+TIME 8
+len 65
+TIME 9
+len 63
+TIME 10
+len 34
+TIME 11
+len 7
+TIME 12
+len 5
+TIME 0
+len 34
+TIME 1
+len 34
+TIME 2
+len 34
+TIME 3
+len 34
+TIME 4
+len 34
+TIME 5
+len 34
+TIME 6
+len 33
+TIME 7
+len 34
+TIME 8
+len 34
+TIME 9
+len 32
+TIME 10
+len 24
+TIME 11
+len 25
+TIME 12
+len 7
+TIME 0
+len 741
+TIME 1
+len 731
+TIME 2
+len 711
+TIME 3
+len 719
+TIME 4
+len 711
+TIME 5
+len 713
+TIME 6
+len 715
+TIME 7
+len 710
+TIME 8
+len 686
+TIME 9
+len 689
+TIME 10
+len 647
+TIME 11
+len 267
+TIME 12
+len 10
+TIME 0
+len 74
+TIME 1
+len 74
+TIME 2
+len 74
+TIME 3
+len 74
+TIME 4
+len 74
+TIME 5
+len 74
+TIME 6
+len 74
+TIME 7
+len 74
+TIME 8
+len 74
+TIME 9
+len 73
+TIME 10
+len 73
+TIME 11
+len 67
+TIME 12
+len 8
+TIME 0
+len 977
+TIME 1
+len 791
+TIME 2
+len 651
+TIME 3
+len 564
+TIME 4
+len 598
+TIME 5
+len 797
+TIME 6
+len 773
+TIME 7
+len 706
+TIME 8
+len 872
+TIME 9
+len 743
+TIME 10
+len 440
+TIME 11
+len 98
+TIME 12
+len 8
+TIME 0
+len 3397
+TIME 1
+len 2631
+TIME 2
+len 2376
+TIME 3
+len 2427
+TIME 4
+len 2908
+TIME 5
+len 2802
+TIME 6
+len 2723
+TIME 7
+len 2313
+TIME 8
+len 1582
+TIME 9
+len 1092
+TIME 10
+len 687
+TIME 11
+len 95
+TIME 12
+len 6
+TIME 0
+len 13
+TIME 1
+len 13
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 13
+TIME 5
+len 13
+TIME 6
+len 13
+TIME 7
+len 12
+TIME 8
+len 11
+TIME 9
+len 12
+TIME 10
+len 13
+TIME 11
+len 6
+TIME 12
+len 5
+TIME 0
+len 114
+TIME 1
+len 103
+TIME 2
+len 95
+TIME 3
+len 79
+TIME 4
+len 72
+TIME 5
+len 73
+TIME 6
+len 80
+TIME 7
+len 77
+TIME 8
+len 74
+TIME 9
+len 91
+TIME 10
+len 83
+TIME 11
+len 60
+TIME 12
+len 7
+TIME 0
+len 3659
+TIME 1
+len 3103
+TIME 2
+len 2714
+TIME 3
+len 2608
+TIME 4
+len 2848
+TIME 5
+len 2535
+TIME 6
+len 2336
+TIME 7
+len 2374
+TIME 8
+len 2282
+TIME 9
+len 2279
+TIME 10
+len 1191
+TIME 11
+len 706
+TIME 12
+len 5
+TIME 0
+len 12
+TIME 1
+len 12
+TIME 2
+len 12
+TIME 3
+len 12
+TIME 4
+len 12
+TIME 5
+len 12
+TIME 6
+len 11
+TIME 7
+len 12
+TIME 8
+len 11
+TIME 9
+len 12
+TIME 10
+len 12
+TIME 11
+len 11
+TIME 12
+len 7
+TIME 0
+len 44
+TIME 1
+len 44
+TIME 2
+len 43
+TIME 3
+len 35
+TIME 4
+len 38
+TIME 5
+len 38
+TIME 6
+len 32
+TIME 7
+len 29
+TIME 8
+len 31
+TIME 9
+len 37
+TIME 10
+len 37
+TIME 11
+len 23
+TIME 12
+len 9
+TIME 0
+len 36
+TIME 1
+len 35
+TIME 2
+len 33
+TIME 3
+len 35
+TIME 4
+len 35
+TIME 5
+len 34
+TIME 6
+len 34
+TIME 7
+len 34
+TIME 8
+len 33
+TIME 9
+len 36
+TIME 10
+len 36
+TIME 11
+len 28
+TIME 12
+len 9
+TIME 0
+len 55
+TIME 1
+len 56
+TIME 2
+len 54
+TIME 3
+len 49
+TIME 4
+len 47
+TIME 5
+len 47
+TIME 6
+len 45
+TIME 7
+len 42
+TIME 8
+len 34
+TIME 9
+len 43
+TIME 10
+len 52
+TIME 11
+len 35
+TIME 12
+len 12
+TIME 0
+len 191
+TIME 1
+len 189
+TIME 2
+len 183
+TIME 3
+len 174
+TIME 4
+len 183
+TIME 5
+len 172
+TIME 6
+len 187
+TIME 7
+len 185
+TIME 8
+len 177
+TIME 9
+len 177
+TIME 10
+len 175
+TIME 11
+len 92
+TIME 12
+len 7
+TIME 0
+len 18
+TIME 1
+len 18
+TIME 2
+len 18
+TIME 3
+len 18
+TIME 4
+len 18
+TIME 5
+len 18
+TIME 6
+len 18
+TIME 7
+len 18
+TIME 8
+len 18
+TIME 9
+len 17
+TIME 10
+len 17
+TIME 11
+len 17
+TIME 12
+len 8
+TIME 0
+len 1152
+TIME 1
+len 1006
+TIME 2
+len 924
+TIME 3
+len 794
+TIME 4
+len 880
+TIME 5
+len 878
+TIME 6
+len 760
+TIME 7
+len 792
+TIME 8
+len 730
+TIME 9
+len 882
+TIME 10
+len 577
+TIME 11
+len 691
+TIME 12
+len 18
+TIME 0
+len 25
+TIME 1
+len 25
+TIME 2
+len 22
+TIME 3
+len 23
+TIME 4
+len 22
+TIME 5
+len 21
+TIME 6
+len 20
+TIME 7
+len 23
+TIME 8
+len 23
+TIME 9
+len 20
+TIME 10
+len 12
+TIME 11
+len 16
+TIME 12
+len 8
+TIME 0
+len 253
+TIME 1
+len 222
+TIME 2
+len 244
+TIME 3
+len 190
+TIME 4
+len 162
+TIME 5
+len 162
+TIME 6
+len 135
+TIME 7
+len 140
+TIME 8
+len 124
+TIME 9
+len 162
+TIME 10
+len 183
+TIME 11
+len 189
+TIME 12
+len 8
+TIME 0
+len 13
+TIME 1
+len 13
+TIME 2
+len 13
+TIME 3
+len 13
+TIME 4
+len 13
+TIME 5
+len 13
+TIME 6
+len 13
+TIME 7
+len 13
+TIME 8
+len 13
+TIME 9
+len 13
+TIME 10
+len 13
+TIME 11
+len 13
+TIME 12
+len 10
+TIME 0
+len 349
+TIME 1
+len 348
+TIME 2
+len 346
+TIME 3
+len 344
+TIME 4
+len 345
+TIME 5
+len 344
+TIME 6
+len 336
+TIME 7
+len 336
+TIME 8
+len 319
+TIME 9
+len 306
+TIME 10
+len 163
+TIME 11
+len 74
+TIME 12
+len 7
+TIME 0
+len 590
+TIME 1
+len 579
+TIME 2
+len 565
+TIME 3
+len 573
+TIME 4
+len 552
+TIME 5
+len 555
+TIME 6
+len 538
+TIME 7
+len 537
+TIME 8
+len 507
+TIME 9
+len 385
+TIME 10
+len 209
+TIME 11
+len 27
+TIME 12
+len 8
+TIME 0
+len 25
+TIME 1
+len 25
+TIME 2
+len 25
+TIME 3
+len 25
+TIME 4
+len 25
+TIME 5
+len 25
+TIME 6
+len 24
+TIME 7
+len 24
+TIME 8
+len 25
+TIME 9
+len 24
+TIME 10
+len 21
+TIME 11
+len 13
+TIME 12
+len 2
+TIME 0
+len 116
+TIME 1
+len 115
+TIME 2
+len 115
+TIME 3
+len 116
+TIME 4
+len 116
+TIME 5
+len 115
+TIME 6
+len 114
+TIME 7
+len 114
+TIME 8
+len 113
+TIME 9
+len 113
+TIME 10
+len 70
+TIME 11
+len 39
+TIME 12
+len 4
+TIME 0
+len 130
+TIME 1
+len 129
+TIME 2
+len 129
+TIME 3
+len 130
+TIME 4
+len 129
+TIME 5
+len 130
+TIME 6
+len 129
+TIME 7
+len 126
+TIME 8
+len 124
+TIME 9
+len 122
+TIME 10
+len 22
+TIME 11
+len 5
+TIME 12
+len 1
+AlphaBAnalysis_2.py:547: RankWarning: Polyfit may be poorly conditioned
+  lplots=None,core_list=None,simframes=None)
+  TIME 0
+  len 17
+  TIME 1
+  len 17
+  TIME 2
+  len 17
+  TIME 3
+  len 17
+  TIME 4
+  len 17
+  TIME 5
+  len 17
+  TIME 6
+  len 16
+  TIME 7
+  len 17
+  TIME 8
+  len 17
+  TIME 9
+  len 17
+  TIME 10
+  len 17
+  TIME 11
+  len 15
+  TIME 12
+  len 11
+  TIME 0
+  len 1650
+  TIME 1
+  len 1576
+  TIME 2
+  len 1522
+  TIME 3
+  len 1508
+  TIME 4
+  len 1538
+  TIME 5
+  len 1500
+  TIME 6
+  len 1390
+  TIME 7
+  len 1395
+  TIME 8
+  len 1367
+  TIME 9
+  len 1420
+  TIME 10
+  len 1374
+  TIME 11
+  len 1219
+  TIME 12
+  len 17
+  TIME 0
+  len 252
+  TIME 1
+  len 243
+  TIME 2
+  len 237
+  TIME 3
+  len 225
+  TIME 4
+  len 220
+  TIME 5
+  len 168
+  TIME 6
+  len 176
+  TIME 7
+  len 198
+  TIME 8
+  len 157
+  TIME 9
+  len 200
+  TIME 10
+  len 203
+  TIME 11
+  len 39
+  TIME 12
+  len 3
+  TIME 0
+  len 21
+  TIME 1
+  len 21
+  TIME 2
+  len 21
+  TIME 3
+  len 21
+  TIME 4
+  len 21
+  TIME 5
+  len 21
+  TIME 6
+  len 20
+  TIME 7
+  len 18
+  TIME 8
+  len 13
+  TIME 9
+  len 14
+  TIME 10
+  len 11
+  TIME 11
+  len 11
+  TIME 12
+  len 8
+  TIME 0
+  len 1304
+  TIME 1
+  len 1283
+  TIME 2
+  len 1267
+  TIME 3
+  len 1251
+  TIME 4
+  len 1269
+  TIME 5
+  len 1245
+  TIME 6
+  len 1246
+  TIME 7
+  len 1252
+  TIME 8
+  len 1213
+  TIME 9
+  len 1186
+  TIME 10
+  len 509
+  TIME 11
+  len 297
+  TIME 12
+  len 9
+  TIME 0
+  len 979
+  TIME 1
+  len 971
+  TIME 2
+  len 957
+  TIME 3
+  len 953
+  TIME 4
+  len 948
+  TIME 5
+  len 923
+  TIME 6
+  len 928
+  TIME 7
+  len 920
+  TIME 8
+  len 899
+  TIME 9
+  len 876
+  TIME 10
+  len 890
+  TIME 11
+  len 588
+  TIME 12
+  len 11
+  TIME 0
+  len 11264
+  TIME 1
+  len 11187
+  TIME 2
+  len 10957
+  TIME 3
+  len 11176
+  TIME 4
+  len 11209
+  TIME 5
+  len 10485
+  TIME 6
+  len 9203
+  TIME 7
+  len 8293
+  TIME 8
+  len 6728
+  TIME 9
+  len 4377
+  TIME 10
+  len 3196
+  TIME 11
+  len 770
+  TIME 12
+  len 10
+  TIME 0
+  len 12
+  TIME 1
+  len 12
+  TIME 2
+  len 11
+  TIME 3
+  len 11
+  TIME 4
+  len 11
+  TIME 5
+  len 11
+  TIME 6
+  len 11
+  TIME 7
+  len 10
+  TIME 8
+  len 10
+  TIME 9
+  len 8
+  TIME 10
+  len 9
+  TIME 11
+  len 12
+  TIME 12
+  len 6
+  TIME 0
+  len 24
+  TIME 1
+  len 23
+  TIME 2
+  len 23
+  TIME 3
+  len 22
+  TIME 4
+  len 23
+  TIME 5
+  len 23
+  TIME 6
+  len 24
+  TIME 7
+  len 20
+  TIME 8
+  len 20
+  TIME 9
+  len 19
+  TIME 10
+  len 24
+  TIME 11
+  len 20
+  TIME 12
+  len 10
+  TIME 0
+  len 2200
+  TIME 1
+  len 2117
+  TIME 2
+  len 2009
+  TIME 3
+  len 1983
+  TIME 4
+  len 1946
+  TIME 5
+  len 1917
+  TIME 6
+  len 1913
+  TIME 7
+  len 1887
+  TIME 8
+  len 1765
+  TIME 9
+  len 1771
+  TIME 10
+  len 1816
+  TIME 11
+  len 1446
+  TIME 12
+  len 6
+  TIME 0
+  len 1233
+  TIME 1
+  len 1175
+  TIME 2
+  len 1156
+  TIME 3
+  len 1124
+  TIME 4
+  len 1115
+  TIME 5
+  len 1130
+  TIME 6
+  len 1131
+  TIME 7
+  len 1156
+  TIME 8
+  len 1063
+  TIME 9
+  len 1096
+  TIME 10
+  len 1101
+  TIME 11
+  len 666
+  TIME 12
+  len 10
+  TIME 0
+  len 648
+  TIME 1
+  len 641
+  TIME 2
+  len 634
+  TIME 3
+  len 631
+  TIME 4
+  len 625
+  TIME 5
+  len 619
+  TIME 6
+  len 617
+  TIME 7
+  len 612
+  TIME 8
+  len 583
+  TIME 9
+  len 589
+  TIME 10
+  len 603
+  TIME 11
+  len 553
+  TIME 12
+  len 13
+  TIME 0
+  len 4902
+  TIME 1
+  len 4113
+  TIME 2
+  len 3676
+  TIME 3
+  len 3816
+  TIME 4
+  len 3769
+  TIME 5
+  len 3940
+  TIME 6
+  len 3779
+  TIME 7
+  len 3842
+  TIME 8
+  len 3196
+  TIME 9
+  len 2113
+  TIME 10
+  len 1346
+  TIME 11
+  len 912
+  TIME 12
+  len 11
+  TIME 0
+  len 1478
+  TIME 1
+  len 1407
+  TIME 2
+  len 1315
+  TIME 3
+  len 1286
+  TIME 4
+  len 1255
+  TIME 5
+  len 1244
+  TIME 6
+  len 1308
+  TIME 7
+  len 1249
+  TIME 8
+  len 1035
+  TIME 9
+  len 1037
+  TIME 10
+  len 1303
+  TIME 11
+  len 972
+  TIME 12
+  len 13
+  TIME 0
+  len 1606
+  TIME 1
+  len 1544
+  TIME 2
+  len 1479
+  TIME 3
+  len 1402
+  TIME 4
+  len 1411
+  TIME 5
+  len 1302
+  TIME 6
+  len 1326
+  TIME 7
+  len 1316
+  TIME 8
+  len 1253
+  TIME 9
+  len 1111
+  TIME 10
+  len 1152
+  TIME 11
+  len 696
+  TIME 12
+  len 19
+  TIME 0
+  len 74
+  TIME 1
+  len 74
+  TIME 2
+  len 74
+  TIME 3
+  len 74
+  TIME 4
+  len 74
+  TIME 5
+  len 73
+  TIME 6
+  len 73
+  TIME 7
+  len 73
+  TIME 8
+  len 73
+  TIME 9
+  len 72
+  TIME 10
+  len 40
+  TIME 11
+  len 23
+  TIME 12
+  len 4
+  TIME 0
+  len 75
+  TIME 1
+  len 75
+  TIME 2
+  len 73
+  TIME 3
+  len 73
+  TIME 4
+  len 73
+  TIME 5
+  len 72
+  TIME 6
+  len 74
+  TIME 7
+  len 74
+  TIME 8
+  len 73
+  TIME 9
+  len 70
+  TIME 10
+  len 69
+  TIME 11
+  len 67
+  TIME 12
+  len 6
+  TIME 0
+  len 1039
+  TIME 1
+  len 1025
+  TIME 2
+  len 1004
+  TIME 3
+  len 999
+  TIME 4
+  len 992
+  TIME 5
+  len 975
+  TIME 6
+  len 970
+  TIME 7
+  len 982
+  TIME 8
+  len 987
+  TIME 9
+  len 970
+  TIME 10
+  len 970
+  TIME 11
+  len 763
+  TIME 12
+  len 2
+  TIME 0
+  len 21
+  TIME 1
+  len 21
+  TIME 2
+  len 21
+  TIME 3
+  len 21
+  TIME 4
+  len 20
+  TIME 5
+  len 20
+  TIME 6
+  len 20
+  TIME 7
+  len 21
+  TIME 8
+  len 20
+  TIME 9
+  len 21
+  TIME 10
+  len 20
+  TIME 11
+  len 17
+  TIME 12
+  len 11
+  TIME 0
+  len 1612
+  TIME 1
+  len 1540
+  TIME 2
+  len 1485
+  TIME 3
+  len 1500
+  TIME 4
+  len 1409
+  TIME 5
+  len 1388
+  TIME 6
+  len 1399
+  TIME 7
+  len 1401
+  TIME 8
+  len 1338
+  TIME 9
+  len 1118
+  TIME 10
+  len 833
+  TIME 11
+  len 472
+  TIME 12
+  len 5
+  TIME 0
+  len 21330
+  TIME 1
+  len 21472
+  TIME 2
+  len 20525
+  TIME 3
+  len 20527
+  TIME 4
+  len 20043
+  TIME 5
+  len 19660
+  TIME 6
+  len 19406
+  TIME 7
+  len 18128
+  TIME 8
+  len 15945
+  TIME 9
+  len 12097
+  TIME 10
+  len 7032
+  TIME 11
+  len 958
+  TIME 12
+  len 7
+  BOX SAVED
+  TIME 0
+  len 20
+  TIME 1
+  len 18
+  TIME 2
+  len 17
+  TIME 3
+  len 17
+  TIME 4
+  len 14
+  TIME 5
+  len 14
+  TIME 6
+  len 15
+  TIME 7
+  len 14
+  TIME 8
+  len 13
+  TIME 9
+  len 12
+  TIME 10
+  len 7
+  TIME 11
+  len 10
+  TIME 0
+  len 16
+  TIME 1
+  len 16
+  TIME 2
+  len 15
+  TIME 3
+  len 12
+  TIME 4
+  len 9
+  TIME 5
+  len 7
+  TIME 6
+  len 5
+  TIME 7
+  len 8
+  TIME 8
+  len 10
+  TIME 9
+  len 8
+  TIME 10
+  len 8
+  TIME 11
+  len 11
+  TIME 0
+  len 271
+  TIME 1
+  len 221
+  TIME 2
+  len 240
+  TIME 3
+  len 223
+  TIME 4
+  len 203
+  TIME 5
+  len 174
+  TIME 6
+  len 139
+  TIME 7
+  len 135
+  TIME 8
+  len 188
+  TIME 9
+  len 213
+  TIME 10
+  len 144
+  TIME 11
+  len 10
+  TIME 0
+  len 1385
+  TIME 1
+  len 1055
+  TIME 2
+  len 1243
+  TIME 3
+  len 1074
+  TIME 4
+  len 895
+  TIME 5
+  len 732
+  TIME 6
+  len 924
+  TIME 7
+  len 999
+  TIME 8
+  len 942
+  TIME 9
+  len 908
+  TIME 10
+  len 345
+  TIME 11
+  len 8
+  TIME 0
+  len 595
+  TIME 1
+  len 557
+  TIME 2
+  len 504
+  TIME 3
+  len 497
+  TIME 4
+  len 427
+  TIME 5
+  len 393
+  TIME 6
+  len 485
+  TIME 7
+  len 350
+  TIME 8
+  len 225
+  TIME 9
+  len 128
+  TIME 10
+  len 62
+  TIME 11
+  len 11
+  TIME 0
+  len 177
+  TIME 1
+  len 154
+  TIME 2
+  len 160
+  TIME 3
+  len 179
+  TIME 4
+  len 178
+  TIME 5
+  len 181
+  TIME 6
+  len 171
+  TIME 7
+  len 154
+  TIME 8
+  len 121
+  TIME 9
+  len 170
+  TIME 10
+  len 52
+  TIME 11
+  len 7
+  TIME 0
+  len 117
+  TIME 1
+  len 103
+  TIME 2
+  len 101
+  TIME 3
+  len 114
+  TIME 4
+  len 110
+  TIME 5
+  len 109
+  TIME 6
+  len 111
+  TIME 7
+  len 106
+  TIME 8
+  len 85
+  TIME 9
+  len 105
+  TIME 10
+  len 53
+  TIME 11
+  len 8
+  TIME 0
+  len 245
+  TIME 1
+  len 242
+  TIME 2
+  len 239
+  TIME 3
+  len 227
+  TIME 4
+  len 216
+  TIME 5
+  len 223
+  TIME 6
+  len 218
+  TIME 7
+  len 232
+  TIME 8
+  len 236
+  TIME 9
+  len 221
+  TIME 10
+  len 173
+  TIME 11
+  len 8
+  TIME 0
+  len 1631
+  TIME 1
+  len 1533
+  TIME 2
+  len 1453
+  TIME 3
+  len 1310
+  TIME 4
+  len 1011
+  TIME 5
+  len 931
+  TIME 6
+  len 834
+  TIME 7
+  len 1158
+  TIME 8
+  len 662
+  TIME 9
+  len 321
+  TIME 10
+  len 68
+  TIME 11
+  len 6
+  TIME 0
+  len 501
+  TIME 1
+  len 461
+  TIME 2
+  len 443
+  TIME 3
+  len 435
+  TIME 4
+  len 385
+  TIME 5
+  len 351
+  TIME 6
+  len 392
+  TIME 7
+  len 292
+  TIME 8
+  len 207
+  TIME 9
+  len 122
+  TIME 10
+  len 178
+  TIME 11
+  len 15
+  TIME 0
+  len 876
+  TIME 1
+  len 773
+  TIME 2
+  len 752
+  TIME 3
+  len 691
+  TIME 4
+  len 659
+  TIME 5
+  len 478
+  TIME 6
+  len 379
+  TIME 7
+  len 384
+  TIME 8
+  len 694
+  TIME 9
+  len 523
+  TIME 10
+  len 188
+  TIME 11
+  len 6
+  TIME 0
+  len 411
+  TIME 1
+  len 389
+  TIME 2
+  len 361
+  TIME 3
+  len 342
+  TIME 4
+  len 328
+  TIME 5
+  len 196
+  TIME 6
+  len 158
+  TIME 7
+  len 257
+  TIME 8
+  len 371
+  TIME 9
+  len 244
+  TIME 10
+  len 116
+  TIME 11
+  len 14
+  TIME 0
+  len 511
+  TIME 1
+  len 392
+  TIME 2
+  len 365
+  TIME 3
+  len 378
+  TIME 4
+  len 383
+  TIME 5
+  len 346
+  TIME 6
+  len 350
+  TIME 7
+  len 332
+  TIME 8
+  len 294
+  TIME 9
+  len 227
+  TIME 10
+  len 58
+  TIME 11
+  len 10
+  TIME 0
+  len 506
+  TIME 1
+  len 440
+  TIME 2
+  len 436
+  TIME 3
+  len 388
+  TIME 4
+  len 363
+  TIME 5
+  len 310
+  TIME 6
+  len 291
+  TIME 7
+  len 295
+  TIME 8
+  len 226
+  TIME 9
+  len 344
+  TIME 10
+  len 329
+  TIME 11
+  len 14
+  TIME 0
+  len 3599
+  TIME 1
+  len 3306
+  TIME 2
+  len 3000
+  TIME 3
+  len 2645
+  TIME 4
+  len 2933
+  TIME 5
+  len 2929
+  TIME 6
+  len 2686
+  TIME 7
+  len 2059
+  TIME 8
+  len 1746
+  TIME 9
+  len 1251
+  TIME 10
+  len 513
+  TIME 11
+  len 6
+  TIME 0
+  len 4823
+  TIME 1
+  len 3719
+  TIME 2
+  len 3067
+  TIME 3
+  len 3028
+  TIME 4
+  len 3357
+  TIME 5
+  len 2403
+  TIME 6
+  len 3009
+  TIME 7
+  len 3469
+  TIME 8
+  len 3188
+  TIME 9
+  len 1954
+  TIME 10
+  len 861
+  TIME 11
+  len 9
+  TIME 0
+  len 28
+  TIME 1
+  len 27
+  TIME 2
+  len 28
+  TIME 3
+  len 28
+  TIME 4
+  len 28
+  TIME 5
+  len 28
+  TIME 6
+  len 28
+  TIME 7
+  len 28
+  TIME 8
+  len 28
+  TIME 9
+  len 26
+  TIME 10
+  len 10
+  TIME 11
+  len 10
+  TIME 0
+  len 6148
+  TIME 1
+  len 5620
+  TIME 2
+  len 5143
+  TIME 3
+  len 5300
+  TIME 4
+  len 5106
+  TIME 5
+  len 4965
+  TIME 6
+  len 5281
+  TIME 7
+  len 5194
+  TIME 8
+  len 4308
+  TIME 9
+  len 3006
+  TIME 10
+  len 951
+  TIME 11
+  len 11
+  TIME 0
+  len 13
+  TIME 1
+  len 13
+  TIME 2
+  len 13
+  TIME 3
+  len 13
+  TIME 4
+  len 13
+  TIME 5
+  len 13
+  TIME 6
+  len 13
+  TIME 7
+  len 13
+  TIME 8
+  len 13
+  TIME 9
+  len 12
+  TIME 10
+  len 12
+  TIME 11
+  len 4
+  TIME 0
+  len 468
+  TIME 1
+  len 461
+  TIME 2
+  len 448
+  TIME 3
+  len 441
+  TIME 4
+  len 445
+  TIME 5
+  len 445
+  TIME 6
+  len 447
+  TIME 7
+  len 433
+  TIME 8
+  len 448
+  TIME 9
+  len 420
+  TIME 10
+  len 203
+  TIME 11
+  len 8
+  TIME 0
+  len 5376
+  TIME 1
+  len 5011
+  TIME 2
+  len 4396
+  TIME 3
+  len 4341
+  TIME 4
+  len 4322
+  TIME 5
+  len 4432
+  TIME 6
+  len 4191
+  TIME 7
+  len 3388
+  TIME 8
+  len 2327
+  TIME 9
+  len 1420
+  TIME 10
+  len 430
+  TIME 11
+  len 11
+  TIME 0
+  len 477
+  TIME 1
+  len 429
+  TIME 2
+  len 443
+  TIME 3
+  len 369
+  TIME 4
+  len 342
+  TIME 5
+  len 291
+  TIME 6
+  len 237
+  TIME 7
+  len 201
+  TIME 8
+  len 227
+  TIME 9
+  len 172
+  TIME 10
+  len 85
+  TIME 11
+  len 4
+  TIME 0
+  len 427
+  TIME 1
+  len 338
+  TIME 2
+  len 322
+  TIME 3
+  len 281
+  TIME 4
+  len 226
+  TIME 5
+  len 175
+  TIME 6
+  len 273
+  TIME 7
+  len 306
+  TIME 8
+  len 171
+  TIME 9
+  len 72
+  TIME 10
+  len 29
+  TIME 11
+  len 8
+  TIME 0
+  len 133
+  TIME 1
+  len 130
+  TIME 2
+  len 128
+  TIME 3
+  len 126
+  TIME 4
+  len 128
+  TIME 5
+  len 130
+  TIME 6
+  len 129
+  TIME 7
+  len 126
+  TIME 8
+  len 130
+  TIME 9
+  len 126
+  TIME 10
+  len 122
+  TIME 11
+  len 12
+  TIME 0
+  len 1386
+  TIME 1
+  len 1177
+  TIME 2
+  len 1269
+  TIME 3
+  len 953
+  TIME 4
+  len 889
+  TIME 5
+  len 712
+  TIME 6
+  len 588
+  TIME 7
+  len 495
+  TIME 8
+  len 728
+  TIME 9
+  len 679
+  TIME 10
+  len 196
+  TIME 11
+  len 10
+  TIME 0
+  len 240
+  TIME 1
+  len 218
+  TIME 2
+  len 198
+  TIME 3
+  len 183
+  TIME 4
+  len 163
+  TIME 5
+  len 193
+  TIME 6
+  len 198
+  TIME 7
+  len 215
+  TIME 8
+  len 205
+  TIME 9
+  len 194
+  TIME 10
+  len 116
+  TIME 11
+  len 14
+  TIME 0
+  len 532
+  TIME 1
+  len 396
+  TIME 2
+  len 396
+  TIME 3
+  len 441
+  TIME 4
+  len 397
+  TIME 5
+  len 343
+  TIME 6
+  len 287
+  TIME 7
+  len 216
+  TIME 8
+  len 177
+  TIME 9
+  len 164
+  TIME 10
+  len 39
+  TIME 11
+  len 7
+  TIME 0
+  len 142
+  TIME 1
+  len 127
+  TIME 2
+  len 107
+  TIME 3
+  len 83
+  TIME 4
+  len 114
+  TIME 5
+  len 105
+  TIME 6
+  len 123
+  TIME 7
+  len 127
+  TIME 8
+  len 116
+  TIME 9
+  len 67
+  TIME 10
+  len 28
+  TIME 11
+  len 10
+  TIME 0
+  len 470
+  TIME 1
+  len 454
+  TIME 2
+  len 447
+  TIME 3
+  len 426
+  TIME 4
+  len 378
+  TIME 5
+  len 361
+  TIME 6
+  len 442
+  TIME 7
+  len 458
+  TIME 8
+  len 319
+  TIME 9
+  len 208
+  TIME 10
+  len 64
+  TIME 11
+  len 5
+  TIME 0
+  len 789
+  TIME 1
+  len 685
+  TIME 2
+  len 634
+  TIME 3
+  len 581
+  TIME 4
+  len 614
+  TIME 5
+  len 573
+  TIME 6
+  len 528
+  TIME 7
+  len 632
+  TIME 8
+  len 673
+  TIME 9
+  len 580
+  TIME 10
+  len 551
+  TIME 11
+  len 12
+  TIME 0
+  len 15
+  TIME 1
+  len 15
+  TIME 2
+  len 14
+  TIME 3
+  len 14
+  TIME 4
+  len 11
+  TIME 5
+  len 10
+  TIME 6
+  len 13
+  TIME 7
+  len 14
+  TIME 8
+  len 11
+  TIME 9
+  len 9
+  TIME 10
+  len 8
+  TIME 11
+  len 6
+  TIME 0
+  len 31
+  TIME 1
+  len 29
+  TIME 2
+  len 29
+  TIME 3
+  len 29
+  TIME 4
+  len 28
+  TIME 5
+  len 29
+  TIME 6
+  len 27
+  TIME 7
+  len 20
+  TIME 8
+  len 24
+  TIME 9
+  len 25
+  TIME 10
+  len 12
+  TIME 11
+  len 6
+  TIME 0
+  len 497
+  TIME 1
+  len 407
+  TIME 2
+  len 355
+  TIME 3
+  len 418
+  TIME 4
+  len 389
+  TIME 5
+  len 337
+  TIME 6
+  len 249
+  TIME 7
+  len 190
+  TIME 8
+  len 183
+  TIME 9
+  len 279
+  TIME 10
+  len 33
+  TIME 11
+  len 7
+  TIME 0
+  len 53
+  TIME 1
+  len 52
+  TIME 2
+  len 52
+  TIME 3
+  len 52
+  TIME 4
+  len 53
+  TIME 5
+  len 52
+  TIME 6
+  len 51
+  TIME 7
+  len 48
+  TIME 8
+  len 50
+  TIME 9
+  len 50
+  TIME 10
+  len 50
+  TIME 11
+  len 11
+  TIME 0
+  len 1328
+  TIME 1
+  len 1047
+  TIME 2
+  len 1320
+  TIME 3
+  len 1152
+  TIME 4
+  len 989
+  TIME 5
+  len 1254
+  TIME 6
+  len 1322
+  TIME 7
+  len 831
+  TIME 8
+  len 462
+  TIME 9
+  len 283
+  TIME 10
+  len 165
+  TIME 11
+  len 6
+  TIME 0
+  len 263
+  TIME 1
+  len 222
+  TIME 2
+  len 225
+  TIME 3
+  len 242
+  TIME 4
+  len 214
+  TIME 5
+  len 182
+  TIME 6
+  len 211
+  TIME 7
+  len 225
+  TIME 8
+  len 201
+  TIME 9
+  len 198
+  TIME 10
+  len 65
+  TIME 11
+  len 7
+  TIME 0
+  len 332
+  TIME 1
+  len 288
+  TIME 2
+  len 260
+  TIME 3
+  len 242
+  TIME 4
+  len 288
+  TIME 5
+  len 196
+  TIME 6
+  len 192
+  TIME 7
+  len 177
+  TIME 8
+  len 193
+  TIME 9
+  len 243
+  TIME 10
+  len 108
+  TIME 11
+  len 12
+  TIME 0
+  len 790
+  TIME 1
+  len 685
+  TIME 2
+  len 825
+  TIME 3
+  len 766
+  TIME 4
+  len 773
+  TIME 5
+  len 794
+  TIME 6
+  len 818
+  TIME 7
+  len 709
+  TIME 8
+  len 535
+  TIME 9
+  len 294
+  TIME 10
+  len 93
+  TIME 11
+  len 6
+  TIME 0
+  len 83
+  TIME 1
+  len 83
+  TIME 2
+  len 83
+  TIME 3
+  len 82
+  TIME 4
+  len 82
+  TIME 5
+  len 83
+  TIME 6
+  len 82
+  TIME 7
+  len 82
+  TIME 8
+  len 80
+  TIME 9
+  len 73
+  TIME 10
+  len 35
+  TIME 11
+  len 1
+  AlphaBAnalysis_2.py:547: RankWarning: Polyfit may be poorly conditioned
+    lplots=None,core_list=None,simframes=None)
+    TIME 0
+    len 1961
+    TIME 1
+    len 1931
+    TIME 2
+    len 1957
+    TIME 3
+    len 1842
+    TIME 4
+    len 1608
+    TIME 5
+    len 1884
+    TIME 6
+    len 1915
+    TIME 7
+    len 1698
+    TIME 8
+    len 1106
+    TIME 9
+    len 392
+    TIME 10
+    len 46
+    TIME 11
+    len 4
+    TIME 0
+    len 37
+    TIME 1
+    len 37
+    TIME 2
+    len 36
+    TIME 3
+    len 37
+    TIME 4
+    len 37
+    TIME 5
+    len 37
+    TIME 6
+    len 37
+    TIME 7
+    len 37
+    TIME 8
+    len 37
+    TIME 9
+    len 37
+    TIME 10
+    len 37
+    TIME 11
+    len 6
+    TIME 0
+    len 338
+    TIME 1
+    len 330
+    TIME 2
+    len 335
+    TIME 3
+    len 333
+    TIME 4
+    len 316
+    TIME 5
+    len 330
+    TIME 6
+    len 330
+    TIME 7
+    len 327
+    TIME 8
+    len 330
+    TIME 9
+    len 309
+    TIME 10
+    len 131
+    TIME 11
+    len 6
+    TIME 0
+    len 599
+    TIME 1
+    len 566
+    TIME 2
+    len 582
+    TIME 3
+    len 576
+    TIME 4
+    len 582
+    TIME 5
+    len 532
+    TIME 6
+    len 467
+    TIME 7
+    len 444
+    TIME 8
+    len 321
+    TIME 9
+    len 263
+    TIME 10
+    len 80
+    TIME 11
+    len 8
+    TIME 0
+    len 23
+    TIME 1
+    len 23
+    TIME 2
+    len 23
+    TIME 3
+    len 23
+    TIME 4
+    len 23
+    TIME 5
+    len 23
+    TIME 6
+    len 22
+    TIME 7
+    len 23
+    TIME 8
+    len 23
+    TIME 9
+    len 21
+    TIME 10
+    len 21
+    TIME 11
+    len 8
+    TIME 0
+    len 1892
+    TIME 1
+    len 1846
+    TIME 2
+    len 1783
+    TIME 3
+    len 1723
+    TIME 4
+    len 1779
+    TIME 5
+    len 1688
+    TIME 6
+    len 1692
+    TIME 7
+    len 1737
+    TIME 8
+    len 1487
+    TIME 9
+    len 892
+    TIME 10
+    len 379
+    TIME 11
+    len 14
+    TIME 0
+    len 10369
+    TIME 1
+    len 9502
+    TIME 2
+    len 9460
+    TIME 3
+    len 9007
+    TIME 4
+    len 9035
+    TIME 5
+    len 8986
+    TIME 6
+    len 8589
+    TIME 7
+    len 8293
+    TIME 8
+    len 7281
+    TIME 9
+    len 5263
+    TIME 10
+    len 1003
+    TIME 11
+    len 16
+    TIME 0
+    len 664
+    TIME 1
+    len 627
+    TIME 2
+    len 624
+    TIME 3
+    len 577
+    TIME 4
+    len 489
+    TIME 5
+    len 440
+    TIME 6
+    len 361
+    TIME 7
+    len 280
+    TIME 8
+    len 214
+    TIME 9
+    len 131
+    TIME 10
+    len 413
+    TIME 11
+    len 13
+    TIME 0
+    len 1125
+    TIME 1
+    len 926
+    TIME 2
+    len 899
+    TIME 3
+    len 757
+    TIME 4
+    len 624
+    TIME 5
+    len 745
+    TIME 6
+    len 923
+    TIME 7
+    len 591
+    TIME 8
+    len 427
+    TIME 9
+    len 234
+    TIME 10
+    len 52
+    TIME 11
+    len 10
+    TIME 0
+    len 927
+    TIME 1
+    len 861
+    TIME 2
+    len 780
+    TIME 3
+    len 715
+    TIME 4
+    len 550
+    TIME 5
+    len 465
+    TIME 6
+    len 401
+    TIME 7
+    len 295
+    TIME 8
+    len 389
+    TIME 9
+    len 498
+    TIME 10
+    len 198
+    TIME 11
+    len 13
+    TIME 0
+    len 956
+    TIME 1
+    len 911
+    TIME 2
+    len 813
+    TIME 3
+    len 714
+    TIME 4
+    len 710
+    TIME 5
+    len 769
+    TIME 6
+    len 824
+    TIME 7
+    len 827
+    TIME 8
+    len 782
+    TIME 9
+    len 488
+    TIME 10
+    len 267
+    TIME 11
+    len 12
+    TIME 0
+    len 928
+    TIME 1
+    len 919
+    TIME 2
+    len 893
+    TIME 3
+    len 836
+    TIME 4
+    len 820
+    TIME 5
+    len 780
+    TIME 6
+    len 807
+    TIME 7
+    len 796
+    TIME 8
+    len 451
+    TIME 9
+    len 212
+    TIME 10
+    len 96
+    TIME 11
+    len 10
+    TIME 0
+    len 4070
+    TIME 1
+    len 3905
+    TIME 2
+    len 3309
+    TIME 3
+    len 2494
+    TIME 4
+    len 3066
+    TIME 5
+    len 3303
+    TIME 6
+    len 2948
+    TIME 7
+    len 2203
+    TIME 8
+    len 1549
+    TIME 9
+    len 1055
+    TIME 10
+    len 436
+    TIME 11
+    len 10
+    TIME 0
+    len 48
+    TIME 1
+    len 48
+    TIME 2
+    len 46
+    TIME 3
+    len 48
+    TIME 4
+    len 47
+    TIME 5
+    len 46
+    TIME 6
+    len 46
+    TIME 7
+    len 47
+    TIME 8
+    len 46
+    TIME 9
+    len 43
+    TIME 10
+    len 13
+    TIME 11
+    len 5
+    TIME 0
+    len 99
+    TIME 1
+    len 96
+    TIME 2
+    len 84
+    TIME 3
+    len 89
+    TIME 4
+    len 90
+    TIME 5
+    len 88
+    TIME 6
+    len 92
+    TIME 7
+    len 94
+    TIME 8
+    len 92
+    TIME 9
+    len 95
+    TIME 10
+    len 76
+    TIME 11
+    len 15
+    TIME 0
+    len 542
+    TIME 1
+    len 504
+    TIME 2
+    len 472
+    TIME 3
+    len 463
+    TIME 4
+    len 468
+    TIME 5
+    len 457
+    TIME 6
+    len 441
+    TIME 7
+    len 429
+    TIME 8
+    len 440
+    TIME 9
+    len 403
+    TIME 10
+    len 395
+    TIME 11
+    len 13
+    TIME 0
+    len 577
+    TIME 1
+    len 504
+    TIME 2
+    len 467
+    TIME 3
+    len 433
+    TIME 4
+    len 427
+    TIME 5
+    len 428
+    TIME 6
+    len 370
+    TIME 7
+    len 296
+    TIME 8
+    len 408
+    TIME 9
+    len 215
+    TIME 10
+    len 340
+    TIME 11
+    len 12
+    TIME 0
+    len 203
+    TIME 1
+    len 197
+    TIME 2
+    len 186
+    TIME 3
+    len 166
+    TIME 4
+    len 172
+    TIME 5
+    len 167
+    TIME 6
+    len 172
+    TIME 7
+    len 179
+    TIME 8
+    len 153
+    TIME 9
+    len 123
+    TIME 10
+    len 150
+    TIME 11
+    len 13
+    TIME 0
+    len 1615
+    TIME 1
+    len 1464
+    TIME 2
+    len 1359
+    TIME 3
+    len 1395
+    TIME 4
+    len 1389
+    TIME 5
+    len 1287
+    TIME 6
+    len 1316
+    TIME 7
+    len 1490
+    TIME 8
+    len 1113
+    TIME 9
+    len 755
+    TIME 10
+    len 289
+    TIME 11
+    len 8
+    TIME 0
+    len 795
+    TIME 1
+    len 719
+    TIME 2
+    len 683
+    TIME 3
+    len 661
+    TIME 4
+    len 709
+    TIME 5
+    len 681
+    TIME 6
+    len 616
+    TIME 7
+    len 540
+    TIME 8
+    len 391
+    TIME 9
+    len 188
+    TIME 10
+    len 81
+    TIME 11
+    len 4
+    TIME 0
+    len 389
+    TIME 1
+    len 344
+    TIME 2
+    len 296
+    TIME 3
+    len 254
+    TIME 4
+    len 352
+    TIME 5
+    len 346
+    TIME 6
+    len 159
+    TIME 7
+    len 294
+    TIME 8
+    len 339
+    TIME 9
+    len 185
+    TIME 10
+    len 184
+    TIME 11
+    len 15
+    TIME 0
+    len 644
+    TIME 1
+    len 563
+    TIME 2
+    len 470
+    TIME 3
+    len 400
+    TIME 4
+    len 473
+    TIME 5
+    len 401
+    TIME 6
+    len 312
+    TIME 7
+    len 206
+    TIME 8
+    len 478
+    TIME 9
+    len 354
+    TIME 10
+    len 114
+    TIME 11
+    len 11
+    TIME 0
+    len 2551
+    TIME 1
+    len 2494
+    TIME 2
+    len 2487
+    TIME 3
+    len 2483
+    TIME 4
+    len 2485
+    TIME 5
+    len 2442
+    TIME 6
+    len 2420
+    TIME 7
+    len 2080
+    TIME 8
+    len 794
+    TIME 9
+    len 374
+    TIME 10
+    len 162
+    TIME 11
+    len 7
+    TIME 0
+    len 27
+    TIME 1
+    len 27
+    TIME 2
+    len 27
+    TIME 3
+    len 27
+    TIME 4
+    len 27
+    TIME 5
+    len 27
+    TIME 6
+    len 27
+    TIME 7
+    len 27
+    TIME 8
+    len 26
+    TIME 9
+    len 25
+    TIME 10
+    len 17
+    TIME 11
+    len 7
+    TIME 0
+    len 3384
+    TIME 1
+    len 3269
+    TIME 2
+    len 2967
+    TIME 3
+    len 3261
+    TIME 4
+    len 3081
+    TIME 5
+    len 3323
+    TIME 6
+    len 3285
+    TIME 7
+    len 2921
+    TIME 8
+    len 2057
+    TIME 9
+    len 868
+    TIME 10
+    len 130
+    TIME 11
+    len 8
+    TIME 0
+    len 23
+    TIME 1
+    len 23
+    TIME 2
+    len 23
+    TIME 3
+    len 23
+    TIME 4
+    len 23
+    TIME 5
+    len 23
+    TIME 6
+    len 23
+    TIME 7
+    len 22
+    TIME 8
+    len 19
+    TIME 9
+    len 21
+    TIME 10
+    len 18
+    TIME 11
+    len 6
+    TIME 0
+    len 13
+    TIME 1
+    len 13
+    TIME 2
+    len 12
+    TIME 3
+    len 13
+    TIME 4
+    len 13
+    TIME 5
+    len 13
+    TIME 6
+    len 12
+    TIME 7
+    len 13
+    TIME 8
+    len 13
+    TIME 9
+    len 11
+    TIME 10
+    len 12
+    TIME 11
+    len 8
+    TIME 0
+    len 97
+    TIME 1
+    len 97
+    TIME 2
+    len 97
+    TIME 3
+    len 96
+    TIME 4
+    len 96
+    TIME 5
+    len 97
+    TIME 6
+    len 97
+    TIME 7
+    len 97
+    TIME 8
+    len 97
+    TIME 9
+    len 94
+    TIME 10
+    len 85
+    TIME 11
+    len 10
+    TIME 0
+    len 779
+    TIME 1
+    len 769
+    TIME 2
+    len 766
+    TIME 3
+    len 772
+    TIME 4
+    len 763
+    TIME 5
+    len 750
+    TIME 6
+    len 750
+    TIME 7
+    len 755
+    TIME 8
+    len 741
+    TIME 9
+    len 699
+    TIME 10
+    len 591
+    TIME 11
+    len 10
+    TIME 0
+    len 533
+    TIME 1
+    len 525
+    TIME 2
+    len 516
+    TIME 3
+    len 508
+    TIME 4
+    len 508
+    TIME 5
+    len 510
+    TIME 6
+    len 491
+    TIME 7
+    len 513
+    TIME 8
+    len 495
+    TIME 9
+    len 494
+    TIME 10
+    len 361
+    TIME 11
+    len 10
+    TIME 0
+    len 340
+    TIME 1
+    len 339
+    TIME 2
+    len 336
+    TIME 3
+    len 334
+    TIME 4
+    len 339
+    TIME 5
+    len 338
+    TIME 6
+    len 335
+    TIME 7
+    len 333
+    TIME 8
+    len 326
+    TIME 9
+    len 315
+    TIME 10
+    len 250
+    TIME 11
+    len 8
+    TIME 0
+    len 356
+    TIME 1
+    len 355
+    TIME 2
+    len 350
+    TIME 3
+    len 351
+    TIME 4
+    len 350
+    TIME 5
+    len 347
+    TIME 6
+    len 342
+    TIME 7
+    len 346
+    TIME 8
+    len 336
+    TIME 9
+    len 337
+    TIME 10
+    len 302
+    TIME 11
+    len 12
+    TIME 0
+    len 29
+    TIME 1
+    len 29
+    TIME 2
+    len 29
+    TIME 3
+    len 29
+    TIME 4
+    len 29
+    TIME 5
+    len 29
+    TIME 6
+    len 29
+    TIME 7
+    len 29
+    TIME 8
+    len 29
+    TIME 9
+    len 29
+    TIME 10
+    len 29
+    TIME 11
+    len 7
+    TIME 0
+    len 4927
+    TIME 1
+    len 4831
+    TIME 2
+    len 4764
+    TIME 3
+    len 4722
+    TIME 4
+    len 4695
+    TIME 5
+    len 4705
+    TIME 6
+    len 4696
+    TIME 7
+    len 4691
+    TIME 8
+    len 4523
+    TIME 9
+    len 4100
+    TIME 10
+    len 2917
+    TIME 11
+    len 6
+    TIME 0
+    len 43494
+    TIME 1
+    len 43246
+    TIME 2
+    len 42866
+    TIME 3
+    len 41499
+    TIME 4
+    len 41189
+    TIME 5
+    len 39971
+    TIME 6
+    len 38780
+    TIME 7
+    len 35098
+    TIME 8
+    len 29162
+    TIME 9
+    len 22098
+    TIME 10
+    len 5026
+    TIME 11
+    len 13
+    TIME 0
+    len 944
+    TIME 1
+    len 941
+    TIME 2
+    len 932
+    TIME 3
+    len 933
+    TIME 4
+    len 919
+    TIME 5
+    len 924
+    TIME 6
+    len 921
+    TIME 7
+    len 917
+    TIME 8
+    len 895
+    TIME 9
+    len 913
+    TIME 10
+    len 821
+    TIME 11
+    len 8
+    TIME 0
+    len 101
+    TIME 1
+    len 101
+    TIME 2
+    len 100
+    TIME 3
+    len 101
+    TIME 4
+    len 100
+    TIME 5
+    len 101
+    TIME 6
+    len 101
+    TIME 7
+    len 101
+    TIME 8
+    len 99
+    TIME 9
+    len 100
+    TIME 10
+    len 99
+    TIME 11
+    len 6
+    TIME 0
+    len 112
+    TIME 1
+    len 112
+    TIME 2
+    len 107
+    TIME 3
+    len 109
+    TIME 4
+    len 110
+    TIME 5
+    len 106
+    TIME 6
+    len 108
+    TIME 7
+    len 105
+    TIME 8
+    len 103
+    TIME 9
+    len 103
+    TIME 10
+    len 79
+    TIME 11
+    len 10
+    TIME 0
+    len 675
+    TIME 1
+    len 657
+    TIME 2
+    len 644
+    TIME 3
+    len 622
+    TIME 4
+    len 553
+    TIME 5
+    len 444
+    TIME 6
+    len 372
+    TIME 7
+    len 297
+    TIME 8
+    len 235
+    TIME 9
+    len 161
+    TIME 10
+    len 36
+    TIME 11
+    len 8
+    TIME 0
+    len 164
+    TIME 1
+    len 161
+    TIME 2
+    len 159
+    TIME 3
+    len 145
+    TIME 4
+    len 151
+    TIME 5
+    len 148
+    TIME 6
+    len 132
+    TIME 7
+    len 153
+    TIME 8
+    len 140
+    TIME 9
+    len 114
+    TIME 10
+    len 26
+    TIME 11
+    len 8
+    TIME 0
+    len 25
+    TIME 1
+    len 25
+    TIME 2
+    len 25
+    TIME 3
+    len 25
+    TIME 4
+    len 25
+    TIME 5
+    len 25
+    TIME 6
+    len 24
+    TIME 7
+    len 23
+    TIME 8
+    len 24
+    TIME 9
+    len 22
+    TIME 10
+    len 23
+    TIME 11
+    len 6
+    TIME 0
+    len 672
+    TIME 1
+    len 644
+    TIME 2
+    len 585
+    TIME 3
+    len 464
+    TIME 4
+    len 495
+    TIME 5
+    len 493
+    TIME 6
+    len 440
+    TIME 7
+    len 365
+    TIME 8
+    len 269
+    TIME 9
+    len 384
+    TIME 10
+    len 143
+    TIME 11
+    len 12
+    TIME 0
+    len 1147
+    TIME 1
+    len 1096
+    TIME 2
+    len 1019
+    TIME 3
+    len 921
+    TIME 4
+    len 851
+    TIME 5
+    len 965
+    TIME 6
+    len 927
+    TIME 7
+    len 661
+    TIME 8
+    len 712
+    TIME 9
+    len 480
+    TIME 10
+    len 128
+    TIME 11
+    len 7
+    TIME 0
+    len 248
+    TIME 1
+    len 238
+    TIME 2
+    len 237
+    TIME 3
+    len 230
+    TIME 4
+    len 220
+    TIME 5
+    len 230
+    TIME 6
+    len 191
+    TIME 7
+    len 203
+    TIME 8
+    len 219
+    TIME 9
+    len 150
+    TIME 10
+    len 56
+    TIME 11
+    len 13
+    TIME 0
+    len 75
+    TIME 1
+    len 75
+    TIME 2
+    len 73
+    TIME 3
+    len 69
+    TIME 4
+    len 69
+    TIME 5
+    len 70
+    TIME 6
+    len 70
+    TIME 7
+    len 72
+    TIME 8
+    len 70
+    TIME 9
+    len 70
+    TIME 10
+    len 57
+    TIME 11
+    len 9
+    TIME 0
+    len 12
+    TIME 1
+    len 12
+    TIME 2
+    len 12
+    TIME 3
+    len 11
+    TIME 4
+    len 12
+    TIME 5
+    len 10
+    TIME 6
+    len 10
+    TIME 7
+    len 10
+    TIME 8
+    len 10
+    TIME 9
+    len 11
+    TIME 10
+    len 12
+    TIME 11
+    len 10
+    TIME 0
+    len 195
+    TIME 1
+    len 188
+    TIME 2
+    len 187
+    TIME 3
+    len 166
+    TIME 4
+    len 183
+    TIME 5
+    len 181
+    TIME 6
+    len 150
+    TIME 7
+    len 139
+    TIME 8
+    len 97
+    TIME 9
+    len 44
+    TIME 10
+    len 10
+    TIME 11
+    len 5
+    TIME 0
+    len 266
+    TIME 1
+    len 234
+    TIME 2
+    len 255
+    TIME 3
+    len 158
+    TIME 4
+    len 119
+    TIME 5
+    len 97
+    TIME 6
+    len 81
+    TIME 7
+    len 76
+    TIME 8
+    len 57
+    TIME 9
+    len 40
+    TIME 10
+    len 37
+    TIME 11
+    len 7
+    TIME 0
+    len 326
+    TIME 1
+    len 291
+    TIME 2
+    len 287
+    TIME 3
+    len 269
+    TIME 4
+    len 249
+    TIME 5
+    len 257
+    TIME 6
+    len 216
+    TIME 7
+    len 210
+    TIME 8
+    len 303
+    TIME 9
+    len 132
+    TIME 10
+    len 35
+    TIME 11
+    len 11
+    TIME 0
+    len 26
+    TIME 1
+    len 24
+    TIME 2
+    len 25
+    TIME 3
+    len 26
+    TIME 4
+    len 24
+    TIME 5
+    len 25
+    TIME 6
+    len 22
+    TIME 7
+    len 22
+    TIME 8
+    len 24
+    TIME 9
+    len 26
+    TIME 10
+    len 22
+    TIME 11
+    len 11
+    TIME 0
+    len 64
+    TIME 1
+    len 63
+    TIME 2
+    len 61
+    TIME 3
+    len 61
+    TIME 4
+    len 62
+    TIME 5
+    len 57
+    TIME 6
+    len 55
+    TIME 7
+    len 53
+    TIME 8
+    len 52
+    TIME 9
+    len 60
+    TIME 10
+    len 46
+    TIME 11
+    len 15
+    TIME 0
+    len 40
+    TIME 1
+    len 38
+    TIME 2
+    len 38
+    TIME 3
+    len 37
+    TIME 4
+    len 38
+    TIME 5
+    len 37
+    TIME 6
+    len 35
+    TIME 7
+    len 37
+    TIME 8
+    len 37
+    TIME 9
+    len 37
+    TIME 10
+    len 22
+    TIME 11
+    len 7
+    TIME 0
+    len 445
+    TIME 1
+    len 426
+    TIME 2
+    len 401
+    TIME 3
+    len 408
+    TIME 4
+    len 384
+    TIME 5
+    len 236
+    TIME 6
+    len 332
+    TIME 7
+    len 336
+    TIME 8
+    len 198
+    TIME 9
+    len 73
+    TIME 10
+    len 14
+    TIME 11
+    len 4
+    TIME 0
+    len 51
+    TIME 1
+    len 51
+    TIME 2
+    len 51
+    TIME 3
+    len 50
+    TIME 4
+    len 50
+    TIME 5
+    len 43
+    TIME 6
+    len 40
+    TIME 7
+    len 43
+    TIME 8
+    len 39
+    TIME 9
+    len 42
+    TIME 10
+    len 34
+    TIME 11
+    len 14
+    TIME 0
+    len 348
+    TIME 1
+    len 347
+    TIME 2
+    len 344
+    TIME 3
+    len 317
+    TIME 4
+    len 305
+    TIME 5
+    len 306
+    TIME 6
+    len 303
+    TIME 7
+    len 174
+    TIME 8
+    len 65
+    TIME 9
+    len 48
+    TIME 10
+    len 16
+    TIME 11
+    len 6
+    TIME 0
+    len 966
+    TIME 1
+    len 995
+    TIME 2
+    len 998
+    TIME 3
+    len 976
+    TIME 4
+    len 997
+    TIME 5
+    len 988
+    TIME 6
+    len 905
+    TIME 7
+    len 815
+    TIME 8
+    len 738
+    TIME 9
+    len 605
+    TIME 10
+    len 267
+    TIME 11
+    len 5
+    TIME 0
+    len 218
+    TIME 1
+    len 218
+    TIME 2
+    len 213
+    TIME 3
+    len 208
+    TIME 4
+    len 208
+    TIME 5
+    len 208
+    TIME 6
+    len 210
+    TIME 7
+    len 198
+    TIME 8
+    len 197
+    TIME 9
+    len 199
+    TIME 10
+    len 114
+    TIME 11
+    len 6
+    TIME 0
+    len 527
+    TIME 1
+    len 520
+    TIME 2
+    len 515
+    TIME 3
+    len 488
+    TIME 4
+    len 467
+    TIME 5
+    len 478
+    TIME 6
+    len 435
+    TIME 7
+    len 457
+    TIME 8
+    len 423
+    TIME 9
+    len 184
+    TIME 10
+    len 86
+    TIME 11
+    len 8
+    TIME 0
+    len 226
+    TIME 1
+    len 222
+    TIME 2
+    len 219
+    TIME 3
+    len 224
+    TIME 4
+    len 213
+    TIME 5
+    len 213
+    TIME 6
+    len 215
+    TIME 7
+    len 197
+    TIME 8
+    len 178
+    TIME 9
+    len 59
+    TIME 10
+    len 18
+    TIME 11
+    len 6
+    TIME 0
+    len 857
+    TIME 1
+    len 758
+    TIME 2
+    len 815
+    TIME 3
+    len 772
+    TIME 4
+    len 724
+    TIME 5
+    len 674
+    TIME 6
+    len 548
+    TIME 7
+    len 628
+    TIME 8
+    len 458
+    TIME 9
+    len 305
+    TIME 10
+    len 75
+    TIME 11
+    len 7
+    TIME 0
+    len 13
+    TIME 1
+    len 13
+    TIME 2
+    len 13
+    TIME 3
+    len 13
+    TIME 4
+    len 13
+    TIME 5
+    len 12
+    TIME 6
+    len 12
+    TIME 7
+    len 12
+    TIME 8
+    len 11
+    TIME 9
+    len 12
+    TIME 10
+    len 11
+    TIME 11
+    len 9
+    TIME 0
+    len 29
+    TIME 1
+    len 28
+    TIME 2
+    len 28
+    TIME 3
+    len 28
+    TIME 4
+    len 28
+    TIME 5
+    len 29
+    TIME 6
+    len 29
+    TIME 7
+    len 29
+    TIME 8
+    len 28
+    TIME 9
+    len 27
+    TIME 10
+    len 24
+    TIME 11
+    len 11
+    TIME 0
+    len 120
+    TIME 1
+    len 120
+    TIME 2
+    len 119
+    TIME 3
+    len 120
+    TIME 4
+    len 116
+    TIME 5
+    len 116
+    TIME 6
+    len 110
+    TIME 7
+    len 114
+    TIME 8
+    len 114
+    TIME 9
+    len 110
+    TIME 10
+    len 100
+    TIME 11
+    len 8
+    TIME 0
+    len 68
+    TIME 1
+    len 50
+    TIME 2
+    len 39
+    TIME 3
+    len 31
+    TIME 4
+    len 42
+    TIME 5
+    len 40
+    TIME 6
+    len 34
+    TIME 7
+    len 32
+    TIME 8
+    len 44
+    TIME 9
+    len 43
+    TIME 10
+    len 13
+    TIME 11
+    len 6
+    TIME 0
+    len 16
+    TIME 1
+    len 15
+    TIME 2
+    len 15
+    TIME 3
+    len 15
+    TIME 4
+    len 15
+    TIME 5
+    len 16
+    TIME 6
+    len 15
+    TIME 7
+    len 15
+    TIME 8
+    len 15
+    TIME 9
+    len 15
+    TIME 10
+    len 16
+    TIME 11
+    len 7
+    TIME 0
+    len 20
+    TIME 1
+    len 20
+    TIME 2
+    len 20
+    TIME 3
+    len 20
+    TIME 4
+    len 20
+    TIME 5
+    len 20
+    TIME 6
+    len 20
+    TIME 7
+    len 18
+    TIME 8
+    len 17
+    TIME 9
+    len 18
+    TIME 10
+    len 17
+    TIME 11
+    len 9
+    TIME 0
+    len 28
+    TIME 1
+    len 28
+    TIME 2
+    len 28
+    TIME 3
+    len 28
+    TIME 4
+    len 28
+    TIME 5
+    len 27
+    TIME 6
+    len 28
+    TIME 7
+    len 28
+    TIME 8
+    len 28
+    TIME 9
+    len 27
+    TIME 10
+    len 27
+    TIME 11
+    len 10
+    TIME 0
+    len 163
+    TIME 1
+    len 162
+    TIME 2
+    len 161
+    TIME 3
+    len 160
+    TIME 4
+    len 161
+    TIME 5
+    len 156
+    TIME 6
+    len 155
+    TIME 7
+    len 159
+    TIME 8
+    len 155
+    TIME 9
+    len 155
+    TIME 10
+    len 147
+    TIME 11
+    len 5
+    TIME 0
+    len 6350
+    TIME 1
+    len 6243
+    TIME 2
+    len 6279
+    TIME 3
+    len 6227
+    TIME 4
+    len 6171
+    TIME 5
+    len 4626
+    TIME 6
+    len 3062
+    TIME 7
+    len 2538
+    TIME 8
+    len 2053
+    TIME 9
+    len 1575
+    TIME 10
+    len 835
+    TIME 11
+    len 8
+    TIME 0
+    len 1380
+    TIME 1
+    len 1353
+    TIME 2
+    len 1337
+    TIME 3
+    len 1304
+    TIME 4
+    len 1160
+    TIME 5
+    len 986
+    TIME 6
+    len 896
+    TIME 7
+    len 693
+    TIME 8
+    len 617
+    TIME 9
+    len 520
+    TIME 10
+    len 378
+    TIME 11
+    len 7
+    TIME 0
+    len 745
+    TIME 1
+    len 726
+    TIME 2
+    len 716
+    TIME 3
+    len 681
+    TIME 4
+    len 701
+    TIME 5
+    len 667
+    TIME 6
+    len 673
+    TIME 7
+    len 688
+    TIME 8
+    len 670
+    TIME 9
+    len 636
+    TIME 10
+    len 343
+    TIME 11
+    len 6
+    TIME 0
+    len 70
+    TIME 1
+    len 70
+    TIME 2
+    len 70
+    TIME 3
+    len 70
+    TIME 4
+    len 70
+    TIME 5
+    len 70
+    TIME 6
+    len 70
+    TIME 7
+    len 70
+    TIME 8
+    len 70
+    TIME 9
+    len 70
+    TIME 10
+    len 69
+    TIME 11
+    len 7
+    TIME 0
+    len 286
+    TIME 1
+    len 276
+    TIME 2
+    len 273
+    TIME 3
+    len 237
+    TIME 4
+    len 242
+    TIME 5
+    len 247
+    TIME 6
+    len 176
+    TIME 7
+    len 115
+    TIME 8
+    len 73
+    TIME 9
+    len 60
+    TIME 10
+    len 42
+    TIME 11
+    len 9
+    TIME 0
+    len 343
+    TIME 1
+    len 326
+    TIME 2
+    len 311
+    TIME 3
+    len 290
+    TIME 4
+    len 305
+    TIME 5
+    len 284
+    TIME 6
+    len 284
+    TIME 7
+    len 224
+    TIME 8
+    len 160
+    TIME 9
+    len 47
+    TIME 10
+    len 22
+    TIME 11
+    len 7
+    TIME 0
+    len 20
+    TIME 1
+    len 20
+    TIME 2
+    len 20
+    TIME 3
+    len 20
+    TIME 4
+    len 20
+    TIME 5
+    len 20
+    TIME 6
+    len 20
+    TIME 7
+    len 19
+    TIME 8
+    len 20
+    TIME 9
+    len 19
+    TIME 10
+    len 17
+    TIME 11
+    len 8
+    TIME 0
+    len 128
+    TIME 1
+    len 127
+    TIME 2
+    len 127
+    TIME 3
+    len 126
+    TIME 4
+    len 123
+    TIME 5
+    len 126
+    TIME 6
+    len 124
+    TIME 7
+    len 127
+    TIME 8
+    len 120
+    TIME 9
+    len 109
+    TIME 10
+    len 54
+    TIME 11
+    len 7
+    TIME 0
+    len 1202
+    TIME 1
+    len 1168
+    TIME 2
+    len 1145
+    TIME 3
+    len 1140
+    TIME 4
+    len 1140
+    TIME 5
+    len 1146
+    TIME 6
+    len 1095
+    TIME 7
+    len 1096
+    TIME 8
+    len 1048
+    TIME 9
+    len 822
+    TIME 10
+    len 230
+    TIME 11
+    len 9
+    TIME 0
+    len 1115
+    TIME 1
+    len 1067
+    TIME 2
+    len 1099
+    TIME 3
+    len 1043
+    TIME 4
+    len 1083
+    TIME 5
+    len 1087
+    TIME 6
+    len 900
+    TIME 7
+    len 793
+    TIME 8
+    len 375
+    TIME 9
+    len 204
+    TIME 10
+    len 38
+    TIME 11
+    len 4
+    TIME 0
+    len 14
+    TIME 1
+    len 14
+    TIME 2
+    len 14
+    TIME 3
+    len 14
+    TIME 4
+    len 14
+    TIME 5
+    len 14
+    TIME 6
+    len 14
+    TIME 7
+    len 14
+    TIME 8
+    len 14
+    TIME 9
+    len 14
+    TIME 10
+    len 14
+    TIME 11
+    len 5
+    TIME 0
+    len 24
+    TIME 1
+    len 24
+    TIME 2
+    len 24
+    TIME 3
+    len 24
+    TIME 4
+    len 24
+    TIME 5
+    len 24
+    TIME 6
+    len 24
+    TIME 7
+    len 24
+    TIME 8
+    len 24
+    TIME 9
+    len 23
+    TIME 10
+    len 22
+    TIME 11
+    len 6
+    TIME 0
+    len 1665
+    TIME 1
+    len 1586
+    TIME 2
+    len 1610
+    TIME 3
+    len 1513
+    TIME 4
+    len 1583
+    TIME 5
+    len 1627
+    TIME 6
+    len 1594
+    TIME 7
+    len 931
+    TIME 8
+    len 264
+    TIME 9
+    len 63
+    TIME 10
+    len 43
+    TIME 11
+    len 4
+    TIME 0
+    len 387
+    TIME 1
+    len 385
+    TIME 2
+    len 378
+    TIME 3
+    len 369
+    TIME 4
+    len 374
+    TIME 5
+    len 373
+    TIME 6
+    len 367
+    TIME 7
+    len 371
+    TIME 8
+    len 362
+    TIME 9
+    len 295
+    TIME 10
+    len 108
+    TIME 11
+    len 10
+    TIME 0
+    len 19
+    TIME 1
+    len 19
+    TIME 2
+    len 19
+    TIME 3
+    len 19
+    TIME 4
+    len 19
+    TIME 5
+    len 19
+    TIME 6
+    len 19
+    TIME 7
+    len 18
+    TIME 8
+    len 18
+    TIME 9
+    len 19
+    TIME 10
+    len 17
+    TIME 11
+    len 7
+    TIME 0
+    len 161
+    TIME 1
+    len 163
+    TIME 2
+    len 160
+    TIME 3
+    len 153
+    TIME 4
+    len 155
+    TIME 5
+    len 140
+    TIME 6
+    len 152
+    TIME 7
+    len 138
+    TIME 8
+    len 149
+    TIME 9
+    len 138
+    TIME 10
+    len 48
+    TIME 11
+    len 7
+    TIME 0
+    len 58
+    TIME 1
+    len 58
+    TIME 2
+    len 58
+    TIME 3
+    len 58
+    TIME 4
+    len 58
+    TIME 5
+    len 55
+    TIME 6
+    len 46
+    TIME 7
+    len 38
+    TIME 8
+    len 15
+    TIME 9
+    len 7
+    TIME 10
+    len 2
+    TIME 11
+    len 1
+    AlphaBAnalysis_2.py:547: RankWarning: Polyfit may be poorly conditioned
+      lplots=None,core_list=None,simframes=None)
+      TIME 0
+      len 47
+      TIME 1
+      len 47
+      TIME 2
+      len 47
+      TIME 3
+      len 46
+      TIME 4
+      len 46
+      TIME 5
+      len 46
+      TIME 6
+      len 47
+      TIME 7
+      len 47
+      TIME 8
+      len 28
+      TIME 9
+      len 15
+      TIME 10
+      len 13
+      TIME 11
+      len 4
+      TIME 0
+      len 163
+      TIME 1
+      len 162
+      TIME 2
+      len 159
+      TIME 3
+      len 154
+      TIME 4
+      len 156
+      TIME 5
+      len 159
+      TIME 6
+      len 160
+      TIME 7
+      len 149
+      TIME 8
+      len 117
+      TIME 9
+      len 72
+      TIME 10
+      len 27
+      TIME 11
+      len 2
+      TIME 0
+      len 3734
+      TIME 1
+      len 3701
+      TIME 2
+      len 3731
+      TIME 3
+      len 3440
+      TIME 4
+      len 1630
+      TIME 5
+      len 88
+      TIME 6
+      len 52
+      TIME 7
+      len 49
+      TIME 8
+      len 41
+      TIME 9
+      len 27
+      TIME 10
+      len 10
+      TIME 11
+      len 5
+      TIME 0
+      len 897
+      TIME 1
+      len 776
+      TIME 2
+      len 811
+      TIME 3
+      len 705
+      TIME 4
+      len 829
+      TIME 5
+      len 587
+      TIME 6
+      len 408
+      TIME 7
+      len 352
+      TIME 8
+      len 266
+      TIME 9
+      len 134
+      TIME 10
+      len 55
+      TIME 11
+      len 7
+      TIME 0
+      len 20
+      TIME 1
+      len 20
+      TIME 2
+      len 19
+      TIME 3
+      len 20
+      TIME 4
+      len 19
+      TIME 5
+      len 18
+      TIME 6
+      len 17
+      TIME 7
+      len 17
+      TIME 8
+      len 14
+      TIME 9
+      len 9
+      TIME 10
+      len 10
+      TIME 11
+      len 13
+      TIME 0
+      len 349
+      TIME 1
+      len 339
+      TIME 2
+      len 297
+      TIME 3
+      len 304
+      TIME 4
+      len 328
+      TIME 5
+      len 275
+      TIME 6
+      len 274
+      TIME 7
+      len 300
+      TIME 8
+      len 271
+      TIME 9
+      len 299
+      TIME 10
+      len 74
+      TIME 11
+      len 15
+      TIME 0
+      len 528
+      TIME 1
+      len 411
+      TIME 2
+      len 371
+      TIME 3
+      len 360
+      TIME 4
+      len 349
+      TIME 5
+      len 334
+      TIME 6
+      len 426
+      TIME 7
+      len 427
+      TIME 8
+      len 389
+      TIME 9
+      len 278
+      TIME 10
+      len 372
+      TIME 11
+      len 16
+      TIME 0
+      len 95
+      TIME 1
+      len 93
+      TIME 2
+      len 83
+      TIME 3
+      len 84
+      TIME 4
+      len 77
+      TIME 5
+      len 69
+      TIME 6
+      len 82
+      TIME 7
+      len 80
+      TIME 8
+      len 88
+      TIME 9
+      len 88
+      TIME 10
+      len 45
+      TIME 11
+      len 6
+      TIME 0
+      len 311
+      TIME 1
+      len 269
+      TIME 2
+      len 239
+      TIME 3
+      len 276
+      TIME 4
+      len 215
+      TIME 5
+      len 265
+      TIME 6
+      len 242
+      TIME 7
+      len 146
+      TIME 8
+      len 106
+      TIME 9
+      len 168
+      TIME 10
+      len 111
+      TIME 11
+      len 7
+      TIME 0
+      len 61
+      TIME 1
+      len 60
+      TIME 2
+      len 55
+      TIME 3
+      len 54
+      TIME 4
+      len 60
+      TIME 5
+      len 52
+      TIME 6
+      len 54
+      TIME 7
+      len 49
+      TIME 8
+      len 50
+      TIME 9
+      len 55
+      TIME 10
+      len 46
+      TIME 11
+      len 11
+      TIME 0
+      len 143
+      TIME 1
+      len 135
+      TIME 2
+      len 121
+      TIME 3
+      len 109
+      TIME 4
+      len 118
+      TIME 5
+      len 104
+      TIME 6
+      len 103
+      TIME 7
+      len 115
+      TIME 8
+      len 109
+      TIME 9
+      len 60
+      TIME 10
+      len 60
+      TIME 11
+      len 19
+      TIME 0
+      len 557
+      TIME 1
+      len 516
+      TIME 2
+      len 466
+      TIME 3
+      len 437
+      TIME 4
+      len 483
+      TIME 5
+      len 466
+      TIME 6
+      len 503
+      TIME 7
+      len 452
+      TIME 8
+      len 444
+      TIME 9
+      len 475
+      TIME 10
+      len 229
+      TIME 11
+      len 7
+      TIME 0
+      len 211
+      TIME 1
+      len 198
+      TIME 2
+      len 164
+      TIME 3
+      len 157
+      TIME 4
+      len 162
+      TIME 5
+      len 136
+      TIME 6
+      len 117
+      TIME 7
+      len 103
+      TIME 8
+      len 148
+      TIME 9
+      len 158
+      TIME 10
+      len 144
+      TIME 11
+      len 13
+      TIME 0
+      len 3487
+      TIME 1
+      len 3066
+      TIME 2
+      len 2774
+      TIME 3
+      len 2682
+      TIME 4
+      len 2850
+      TIME 5
+      len 2540
+      TIME 6
+      len 2496
+      TIME 7
+      len 2196
+      TIME 8
+      len 1818
+      TIME 9
+      len 1038
+      TIME 10
+      len 404
+      TIME 11
+      len 5
+      TIME 0
+      len 75
+      TIME 1
+      len 60
+      TIME 2
+      len 43
+      TIME 3
+      len 59
+      TIME 4
+      len 56
+      TIME 5
+      len 40
+      TIME 6
+      len 58
+      TIME 7
+      len 54
+      TIME 8
+      len 66
+      TIME 9
+      len 53
+      TIME 10
+      len 27
+      TIME 11
+      len 14
+      TIME 0
+      len 222
+      TIME 1
+      len 206
+      TIME 2
+      len 192
+      TIME 3
+      len 201
+      TIME 4
+      len 177
+      TIME 5
+      len 155
+      TIME 6
+      len 180
+      TIME 7
+      len 169
+      TIME 8
+      len 189
+      TIME 9
+      len 187
+      TIME 10
+      len 132
+      TIME 11
+      len 13
+      TIME 0
+      len 2001
+      TIME 1
+      len 1595
+      TIME 2
+      len 1149
+      TIME 3
+      len 1419
+      TIME 4
+      len 1023
+      TIME 5
+      len 769
+      TIME 6
+      len 1145
+      TIME 7
+      len 922
+      TIME 8
+      len 1135
+      TIME 9
+      len 699
+      TIME 10
+      len 226
+      TIME 11
+      len 12
+      TIME 0
+      len 14
+      TIME 1
+      len 14
+      TIME 2
+      len 13
+      TIME 3
+      len 14
+      TIME 4
+      len 14
+      TIME 5
+      len 12
+      TIME 6
+      len 12
+      TIME 7
+      len 11
+      TIME 8
+      len 11
+      TIME 9
+      len 12
+      TIME 10
+      len 11
+      TIME 11
+      len 8
+      TIME 0
+      len 3876
+      TIME 1
+      len 3061
+      TIME 2
+      len 2529
+      TIME 3
+      len 2892
+      TIME 4
+      len 2733
+      TIME 5
+      len 2193
+      TIME 6
+      len 3105
+      TIME 7
+      len 3145
+      TIME 8
+      len 2361
+      TIME 9
+      len 1708
+      TIME 10
+      len 450
+      TIME 11
+      len 7
+      TIME 0
+      len 1018
+      TIME 1
+      len 881
+      TIME 2
+      len 745
+      TIME 3
+      len 768
+      TIME 4
+      len 729
+      TIME 5
+      len 579
+      TIME 6
+      len 727
+      TIME 7
+      len 838
+      TIME 8
+      len 319
+      TIME 9
+      len 35
+      TIME 10
+      len 9
+      TIME 11
+      len 5
+      TIME 0
+      len 982
+      TIME 1
+      len 829
+      TIME 2
+      len 922
+      TIME 3
+      len 743
+      TIME 4
+      len 469
+      TIME 5
+      len 296
+      TIME 6
+      len 197
+      TIME 7
+      len 508
+      TIME 8
+      len 372
+      TIME 9
+      len 557
+      TIME 10
+      len 282
+      TIME 11
+      len 11
+      TIME 0
+      len 18
+      TIME 1
+      len 18
+      TIME 2
+      len 18
+      TIME 3
+      len 18
+      TIME 4
+      len 18
+      TIME 5
+      len 18
+      TIME 6
+      len 18
+      TIME 7
+      len 18
+      TIME 8
+      len 18
+      TIME 9
+      len 17
+      TIME 10
+      len 9
+      TIME 11
+      len 3
+      TIME 0
+      len 116
+      TIME 1
+      len 116
+      TIME 2
+      len 112
+      TIME 3
+      len 115
+      TIME 4
+      len 114
+      TIME 5
+      len 116
+      TIME 6
+      len 116
+      TIME 7
+      len 112
+      TIME 8
+      len 109
+      TIME 9
+      len 57
+      TIME 10
+      len 12
+      TIME 11
+      len 2
+      TIME 0
+      len 151
+      TIME 1
+      len 151
+      TIME 2
+      len 150
+      TIME 3
+      len 154
+      TIME 4
+      len 152
+      TIME 5
+      len 154
+      TIME 6
+      len 153
+      TIME 7
+      len 151
+      TIME 8
+      len 144
+      TIME 9
+      len 132
+      TIME 10
+      len 76
+      TIME 11
+      len 6
+      TIME 0
+      len 1390
+      TIME 1
+      len 1515
+      TIME 2
+      len 1589
+      TIME 3
+      len 1612
+      TIME 4
+      len 1572
+      TIME 5
+      len 1559
+      TIME 6
+      len 1272
+      TIME 7
+      len 1189
+      TIME 8
+      len 804
+      TIME 9
+      len 425
+      TIME 10
+      len 135
+      TIME 11
+      len 14
+      TIME 0
+      len 296
+      TIME 1
+      len 269
+      TIME 2
+      len 231
+      TIME 3
+      len 232
+      TIME 4
+      len 278
+      TIME 5
+      len 267
+      TIME 6
+      len 279
+      TIME 7
+      len 237
+      TIME 8
+      len 269
+      TIME 9
+      len 258
+      TIME 10
+      len 105
+      TIME 11
+      len 5
+      TIME 0
+      len 590
+      TIME 1
+      len 509
+      TIME 2
+      len 462
+      TIME 3
+      len 395
+      TIME 4
+      len 543
+      TIME 5
+      len 546
+      TIME 6
+      len 510
+      TIME 7
+      len 428
+      TIME 8
+      len 505
+      TIME 9
+      len 495
+      TIME 10
+      len 228
+      TIME 11
+      len 6
+      TIME 0
+      len 252
+      TIME 1
+      len 246
+      TIME 2
+      len 244
+      TIME 3
+      len 244
+      TIME 4
+      len 239
+      TIME 5
+      len 243
+      TIME 6
+      len 243
+      TIME 7
+      len 246
+      TIME 8
+      len 246
+      TIME 9
+      len 241
+      TIME 10
+      len 236
+      TIME 11
+      len 10
+      TIME 0
+      len 21
+      TIME 1
+      len 21
+      TIME 2
+      len 21
+      TIME 3
+      len 21
+      TIME 4
+      len 21
+      TIME 5
+      len 21
+      TIME 6
+      len 21
+      TIME 7
+      len 20
+      TIME 8
+      len 19
+      TIME 9
+      len 21
+      TIME 10
+      len 20
+      TIME 11
+      len 7
+      TIME 0
+      len 54
+      TIME 1
+      len 52
+      TIME 2
+      len 54
+      TIME 3
+      len 54
+      TIME 4
+      len 54
+      TIME 5
+      len 52
+      TIME 6
+      len 53
+      TIME 7
+      len 51
+      TIME 8
+      len 52
+      TIME 9
+      len 53
+      TIME 10
+      len 51
+      TIME 11
+      len 6
+      TIME 0
+      len 6279
+      TIME 1
+      len 6369
+      TIME 2
+      len 5885
+      TIME 3
+      len 6225
+      TIME 4
+      len 6466
+      TIME 5
+      len 6118
+      TIME 6
+      len 5158
+      TIME 7
+      len 4507
+      TIME 8
+      len 3036
+      TIME 9
+      len 1478
+      TIME 10
+      len 314
+      TIME 11
+      len 8
+      TIME 0
+      len 134
+      TIME 1
+      len 134
+      TIME 2
+      len 131
+      TIME 3
+      len 129
+      TIME 4
+      len 129
+      TIME 5
+      len 128
+      TIME 6
+      len 130
+      TIME 7
+      len 127
+      TIME 8
+      len 131
+      TIME 9
+      len 130
+      TIME 10
+      len 87
+      TIME 11
+      len 10
+      TIME 0
+      len 573
+      TIME 1
+      len 570
+      TIME 2
+      len 560
+      TIME 3
+      len 564
+      TIME 4
+      len 564
+      TIME 5
+      len 561
+      TIME 6
+      len 572
+      TIME 7
+      len 550
+      TIME 8
+      len 549
+      TIME 9
+      len 349
+      TIME 10
+      len 68
+      TIME 11
+      len 7
+      BOX SAVED
+      GOOD-BYE
+

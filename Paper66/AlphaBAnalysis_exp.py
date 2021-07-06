@@ -33,6 +33,7 @@ class BRho_tool():
         self.this_looper = this_looper
         self.betarr = np.empty([0],dtype=float)
         self.pearsonr = np.empty([0],dtype=float)
+        self.corestdzero = np.empty([0],dtype=float)
 
         # need to add 'self' to the following: 
         self.time_stamp = np.empty([0],dtype=float) 
@@ -72,6 +73,10 @@ class BRho_tool():
         self.bear13 = np.empty([0],dtype=float)
         #self.bear14 = np.empty([0],dtype=float)
 
+        self.brms = np.empty([0],dtype=float)
+        self.vrms = np.empty([0],dtype=float)
+        self.vrmsq_bmean = np.empty([0],dtype=float)
+
         self.pears = [] 
         self.bears = []
    
@@ -109,19 +114,21 @@ class BRho_tool():
                 pearX,pearY = scipy.stats.pearsonr(the_x,the_y)   
             else:
                 print("A zero encountered!!",xs,ys)
-                pearX = 0  
-            self.pearsonr = np.append(self.pearsonr,pearX)
-
+                #print("core id and sim ",core_id,name)  #EXP
+                #self.corestdzero = np.append(self.corestdzero,core_id)  #EXP
+                pearX = 0  # try a break from the current loop...which would only be of the time, not core... 
+            self.pearsonr = np.append(self.pearsonr,pearX)  
+                
 
         def scatterplots(fig=None,ax1=None,ax2=None,ax3=None,ax4=None,ax5=None,ax7=None,ax8=None,
                          lplots=None,xx2=None,yy=None):
            
             if typeplot == 'scatter_plot':
 
-                ax1.scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)  #what's this label?          
+                ax1.scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times          
                 ax1.plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
                 
-                BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu g)$',
+                BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu G)$',
                                    xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\alpha_{b\rho} = %.3f$'%beta)
 
                 if n_time == asort[-1]:
@@ -129,10 +136,11 @@ class BRho_tool():
                     plt.savefig(outname)  # CAREFUL WITH FIG VS PLT
                     print("saved "+outname)
                     plt.close(fig)  
-                    
+
+
             if typeplot == 'frame_scatters':
                 if n_time in simframes:  
-                    lplots[n_time].scatter(density[mask,n_time],magfield[mask,n_time],c=c,label=thtr.times[n_time],s=0.1)  #what's this label
+                    lplots[n_time].scatter(density[:,n_time],magfield[:,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times          
                     lplots[n_time].plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
                     print("scatters plotted")             
                   
@@ -143,7 +151,7 @@ class BRho_tool():
                     ax4.set_ylabel(r'$\mid B \mid (\mu G)$')
                     ax5.tick_params(axis='y',labelleft=False)
                     ax8.tick_params(axis='y',labelleft=False) 
-     
+
                 if n_time == asort[-1]:                
                     tmap2 = rainbow_map(len(self.betarr)) 
                     c2 = [tmap2(n) for n in range(len(self.betarr))] 
@@ -238,8 +246,8 @@ class BRho_tool():
             core_list = looper.get_all_nonzero(dl.n_particles[name])  
         #rm = rainbow_map(len(core_list))  # or all_cores, needed??  
         rho_extents=davetools.extents()
-        magfield_extents = davetools.extents() 
-    
+        magfield_extents = davetools.extents()  
+
 
         # - - - - - - - - - - - - - - - - - - - - 
         # CORELOOP
@@ -260,26 +268,44 @@ class BRho_tool():
 
             ms = trackage.mini_scrubber(thtr,core_id,do_velocity=False) 
             tmap=rainbow_map(ms.ntimes) 
-
+ 
+            # FIELDS
             density = thtr.c([core_id],'density') 
             magfield = thtr.c([core_id],'magnetic_field_strength')
-            cellvolume = thtr.c([core_id],'cell_volume')
+            cv = thtr.c([core_id],'cell_volume')  
+ 
+            if name != 'u201': 
+                #print("name",name)
+                B_x = thtr.c([core_id],'magnetic_field_x')  
+                B_y = thtr.c([core_id],'magnetic_field_y')
+                B_z = thtr.c([core_id],'magnetic_field_z')
+                v_x = thtr.c([core_id],'velocity_x')
+                v_y = thtr.c([core_id],'velocity_y')
+                v_z = thtr.c([core_id],'velocity_z') 
 
             rho_extents(density)
             magfield_extents(magfield) 
+           
             asort =  np.argsort(thtr.times)
             if (asort != sorted(asort)).any():
                 print("Warning: times not sorted.") 
 
+
+            # SETUP FIGURES FOR EACH CORE HERE: 
+            if which_plot == 'scatter_plot' or 'rms_plot':
+                fig, ax1=plt.subplots(1,1)
+
+
             # - - - - - - - - - - - - - - - - - - - - 
             # TIMELOOP:
             for n_count,n_time in enumerate(asort):      
+                #print("in the TIME loop")
                 mask = ms.compute_unique_mask(core_id, dx=1./2048,frame=n_time)  
-                c=tmap(n_count,mask.sum())  #ms.nparticles, EDIT  
+                c=tmap(n_count,mask.sum())  #Used to be: ms.nparticles
                 if timing == 'per_frame':   
                     X = np.log10(density[mask,n_time]).flatten()  # [mask,n_time], OR [:,n_time][mask]
                     Y = np.log10(magfield[mask,n_time]).flatten()
-
+ 
                 if timing == 'all_time':      
                     time=thtr.times[n_time]
                     if time == 0:
@@ -313,11 +339,91 @@ class BRho_tool():
                 if typeplot == 'vio_plot':  
                     pearsonR(X,Y)
                     if n_time == asort[-1]:
-                        scatterplots()
+                        scatterplots()                     
                         break  #TEMPORARY FIX to get violin plots :-/
+                       
                 # CALL SCATTER
                 if typeplot == 'frame_scatters' or 'scatter_plot': 
                     scatterplots(fig,ax1,ax2,ax3,ax4,ax5,ax7,ax8,lplots,XX2,YY)  
+
+
+
+                # RMS EXPERIMENTS
+                if typeplot == 'rms_plot': 
+                    if name != 'u201':  
+                        B_avg = (magfield[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()  
+
+                        Bx_avg = (B_x[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum() 
+                        By_avg = (B_y[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()
+                        Bz_avg = (B_z[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()
+                        vx_avg = (v_x[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()
+                        vy_avg = (v_y[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()
+                        vz_avg = (v_z[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()
+
+                        Bx_sq = (B_x[mask,n_time] - Bx_avg)**2 
+                        By_sq = (B_y[mask,n_time] - By_avg)**2
+                        Bz_sq = (B_z[mask,n_time] - Bz_avg)**2
+                        vx_sq = (v_x[mask,n_time] - Bx_avg)**2
+                        vy_sq = (v_y[mask,n_time] - By_avg)**2
+                        vz_sq = (v_z[mask,n_time] - Bz_avg)**2
+                    
+                        # SPREAD OF B FIELD FROM THE MEAN, also the standard dev...these should give same-sh as np.std()?  
+                        brms = np.sqrt(np.mean(Bx_sq) + np.mean(By_sq) + np.mean(Bz_sq))  # DO MEAN WITH CV !
+                        brms_py = np.std(magfield)  #COMPARE for fun, but for the vector field
+                        #print('BRMS',brms)
+                        #print('BRMS_py',brms_py)
+                        vrms = np.sqrt(np.mean(vx_sq) + np.mean(vy_sq) + np.mean(vz_sq))  # DO MEAN WITH CV!! 
+                        #vrms_py = np.std()   #COMPARE for fun, VELOCITY mag.
+                        vrmsq_bmean = (vrms**2)/B_avg  #B_avg for all box or region; try diff ways
+                        #print('VRMS',vrms)
+                        #print('VRMS_py',vrms_py)
+
+                        self.brms = np.append(self.brms,brms) 
+                        self.vrms = np.append(self.vrms,vrms)
+                        self.vrmsq_bmean = np.append(self.vrmsq_bmean,vrmsq_bmean)
+                        
+                        if n_time == asort[-1]:
+                            print('vrmsq_bmean',self.vrmsq_bmean)
+                            #breakpoint()
+                            print('inside!')
+                            tmap2 = rainbow_map(len(self.brms)) 
+                            c2 = [tmap2(n) for n in range(len(self.brms))]  
+
+                            if name == 'u202':
+                                the_range = np.arange(0.075,1,0.075)  
+                                #ax1.scatter(the_range,self.brms,c='b')  
+                                #ax1.scatter(the_range,self.vrms,c='g')  
+                                #ax1.scatter(self.vrms, self.brms,c=c2) 
+                                ax1.scatter(self.vrmsq_bmean, self.brms,c=c2) 
+                                #ax1.set_xscale('log')
+                                #ax1.set_yscale('log')
+                                #ax1.set_title(r"$\beta = 2.0$, B_rms: blue, V_rms: green, core:%04d"%core_id)
+                                ax1.set_title(r"$\beta = 2.0$, B_rms vs V_rms vs tff, core:%04d"%core_id)
+                                
+                                outname = 'Brms_vrmsqBm_tff_c%04d_%s'%(core_id,name)  
+                                plt.savefig(outname)  # CAREFUL WITH FIG VS PLT
+                                print("saved "+outname)
+                                #plt.close(fig)  #CAREFUL, this doesn't allow to do another desired core :(   
+                                
+                            if name == 'u203':
+                                the_range = np.arange(0.075,0.9,0.075) 
+                                #ax1.scatter(the_range,self.brms,c='b')  
+                                #ax1.scatter(the_range,self.vrms,c='g')  
+                                #ax1.scatter(self.vrms, self.brms,c=c2)  
+                                ax1.scatter(self.vrmsq_bmean, self.brms,c=c2) 
+                                #ax1.set_xscale('log')
+                                #ax1.set_yscale('log')
+                                #ax1.set_title(r"$\beta = 20.$, B_rms: blue, V_rms: green, core:%04d"%core_id)
+                                ax1.set_title(r"$\beta = 20.$, B_rms vs V_rms vs tff, core:%04d"%core_id)
+
+                                outname = 'Brms_vrmsqBm_tff_c%04d_%s'%(core_id,name)  
+                                plt.savefig(outname)  # CAREFUL WITH FIG VS PLT
+                                print("saved "+outname)
+                                #plt.close(fig)  #CAREFUL, this doesn't allow to do another desired core :(   
+                            
+                            self.vrmsq_bmean = np.empty([0],dtype=float)                               
+                            self.brms = np.empty([0],dtype=float)                               
+                            self.vrms = np.empty([0],dtype=float)                               
 
 
     def histograms(self,num,figs,plts):
@@ -357,7 +463,7 @@ class BRho_tool():
             plt.close(figs)  
 
 
-    def boxes(self,num,name,tff_lab):
+    def boxes(self,num,name,tff_lab): 
         Bears = {}
         index = []
         data = [] 
@@ -369,7 +475,21 @@ class BRho_tool():
 
         fig, ax1=plt.subplots(1,1)    
  
-        bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  #bparts is now a dictionary       
+        bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  #bparts is now a dictionary      
+
+        # EXPERIMENTS
+        if 0: #not tested yet
+            q1 = pd.DataFrame(normal).quantile(0.25)[0]
+            q3 = pd.DataFrame(normal).quantile(0.75)[0]
+            iqr = q3 - q1 #Interquartile range
+            fence_low = q1 - (1.5*iqr)
+            fence_high = q3 + (1.5*iqr)
+        if 0:
+            print("Flier values of boxplot frame")
+            flies = bparts['fliers'][0].get_ydata()
+            print(flies)
+        if 0:
+            breakpoint()  #to try the dictionary
 
         #To compare boxplot with a zero, affects the position of the plots
         if nt == 0:
@@ -480,11 +600,11 @@ print("GREETINGS")
 
 
 if 1:
-    for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]): 
+    for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
 
         # TYPE OF PLOT: 'scatter_plot' OR 'frame_scatters' 
-        # OR 'box_plot' OR 'vio_plot'?
-        which_plot = 'frame_scatters'
+        # OR 'box_plot' OR 'vio_plot'? OR 'rms_plot'
+        which_plot = 'rms_plot'
         # ALL TIME: 'all_time', OR PER FRAME: 'per_frame'?
         which_time = 'per_frame'
 
@@ -499,20 +619,19 @@ if 1:
         if nt == 0:
             tff_p = thtr.times[1:-1]/t_ff
             frames = [1,3,5,8,10,12]  
-            core_list = [275]
+            core_list = [70,275,297,165]
         if nt == 1:
             tff_p = thtr.times[:-1]/t_ff 
             frames = [1,3,5,7,9,11] 
-            core_list = [114]
+            core_list = [114,190,192]
         if nt == 2:
             tff_p = thtr.times[:-1]/t_ff 
             frames = [1,3,5,6,8,10] 
-            core_list = [124]
+            core_list = [128,165,89]
         
         simframes = set(frames) 
         tff_labels = ['%.2f'%s for s in tff_p]
         
-
         if which_plot == 'frame_scatters': 
             fig = plt.figure() 
             fig.text(0.365,0.03,r'$\rho/\rho_{o}$')
@@ -533,21 +652,20 @@ if 1:
                 lplots = [0,ax1,0,ax2,0,ax4,0,ax5,0,ax7,0,ax8,0] 
             if nt == 2:
                 lplots = [0,ax1,0,ax2,0,ax4,ax5,0,ax7,0,ax8,0] 
-  
+     
             tool.run(simnames[nt],thtr,which_time,which_plot,
                  fig,ax1,ax2,ax3,ax4,ax5,ax7,ax8,
                  lplots,core_list,simframes) 
 
-        if which_plot == 'scatter_plot':
-            print('entered....')  #CAREFUL, it enters if there is an 'OR'
-            fig, ax1=plt.subplots(1,1)   
+        #if which_plot == 'scatter_plot' or 'rms_plot':
+        else: 
+            #fig, ax1=plt.subplots(1,1)  #here or inside .run   
        
             tool.run(simnames[nt],thtr,which_time,which_plot,
                  fig,ax1,ax2= None,ax3= None,ax4= None,ax5= None,ax7= None,ax8= None,
                  lplots= None,core_list=core_list,simframes= None) 
 
-
-        #CHECK if there is still a 'neutral tool.run for the following
+        # check to see if these are now missing tool.run
         if 0:        
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME
             if nt == 0:
@@ -559,8 +677,23 @@ if 1:
         if 0: 
             # CALL VIOLINPLOTS              
             tool.violins(nt,simnames[nt],tff_labels)
-     
+    plt.close(fig)
 print("GOOD-BYE")
 
 # NEXT: how to close the figures for one core, but leave it open for the same in the same sim
+'''
+# TEMP CODE FOR INVESTIGATIONS
+# in time loop, after X & Y in 'per_frame'
+if n_time == 8:
+    plt.hist(Y, 50, density=False, histtype='step', color='b')
+    name_save = "MagfieldHistogramTff_colmask_%s"%name
+    plt.savefig(name_save) 
+    print('saved ',name_save)
+    plt.close()  
 
+    plt.hist(X, 50, density=False, histtype='step', color='g')
+    name_save = "RhoHistogramTff_coldmask_%s"%name
+    plt.savefig(name_save) 
+    print('saved ',name_save)
+    plt.close()  
+'''

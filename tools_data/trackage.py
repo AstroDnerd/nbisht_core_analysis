@@ -167,13 +167,13 @@ class track_manager():
             else:
                 output= np.append(output, parts,axis=0)
         return output
-    def c(self,core_list,field):
-        if type(core_list) is int:
+    def c(self,core_list,field): 
+        if type(core_list) is int: 
             core_list = [core_list]
         nf = self.frames.size
-        output = None
+        output = None 
         for core in core_list:
-            loc = self.core_ids == core
+            loc = self.core_ids == core 
             core_values = self[field][loc,:]
             if output is None:
                 output = core_values

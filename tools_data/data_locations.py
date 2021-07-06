@@ -34,7 +34,8 @@ if machine == 'Nazare':
     sim_u201 = '/archive2/dcollins4096/Paper19/u05-r4-l4-128-Beta0.2' #same as sim_u05
      
     #u05_every_ten = '/home/luzlourdes/scripts/p19_newscripts/datasets_small/u05_all_primitives_primitives_c0165_nXXX0.h5'  # two snaps
-    u05_every_ten ='/scratch1/dcollins/Paper19/Datasets/track_indfix_sixteenframe/*h5'
+    #u05_every_ten ='/scratch1/dcollins/Paper19/Datasets/track_indfix_sixteenframe/*h5'
+    u05_every_ten = '/scratch1/dcollins/Paper19/Datasets/all_primitives/*'
     u10_every_ten = "/scratch1/dcollins/Paper19/Datasets/u10_every_ten/u10_all_primitives_primitives_c*_nXXX0.h5"
     u11_every_ten = "/scratch1/dcollins/Paper19/Datasets/u11_every_ten/u11_all_primitives_primitives_c*_nXXX0.h5"
  
