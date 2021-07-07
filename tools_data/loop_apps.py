@@ -48,7 +48,8 @@ import annotate_particles_3
 reload(annotate_particles_3)
 def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
                     core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
-                    only_sphere=True, center_on_sphere=True, slab=None, fields=False, velocity=False, code_length=True, lic=False):
+                    only_sphere=True, center_on_sphere=True, slab=None, fields=False, velocity=False, code_length=True, lic=False, 
+                      tracker_positions=True):
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
@@ -74,13 +75,24 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         right = np.array([0,0,0])
         for core_id in core_list:
             snapshot = looper.snaps[frame][core_id]
-            if snapshot.R_centroid is None:
-                snapshot.get_all_properties()
-            this_left =  snapshot.pos.min(axis=0)
-            this_right = snapshot.pos.max(axis=0)
+            if tracker_positions:
+                ms = trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
+                frame_ind = np.where(looper.tr.frames == frame)[0]
+                this_x=ds.arr(ms.this_x[:,frame_ind],"code_length")
+                this_y=ds.arr(ms.this_y[:,frame_ind],"code_length")
+                this_z=ds.arr(ms.this_z[:,frame_ind],"code_length")
+                positions = np.column_stack([this_x,this_y,this_z])
+            else:
+                if snapshot.R_centroid is None:
+                    snapshot.get_all_properties()
+                positions = snapshot.pos
+            this_left =  positions.min(axis=0)
+            this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
             right = np.row_stack([this_right,right]).max(axis=0)
         center = 0.5*(left+right)
+        left = np.row_stack([this_left,center - 1/128]).min(axis=0)
+        right = np.row_stack([this_right,center + 1/128]).max(axis=0)
         left = ds.arr(left,'code_length')
         right = ds.arr(right,'code_length')
         center = ds.arr(center,'code_length')
@@ -104,7 +116,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
             
             if zoom:
-                pw.zoom(1./(scale))
+                pw.zoom(1./(2*scale))
             pw.set_cmap(field,'gray')
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
@@ -118,7 +130,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                                      inset_box_args={'visible':False},
                                      coord_system='data')
                     #pw.annotate_select_particles(1.0, col=[color], indices=snapshot.target_indices)
-                    pw.annotate_these_particles2(1.0, col=[color], positions=snapshot.pos)
+                    pw.annotate_these_particles2(1.0, col=[color], positions=positions)
                     #print("SNAP STATS", snapshot.pos.min(), snapshot.pos.max())
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
