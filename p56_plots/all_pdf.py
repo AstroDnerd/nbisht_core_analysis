@@ -8,9 +8,7 @@ reload(trackage)
 plt.close('all')
 
 form='pdf'
-if 'looper1' not in dir():
-    from three_loopers import *
-
+import three_loopers_1tff as tl
 
 tm = rainbow_map(15)
 #all_cores = all_cores[:10]
@@ -94,13 +92,14 @@ class means_etc():
 
 
 
-m1 = means_etc( looper1 )
-m2 = means_etc( looper2 )
-m3 = means_etc( looper3 )
+if 'm1' not in dir():
+    m1 = means_etc(tl.looper1 )
+    m2 = means_etc(tl.looper2 )
+    m3 = means_etc(tl.looper3 )
 
-looper1.c='r'
-looper2.c='g'
-looper3.c='b'
+tl.looper1.c='r'
+tl.looper2.c='g'
+tl.looper3.c='b'
 
 def three_way_bean():
     from matplotlib.ticker import NullFormatter
@@ -151,22 +150,22 @@ def three_way_bean():
    
 
 
-if 1:
+if 0:
     if 1:
         ax, ax_den_hist,ax_vel_hist=three_way_bean()
         ok = slice(None)
-        ax.scatter(np.log10(m1.dmeans[ok]),np.log10(m1.variance[ok])/2,c=looper1.c,label=looper1.out_prefix, s=0.1)
-        ax.scatter(np.log10(m2.dmeans[ok]),np.log10(m2.variance[ok])/2,c=looper2.c,label=looper2.out_prefix, s=0.1)
-        ax.scatter(np.log10(m3.dmeans[ok]),np.log10(m3.variance[ok])/2,c=looper3.c,label=looper3.out_prefix, s=0.1)
+        ax.scatter(np.log10(m1.dmeans[ok]),np.log10(m1.variance[ok])/2,c=tl.looper1.c,label=tl.looper1.out_prefix, s=0.1)
+        ax.scatter(np.log10(m2.dmeans[ok]),np.log10(m2.variance[ok])/2,c=tl.looper2.c,label=tl.looper2.out_prefix, s=0.1)
+        ax.scatter(np.log10(m3.dmeans[ok]),np.log10(m3.variance[ok])/2,c=tl.looper3.c,label=tl.looper3.out_prefix, s=0.1)
 
 
-        ax_den_hist.hist(np.log10(m1.dmeans[ok]), histtype='step',color=looper1.c,label=looper1.out_prefix)
-        ax_den_hist.hist(np.log10(m2.dmeans[ok]), histtype='step',color=looper2.c,label=looper2.out_prefix)
-        ax_den_hist.hist(np.log10(m3.dmeans[ok]), histtype='step',color=looper3.c,label=looper3.out_prefix)
+        ax_den_hist.hist(np.log10(m1.dmeans[ok]), histtype='step',color=tl.looper1.c,label=tl.looper1.out_prefix)
+        ax_den_hist.hist(np.log10(m2.dmeans[ok]), histtype='step',color=tl.looper2.c,label=tl.looper2.out_prefix)
+        ax_den_hist.hist(np.log10(m3.dmeans[ok]), histtype='step',color=tl.looper3.c,label=tl.looper3.out_prefix)
 
-        ax_vel_hist.hist(np.log10(m1.variance[ok])/2, histtype='step', orientation='horizontal',color=looper1.c)
-        ax_vel_hist.hist(np.log10(m2.variance[ok])/2, histtype='step', orientation='horizontal',color=looper2.c)
-        ax_vel_hist.hist(np.log10(m3.variance[ok])/2, histtype='step', orientation='horizontal',color=looper3.c)
+        ax_vel_hist.hist(np.log10(m1.variance[ok])/2, histtype='step', orientation='horizontal',color=tl.looper1.c)
+        ax_vel_hist.hist(np.log10(m2.variance[ok])/2, histtype='step', orientation='horizontal',color=tl.looper2.c)
+        ax_vel_hist.hist(np.log10(m3.variance[ok])/2, histtype='step', orientation='horizontal',color=tl.looper3.c)
         axbonk(ax,yscale='linear', xscale='linear',  ylabel=r'$\log_{10} \sigma_v$', xlabel=r'$\log_{10} \langle\rho\rangle$')
         axbonk(ax_vel_hist,yscale='linear', xscale='linear',  ylabel=None, xlabel=r'$N$')
         axbonk(ax_den_hist,yscale='linear', xscale='linear',  ylabel=r'$N$', xlabel=None)

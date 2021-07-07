@@ -19,10 +19,11 @@ def target_particle_volume(field, data):
     data.set_field_parameter('mask_to_get',mask_to_get) #keeping the mask is faster
     pos_to_get = data['particle_position'][mask == 1]
     d = data.deposit(pos_to_get, method = "count")
-    d = data.ds.arr(d, input_units = field.units)  #was cm**-3
+    d = data.ds.arr(d, input_units = "cm**-3")
     mask = d>0
     d[mask]  = data['cell_volume'][mask]
-    return  data.apply_units(d,field.units)
+    return d
+    #return  data.apply_units(d, field.units)
 
 def add_tracer_density(obj):
     obj.add_field(      ("deposit","target_particle_volume"),
@@ -31,7 +32,8 @@ def add_tracer_density(obj):
                            yt.ValidateParameter('target_indices'), 
                            yt.ValidateParameter('mask_to_get'), 
                            yt.ValidateGridType()],
-             display_name = "target_particle_volume",sampling_type='cell')  #can add units=''
+                  units = '1/cm**3',
+             display_name = "target_particle_volume",sampling_type='cell')
 
 def get_deposit_field(myloop,frame=None,core_list=None, mask_stash=None):
     if frame is None: frame = myloop.current_frame

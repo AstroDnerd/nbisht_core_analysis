@@ -87,13 +87,53 @@ class lagrange():
             cell_volume1 = cell_volume[:,frame1]
             cell_volume2 = cell_volume[:,frame2]
             x1=self.this_looper.snaps[frame1][core_id].pos
-            self.dumb_x1=x1
                 #half edge structure
             self.tri = Delaunay(x1)
+
 
             x2=self.this_looper.snaps[frame2][core_id].pos
             print(x1.shape)
             rm = rainbow_map(4)
+
+            ds1 = self.this_looper.load(frame1)
+            domain_dimensions=ds1.domain_dimensions
+            cg1 = ds1.covering_grid(0,[0.0]*3,domain_dimensions)
+            density_proj_1 = cg1['density'].sum(axis=2)/domain_dimensions[2]
+            projx = cg1['x'].sum(axis=2)/domain_dimensions[2]
+            projy = cg1['y'].sum(axis=2)/domain_dimensions[2]
+
+            ds2 = self.this_looper.load(frame2)
+            domain_dimensions=ds2.domain_dimensions
+            cg2 = ds2.covering_grid(0,[0.0]*3,domain_dimensions)
+            density_proj_2 = cg2['density'].sum(axis=2)/domain_dimensions[2]
+            projx = cg2['x'].sum(axis=2)/domain_dimensions[2]
+            projy = cg2['y'].sum(axis=2)/domain_dimensions[2]
+
+            figp, axesp = plt.subplots(2,2, figsize=(8,8))
+            axp=axesp[0]
+
+
+            pcolormesh_args = {'cmap':'gray','shading':'nearest'}
+            axp[0].pcolormesh(projx,projy,density_proj_1,**pcolormesh_args)
+            axp[0].set_aspect('equal')
+            axp[1].pcolormesh(projx,projy,density_proj_1,**pcolormesh_args)
+            axp[1].set_aspect('equal')
+
+            axesp[1][0].pcolormesh(projx,projy,density_proj_2,**pcolormesh_args)
+            axesp[1][0].set_aspect('equal')
+            ratio_proj = (cg2['density']/cg1['density']).sum(axis=2)/domain_dimensions[2]
+            axesp[1][1].pcolormesh(projx,projy,ratio_proj,**pcolormesh_args)
+            axesp[1][1].set_aspect('equal')
+
+            self.ijk_1 = (x1*domain_dimensions).astype('int')
+            self.ijk_2 = (x2*domain_dimensions).astype('int')
+
+            self.cell_jump = ((self.ijk_1-self.ijk_2)**2).sum(axis=1)
+            self.colors = np.array(['y']*self.cell_jump.size)
+            self.colors[ self.cell_jump > 0] = 'r'
+
+
+
             for pi in indices:
                 print('p', pi, ms.nparticles)
                 #print(all_simplices(self.tri,pi))
@@ -117,95 +157,38 @@ class lagrange():
                     massB += (cell_volume2[my_simplex]*density2[my_simplex]).sum()
                     volumeA += cell_volume1[my_simplex].sum()
                     volumeB += cell_volume2[my_simplex].sum()
+                #densityA = density1[pi]
+                #densityB = density2[pi]
                 densityA = massA/volumeA
                 densityB = massB/volumeB
                 detFTF /= len(my_simplices)
                 detF = np.sqrt(detFTF)
                 self.density_ratio.append(densityB/densityA)
                 self.det.append(detF)
+                full_metric = self.density_ratio[-1]*self.det[-1]
+                if True: #full_metric <= 1.5:
+                    print('   plot')
+                    axp[0].plot([x1i[0],x2i[0]],[x1i[1],x2i[1]], c=rm(1/self.det[-1]),marker='o')
+                    axp[1].plot([x1i[0],x2i[0]],[x1i[1],x2i[1]], c=rm(self.density_ratio[-1]),marker='o')
+                    axp[0].set_title('1/det F')
+                    axp[1].set_title('rho2/rho2')
+                if False:
+                    for n_simplex,my_simplex_id in enumerate(my_simplices):
+                        my_simplex= self.tri.simplices[my_simplex_id]
+                        other_points=my_simplex[my_simplex != pi]
+                        dA = x1[other_points]-x1i
+                        dB = x2[other_points]-x2i
+                        for i in [0,1,2]:
+                            c = rm( self.density_ratio[-1]*self.det[-1])
+                            ax.plot([x1i[0],x1i[0]+dA[i,0]],[x1i[1],x1i[1]+dA[i,1]],c=c)
+                            #ax.plot([x2i[0],x2i[0]+dB[i,0]],[x2i[1],x2i[1]+dB[i,1]],c=)
+                        if np.abs(self.det[-1]) > 1e-16:
+                            ax2.scatter(x1i[0],x1i[1],np.abs(1/self.det[-1]),marker='*')
 
-#           take 1, works ok.
-#           for pi in indices:
-#               print('p')
-#               print(all_simplices(self.tri,pi))
-#               #Loop over simplices.  Each simplex is a triangle.
-#               #Average FTF.
-#               x1i = x1[pi,:]
-#               x2i = x2[pi,:]
-#               my_simplex_id = self.tri.find_simplex(x1i)
-#               my_simplex= self.tri.simplices[my_simplex_id]
-#               other_points=my_simplex[my_simplex != pi]
-#               dA = x1[other_points]-x1i
-#               dB = x2[other_points]-x2i
-#               F = np.linalg.solve(dA.T,dB.T).T
-#               densityA = (cell_volume1[my_simplex]*density1[my_simplex]).sum()/cell_volume1[my_simplex].sum()
-#               densityB = (cell_volume2[my_simplex]*density2[my_simplex]).sum()/cell_volume2[my_simplex].sum()
-#               self.density_ratio.append(densityB/densityA)
-#               self.det.append(np.linalg.det(F))
 
-
-                for i in [0,1,2]:
-                    c = rm( self.density_ratio[-1]*self.det[-1])
-                    ax.plot([x1i[0],x1i[0]+dA[i,0]],[x1i[1],x1i[1]+dA[i,1]],c=c)
-                    #ax.plot([x2i[0],x2i[0]+dB[i,0]],[x2i[1],x2i[1]+dB[i,1]],c=)
-                if np.abs(self.det[-1]) > 1e-16:
-                    ax2.scatter(x1i[0],x1i[1],np.abs(1/self.det[-1]),marker='*')
-
+        figp.savefig('plots_to_sort/%s_proj1.png'%prefix)
         fig.savefig('plots_to_sort/%s_volumes.png'%self.this_looper.out_prefix)
         plt.close(fig)
-#       def randrange(n, vmin, vmax):
-                #dA = dA[ dA>0]
-#           for pi in indices:
-#               x1i = x1[pi,:]
-#               x2i = x2[pi,:]
-#               xs_1 = x1 - x1i
-#               xs_2 = x2 - x2i
-#               distance = (xs_1**2).sum(axis=1)
-#               srt = np.argsort(distance)
-#               ok = distance[srt] > 0
-#               if ok.sum() < 4:
-#                   print("Not enough distinct particles")
-#                   assert(False)
-#               dA=xs_1[srt][ok][1:4]
-#               dB=xs_2[srt][ok][1:4]
-#               #dA=x1i[srt][ok][0:3]
-#               #dB=x2i[srt][ok][0:3]
-#               F = np.linalg.solve(dA.T,dB.T).T
-#               self.density_ratio.append(density2[pi]/density1[pi])
-#               self.det.append(np.linalg.det(F))
-#               print(self.tri.find_simplex(x1i))
-#               continue
-#               c1 = [0.1]*3
-#               c2 = [0.1,0,0]
-#               if np.abs(1/self.det[-1]) > 1e4:
-#                   pdb.set_trace()
-#                   c1 = 'k'
-#                   c2 = 'r'
-
-#               for i in [0,1,2]:
-#                   ax.plot([x1i[0],x1i[0]+dA[i,0]],[x1i[1],x1i[1]+dA[i,1]],c=c1)
-#                   ax.plot([x2i[0],x2i[0]+dB[i,0]],[x2i[1],x2i[1]+dB[i,1]],c=c2)
-#               if np.abs(self.det[-1]) > 1e-16:
-#                   ax2.scatter(x1i[0],x1i[1],np.log10(np.abs(1/self.det[-1])),marker='*')
-
-#       fig.savefig('plots_to_sort/%s_volumes.png'%self.this_looper.out_prefix)
-#       plt.close(fig)
-#       def randrange(n, vmin, vmax):
-#           '''
-#           Helper function to make an array of random numbers having shape (n, )
-#           with each number distributed Uniform(vmin, vmax).
-#           '''
-#           return (vmax - vmin)*np.random.rand(n) + vmin
-
-
-#       n = 100
-
-
-#       for m, zlow, zhigh in [('o', -50, -25), ('^', -30, -5)]:
-#           xs = randrange(n, 23, 32)
-#           ys = randrange(n, 0, 100)
-#           zs = randrange(n, zlow, zhigh)
-#           #ax2.scatter(xs, ys, zs, marker=m)
 
         ax2.set_xlabel('x')
         fig2.savefig('plots_to_sort/%s_dets.png'%self.this_looper.out_prefix)
@@ -214,30 +197,6 @@ class lagrange():
 
 
 
-
-no="""
-            i1 = indices.pop(int(np.random.random()*len(indices)))
-            i2 = indices.pop(int(np.random.random()*len(indices)))
-            i3 = indices.pop(int(np.random.random()*len(indices)))
-            #print(i1,i2,i3)
-            density = thtr.c([core_id],'density')
-            cell_volume = thtr.c([core_id],'cell_volume')
-
-            for frame in [10]:
-                F, rho_a, rho_b = two_point(ms,density,cell_volume, i1, i2, i3, frame)
-                if F is not None:
-                    self.density_ratio.append(rho_b/rho_a)
-                    print("rhox, rhoa",rho_b, rho_a)
-                    detf= np.linalg.det(F)
-                    print("rat %0.2f det %0.2f"%(rho_b/rho_a, detf))
-                    self.det.append( detf)
-                else:
-                    self.density_ratio.append(-1)
-                    self.det.append( -1)
-                #pdb.set_trace()
-        self.density_ratio = nar(self.density_ratio)
-        self.det = nar(self.det)
-"""
 
 
 
@@ -248,7 +207,7 @@ if 0:
     tool1=lagrange(tl.looper1)
     tool1.run()#core_list=[10,11])
 
-if 0:
+if 1:
     tool1 = lagrange(u14.looper14)
     tool1.run(frame1=5,frame2=6)
 
@@ -259,7 +218,7 @@ if 1:
     ok = ok * (np.abs(tool1.det) > 1e-16)
     the_y = np.abs(1./tool1.det[ok])
     the_x = tool1.density_ratio[ok]
-    ax.scatter(the_x,the_y)
+    ax.scatter(the_x,the_y,c=tool1.colors)
     minmin = min([the_y.min(),the_x.min()])
     maxmax = max([the_y.max(),the_x.max()])
     minmax=[minmin,maxmax]

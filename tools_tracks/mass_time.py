@@ -20,7 +20,6 @@ class mass_tool():
         nx = 1./dx
         thtr = self.this_looper.tr
         all_cores = np.unique(thtr.core_ids)
-        core_list=all_cores
         if core_list is None:
             core_list = all_cores
 
@@ -30,6 +29,7 @@ class mass_tool():
         self.core_list=core_list
         for core_id in core_list:
             ms = trackage.mini_scrubber(thtr,core_id)
+            self.ms = ms
             if ms.nparticles < 10:
                 continue
             print('go ', core_id)
@@ -54,6 +54,7 @@ if 'mass_tool1' not in dir() or clobber:
     mass_tool1=mass_tool(tl.looper1)
     mass_tool1.run()
 
+
 if 'mass_tool2' not in dir() or clobber:
     mass_tool2=mass_tool(tl.looper2)
     mass_tool2.run()
@@ -72,9 +73,14 @@ if 1:
         masses = np.zeros([ntimes,ncores])
         these_times = tool.times/tff_global
         outname='plots_to_sort/mass_time_heatmap_unique_particles.pdf'
-        this_mass = tool.unique_mass[core_id]
         for ncore,core_id in enumerate(tool.cores_used):
+            this_mass = tool.unique_mass[core_id]
+            if len(this_mass) == 0:
+                pdb.set_trace()
             masses[:,ncore]=this_mass/nar(this_mass[:6]).mean()
+            dof = nar(tool.dof[core_id])
+            #masses[:,ncore] *= dof[0]/dof
+
 
         nc = len(tool.cores_used)
         take_a_few = ((nc-1)*np.random.random(10)).astype('int')
@@ -86,6 +92,7 @@ if 1:
             #axes[3].plot(these_times, tool.dof[core_id]/tool.dof[core_id][-1],c=[0.5]*4)
 
         mass_bins_edge = np.logspace(-3,4,101)
+        mass_bins_edge = np.logspace(-2,1,101)
         xbins = these_times
         ybins = 0.5*(mass_bins_edge[1:]+mass_bins_edge[:-1])
         nx = len(xbins) ; ny=len(ybins)
@@ -102,8 +109,8 @@ if 1:
         minmin = hist[hist>0].min()
         norm = mpl.colors.LogNorm(vmin=1,vmax=33)
         ploot=axes[nt].pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
-        axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
-        axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
+        #axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
+        #axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
         axbonk(axes[nt],ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='log')
     axes[0].set_ylabel(r'$M/\bar{M_{\rm{early}}}$')
     fig.colorbar(ploot)

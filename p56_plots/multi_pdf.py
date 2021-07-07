@@ -16,7 +16,8 @@ if 'sim_list' not in dir():
 
 
     class sim_details():
-        def __init__(self,name,file_list,beta=""):
+        def __init__(self,name,file_list,beta="", loop=None):
+
             self.name=name
             self.file_list=file_list
             self.my_looper=None
@@ -24,22 +25,29 @@ if 'sim_list' not in dir():
             self.density_profiles=[]
             self.velocity_profiles=[]
             self.means=None
+            self.loop=loop
+            self.beta=beta
 
 
-    u05s = sim_details('u05',files_u05,beta=0.2)
-    u10s = sim_details('u10',files_u10,beta=2.0)
-    u11s = sim_details('u11',files_u11,beta=20)
+    import three_loopers_1tff as tl
+    u05s = sim_details('u05',files_u05,beta=0.2, loop=tl.looper1)
+    u10s = sim_details('u10',files_u10,beta=2.0, loop=tl.looper2)
+    u11s = sim_details('u11',files_u11,beta=20, loop=tl.looper3)
 
+
+        
     sim_list=[u05s,u10s,u11s]
- 
-    for sim in sim_list:
-        if sim.my_looper is None:
-            sim.my_looper=looper.core_looper(directory=dl.sims[this_simname])
-            for nfile,fname in enumerate(sim.file_list):
-                sim.my_looper.load_loop(fname)
-                print( "File %d of %d"%(nfile,len(sim.file_list)))
-            sim.tracker = sim.my_looper.tr
-            sim.tracker.sort_time()
+
+     
+    if 0:
+        for sim in sim_list:
+            if sim.my_looper is None:
+                sim.my_looper=looper.core_looper(directory=dl.sims[this_simname])
+                for nfile,fname in enumerate(sim.file_list):
+                    sim.my_looper.load_loop(fname)
+                    print( "File %d of %d"%(nfile,len(sim.file_list)))
+                sim.tracker = sim.my_looper.tr
+                sim.tracker.sort_time()
 
 def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_bins=64,extrema=None):
     reg = ds.all_data()
@@ -68,6 +76,8 @@ class means_etc():
     def __init__(self,thtr,core_list=None):
         if core_list is None:
             core_list = np.unique(thtr.core_ids)
+        self.core_list=core_list
+        self.thtr = thtr
         self.dmeans = np.zeros_like(core_list,dtype='float')
         self.dstds = np.zeros_like(core_list,dtype='float')
         self.d_logmeans = np.zeros_like(core_list,dtype='float')
@@ -81,11 +91,28 @@ class means_etc():
         self.vrel  =  np.zeros_like(core_list,dtype='float')
         self.volume =  np.zeros_like(core_list,dtype='float')
 
+        self.dmean_volume = np.zeros_like(core_list,dtype='float')
+        self.dstd_volume_1 = np.zeros_like(core_list,dtype='float')
+        self.dstd_volume_2 = np.zeros_like(core_list,dtype='float')
+        self.mass = np.zeros_like(core_list,dtype='float')
+        self.Bmean = np.zeros_like(core_list,dtype='float')
+        self.Brms = np.zeros_like(core_list,dtype='float')
+
+        self.densities=[]
+        self.volumes=[]
+        self.bfields=[]
+
+
+
         for i,nc in enumerate(core_list):
             ms = trackage.mini_scrubber(thtr,int(nc),do_velocity=True)
-            this_density = thtr.c(int(nc),'density')[:,0]
-            this_vel = thtr.c(int(nc),'velocity_magnitude')[:,0]
-            this_volume = thtr.c(int(nc),'cell_volume')[:,0]
+            frame = 1
+            this_density = thtr.c(int(nc),'density')[:,frame]
+            this_vel = thtr.c(int(nc),'velocity_magnitude')[:,frame]
+            this_volume = thtr.c(int(nc),'cell_volume')[:,frame]
+            this_magnetic = thtr.c(int(nc),'magnetic_field_strength')[:,frame]
+            self.densities.append(this_density)
+            self.volumes.append(this_volume)
             self.npart[i] = this_density.size
             self.volume[i] = this_volume.sum()
             self.dmeans[i]=this_density.mean()
@@ -103,21 +130,71 @@ class means_etc():
             sigma_2 = (rvx**2).sum()/rvx.size+ (rvy**2).sum()/rvx.size+ (rvz**2).sum()/rvx.size
             self.vstds_xyz[i] =np.sqrt(sigma_2)
 
+            self.dmean_volume[i] = (this_density*this_volume).sum()/this_volume.sum()
+            self.dstd_volume_1[i] =np.sqrt( ( (this_density-1)**2*this_volume).sum()/this_volume.sum())
+            self.dstd_volume_2[i] =np.sqrt( ( (this_density-self.dmean_volume[i])**2*this_volume).sum()/this_volume.sum())
+
+            self.mass[i] = (this_density*this_volume).sum()
+            self.bfields.append(this_magnetic)
+            self.Bmean[i] = (this_magnetic*this_volume).sum()/this_volume.sum()
+            self.Brms[i] = np.sqrt(((this_magnetic)**2*this_volume).sum()/this_volume.sum())
+
+
 for sim in sim_list:
     if sim.means is None:
-        sim.means = means_etc( sim.tracker )
+        sim.means = means_etc( sim.loop.tr )
+
+if 0:
+    fig, ax = plt.subplots(1,3, figsize=(12,4))
+    ax0=ax[0]
+    ax1=ax[1]
+    ax2=ax[2]
+    frame=0
+    rm = rainbow_map(10)
+    for sim in sim_list[:1]:
+        order = np.argsort( sim.means.dmean_volume )
+        for nc, core_order in enumerate(order):
+            core_id = sim.means.core_list[core_order]
+            this_rho = sim.means.thtr.c(int(core_id), 'density')[:,frame]
+            this_log_rho = np.log10(this_rho)
+            if this_rho.size < 10:
+                continue
+
+            ax0.hist( this_log_rho, histtype='step')
+            ax0.set_yscale('log')
+            ax1.scatter( sim.means.dmean_volume[core_order],
+                        sim.means.dstd_volume_2[core_order])
+            axbonk(ax1, xlim=[1e-1, 10],ylim=[1e-1,10], yscale='log',xscale='log')
+
+        ok = sim.means.npart 
+        ratio = sim.means.dstd_volume_2/sim.means.dmean_volume 
+        ax2.scatter( sim.means.npart, sim.means.dmean_volume)#, histtype='step')
+        axbonk(ax2,xscale='log', yscale='log', xlabel=r'$N$', ylabel=r'$\rho$')
+        ax1.plot( sim.means.dmean_volume, sim.means.dmean_volume,c='k')
+        outname=odir+'/multi_hist_X%03d.png'%(nc)
+        fig.savefig(outname)
+        print(outname)
+
+
+outname='x'
+
+
+
+fig,ax=plt.subplots(1,1)
+
 if 1:
     rho_ext = extents()
     v_ext = extents()
     only_once=True
     for sim in sim_list:
-        ok = sim.means.npart > 1
+        ok = sim.means.npart > 10
         kwargs={}
         kwargs['label']=label=r'$\beta=%0.1f$'%sim.beta
         kwargs['marker']= {'u05':'*','u10':'v','u11':'^'}[sim.name]
         cset={'u05':0.0,'u10':0.5,'u11':0.7}
         kwargs['color'] = [cset[sim.name]]*3
-        if 1:
+        if 0:
+            # rho sigma-v
             if only_once:
                 ax.plot( [1.0,1.0],[0,100],c=[0.5]*4)
                 ax.plot( [0.1,100],[1,1],c=[0.5]*4)
@@ -128,23 +205,84 @@ if 1:
             axbonk(ax,yscale='log', xscale='log', ylabel=r'$\sigma_v$', xlabel=r'$\langle\rho\rangle$',
                    xlim=rho_ext.minmax,ylim=v_ext.minmax)
             ax.legend(loc=3)
-            fig.savefig(odir+'/%s_pre_rho_mean_v_rms.%s'%(sim.name,form))
+            outname=odir+'/pre_rho_mean_v_rms.%s'%(form)
         if 0:
-            ax.scatter(sim.means.dstds[ok],sim.means.vstds[ok])
-            axbonk(ax,yscale='log', xscale='log',  ylabel=r'$\sigma_v$', xlabel=r'$\sigma_{\rho}$')
-            fig.savefig(odir+'/%s_pre_rho_rms_v_rms.%s'%(sim.name,form))
+            # rho sigma-rho, dumb way
+            the_x = sim.means.dmeans[ok]
+            the_y = sim.means.dstds[ok]
+            pfit = np.polyfit( the_x, the_y,1)
+            new_y = the_y
+            ax.scatter(the_x,new_y)
+            #ax.plot( the_x, pfit[0]*the_x+pfit[1],c='k')
+            axbonk(ax,yscale='log', xscale='log',  xlabel=r'$\langle\rho\rangle$', ylabel=r'$\sigma_{\rho}$')
+            outname=odir+'/pre_rho_mean_rho_rms.%s'%(form)
         if 0:
-            ax.clear()
-            ax.scatter(sim.means.dmeans,sim.means.vmeans)
-            axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
-            fig.savefig(odir+'/%s_pre_rho_v_mean.%s'%(sim.name,form))
+            #this is the good one.
+            # rho sigma-rho 
+            the_x = sim.means.dmean_volume[ok]
+            the_y = sim.means.dstd_volume_2[ok]
+            pfit = np.polyfit( the_x, the_y,1)
+            new_y = the_y
+            ax.scatter(the_x,new_y)
+            ax.plot( the_x, the_x,c='k')
+            axbonk(ax,yscale='log', xscale='log',  xlabel=r'$\langle\rho\rangle$', ylabel=r'$\sigma_{\rho}$')
+            outname = odir+'/pre_rho_mean_rho_rms_avg2.%s'%(form)
+        if 1:
+            # brms vs v
+            Bmean = sim.means.Bmean
+            Brms  = sim.means.Brms
+            the_y = Brms
+            the_x = sim.means.vstds_xyz**2#/Bmean
+            the_x =the_x[ok]; the_y=the_y[ok]
+            #pfit = np.polyfit( the_x, the_y,1)
+            ax.scatter(the_x,the_y,**kwargs)
+            ax.set_yscale('log')
+            ax.set_xscale('log')
+            #xlim = [the_x.min(),the_x.max()]
+            #ylim = [the_y.min(),the_y.max()]
+            #ax.set_xlim(xlim); ax.set_ylim(ylim)
+            #axbonk(ax,yscale='log', xscale='log',  ylabel=r'$\sigma_B$', xlabel=r'$\sigma_{v}^2/B$')
+            outname = odir+'/pre_v_rms_brms.%s'%(form)
+        if 0:
+            #
+            # sigma-v sigma-rho
+            the_x = sim.means.vstds_xyz[ok]
+            the_y = sim.means.dstd_volume_2[ok]
+            pfit = np.polyfit( the_x, the_y,1)
+            ax.scatter(the_x,the_y)
+            axbonk(ax,yscale='log', xscale='log',  ylabel=r'$\sigma_\rho$', xlabel=r'$\sigma_{v}$')
+            outname = odir+'/pre_v_rms_rho_rms_avg2.%s'%(form)
 
         if 0:
-            ax.clear()
+            the_x = sim.means.mass[ok]
+            the_y = sim.means.dstd_volume_2[ok]
+            pfit = np.polyfit( the_x, the_y,1)
+            ax.scatter(the_x,the_y)
+            axbonk(ax,yscale='log', xscale='log',  xlabel=r'$M$', ylabel=r'$\sigma_{\rho}$')
+            outname = odir+'/pre_mass_rho_rms_avg2.%s'%(form)
+
+        if 0:
+            the_x = sim.means.volume[ok]
+            the_y = sim.means.dstd_volume_2[ok]
+            pfit = np.polyfit( the_x, the_y,1)
+            ax.scatter(the_x,the_y)
+            axbonk(ax,yscale='log', xscale='log',  xlabel=r'$Volume$', ylabel=r'$\sigma_{\rho}$')
+            outname=odir+'/pre_volume_rho_rms_avg2.%s'%(form)
+
+
+        if 0:
+            ax.scatter(sim.means.dmeans,sim.means.vmeans)
+            axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
+            outname = odir+'/pre_rho_v_mean.%s'%(form)
+
+        if 0:
             ax.errorbar(sim.means.d_logmeans,sim.means.v_logmeans, 
                         xerr=sim.means.d_logstds, yerr=sim.means.v_logstds)
             axbonk(ax,yscale='log', xscale='log', ylabel=r'$\langle v \rangle$', xlabel=r'$\langle \rho \rangle$')
-            fig.savefig(odir+'/%s_pre_rho_v_log_errb.%s'%(sim.name,form))
+            outname = odir+'/pre_rho_v_log_errb.%s'%(form)
+    ax.legend(loc=0)
+    fig.savefig(outname)
+    print(outname)
 
 if 0:
     #relative and tangential histograms

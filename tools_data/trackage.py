@@ -167,13 +167,13 @@ class track_manager():
             else:
                 output= np.append(output, parts,axis=0)
         return output
-    def c(self,core_list,field): 
-        if type(core_list) is int: 
+    def c(self,core_list,field):
+        if type(core_list) is int:
             core_list = [core_list]
         nf = self.frames.size
-        output = None 
+        output = None
         for core in core_list:
-            loc = self.core_ids == core 
+            loc = self.core_ids == core
             core_values = self[field][loc,:]
             if output is None:
                 output = core_values
@@ -206,20 +206,44 @@ class track_manager():
 def shift_down(pos):
     #shift based on the time history: if a particle jumps more than half the box,
     #move it.
+    # NOT A GOOD IDEA.  Later realized that this is buggy
     sign = -1
     out = copy.copy(pos)
-
     mean_pos = np.median(out[:,-1])
-    #print("mean_pos",mean_pos)
     distance_from_final =        out- mean_pos
-    #ft = np.abs(distance_from_final[:,:-1]) > 0.5
     ft = np.abs(distance_from_final) > 0.5
     out[ft] -=  1*np.sign(distance_from_final[ft])
-
-
-
-    #out[ out > point ] = out[ out > point]-1
     return out#,delta
+
+def shift_6(pos):
+    #Shift based on large shifts in the trajectory.
+    #Assume we want to be on the same side as the end.
+    #Find all the times when the particle jumps by more than half the box,
+    #and shift it back.
+    out = copy.copy(pos)
+    delta = out[1:] - out[:-1]
+    index =  np.where(np.abs(delta) > 0.5)[0]
+    sign = list(np.sign( delta[index]))
+    index=list(index)
+    if len(index) % 2:
+        index = [-1]+index
+        sign = [0]+sign
+    while len(index):
+        Ie = index.pop(-1)+1
+        Is = index.pop(-1)+1
+        Sgn = sign.pop(-1)
+        othersgn = sign.pop(-1)
+        out[Is:Ie]  += Sgn
+    return out
+
+def shift_4(arr):
+    #Loop over particles in the array and call shift_6
+    out = np.zeros_like(arr)
+    for n,p in enumerate(arr):
+        out[n,:]=shift_6(arr[n,:])
+    return out  
+
+
         
 class mini_scrubber():
     def __init__(self,trk,core_id,do_velocity=True):
@@ -250,7 +274,7 @@ class mini_scrubber():
 
         self.density = self.trk.c([core_id],'density')
         self.cell_volume = self.trk.c([core_id],'cell_volume')
-        self.velocity_div = self.trk.c([core_id],'velocity_divergence')
+        #self.velocity_div = self.trk.c([core_id],'velocity_divergence')
         #self.vorticity = self.trk.c([core_id],'vorticity_magnitude')
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
@@ -259,9 +283,9 @@ class mini_scrubber():
         #this_y=raw_y
         if 1:
             #do the shift
-            self.this_x = shift_down(self.raw_x)
-            self.this_y = shift_down(self.raw_y)
-            self.this_z = shift_down(self.raw_z)
+            self.this_x = shift_4(self.raw_x)
+            self.this_y = shift_4(self.raw_y)
+            self.this_z = shift_4(self.raw_z)
         else:
             #don't actuall shift
             self.this_x = self.raw_x+0
@@ -328,7 +352,7 @@ class mini_scrubber():
             self.sqr_vy = np.sum(self.raw_vy**2,axis=0)
             self.sqr_vz = np.sum(self.raw_vz**2,axis=0)
             self.raw_v2 = self.raw_vx**2+self.raw_vy**2+self.raw_vz**2
-            print("KLUDGE: using raw mean for velocity")
+            #print("KLUDGE: using raw mean for velocity")
             self.mean_vx = np.mean(self.raw_vx,axis=0)
             self.mean_vy = np.mean(self.raw_vy,axis=0)
             self.mean_vz = np.mean(self.raw_vz,axis=0)

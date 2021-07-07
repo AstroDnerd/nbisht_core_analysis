@@ -210,11 +210,11 @@ def rainbow_01():
     return  color_map.to_rgba
 
 class rainbow_map():
-    def __init__(self,n):
+    def __init__(self,n, cmap='jet'):
         norm = mpl.colors.Normalize()
         norm.autoscale(np.arange(n))
         #cmap = mpl.cm.jet
-        self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap='jet')
+        self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap=cmap)
     def __call__(self,val,n_fields=0):
         this_value = self.color_map.to_rgba(val)
         if n_fields > 0:

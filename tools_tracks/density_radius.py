@@ -5,65 +5,82 @@ reload(davetools)
 
 plt.close('all')
 
+class dr_thing():
+    def __init__(self,this_looper):
+        self.this_looper=this_looper
+        self.cores_used=[]
+        self.rho_extents=None
+    def run(self,core_list=None):
+        dx=1./2048
+        nx = 1./dx
+        thtr = self.this_looper.tr
+        all_cores = np.unique(thtr.core_ids)
+        if core_list is None:
+            core_list = all_cores
 
-file_list=glob.glob('%s/*h5'%dl.sixteen_frame)
-#for debug purposes you may want a reduced list 
-#file_list=file_list[:3]    
+        thtr.sort_time()
 
-if 'this_looper' not in dir():
-    this_looper=looper.core_looper(directory=dl.enzo_directory)
-    for nfile,fname in enumerate(file_list):
-        this_looper.load_loop(fname)
-        print( "Reading file %d of %d"%(nfile,len(file_list)))
-    thtr = this_looper.tr
-    thtr.sort_time()
-    all_cores = np.unique(thtr.core_ids)
+        if self.rho_extents is None: 
+            self.rho_extents=davetools.extents()
+            self.r_extents=davetools.extents()
+            for nc,core_id in enumerate(all_cores):
+                ms = trackage.mini_scrubber(thtr,core_id)
+                if ms.nparticles < 20:
+                    continue
+                density = thtr.c([core_id],'density')[:,0]
+                self.rho_extents(density)
+                self.r_extents(ms.r)
 
-core_list=all_cores
-rm = rainbow_map(len(all_cores))
+        tsorted = thtr.times
+        self.core_list=core_list
+        fig, axd=plt.subplots(2,2)
+        axd1 = axd[0][0]; axd2=axd[0][1]#sorry
+        axd3 = axd[1][0]; axd4=axd[1][1]
 
-if 'rho_extents' not in dir():
-    rho_extents=davetools.extents()
-    r_extents=davetools.extents()
-    for nc,core_id in enumerate(all_cores):
-        ms = trackage.mini_scrubber(thtr,core_id)
-        if ms.nparticles == 1:
-            continue
-        density = thtr.c([core_id],'density')
-        rho_extents(density)
-        r_extents(ms.r)
+        ds= self.this_looper.load(0)
+        ad = ds.all_data()
+        axd2.hist(np.log10(ad['density'].v.flatten()), histtype='step',color='k')
+        rmcore=rainbow_map(len(core_list))
+        for nc,core_id in enumerate(core_list):
+            ms = trackage.mini_scrubber(thtr,core_id)
+            self.ms = ms
+            if ms.nparticles < 10:
+                continue
+            self.cores_used.append(core_id)
 
-for nc,core_id in enumerate(core_list):
+            tmap=rainbow_map(ms.ntimes)
+            asort =  np.argsort(thtr.times)
+            density = thtr.c([core_id],'density')
+            n0=asort[0]
+            tsorted = thtr.times[asort]
 
-    #miniscrubber computes distance, r^2, several other quantities
-    ms = trackage.mini_scrubber(thtr,core_id)
-    tmap=rainbow_map(ms.ntimes)
-    if ms.nparticles == 1:
-        continue
+            #fig, axd1=plt.subplots(1,1)
 
-    asort =  np.argsort(thtr.times)
-    density = thtr.c([core_id],'density')
-    if (asort != sorted(asort)).any():
-        print("Warning: times not sorted.")
-    n0=asort[0]
-    tsorted = thtr.times[asort]
+            for n_count,n_time in enumerate(asort[0:1]):
+                mask2 = ms.compute_unique_mask(core_id, dx=1./2048,frame=n_count)
+                time=thtr.times[n_time]
+                c=tmap(n_count,mask2.sum())
+                c=rmcore(nc, mask2.sum())
+                this_r=ms.r[:,n_time]+0
+                r_un = nar(sorted(np.unique(this_r)))
 
-    fig, axd1=plt.subplots(1,1)
+                axd1.scatter(this_r[mask2],density[mask2,n_time],c=c,label=thtr.times[n_time],s=0.1)
+                axd2.hist(np.log10(density[mask2,n_time]), histtype='step',color=c[0])
+                axd1.plot(r_un, 100*(r_un/1e-2)**-2,c='k',linewidth=0.1)
+                axd3.scatter( density[mask2,n_time].mean(), density[mask2,n_time].std())
+                
 
-    for n_count,n_time in enumerate(asort):
-        time=thtr.times[n_time]
-        if time == 0:
-            continue
-        c=tmap(n_count,ms.nparticles)
-        this_r=ms.r[:,n_time]+0
-        r_un = nar(sorted(np.unique(this_r)))
+            davetools.axbonk(axd1,xscale='log',yscale='log',xlabel='r',ylabel=r'$\rho$',
+                             xlim=self.r_extents.minmax, ylim=self.rho_extents.minmax)
+            davetools.axbonk(axd2,xscale='linear',yscale='log',xlabel='r',ylabel=r'$\rho$',
+                             xlim=np.log10(self.rho_extents.minmax))
+        #outname = '%s/density_radius_c%04d'%(dl.output_directory,core_id)
+        outname = '%s/density_radius_n0000.png'%(dl.output_directory)
+        fig.savefig(outname)
+        print("saved "+outname)
+        plt.close(fig)
 
-        axd1.scatter(this_r,density[:,n_time],c=c,label=thtr.times[n_time],s=0.1)
-        axd1.plot(r_un, 100*(r_un/1e-2)**-2,c='k',linewidth=0.1)
+import three_loopers_1tff as TL
 
-    davetools.axbonk(axd1,xscale='log',yscale='log',xlabel='r',ylabel=r'$\rho$',
-                     xlim=r_extents.minmax, ylim=rho_extents.minmax)
-    outname = '%s/density_radius_c%04d'%(dl.output_directory,core_id)
-    fig.savefig(outname)
-    print("saved "+outname)
-    plt.close(fig)
+r1 = dr_thing(TL.looper1)
+r1.run()

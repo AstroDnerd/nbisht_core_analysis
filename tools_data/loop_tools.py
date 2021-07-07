@@ -139,17 +139,17 @@ def shift_particles(ds=None, position=None,shift = np.zeros(3),shiftRight = Fals
             continue
         delta_x = nique[1:] - nique[0:-1]
         max_delta_x = delta_x.max()
-        break_index = np.where(delta_x == max_delta_x)[0]
+        break_index = np.where(delta_x == max_delta_x)
         if len(break_index) > 1:
             break_index = break_index[0]
         if max_delta_x > max_dx:
            if shiftRight:
-              break_x = nique[break_index]
+              break_x = nique[break_index[0]]
               all_to_shift = np.where( shifted[:,i] <= break_x + min_dx )[0]
               shifted[:,i][all_to_shift] += DomainWidth[i]
               shift[i] = DomainWidth[i]
            else:
-              break_x = nique[break_index+1]
+              break_x = nique[break_index[0]+1]
               all_to_shift = np.where( shifted[:,i] >= break_x - min_dx )[0]
               shifted[:,i][all_to_shift] -= DomainWidth[i]
               shift[i] = -DomainWidth[i]

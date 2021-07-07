@@ -49,6 +49,8 @@ def save_loop(self,fname):
                             "frame",
                             "mask",
                             "pos",
+                            "ind",
+                            "vel",
                             "R_centroid",
                             "R_vec",
                             "R_mag",
@@ -129,6 +131,8 @@ def load_loop(self,fname):
                 for val in ["R_centroid",
                             "R_vec",
                             "pos",
+                            "ind",
+                            "vel",
                             "R_mag", ]:
                     if val in core_grp:
                         #thisval = this_snap.ds.arr(core_grp[val].value,'code_length')
