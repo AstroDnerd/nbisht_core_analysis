@@ -39,18 +39,21 @@ class track_manager():
     plots the field vs. time.
     self.ingest(snapshot) populates the master list
     """
-    def __init__(self,my_loop=None):
-        self.my_loop = None
-        if my_loop is not None:
-            self.my_loop = weakref.proxy(my_loop)
-        self.particle_ids=nar([],dtype='int64')
-        self.core_ids = nar([],dtype='int64')
-        self.frames = nar([],dtype='int64')
-        self.times = nar([],dtype='float64')
-        self.V_rad = nar([],dtype='float64')
-        self.V_rel = nar([],dtype='float64')
+    def __init__(self,my_loop=None, h5ptr=None):
+        #self.my_loop = None
+        #if my_loop is not None:
+        #    self.my_loop = weakref.proxy(my_loop)
         self.track_dict={}
-        self.shape=(0,0) #particles, frames
+        if h5ptr is None:
+            self.particle_ids=nar([],dtype='int64')
+            self.core_ids = nar([],dtype='int64')
+            self.frames = nar([],dtype='int64')
+            self.times = nar([],dtype='float64')
+            self.V_rad = nar([],dtype='float64')
+            self.V_rel = nar([],dtype='float64')
+            self.shape=(0,0) #particles, frames
+        else:
+            self.read(fptr=h5ptr)
     def sort_time(self):
         """fix up the time ordering of the members"""
         #pdb.set_trace()
@@ -61,33 +64,39 @@ class track_manager():
             self.times = self.times[asort]
             self.frames = self.frames[asort]
 
-    def write(self,fname):
-        fptr = h5py.File(fname,'w')
+    def write(self,fname="TRACKAGE_SAVE.ht", fptr=None):
+        create_file_here = False
+        if fptr is None:
+            create_file_here=True
+            fptr = h5py.File(fname,'w')
         try:
             fptr['particle_ids'] = self.particle_ids
             fptr['core_ids'] = self.core_ids
             fptr['frames'] = self.frames
             fptr['times'] = self.times
-            fptr['r_velocity'] = self.V_rad
-            fptr['full_velocity']=self.V_rel
             for k in self.track_dict:
                 fptr[k] = self.track_dict[k]
         except:
             raise
         finally:
-            fptr.close()
-    def read(self,fname):
-        fptr = h5py.File(fname,'r')
+            if create_file_here:
+                fptr.close()
+    def read(self,fname = None, fptr=None):
+        create_file_here = False
+        if fptr is None:
+            create_file_here=True
+            fptr = h5py.File(fname,'r')
         try:
             for key in fptr:
-                if str(key) in ['particle_ids', 'core_ids', 'frames', 'times','r_velocity','full_velocity']:
+                if str(key) in ['particle_ids', 'core_ids', 'frames', 'times']:
                     self.__dict__[key]=fptr[key][:]
                 else:
                     self.track_dict[key] = fptr[key][:] 
         except:
             raise
         finally:
-            fptr.close()
+            if create_file_here:
+                fptr.close()
     def merge(self,fname):
         fptr = h5py.File(fname,'r')
         temp_dict = {}
@@ -132,6 +141,8 @@ class track_manager():
         if snapshot.core_id not in self.core_ids:
             #this might not be the best place for the parent step.
             core_ids = np.ones_like(particle_ids) * snapshot.core_id
+            if hasattr(core_ids,'v'):
+                core_ids = core_ids.v #need it to not have units.
             self.core_ids = np.append(self.core_ids, core_ids)
             self.particle_ids = np.append(self.particle_ids, particle_ids)
         particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
@@ -212,16 +223,17 @@ class track_manager():
         return self.track_dict[item]
     def __setitem__(self,item,value):
         self.track_dict[item]=value
-    def setup_fields(self,field_list=None):
-        for frame in self.my_loop.field_list:
-            for core_id in self.my_loop.core_list:
-                this_snapshot = looper.make_snapshot(frame,core_id)
-                if field_list is None:
-                    local_field_list = this_snapshot.field_values.keys()
-                else:
-                    local_field_list = field_list
-                for field in local_field_list:
-                    self[field].ingest(this_snapshot)
+    #can I remove this?
+    #def setup_fields(self,field_list=None):
+    #    for frame in self.my_loop.field_list:
+    #        for core_id in self.my_loop.core_list:
+    #            this_snapshot = looper.make_snapshot(frame,core_id)
+    #            if field_list is None:
+    #                local_field_list = this_snapshot.field_values.keys()
+    #            else:
+    #                local_field_list = field_list
+    #            for field in local_field_list:
+    #                self[field].ingest(this_snapshot)
 
 
 def shift_down(pos):

@@ -78,6 +78,7 @@ def save_loop(self,fname):
         raise
     finally:
         fptr.close()
+
 def load_loop(self,fname):
     fptr = h5py.File(fname,'r')
     #just a bunch of values
@@ -107,12 +108,18 @@ def load_loop(self,fname):
         for core in fptr['target_indices']:
             self.target_indices[int(core)]=fptr['target_indices'][core][()]
 
+        KLUDGE_ONLY_ONE = False
         for frame_name in fptr['snaps']:
+            if KLUDGE_ONLY_ONE:
+                continue
+            KLUDGE_ONLY_ONE = True
+
             frame_number = int(frame_name.split()[1])
             self.load(frame_number,dummy=True)
 
             for core_name in fptr['snaps'][frame_name]:
                 core_number = int(core_name.split()[1])
+                print('LOADING', frame_number, core_number)
                 core_grp = fptr['snaps'][frame_name][core_name]
                 self.snaps[frame_number][core_number]=self.make_snapshot(frame_number,core_number,
                                                                         dummy_ds=True)
@@ -150,43 +157,12 @@ def load_loop(self,fname):
                 if self.tr is None:
                     self.tr = trackage.track_manager(self)
                 self.tr.ingest(this_snap)
-        #for val in ['particle_ids','core_ids','frames','times']:
-        #    self.tr.__dict__[val] =fptr['track_manager'][val].value
-        #self.tr.track_dict={}
-        #for k in fptr['track_manager']['track_dict']:
-        #    self.tr.track_dict[k]=fptr['track_manager']['track_dict'][k].value
 
     except:
         raise
     finally:
         fptr.close()
-#def check(one,two):
-#	for fld in ['core_list',
-#				'current_frame',
-#				'data_template',
-#				'directory',
-#				'ds',
-#			'ds_list',
-#			'field_values',
-#			'fields_from_grid',
-#			'filename',
-#			'frame_list',
-#			'get_current_frame',
-#			'get_region',
-#			'get_target_indices',
-#			'get_tracks',
-#			'individual_particle_tracks',
-#			'load',
-#			'make_snapshot',
-#			'out_prefix',
-#			'sim_name',
-#			'snaps',
-#			'target_frame',
-#			'target_indices',
-#			'tr']:
 
-#    this_looper.get_tracks()
-#    this_looper.tr.write('cores_many_take3.h5')
 def check(lpr):
     f0=lpr.frame_list[1]
     c0=lpr.core_list[1]
@@ -203,15 +179,96 @@ def check(lpr):
                 fv1 = lpr.snaps[frame][core].field_values[field]
                 if fv0.size != fv1.size:
                     print("n %d c %d f %s z %d %d"%(frame,core,field, fv0.size, fv1.size))
-#check(this_looper)
-                
-        
 
-#fname = "test2.h5"
-#save_loop(self,fname)
-#new = looper.core_looper()
-#load_loop(new,fname)
-#new.fields_from_grid = list(new.fields_from_grid)+['Bx']
-#new.get_tracks()
-#new.frame_list=[7]
-#new.get_tracks()
+
+def save_loop_only_trackage(self,fname):
+    fptr = h5py.File(fname,'w')
+    try:  #the try-except-finally is for clean failures with the hdf5 file
+
+        #
+        # write meta data
+        #
+        for value in [ "current_frame",
+                       "data_template",
+                       "sim_name",     
+                       "frame_list",   
+                       "core_list",    
+                       "directory",    
+                       "target_frame", 
+                       "out_prefix",   
+                      ]:
+            result = self.__dict__[value]
+            if result is None:
+                continue
+            fptr.create_dataset(value,data=result)
+        # write fields
+        fptr.create_dataset('fields_from_grid',data=np.array( [np.string_(s) for s in self.fields_from_grid]))
+        # write target_indices
+        ti_grp=fptr.create_group('target_indices')
+        for core in self.target_indices:
+            ti_grp.create_dataset(str(core),data=self.target_indices[core])
+
+        tr_gr=fptr.create_group('track_manager')
+        self.tr.write(fptr=tr_gr)
+    except:
+        raise
+    finally:
+        fptr.close()
+
+def load_trackage_only(self,fname):
+    fptr = h5py.File(fname,'r')
+    #just a bunch of values
+    try:
+        for value in [ "current_frame",
+                       "data_template",
+                       "sim_name",     
+                       "frame_list",   
+                       "core_list",    
+                       "target_frame", 
+                       "out_prefix",   
+                       "fields_from_grid"
+                      ]:
+            if value in fptr:
+                the_value = fptr[value][()]
+                if value in ['frame_list','core_list']:
+                    for iii in the_value:
+                        if iii not in self.__dict__[value]:
+                            self.__dict__[value].append(iii)
+                else:
+                    self.__dict__[value] = the_value
+        if self.directory is None:
+            self.directory = fptr['directory'][()]
+        #ti_grp=fptr.create_group('target_indices')
+        #for core in self.target_indices:
+        #    ti_grp.create_dataset(str(core),data=self.target_indices[core])
+        for core in fptr['target_indices']:
+            self.target_indices[int(core)]=fptr['target_indices'][core][()]
+        if 'track_manager' not in fptr:
+            print("No track manager in this file.")
+            raise
+        self.tr = trackage.track_manager(self, h5ptr=fptr['track_manager'])
+
+    except:
+        raise
+    finally:
+        fptr.close()
+
+def check(lpr):
+    f0=lpr.frame_list[1]
+    c0=lpr.core_list[1]
+    for frame in lpr.frame_list[1:]:
+        for core in lpr.core_list:
+            if core not in lpr.snaps[frame]:
+                print("missing d%d c%d"%(frame,core))
+                continue
+            for field in lpr.snaps[f0][c0].field_values:
+                if field is 'V_radial':
+                    continue
+                fv0 = lpr.snaps[f0][core].field_values[field]
+                #this_looper.snaps[0][77].field_values['density'].size
+                fv1 = lpr.snaps[frame][core].field_values[field]
+                if fv0.size != fv1.size:
+                    print("n %d c %d f %s z %d %d"%(frame,core,field, fv0.size, fv1.size))
+
+
+
