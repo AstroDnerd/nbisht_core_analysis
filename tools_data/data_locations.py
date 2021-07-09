@@ -75,10 +75,18 @@ elif machine == 'cloudbreak':
     sim_u202 = '/data/cb1/Projects/P19_CoreSimulations/u202-Beta2/GravPotential'  
     sim_u203 = '/data/cb1/Projects/P19_CoreSimulations/u203-Beta20/GravPotential' 
 
+    #The 300 series uses the 200 series data, but extracts cores in a different manner.
+    sim_u301 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
+    sim_u302 = '/data/cb1/Projects/P19_CoreSimulations/u202-Beta2/GravPotential'  
+    sim_u303 = '/data/cb1/Projects/P19_CoreSimulations/u203-Beta20/GravPotential' 
+
     u201_every_ten = u05_every_ten #"/data/cb1/Projects/P19_CoreSimulations/CoreSets/u201/*h5"
     u202_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u202/*h5"
     u203_every_ten = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/u203/*h5"
     every_ten_compact_base = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/every_ten_u20x_compact"
+    mountain_top = {'u301':"u301_new_target_34.h5",
+                    "u302":"u302_mountain_top_34_nXXX0.h5",
+                    "u303":'u303_new_target_34.h5'}
 else:
     sim_u05 = None
     sim_u10 = None
@@ -118,11 +126,11 @@ peaks_u103 = 'datasets_small/u103_0080_peaklist.h5'
 peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'
 peaks_u203 = 'datasets_small/u203_0107_peaklist.h5'
 peaks_u14  = 'datasets_small/u14_0025_peaklist.h5'
-peaks_u301 = 'datasets_small/u301_0080_peaklist.h5'
-peaks_u302 = 'datasets_small/u302_0080_peaklist.h5'
-peaks_u303 = 'datasets_small/u303_0080_peaklist.h5'
+peaks_u301 = 'datasets_small/u301_0125_peaklist.h5'
+peaks_u302 = 'datasets_small/u302_0118_peaklist.h5'
+peaks_u303 = 'datasets_small/u303_0107_peaklist.h5'
 peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103}
-peak_list.update( {'u202':peaks_u202, 'u203':peaks_u203})
+peak_list.update( {'u201':peaks_u05,'u202':peaks_u202, 'u203':peaks_u203})
 peak_list.update( {'u301':peaks_u301,'u302':peaks_u302, 'u303':peaks_u303})
 peak_list['u14']=peaks_u14
 
