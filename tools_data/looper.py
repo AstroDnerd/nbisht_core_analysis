@@ -149,8 +149,8 @@ class core_looper():
         if True:
             self.ds.periodicity = (True,True,True)
         return self.ds
-    def get_all_particles(self):
-        region = self.get_region()
+    def get_all_particles(self,frame):
+        region = self.get_region(frame)
         self.all_particle_index = region['particle_index'].astype('int64')
         self.all_particle_position = region['particle_position']
         self.all_particle_velocity = region['particle_velocity']
@@ -202,7 +202,7 @@ class core_looper():
         if self.tr is None:
             self.tr = trackage.track_manager(self)
         for frame in self.frame_list:
-            self.get_all_particles()
+            self.get_all_particles(frame)
             for core_id in self.core_list:
                 this_snapshot = self.make_snapshot(frame,core_id)
                 if this_snapshot.R_centroid is None:
