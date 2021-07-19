@@ -75,7 +75,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         right = np.array([0,0,0])
         position_dict={}
         for core_id in core_list:
-            snapshot = looper.snaps[frame][core_id]
             if tracker_positions:
                 ms = trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
                 frame_ind = np.where(looper.tr.frames == frame)[0]
@@ -91,6 +90,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 positions = np.column_stack([this_x,this_y,this_z])
                 position_dict[core_id] = positions
             else:
+                snapshot = looper.snaps[frame][core_id]
                 if snapshot.R_centroid is None:
                     snapshot.get_all_properties()
                 positions = snapshot.pos
@@ -98,7 +98,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
             right = np.row_stack([this_right,right]).max(axis=0)
-            print(left)
         center = 0.5*(left+right)
         left = np.row_stack([this_left,center - 1/128]).min(axis=0)
         right = np.row_stack([this_right,center + 1/128]).max(axis=0)
@@ -133,7 +132,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
-                snapshot = looper.snaps[frame][core_id]
                 positions = position_dict[core_id]
                 color=color_dict[core_id]
                 if annotate:
@@ -141,13 +139,11 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                     centroid=positions.mean(axis=0).v
                     print("CENTROID",centroid)
                     pw.annotate_text(centroid,
-                                     "%d"%snapshot.core_id,text_args={'color':color}, 
+                                     "%d"%core_id,text_args={'color':color}, 
                                      inset_box_args={'visible':False},
                                      coord_system='data')
-                    #pw.annotate_select_particles(1.0, col=[color], indices=snapshot.target_indices)
                 if particles:
                     pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions)
-                    #print("SNAP STATS", snapshot.pos.min(), snapshot.pos.max())
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
         if fields:
