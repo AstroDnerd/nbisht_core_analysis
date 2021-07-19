@@ -15,8 +15,25 @@ reload(looper)
 reload(trackage)
 reload(time_kludge)
 
+def get_savefile_type(savefile):
+    #savefile can be "full" or "trackage"
+    #"full" stores everyting and is very slow to read.
+    #"trackage" stores only the track manager, and is very fast.
+    fptr = h5py.File(savefile,'r')
+    try:
+        if "savefile_type" in fptr:
+            savefile_type = fptr['savefile_type'][()]
+        else:
+            savefile_type = "full"
+    except: #try A/except B/finally C: do A, if it fails do B, do C even if it fails. 
+        raise
+    finally:
+        fptr.close()
+    return savefile_type
+    
 def save_loop(self,fname):
     fptr = h5py.File(fname,'w')
+    fptr['savefile_type'] = 'full'
     #just a bunch of values
     try:
         for value in [ "current_frame",
@@ -27,6 +44,7 @@ def save_loop(self,fname):
                        "directory",    
                        "target_frame", 
                        "out_prefix",   
+                       "plot_directory",
                       ]:
             result = self.__dict__[value]
             if result is None:
@@ -90,7 +108,8 @@ def load_loop(self,fname):
                        "core_list",    
                        "target_frame", 
                        "out_prefix",   
-                       "fields_from_grid"
+                       "fields_from_grid",
+                       "output_directory"
                       ]:
             if value in fptr:
                 the_value = fptr[value][()]
@@ -108,11 +127,7 @@ def load_loop(self,fname):
         for core in fptr['target_indices']:
             self.target_indices[int(core)]=fptr['target_indices'][core][()]
 
-        KLUDGE_ONLY_ONE = False
         for frame_name in fptr['snaps']:
-            if KLUDGE_ONLY_ONE:
-                continue
-            KLUDGE_ONLY_ONE = True
 
             frame_number = int(frame_name.split()[1])
             self.load(frame_number,dummy=True)
@@ -163,26 +178,10 @@ def load_loop(self,fname):
     finally:
         fptr.close()
 
-def check(lpr):
-    f0=lpr.frame_list[1]
-    c0=lpr.core_list[1]
-    for frame in lpr.frame_list[1:]:
-        for core in lpr.core_list:
-            if core not in lpr.snaps[frame]:
-                print("missing d%d c%d"%(frame,core))
-                continue
-            for field in lpr.snaps[f0][c0].field_values:
-                if field is 'V_radial':
-                    continue
-                fv0 = lpr.snaps[f0][core].field_values[field]
-                #this_looper.snaps[0][77].field_values['density'].size
-                fv1 = lpr.snaps[frame][core].field_values[field]
-                if fv0.size != fv1.size:
-                    print("n %d c %d f %s z %d %d"%(frame,core,field, fv0.size, fv1.size))
 
-
-def save_loop_only_trackage(self,fname):
+def save_loop_trackage_only(self,fname):
     fptr = h5py.File(fname,'w')
+    fptr['savefile_type'] = 'trackage'
     try:  #the try-except-finally is for clean failures with the hdf5 file
 
         #
@@ -196,6 +195,7 @@ def save_loop_only_trackage(self,fname):
                        "directory",    
                        "target_frame", 
                        "out_prefix",   
+                       "plot_directory",
                       ]:
             result = self.__dict__[value]
             if result is None:
@@ -227,6 +227,7 @@ def load_trackage_only(self,fname):
                        "target_frame", 
                        "out_prefix",   
                        "fields_from_grid"
+                       "plot_directory",
                       ]:
             if value in fptr:
                 the_value = fptr[value][()]
@@ -262,7 +263,7 @@ def check(lpr):
                 print("missing d%d c%d"%(frame,core))
                 continue
             for field in lpr.snaps[f0][c0].field_values:
-                if field is 'V_radial':
+                if field == 'V_radial':
                     continue
                 fv0 = lpr.snaps[f0][core].field_values[field]
                 #this_looper.snaps[0][77].field_values['density'].size
