@@ -40,7 +40,8 @@ if 'this_simname' not in dir():
     this_simname='u302'
 
 #directory = 'u05-r4-l4-128-Beta0.2  u10_r4_l4_128-Beta2  u11_r4_l4_128-Beta20'
-center=np.array([0.89331055, 0.1159668 , 0.4440918 ])
+
+center=np.array([0.89331055, 0.1159668 , 0.4440918 ])#u202 core0258 center
 rad=5e-2
 if 'master_clump' not in dir():
     frame = dl.target_frames[this_simname]
@@ -52,11 +53,34 @@ if 'master_clump' not in dir():
     leaves = loop_tools.get_peak_indices(master_clump, ds, h5name) #,h5_name="NEW_PEAKS.h5" )
 
 if 1:
-    proj = ds.proj('density',0,center=center,data_source=test_main)
+    proj = ds.proj('density',1,center=center,data_source=test_main)
     pw = proj.to_pw()
     pw.set_cmap('density','Greys')
-    pw.annotate_clumps([master_clump]+master_clump.leaves)
+
+    #pw.annotate_clumps([master_clump]+master_clump.leaves)
     pw.annotate_these_particles2(1.0,col='r',positions= test_main['particle_position'])
-    pw.zoom(1/rad)
-    pw.save('plots_to_sort/%s_clump_test.png'%this_simname)
+    pw.zoom(0.5/rad)
+    pw.save('plots_to_sort/%s_clump_test_4'%this_simname)
     #            proj = ds.proj(field,ax,center=center, data_source = sph) 
+
+if 0:
+    fig,ax=plt.subplots(1,1)
+    ax.scatter(test_main['radius'], test_main['density'])
+    axbonk(ax,xscale='log',yscale='log',ylabel='density',xlabel='radius', xlim=[1/2048,test_main['radius'].max()])
+    fig.savefig('plots_to_sort/test_density.png')
+
+if 1:
+    from yt.data_objects.level_sets.clump_handling import \
+                Clump, \
+                find_clumps, \
+                get_lowest_clumps
+    mountain_top = Clump(test_main,('gas','density'))
+    peak_density = test_main['density'].max()
+    min_density = 1
+    step = 1.2
+    nzones=(mountain_top['density']>min_density).sum()
+    #find_clumps(mountain_top, min_density,peak_density,step)
+    mountain_top.find_children( 0.05*peak_density, peak_density)
+    pw.annotate_clumps(mountain_top.leaves)
+    pw.save('plots_to_sort/%s_clump_test_5'%this_simname)
+
