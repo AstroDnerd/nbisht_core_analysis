@@ -324,6 +324,7 @@ if 'density_tool1' not in dir():
 
 if 1:
     sim_color={'u05':'r','u10':'g','u11':'b'}#[this_tool.this_looper.out_prefix]
+    sim_color.update({'u301':'r','u302':'g','u303':'b'}#[this_tool.this_looper.out_prefix]
     fig, axes=plt.subplots(2,2)
     ax0 = axes[0][0]; ax1=axes[0][1]
     ax2 = axes[1][0]; ax3=axes[1][1]
