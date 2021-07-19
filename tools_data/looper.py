@@ -61,6 +61,7 @@ class core_looper():
     def __init__(self,savefile=None,
                  savefile_only_trackage=None,
                  directory="./", data_template = "%s/DD%04d/data%04d", sim_name='sim',
+                 plot_directory="./plots_to_sort",
                  out_prefix="",
                  frame_list=[], core_list=[], target_frame=0,
                  fields_from_grid = [], 
@@ -75,6 +76,7 @@ class core_looper():
         self.directory     = directory
         self.target_frame  = target_frame
         self.out_prefix    = out_prefix
+        self.plot_directory = plot_directory
         self.fields_from_grid = ['density', 'cell_volume'] + fields_from_grid
 
         #this is not used.
