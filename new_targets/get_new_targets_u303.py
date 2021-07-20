@@ -10,7 +10,7 @@ reload(tracks_read_write)
 #
 
 this_simname = 'u303'
-mountain_top_name = "%s_mountain_tops_take_8.h5"%this_simname
+mountain_top_name = "%s_mountain_tops_take_9.h5"%this_simname
 do_projections=True
 
 import coreset_data
@@ -28,6 +28,7 @@ this_radius_dict={'u301':coreset_data.radius_u301,
 if 'leaf_storage_all' not in dir():#'leaf_storage' not in dir() and False:
     leaf_storage_all={}
     #kludge={'peak_id':[10]}
+    #kludge={'peak_id':[11, 111, 129, 132, 133, 134, 153, 170, 177, 199]}
     kludge={}
     MT=mountain_top.cut_mountain_top( this_simname, target_fname = mountain_top_name, 
                                      do_projections=do_projections, verify=verifiers[this_simname],
@@ -57,7 +58,7 @@ if 1:
 #
 # Make all the leaves again, with new thresholds
 #
-if 0:
+if 1:
     leaf_storage_2={}
     #kludge={'peak_id':[k0,k1]}
     kludge={}

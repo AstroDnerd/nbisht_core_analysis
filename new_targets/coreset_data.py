@@ -3,9 +3,10 @@ from starter2 import *
 
 skip_301 = [35,49]
 skip_302 = [4, 89,17, 67, 109, 60, 58,59, 77,78, 90, 186, 188]
-skip_302+= [100,102,302,303,310,313] #we should double check these.
+skip_302+= [198,100,102,302,303,310,313] #we should double check these.
 skip_303 = [4,5,6,20] #these we have, but I think they're sus.
-skip_303+= [10,122] #these are definitely problematic.
+skip_303+= [10,122, 133] #these are definitely problematic.
+skip_303+=[11,12,111,179,129,139,132,135,134,170,179] #stragglers
 
 def verify_cores_u301(this_top):
     out = True
@@ -44,7 +45,10 @@ def verify_cores_u303(this_top):
 
 radius_u302 = {109:2e-2, 194:2e-2, 17:2e-2, 18:2e-2, 19:2e-2, 23:2e-2, 25:2e-2, 35:2e-2, 46:2e-2}
 radius_u301 = {}
-radius_u303 = {}
+b=[11, 111, 129, 132, 133, 134, 153, 170, 177, 199]
+r=[2e-2]*len(b)
+radius_u303 = dict(zip(b,r))
+
 
 overlap_302 = {11: [14],
               #17: [18, 19],

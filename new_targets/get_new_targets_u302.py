@@ -11,7 +11,7 @@ reload(tracks_read_write)
 
 this_simname = 'u302'
 mountain_top_name = "%s_mountain_tops_take_8.h5"%this_simname
-do_mountain_projections=False
+do_mountain_projections=True
 
 import coreset_data
 reload(coreset_data)
@@ -28,7 +28,7 @@ this_radius_dict={'u301':coreset_data.radius_u301,
 if 'leaf_storage_all' not in dir():#'leaf_storage' not in dir() and False:
     leaf_storage_all={}
     k0,k1=11,14
-    #kludge={'peak_id':list(range(100,200))}
+    #kludge={'peak_id':[198,199]}
     kludge={}
     MT=mountain_top.cut_mountain_top( this_simname, target_fname = mountain_top_name, 
                                      do_projections=do_mountain_projections, verify=verifiers[this_simname],
@@ -50,10 +50,19 @@ if 1:
 if 1:
     leaf_storage_2={}
     #kludge={'peak_id':[k0,k1]}
-    kludge={}
+    #kludge={}
     MT=mountain_top.cut_mountain_top( this_simname, target_fname = mountain_top_name, 
                                      do_projections=do_mountain_projections, verify=verifiers[this_simname],
                                      kludge=kludge, leaf_storage=leaf_storage_2, 
                                      cut_override = new_thresholds, 
                                      radius_dict=this_radius_dict)
     overlap_2=mountain_top.check_overlap(leaf_storage_2)
+
+if 0:
+    all_particles = nar([])
+    for leaf in leaf_storage_2:
+        the_leaf = leaf[1]
+        all_particles = np.append(all_particles, the_leaf['particle_index'])
+
+
+

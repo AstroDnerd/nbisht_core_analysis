@@ -37,11 +37,31 @@ if 'new_looper' not in dir() and disk_or_new:
                                   )
     new_looper.plot_directory = "./plots_to_sort"
     new_looper.read_targets(mountain_top_fname)
+
+
+if 1:
+    for frame in range(target_frame):
+        new_looper.verify_all_particles(frame)
+    new_looper.save_bad_particles('%s_bad_particles_full.h5'%this_simname)
+
+if 1:
+    new_looper.remove_bad_particles()
+
+if 1:
+    new_looper.read_bad_particles('%s_bad_particles_full.h5'%this_simname)
+    new_looper.get_tracks()
+
+
+if 1:
     new_looper.get_tracks()
     #loop_tools.re_shift_snaps(new_looper)
     #new_looper.save('TEMP.h5')
     import tracks_read_write
     tracks_read_write.save_loop_trackage_only( new_looper, outname)
+
+
+if 0:
+    print("ZEROS: %d"%( (new_looper.tr.track_dict['density']==0).sum() ))
 if 'new_looper' not in dir() and disk_or_new == 'disk':
     print("reload")
     file_list=['TEMP.h5']
@@ -55,11 +75,12 @@ if 'new_looper' not in dir() and disk_or_new == 'disk':
     #loop_tools.re_shift_snaps(new_looper)
 
 
-import colors
-reload(colors)
-core_cmap = colors.make_core_cmap( new_looper.core_list)
-reload(loop_apps)
-loop_apps.core_proj_multiple(new_looper,#core_list=[258],
+if 0:
+    import colors
+    reload(colors)
+    core_cmap = colors.make_core_cmap( new_looper.core_list)
+    reload(loop_apps)
+    loop_apps.core_proj_multiple(new_looper,#core_list=[258],
                              #frame_list=[0],
                              axis_list=[1], color_dict=core_cmap, particles=True,
                              only_sphere=False,zoom=False,
