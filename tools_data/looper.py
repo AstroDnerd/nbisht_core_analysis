@@ -66,7 +66,8 @@ class core_looper():
                  frame_list=[], core_list=[], target_frame=0,
                  fields_from_grid = [], 
                  individual_particle_tracks=False,
-                 derived=[], do_shift=True):
+                 derived=[], do_shift=True, 
+                 bad_particles=None):
         #set defaults and/or arguments.
         self.current_frame = None
         self.data_template = data_template
@@ -97,6 +98,10 @@ class core_looper():
         self.derived=derived
 
         self.shift = do_shift
+
+        if bad_particles is None:
+            bad_particles = defaultdict(list)
+        self.bad_particles = bad_particles
 
         if savefile is not None:
             if not os.path.exists(savefile):
@@ -189,6 +194,7 @@ class core_looper():
     #reload(mountain_top)
     def read_targets(self,target_fname):
         import mountain_top
+        all_particles=np.array([])
         if self.targets is None:
             self.targets = {}
         h5ptr = h5py.File(target_fname,'r')
@@ -197,8 +203,94 @@ class core_looper():
             #read from disk
             self.targets[core_id] = mountain_top.target_info(h5ptr=h5ptr[group_name])
             self.target_indices[core_id] = self.targets[core_id].particle_index
+
+            #check for uniqueness
+            all_particles=np.append(all_particles, self.target_indices[core_id] )
+            if np.unique(all_particles).size - all_particles.size:
+                print("FATAL ERROR: repeated particle")
+                pdb.set_trace()
+
         h5ptr.close()
         self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
+
+    def verify_all_particles(self,frame):
+
+        if self.bad_particles is None:
+            self.bad_particles = defaultdict(list)
+
+        #Error check core_list
+        #We want to use looper.core_list, since dictionaries aren't sorted (or, weren't)
+        cores_from_targets = np.sort(nar( [core_id for core_id in self.target_indices]))
+        if np.max( np.abs(nar(self.core_list ) -cores_from_targets)) >0:
+            print("Fatal error: core list does not match targets.")
+            raise
+
+        all_target_particles = np.concatenate([self.target_indices[core_id] for core_id in self.core_list]).astype('int64')
+        if type(all_target_particles) == yt.units.yt_array:
+            #strip off the units since we'll pass this to cython.
+            all_target_particles = all_target_particles.v
+
+        #check for repeated particles.  
+        if np.unique(all_target_particles).size - all_target_particles.size:
+            print("Fatal error: repeated particle.")
+            raise
+
+        #we'll need to know which cores have missing particles,
+        #so make a list now.
+        core_id_by_particle = np.concatenate([self.target_indices[core_id]*0+core_id for core_id in self.core_list]).astype('int64')
+
+        #a mask of the particles we're looking for.  
+        #records which ones are found.  Also makes things faster.
+        mask_to_get=np.zeros(all_target_particles.shape,dtype='int32')
+
+        #all indices in the simulation.  Sometimes misses particles.
+        self.get_all_particles(frame)
+        all_indices = self.all_particle_index.astype('int64')
+        all_order = np.argsort(all_indices)
+        all_return = np.argsort(all_order)
+        sorted_all = all_indices[all_order]
+
+        target_order = np.argsort( all_target_particles )
+        sorted_targets = all_target_particles[target_order]
+        return_targets = np.argsort(target_order)
+        found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_targets,sorted_all,mask_to_get)
+        #mask = all_mask[all_return].astype('bool') #we don't actually need this here
+
+        missing_particles = all_target_particles[ mask_to_get[return_targets] == 0]
+        missing_cores     = core_id_by_particle[ mask_to_get[return_targets] == 0]
+
+        for particle_id, core_id in zip(missing_particles,missing_cores):
+            self.bad_particles[core_id].append( particle_id)
+
+
+    def remove_bad_particles(self):
+
+        for core_id in self.bad_particles:
+            these_bad_particles = self.bad_particles[core_id]
+            keepers = np.ones( self.target_indices[core_id].size, dtype='bool')
+            for particle in self.bad_particles[core_id]:
+                found_it =  np.where( self.target_indices[core_id] == particle)
+                keepers[found_it] = False
+            self.target_indices[core_id] = self.target_indices[core_id][keepers]
+    def save_bad_particles(self,fname):
+        h5ptr = h5py.File(fname,'w')
+        for core_id in self.bad_particles:
+            h5ptr[str(core_id)] = nar(self.bad_particles[core_id])
+        h5ptr.close()
+    def read_bad_particles(self,fname):
+        h5ptr = h5py.File(fname,'r')
+        if self.bad_particles is None:
+            self.bad_particles = defaultdict(list)
+        core_ids = []
+        for group in h5ptr:
+            core_ids.append(group)
+        core_ids = np.sort(core_ids)
+        for core_id in core_ids:
+            self.bad_particles[int(core_id)] = h5ptr[core_id][()]
+        h5ptr.close()
+
+
+            
 
     def get_tracks(self):
         if self.tr is None:
@@ -210,6 +302,10 @@ class core_looper():
                 if this_snapshot.R_centroid is None:
                     this_snapshot.get_all_properties()
                 this_snapshot.get_particle_values_from_grid()
+                error=np.abs(np.sort(this_snapshot.ind) - np.sort(self.target_indices[core_id]))
+                if error.max() != 0:
+                    print("FATAL ERROR: particle order error")
+                    pdb.set_trace()
                 self.tr.ingest(this_snapshot)
 """
         #this is not used.
@@ -288,8 +384,6 @@ class snapshot():
 
         mask_to_get=np.zeros(core_ids.shape,dtype='int32')
         all_indices = self.loop.all_particle_index
-
-
         
         core_order = np.argsort( core_ids)
         sorted_cores = core_ids[core_order]
@@ -298,6 +392,8 @@ class snapshot():
         sorted_all = all_indices[all_order]
         found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_cores,sorted_all,mask_to_get)
 
+        if mask_to_get.sum() != mask_to_get.size:
+            pdb.set_trace()
         self.mask = all_mask[all_return].astype('bool')
         return found_any, self.mask
         
