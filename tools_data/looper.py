@@ -63,21 +63,27 @@ class core_looper():
                  directory="./", data_template = "%s/DD%04d/data%04d", sim_name='sim',
                  plot_directory="./plots_to_sort",
                  out_prefix="",
-                 frame_list=[], core_list=[], target_frame=0,
-                 fields_from_grid = [], 
+                 frame_list=None, core_list=None, target_frame=0,
+                 fields_from_grid = None, 
                  individual_particle_tracks=False,
-                 derived=[], do_shift=True, 
+                 derived=None, do_shift=True, 
                  bad_particles=None):
         #set defaults and/or arguments.
         self.current_frame = None
         self.data_template = data_template
         self.sim_name      = sim_name
+        if frame_list is None:
+            frame_list=[]
         self.frame_list     = frame_list
+        if core_list is None:
+            core_list=[]
         self.core_list     = core_list
         self.directory     = directory
         self.target_frame  = target_frame
         self.out_prefix    = out_prefix
         self.plot_directory = plot_directory
+        if fields_from_grid is None:
+            fields_from_grid = []
         self.fields_from_grid = ['density', 'cell_volume'] + fields_from_grid
 
         #this is not used.
@@ -95,6 +101,8 @@ class core_looper():
         #    defaultdict(whatev) is a dict, but makes a new (whatev) by default
         self.ds_list={}
         self.all_data={}
+        if derived is None:
+            derived=[]
         self.derived=derived
 
         self.shift = do_shift
@@ -195,6 +203,7 @@ class core_looper():
     def read_targets(self,target_fname):
         import mountain_top
         all_particles=np.array([])
+        core_ids_by_particle=np.array([])
         if self.targets is None:
             self.targets = {}
         h5ptr = h5py.File(target_fname,'r')
@@ -207,8 +216,11 @@ class core_looper():
             #check for uniqueness
             all_particles=np.append(all_particles, self.target_indices[core_id] )
             if np.unique(all_particles).size - all_particles.size:
-                print("FATAL ERROR: repeated particle")
+                print("FATAL ERROR: repeated particle, ", core_id)
                 pdb.set_trace()
+            #I might need this later when I revamp get_tracks again.
+            #these_core_ids=[core_id]*self.target_indices[core_id].size
+            #core_ids_by_particle=np.append(core_ids_by_particle, these_core_ids)
 
         h5ptr.close()
         self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
