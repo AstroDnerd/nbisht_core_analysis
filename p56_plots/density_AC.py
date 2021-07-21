@@ -16,123 +16,73 @@ axis=0
 
 this_simname = 'u10'
 #this_simname = 'u05'
-if 1:
-    #sims
-    if 1:   
-        """This is the one"""
-        directory = dl.sims[this_simname]
+class ac_thing():
+    def __init__(self,this_simname):
+
+        self.this_simname = this_simname
+        self.directory = dl.sims[self.this_simname]
         frame=0
-        ds = yt.load("%s/DD%04d/data%04d"%(directory,frame,frame))
-        prefix="%s_n%04d"%(this_simname,frame)
-    if 0:   
-        """dead"""
-        directory = '/scratch2/dcollins/Paper19_48/B02/u05-r4-l4-128/GravPotential'
-        ds = yt.load("%s/DD%04d/data%04d"%(directory,0,0))
-        prefix='u05'
-    if 0:
-        """a test"""
-        directory = "/scratch1/dcollins/Paper19/u21_sphere_large"
-        ds = yt.load("%s/DD%04d/data%04d"%(directory,0,0))
-        prefix='u21'
-    if 0:
-        """a smaller test test"""
-        directory = "/scratch1/dcollins/Paper19/u22_sphere_128"
-        ds = yt.load("%s/DD%04d/data%04d"%(directory,0,0))
-        prefix='u22'
+        self.ds = yt.load("%s/DD%04d/data%04d"%(self.directory,frame,frame))
+        self.prefix="%s_n%04d"%(this_simname,frame)
 
-    left=[0.0]*3
-    resolution = ds['TopGridDimensions'] 
-    cg=ds.covering_grid(0,left,resolution)#,num_ghost_zones=num_ghost_zones)
+        left=[0.0]*3
+        resolution = self.ds['TopGridDimensions'] 
+        self.cg=self.ds.covering_grid(0,left,resolution)#,num_ghost_zones=num_ghost_zones)
 
-    rho = cg['density'].v -1 #[:40,:40,:40]
-    size = rho.shape[0]
-    dx = 1./size
-    x,y,z = np.mgrid[0:size:1,0:size:1,0:size:1]
-    xcen, ycen, zcen= size/2.,size/2., size/2.
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2+ (z-zcen)**2)
+        self.rho = self.cg['density'].v -1 #[:40,:40,:40]
 
-    dx = 1./size
-    x,y,z = np.mgrid[0:1:dx,0:1:dx,0:1:dx]
-    xcen, ycen, zcen= 0.5, 0.5, 0.5,
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2+ (z-zcen)**2)
+        self.rhohat = np.fft.fftn(self.rho)
+        self.rho2 = self.rhohat*np.conj(self.rhohat)
+        self.AC1 = np.fft.ifftn(self.rho2)
+        self.ACc = np.fft.fftshift(self.AC1)
+        self.AC = np.real(self.ACc)
+        self.ACB = self.AC
+        self.AC = self.AC/self.AC.max()
 
-R_sphere = 0.25
-if 0:
-    prefix='sphere_128'
-    size=128
-    dx = 1./size
-    x,y,z = np.mgrid[0:size:1,0:size:1,0:size:1]
+        #fig2.savefig("plots_to_sort/%s_proj.png"%self.this_simname)
+        dx = 1./self.rho.shape[0]
+        x,y,z = np.mgrid[0:1:dx,0:1:dx,0:1:dx]
+        xcen, ycen, zcen= 0.5, 0.5, 0.5,
+        self.rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2+ (z-zcen)**2)
+        self.binned=rb.rb2( self.rmag, self.AC.real)#,bins=bins)
 
-    xcen, ycen, zcen= size/2.,size/2., size/2.
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2+ (z-zcen)**2)
-    rho = np.zeros_like(rmag)
-    rho[ rmag < x.shape[0]/4] = 1.
+        self.ACb = self.binned[2]
+        self.db = self.binned[0][1:] - self.binned[0][:-1]
+        self.L = np.sum(self.ACb*self.db)/self.ACb[0]
 
-if 0:
-    prefix='sphere'
-    size=64
-    dx = 1./size
-    x,y,z = np.mgrid[0:size:1,0:size:1,0:size:1]
+    def plot(self):
 
-    xcen, ycen, zcen= size/2.,size/2., size/2.
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2+ (z-zcen)**2)
-    rho = np.zeros_like(rmag)
-    rho[ rmag < x.shape[0]/4] = 1.
+        fig2,axes2=plt.subplots(2,2,figsize=figsize)
+        a20,a21=axes2[0]
+        a22,a23=axes2[1]
 
 
-if 0:
-    prefix='circle_manual'
-    size=64
-    dx = 1./size
-    x,y = np.mgrid[0:1:dx, 0:1:dx]
-    xcen, ycen = size/2.,size/2.
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2)
-    rho = np.zeros_like(rmag)
-    rho[ rmag < x.shape[0]/4] = 1.
+        if len(self.rho.shape) != 2:
+            im1 = self.rho.sum(axis=axis)
+            im2 = self.AC.sum(axis=axis)
 
-if 0:
-    prefix='circle'
-    size=64
-    dx = 1./size
-    x,y = np.mgrid[0:1:dx, 0:1:dx]
-    xcen, ycen = size/2.,size/2.
-    dv = np.ones_like(x)*dx**3
-    rmag = np.sqrt((x-xcen)**2 + (y-ycen)**2)
-    rho = np.array(Image.open("circ.tif")).astype('float')
+        else:
+            im1 = self.rho
+            im2 = self.AC
 
-if 1:
-    #
-    # Do the AC. 
-    #
-    rhohat = np.fft.fftn(rho)
-    rho2 = rhohat*np.conj(rhohat)
-    AC1 = np.fft.ifftn(rho2)
-    ACc = np.fft.fftshift(AC1)
-    AC = np.real(ACc)
-    ACB = AC
-    AC = AC/AC.max()
+        a20.imshow(im1, cmap='Greys' )
+        a21.imshow(im2, cmap='Greys')
+        a22.plot( self.binned[1],self.binned[2],c='r',label='binned ACfft')
 
-if 1:
-    fig2,axes2=plt.subplots(2,2,figsize=figsize)
-    a20,a21=axes2[0]
-    a22,a23=axes2[1]
+        rect=patches.Rectangle((0,0),self.L,self.ACb[0],facecolor=[0.8]*3)
+        a22.add_patch(rect)
 
+        axbonk(a22,xlabel='$r$', ylabel=r'$\rm{AC}_\rho(r)$',
+               #yscale='log',xscale='log')
+               yscale='linear',xscale='linear')
+        a23.legend(loc=0)
 
-    if len(rho.shape) != 2:
-        im1 = rho.sum(axis=axis)
-        im2 = AC.sum(axis=axis)
+        fig2.savefig('plots_to_sort/%s_density_AC.pdf'%self.prefix)
+        print('saved')
 
-    else:
-        im1 = rho
-        im2 = AC
-    a20.imshow(im1, cmap='Greys' )
-    a21.imshow(im2, cmap='Greys')
-
-
-if 1:    
-    binned=rb.rb2( rmag, AC.real)#,bins=bins)
-    a22.plot( binned[1],binned[2],c='r',label='binned ACfft')
-
+#a1 = ac_thing('u05'); a1.plot()
+#a2 = ac_thing('u10'); a2.plot()
+#a3 = ac_thing('u11'); a3.plot()
 if 0:
     r1 = np.arange(31)/32 #rmag[33,33:]
     anne = 2.0*(np.arccos(r1)- r1*np.sqrt(1.0-r1**2))/np.pi;
@@ -152,31 +102,6 @@ if 0:
     a24.plot( rrr, 10**powerlaw2(rrr, fit_r02, fit_alpha2),label='tweak2')
     a24.plot( rrr, 10**powerlaw2(rrr, L, fit_alpha2),label='tweak2')
 
-if 1:
-    """actual correlation length"""
-
-    ACb = binned[2]
-    db = binned[0][1:] - binned[0][:-1]
-    L = np.sum(ACb*db)/ACb[0]
-
-if 1:
-    """do we want the rectangle?"""
-    rect=patches.Rectangle((0,0),L,ACb[0],facecolor=[0.8]*3)
-    a22.add_patch(rect)
-
-if 1:
-    axbonk(a22,xlabel='$r$', ylabel=r'$\rm{AC}_\rho(r)$',
-           #yscale='log',xscale='log')
-           yscale='linear',xscale='linear')
-    #a24.set_yscale('log')
-    #x0a24.set_xscale('log')
-    
-
-if 0:
-    a24.legend(loc=0)
-
-fig2.savefig('plots_to_sort/%s_density_AC.pdf'%prefix)
-print('saved')
 
 if 0:
     def make_k_freqs(nk,real=False, d=1):

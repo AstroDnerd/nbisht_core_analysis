@@ -8,8 +8,14 @@ if 'this_simname' not in dir():
 
 frame_list=[0]
 fields=['density']
-core_list=range(254)
+#read in all cores made.
+peaklist = dl.peak_list[this_simname]
+peaks_fptr = h5py.File(peaklist,'r')
+peaks = peaks_fptr['peaks'][()]
+peaks_fptr.close()
+core_list = list(range(peaks.shape[0]))
 if 1:
+    print("Make looper")
     this_looper = looper.core_looper(directory= dl.sims[this_simname],
                                      sim_name = this_simname,
                                      out_prefix = this_simname,
@@ -18,6 +24,7 @@ if 1:
                                      core_list =  core_list,
                                      fields_from_grid=fields
                                   )
+    print("Get target indices")
     this_looper.get_target_indices(h5_name=dl.peak_list[this_simname])
                                      #bad_particle_list=dl.bad_particles[this_simname])
 

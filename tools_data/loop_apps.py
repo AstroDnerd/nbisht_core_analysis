@@ -43,6 +43,128 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
             self.proj.annotate_select_particles(1.0, col='r', indices=self.target_indices[core_number])
             outname = '%s_full_particles_%sn%04d'%(self.out_prefix,core_label,self.current_frame)
         print( self.proj.save(outname))
+
+import annotate_particles_3
+reload(annotate_particles_3)
+def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
+                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
+                    only_sphere=True, center_on_sphere=True, slab=None, fields=False, velocity=False, code_length=True, lic=False, 
+                      tracker_positions=True, annotate=False, shifted_tracker=True):
+    if core_list is None:
+        core_list = looper.core_list
+    if frame_list is None:
+        frame_list = looper.frame_list
+    all_png = glob.glob("*png")
+    tr = looper.tr
+    for frame in frame_list:
+        ds = looper.load(frame)
+
+        # Check to see if the image was made already,
+        # and skips it if it has.
+        outname = "%s/%s_n%04d_multi"%(looper.plot_directory,looper.out_prefix, frame)
+        got_one = False
+        for i in all_png:
+            if i.startswith(outname):
+                print(i)
+                got_one=True
+        if got_one and not clobber:
+            print("File exists, skipping")
+            return
+        #get extents and bounding region
+        left =  np.array([1,1,1])
+        right = np.array([0,0,0])
+        position_dict={}
+        for core_id in core_list:
+            if tracker_positions:
+                ms = trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
+                frame_ind = np.where(looper.tr.frames == frame)[0]
+                if shifted_tracker:
+                    this_x=ds.arr(ms.this_x[:,frame_ind],"code_length")
+                    this_y=ds.arr(ms.this_y[:,frame_ind],"code_length")
+                    this_z=ds.arr(ms.this_z[:,frame_ind],"code_length")
+                else:
+                    this_x=ds.arr(ms.raw_x[:,frame_ind],"code_length")
+                    this_y=ds.arr(ms.raw_y[:,frame_ind],"code_length")
+                    this_z=ds.arr(ms.raw_z[:,frame_ind],"code_length")
+
+                positions = np.column_stack([this_x,this_y,this_z])
+                position_dict[core_id] = positions
+            else:
+                snapshot = looper.snaps[frame][core_id]
+                if snapshot.R_centroid is None:
+                    snapshot.get_all_properties()
+                positions = snapshot.pos
+            this_left =  positions.min(axis=0)
+            this_right = positions.max(axis=0)
+            left = np.row_stack([this_left,left]).min(axis=0)
+            right = np.row_stack([this_right,right]).max(axis=0)
+        center = 0.5*(left+right)
+        left = np.row_stack([this_left,center - 1/128]).min(axis=0)
+        right = np.row_stack([this_right,center + 1/128]).max(axis=0)
+        left = ds.arr(left,'code_length')
+        right = ds.arr(right,'code_length')
+        center = ds.arr(center,'code_length')
+
+        if not center_on_sphere:
+            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
+
+        for ax in axis_list:
+            Rmax = np.sqrt( ( (right-left)**2).sum(axis=0)).max()
+            scale_min = ds.arr(0.05,'code_length')
+            scale = Rmax.v #2*max([Rmax, scale_min]).v
+            scale = min([scale,1])
+            if only_sphere:
+                sph = ds.region(center,left,right)
+                proj = ds.proj(field,ax,center=center, data_source = sph) 
+            else:
+                proj = ds.proj(field,ax,center=center)
+            looper.proj=proj
+            if moving_center:
+                #not quite working.
+                pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
+                pw.set_center([center[0],center[1]])
+            else:
+                pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+            
+            if zoom:
+                pw.zoom(1./(2*scale))
+            pw.set_cmap(field,'gray')
+            if force_log is not None:
+                pw.set_log(field,force_log,linthresh=linthresh)
+            for core_id in core_list:
+                positions = position_dict[core_id]
+                color=color_dict[core_id]
+                if annotate:
+                    #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
+                    centroid=positions.mean(axis=0).v
+                    print("CENTROID",centroid)
+                    pw.annotate_text(centroid,
+                                     "%d"%core_id,text_args={'color':color}, 
+                                     inset_box_args={'visible':False},
+                                     coord_system='data')
+                if particles:
+                    pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions)
+        if lic:
+            pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
+        if fields:
+            #pw.annotate_magnetic_field(plot_args={'color':'b'})
+            pw.annotate_streamlines("magnetic_field_x","magnetic_field_y",plot_args={'color':'b'})
+        if velocity:
+            pw.annotate_velocity()
+        if grids:
+            pw.annotate_grids()
+        if code_length:
+            pw.set_axes_unit('code_length')
+        if field in ['MagVelAngle']:
+            pw.set_cmap('MagVelAngle','hsv')
+            pw.set_zlim('MagVelAngle',0,180)
+        looper.pw = pw
+        print(pw.save(outname))
+
+
+#
+# Other functions are not as useful.
+#
 import annotate_particles_3
 reload(annotate_particles_3)
 from scipy.spatial import ConvexHull
@@ -85,6 +207,50 @@ def proj_cores2(self, axis_list=[0,1,2],core_list=[], field='density',color='r')
             self.proj.annotate_convex_hull_1(1,points=points3d)
         print( self.proj.save(outname))
 
+def proj_select_particles(this_looper, frame_list=None, axis_list=[0,1,2],core_list=[], field='density',color='r'):
+    """Full projections of the data, with core particles marked."""
+    rm = rainbow_map(len(core_list))
+    if frame_list is None:
+        frame_list = this_looper.frame_list
+
+    for frame in frame_list:
+
+        for snapshot in this_looper.snaps[frame].values():
+            if snapshot.R_centroid is None:
+                snapshot.get_all_properties()
+        for axis in axis_list:
+            ds = this_looper.load(frame)
+            proj_center = ds.arr([0.12768555, 0.4987793 , 0.17797852], 'code_length')
+            proj_center = ds.arr([0.6,0.6,0.6], 'code_length')
+
+            center = this_looper.ds.arr(nar([0.5]*3),'code_length')
+            print("poot")
+            this_looper.proj = yt.ProjectionPlot(this_looper.ds, axis=axis, fields=[field])#, center=center)
+            this_looper.proj.set_cmap(field,'Greys')
+            core_label = ""
+            mean_center=0
+            for nc,core_number in enumerate(core_list):
+                c=rm(nc)
+                snapshot = this_looper.snaps[frame][core_number]
+                center = ds.arr(snapshot.R_centroid,'code_length')
+                mean_center = center + mean_center
+                print("Core %d center %s"%(core_number, str(center)))
+                core_label += "c%04d_"%core_number
+                this_looper.proj.annotate_select_particles4(1.0, indices=this_looper.target_indices[core_number],col=c)
+                reload( annotate_particles_3)
+                this_looper.proj.annotate_text(center,
+                                 "%d"%snapshot.core_id,text_args={'color':c}, 
+                                 inset_box_args={'visible':False},
+                                 coord_system='data')
+            mean_center /= len(core_list)
+            plot_x = [1,2,0][axis]
+            plot_y = [2,0,1][axis]
+            this_center = mean_center[plot_x],mean_center[plot_y]
+            this_looper.proj.set_center(this_center)
+            this_looper.proj.zoom(4)
+
+            outname = 'plots_to_sort/%s_full_particles_%sn%04d'%(this_looper.out_prefix,"cores_10_11_",frame)
+            print( this_looper.proj.save(outname))
 
 @looper.frame_loop
 def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
@@ -114,32 +280,11 @@ def select_particles(looper,these_particles=None,axis_list=[0,1,2]):
         print(outname)
         print( pw.save(outname))
 
+def core_proj_follow_b(looper, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100,
+                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
+                    only_sphere=True, center_on_sphere=True, slab=None, annotate=True, p_size=0.1):
+    print("THIS CODE HAS BEEN REMOVED IN FAVOR OF core_proj_multiple")
 
-@looper.core_loop
-def core_proj_follow(looper,snapshot, field='density', axis_list=[0,1,2], color='r',force_log=None,linthresh=100):
-    if snapshot.R_centroid is None:
-        snapshot.get_all_properties()
-    ds = snapshot.get_ds()
-    for ax in axis_list:
-        center = ds.arr(snapshot.R_centroid,'code_length')
-        Rmax = snapshot.R_mag.max()
-        scale_min = ds.arr(0.05,'code_length')
-        scale = max([Rmax, scale_min])
-        sph = ds.sphere(center,scale)
-        proj = ds.proj(field,ax,center=center, data_source = sph) 
-        pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
-        pw.zoom(1./(2*scale.v))
-        pw.set_cmap(field,'gray')
-        if force_log is not None:
-            pw.set_log(field,force_log,linthresh=linthresh)
-        pw.annotate_sphere(center,Rmax, circle_args={'color':color} ) #R_mag.max())
-        pw.annotate_text(center,
-                         "%d"%snapshot.core_id,text_args={'color':color}, 
-                         inset_box_args={'visible':False},
-                         coord_system='data')
-        pw.annotate_select_particles(1.0, col=color, indices=snapshot.target_indices)
-        outname = "%s_c%04d_n%04d_centered"%(looper.out_prefix,snapshot.core_id,snapshot.frame)
-        print(pw.save(outname))
 
 @looper.core_loop
 def core_circle(looper,snapshot, axis_list=[0,1,2]):
@@ -201,3 +346,31 @@ def proj_with_species(self, field='density',axis_list=[0,1,2], color_dict={}, co
                              coord_system='data')
         outname = '%s_proj_regime_n%04d'%(self.out_prefix,self.current_frame)
         print( pw.save(outname))
+
+def phase_with_preimage(this_looper,frame,fields,weight_field=None, bins=None, xlim=None,ylim=None,zlim=None):
+    print('yay')
+    ds = this_looper.load(frame)
+    ad = ds.all_data()
+    phase_all = yt.create_profile(ad,fields[:2], fields[2],weight_field=None, override_bins=bins)
+    p = yt.ParticlePhasePlot.from_profile(phase_all)
+    if xlim:
+        p.set_xlim(xlim[0],xlim[1])
+    if ylim:
+        p.set_ylim(ylim[0],ylim[1])
+    if zlim:
+        p.set_zlim(fields[2],zlim[0],zlim[1])
+
+    #this save is important.
+    p.save("plots_to_sort/%s"%this_looper.out_prefix)
+    tr=this_looper.tr
+    location = np.where(tr.frames==frame)[0][0]
+    the_x = tr.track_dict[fields[0]][:,location]
+    the_y = tr.track_dict[fields[1]][:,location]
+    cell_plot = p.plots['cell_volume']
+    this_axes = cell_plot.axes
+    this_axes.scatter(the_x,the_y,c='k',s=0.5)
+    print(p.save("plots_to_sort/%s_n%04d"%(this_looper.out_prefix,frame)))
+
+
+
+

@@ -6,7 +6,7 @@ import loop_tools
 reload(loop_tools)
 import tracks_read_write
 reload(tracks_read_write)
-
+verbose=True
 def count_particles(fname='tools_data/n_particles.txt'):
     fptr = open(fname,'r')
     lines=fptr.readlines()
@@ -59,12 +59,13 @@ class core_looper():
          
     """
     def __init__(self,savefile=None,
+                 savefile_only_trackage=None,
                  directory="./", data_template = "%s/DD%04d/data%04d", sim_name='sim',
                  out_prefix="",
                  frame_list=[], core_list=[], target_frame=0,
                  fields_from_grid = [], 
                  individual_particle_tracks=False,
-                 derived=[]):
+                 derived=[], do_shift=True):
         #set defaults and/or arguments.
         self.current_frame = None
         self.data_template = data_template
@@ -84,6 +85,7 @@ class core_looper():
 
         #defaults for things to be set later
         self.target_indices = {}
+        self.targets = None
         self.ds = None
         self.field_values=None
         self.snaps = defaultdict(dict) 
@@ -92,7 +94,7 @@ class core_looper():
         self.all_data={}
         self.derived=derived
 
-        self.shift = True
+        self.shift = do_shift
 
         if savefile is not None:
             if not os.path.exists(savefile):
@@ -100,6 +102,8 @@ class core_looper():
             else:
                 tracks_read_write.load_loop(self,savefile)
                 self.tr.sort_time()
+        if savefile_only_trackage is not None:
+            tracks_read_write.load_trackage_only(self,savefile_only_trackage )
 
         #read from save file.
         #if savefile is not None:
@@ -145,6 +149,11 @@ class core_looper():
         if True:
             self.ds.periodicity = (True,True,True)
         return self.ds
+    def get_all_particles(self,frame):
+        region = self.get_region(frame)
+        self.all_particle_index = region['particle_index'].astype('int64')
+        self.all_particle_position = region['particle_position']
+        self.all_particle_velocity = region['particle_velocity']
 
     def get_target_indices(self,target_frame=None,core_list=None,h5_name=None, peak_radius=1.5,
                           bad_particle_list=None):
@@ -175,10 +184,25 @@ class core_looper():
             self.snaps[frame][core_id] = this_snap # not a weak ref, needs to persist.weakref.proxy(this_snap)
         return this_snap
 
+    #reload(mountain_top)
+    def read_targets(self,target_fname):
+        import mountain_top
+        if self.targets is None:
+            self.targets = {}
+        h5ptr = h5py.File(target_fname,'r')
+        for group_name in h5ptr:
+            core_id = h5ptr[group_name]['peak_id'][()]
+            #read from disk
+            self.targets[core_id] = mountain_top.target_info(h5ptr=h5ptr[group_name])
+            self.target_indices[core_id] = self.targets[core_id].particle_index
+        h5ptr.close()
+        self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
+
     def get_tracks(self):
         if self.tr is None:
             self.tr = trackage.track_manager(self)
         for frame in self.frame_list:
+            self.get_all_particles(frame)
             for core_id in self.core_list:
                 this_snapshot = self.make_snapshot(frame,core_id)
                 if this_snapshot.R_centroid is None:
@@ -246,7 +270,7 @@ class snapshot():
         self.get_current_mask()
         self.get_current_pos_vel()
         self.get_particle_values_from_grid()
-        self.compute_relative_coords()
+        #self.compute_relative_coords()
 
     def get_region(self,region_stuff=None):
         """I will probably extend this to make more complex regions."""
@@ -256,15 +280,24 @@ class snapshot():
     def get_current_mask(self):
         """get the particle mask that relates particles for this core_id and this frame
         to the particles in the target_indices from the target_frame"""
-        these_pids=self.target_indices.astype('int64')
-        if type(these_pids) == yt.units.yt_array:
-            these_pids = these_pids.v
-        data_region = self.get_region(self.frame)
-        mask_to_get=np.zeros(these_pids.shape,dtype='int32')
-        my_indices = data_region['particle_index'].astype('int64')
-        found_any, mask = particle_ops.mask_particles(these_pids,my_indices,mask_to_get)
-        self.mask = mask
-        return found_any, mask
+        core_ids=self.target_indices.astype('int64')
+        if type(core_ids) == yt.units.yt_array:
+            core_ids = core_ids.v
+
+        mask_to_get=np.zeros(core_ids.shape,dtype='int32')
+        all_indices = self.loop.all_particle_index
+
+
+        
+        core_order = np.argsort( core_ids)
+        sorted_cores = core_ids[core_order]
+        all_order = np.argsort(all_indices)
+        all_return = np.argsort(all_order)
+        sorted_all = all_indices[all_order]
+        found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_cores,sorted_all,mask_to_get)
+
+        self.mask = all_mask[all_return].astype('bool')
+        return found_any, self.mask
         
     def check_and_fix_bad_particles(self,mask):
         if mask.sum() == self.target_indices.size:
@@ -307,17 +340,18 @@ class snapshot():
 
     def get_current_pos_vel(self):
 
-        if self.mask is not None:
+        if self.mask is None:
             found_any, mask = self.get_current_mask()
             if not found_any:
                 raise
+        else:
+            mask = self.mask.astype('bool')
         region = self.get_region(self.frame)
-        self.ind = region['particle_index'][mask == 1]
+        self.ind = self.loop.all_particle_index[mask]
         args=np.argsort(self.ind)
         self.ind=self.ind[args]
-        self.pos = region['particle_position'][mask == 1][args]
-        self.vel = region['particle_velocity'][mask == 1][args]
-        #self.check_and_fix_bad_particles(mask)
+        self.pos = self.loop.all_particle_position[mask][args]
+        self.vel = self.loop.all_particle_velocity[mask][args]
 
 
     def compute_relative_coords(self):
@@ -349,9 +383,15 @@ class snapshot():
         else:
             self.R_centroid = yt.units.yt_array([0,0,0],'cm')
             self.V_bulk =    yt.units.yt_array([0,0,0],'cm/s')
-        for dim in range(3):
-            self.R_centroid[dim] = (shifted[:,dim]*self.field_values['density']).sum()/m
-            self.V_bulk[dim] = (self.vel[:,dim]*self.field_values['density']).sum()/m
+        centroid_tmp =  np.array([(shifted[:,dim]*self.field_values['density']).sum()/m for dim in range(3)])
+        vbulk_tmp = [ (self.vel[:,dim]*self.field_values['density']).sum()/m for dim in range(3)]
+        if self.ds is not None:
+            self.R_centroid = self.ds.arr(centroid_tmp,'code_length')
+            self.V_bulk = self.ds.arr(vbulk_tmp,'code_velocity')
+        else:
+            self.R_centroid = yt.units.yt_array(centroid_tmp,'cm')
+            self.V_bulk =    yt.units.yt_array(vbulk_tmp,'cm/s')
+
         self.R_vec = shifted - self.R_centroid
         self.R_mag = (self.R_vec**2).sum(axis=1)**0.5
         self.N_vec = np.zeros_like(self.R_vec)
@@ -359,9 +399,9 @@ class snapshot():
             self.N_vec[:,dim] = self.R_vec[:,dim]/self.R_mag
         self.V_relative = self.vel - self.V_bulk
         self.V_radial = (self.V_relative * self.N_vec).sum(axis=1)
-        self.field_values['V_radial']=self.V_radial
+        #self.field_values['V_radial']=self.V_radial
         #self.field_values['V_mag']=((self.V_relative*self.V_relative).sum())**0.5
-        self.field_values['R_mag']=self.R_mag
+        #self.field_values['R_mag']=self.R_mag
         #self.field_values['V_radial']=self.V_radial
         #self.field_values['V_relative']=self.V_relative
 
@@ -375,7 +415,7 @@ class snapshot():
 
         if self.field_values is None:
             self.field_values={}
-        fields_to_get = np.unique(self.loop.fields_from_grid + field_list)
+        fields_to_get = np.unique(list(self.loop.fields_from_grid) + list(field_list))
         number_of_new_fields=0
 
         for field in fields_to_get:
@@ -387,46 +427,53 @@ class snapshot():
         if number_of_new_fields == 0:
             return
 
+        verbose=False
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
-        for grid in self.ds.index.grids[-1::-1]:
+        gridlist = self.ds.index.grids[-1::-1]
+        for ngrid, grid in enumerate(gridlist):
+            if verbose:
+                print("grid %d / %d"%(ngrid, len(gridlist)))
             grid_selector = np.zeros([3,good_index_sort_np.size],dtype='int32') #grid i,j,k index selector.
             particle_selector = np.zeros(good_index_sort_np.size,dtype='int32') #mask between all particles and this grid.
-            mask_to_get_3 = np.zeros(good_index_sort_np.shape, dtype='int32')   #particles in this grid.  This is only for existence checking.
+            #mask_to_get_3 = np.zeros(good_index_sort_np.shape, dtype='int32')   #particles in this grid.  This is only for existence checking.
             #this gives the particles that live in _this grid._
-            found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
-            if found_any_g:
-                particle_grid_mask.particle_grid_mask_go_i2(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
-                                                            grid.LeftEdge, grid.dds, 
-                                                            grid.ActiveDimensions,grid.child_mask, 
-                                                            grid_selector,
-                                                            particle_selector)
+            #found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
 
-                particle_selector = particle_selector==1
+            Nxyz = grid.ActiveDimensions
+            i =((self.pos[:,0] - grid.LeftEdge[0])/grid.dds[0]).astype('int32')
+            j =((self.pos[:,1] - grid.LeftEdge[1])/grid.dds[1]).astype('int32')
+            k =((self.pos[:,2] - grid.LeftEdge[2])/grid.dds[2]).astype('int32')
+            particle_selector = (i >= 0 ) * ( j >= 0) * ( k >= 0 ) * ( i < Nxyz[0])*(j<Nxyz[1])*(k<Nxyz[2])
+            if particle_selector.sum() == 0:
+                continue
+            grid_selector = [i,j,k]
+            #this is giving a depreciation warning
+            subgrid_mask = grid.child_mask[[grid_selector[i][particle_selector] for i in [0,1,2]]]
+            particle_selector[particle_selector] = particle_selector[particle_selector]*subgrid_mask
+            if verbose:
+                print("   work1")
+            #particle_grid_mask.particle_grid_mask_go_i3(self.pos[:,0],self.pos[:,1],self.pos[:,2], 
+            #                                            grid.LeftEdge, grid.dds, 
+            #                                            grid.ActiveDimensions,grid.child_mask, 
+            #                                            grid_selector,
+            #                                            particle_selector, particle_exclude)
+            if particle_selector.max() > 0:  #if we have found any particles
+
+                particle_selector = particle_selector.astype('bool')
                 if particle_selector.sum() == 0:
                     continue
                 for field in self.field_values:
                     values = grid[field][[grid_selector[i][particle_selector] for i in [0,1,2]]]
                     self.field_values[field][particle_selector] = values
-                if self.loop.individual_particle_tracks:
-                    print("ERROR: individual particle tracks not implimented")
-                    raise
-                    particles_in_grids = these_pids[particle_selector]
-                    for p in particles_in_grids:
-                       pdict[p]=pdict.get(p,{})
-                       for k in ['times','cycles']:
-                           if not pdict[p].has_key(k): pdict[p][k]=[]
-                       pdict[p]['times'].append(times[-1])
-                       pdict[p]['cycles'].append(cycles[-1])
-                    for field in ['density']:
-                       values = grid[field][[grid_selector[i][particle_selector] for i in [0,1,2]]]
-                       for n,p in enumerate(particles_in_grids):
-                           pdict[p][field] = pdict[p].get(field,[])
-                           pdict[p][field].append(values[n])
+                if verbose:
+                    print("   work2")
                           
         #error check.
         if  (self.field_values['cell_volume'] < 0).any():
             NM= (self.field_values['cell_volume'] < 0).sum()
             print("ERROR: some particles (%d of them) not found.  This is problematic."%NM)
+        if verbose:
+            print("   work3")
 
 #Decorators frame_loop and core_loop takes functions and makes them loop over frame and core_id.
 #The decorator takes care of loading the data, so your funciton only needs to use it.

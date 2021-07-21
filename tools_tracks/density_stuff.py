@@ -1,0 +1,25 @@
+reload(sf2)
+if 0:
+    msf = sf2.make_sf(this_looper=this_run.this_looper,frame=0, field='density')
+    msf.plot()
+    msv = sf2.make_sf(this_looper=this_run.this_looper,frame=0, field='velocity')
+    msv.plot()
+    msV = sf2.make_sf(this_looper=this_run.this_looper,frame=0, field='velocity_magnitude')
+    msV.plot()
+if 0:
+    plt.clf()
+    plt.plot( msf.v2abin[1], msf.v2abin[2], c='r')
+    plt.plot( msv.v2abin[1], msv.v2abin[2], c='g')
+    plt.plot( msV.v2abin[1], msV.v2abin[2], c='b')
+    plt.savefig('plots_to_sort/all3.png')
+if 1:
+    fig,axes=plt.subplots(2,2)
+    ax=axes.flatten()
+    p0=ax[0].imshow(np.mean(msf.cg['density'].v,axis=0))
+    fig.colorbar(p0,ax=ax[0])
+    p1=ax[1].imshow(np.mean(msf.cg['velocity_magnitude'].v,axis=0))
+    fig.colorbar(p1,ax=ax[1])
+    p1=ax[2].imshow(np.mean(np.abs(msf.cg['velocity_x'].v),axis=0))
+    fig.colorbar(p1,ax=ax[2])
+    fig.savefig('plots_to_sort/projections.png')
+

@@ -7,15 +7,21 @@ import os.path
 import tarfile
 import h5py
 class extents():
-    def __init__(self):
+    def __init__(self, nonzeromin=False):
         self.minmax=[]
         self.errors=[]
+        self.nonzeromin=nonzeromin
     def __call__(self,array):
-        if len(self.minmax):
-            self.minmax[0] = min([array.min(),self.minmax[0]])
-            self.minmax[1] = max([array.max(),self.minmax[1]])
+        if self.nonzeromin:
+            array_min = array[ array>0].min()
         else:
-            self.minmax=[array.min(),array.max()]
+            array_min = array.min()
+        array_max = array.max()
+        if len(self.minmax):
+            self.minmax[0] = min([array_min,self.minmax[0]])
+            self.minmax[1] = max([array_max,self.minmax[1]])
+        else:
+            self.minmax=[array_min,array_max]
     def __getitem__(self,index):
         return self.minmax[index]
     def __str__(self):
@@ -204,11 +210,11 @@ def rainbow_01():
     return  color_map.to_rgba
 
 class rainbow_map():
-    def __init__(self,n):
+    def __init__(self,n, cmap='jet'):
         norm = mpl.colors.Normalize()
         norm.autoscale(np.arange(n))
         #cmap = mpl.cm.jet
-        self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap='jet')
+        self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap=cmap)
     def __call__(self,val,n_fields=0):
         this_value = self.color_map.to_rgba(val)
         if n_fields > 0:
