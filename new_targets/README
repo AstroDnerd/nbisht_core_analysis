@@ -1,0 +1,28 @@
+This is the new target machinery.
+
+Instead of just the densest zones, we 
+1.) Find peaks.
+2.) Throw out peaks less than 1100.  These are all turbulent fluctuations.
+    We can justify this with the CDF of peak densities.
+3.) For each peak, cut out particles between \rho_max^{3/4} and \rho_max
+4.) For peaks that have overlapping lower contours, bump the contours up so they don't overlap.
+5.) This is kind of a kludge.  
+6.) Finally run new_tracks, which will read the target files.
+
+get_new_targets*.py:
+    First, take the mountain tops.
+    Then, look for collisions.  Re-contour.
+    Then make the mountain tops again with the new contours.
+	there are several of these.
+
+new_tracks_*.py  
+	makes the new tracks.  These will be used for analysis.
+
+coreset_data.py: cores to skip in each simulation
+
+mountain_top.py:
+	
+
+
+
+
