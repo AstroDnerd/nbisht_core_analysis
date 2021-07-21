@@ -11,7 +11,7 @@ reload(tracks_read_write)
 
 this_simname = 'u301'
 mountain_top_name = "%s_mountain_tops_take_8.h5"%this_simname
-do_mountain_projections=False
+do_mountain_projections=True
 
 import coreset_data
 reload(coreset_data)
