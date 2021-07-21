@@ -145,15 +145,24 @@ class track_manager():
                 core_ids = core_ids.v #need it to not have units.
             self.core_ids = np.append(self.core_ids, core_ids)
             self.particle_ids = np.append(self.particle_ids, particle_ids)
+
         particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
         particle_end=particle_start+particle_ids.size
+
+        #check that the particles we're inserting
+        #are in the same order as the previous ones
+        check_particles = np.abs(self.particle_ids[particle_start:particle_end] - particle_ids).max()
+
+        if check_particles:
+            print("Fatal Error: particle order.  Email collins.")
+            pdb.set_trace()
 
         if snapshot.frame not in self.frames:
             self.frames=np.append(self.frames,snapshot.frame)
             self.times=np.append(self.times,snapshot.time) #ds['InitialTime'])
-            self.V_rad = np.append(self.V_rad,snapshot.V_radial)
 
         frame_id = np.where(self.frames == snapshot.frame)[0][0]
+
 
         for field in snapshot.field_values:
             current_shape = self[field].shape
@@ -166,19 +175,10 @@ class track_manager():
             new_slice = (slice(particle_start,particle_end),
                          slice(frame_id,frame_id+1))
             nuggle=np.array(snapshot.field_values[field])
-            #print("this is nuggle")
-            #print(nuggle)
-            #print("this is the snapshot")
-            #print(snapshot.field_values[field])
-            #print("this is my field")
-            #print(field)
             nuggle.shape=(particle_ids.size,1)
-            #print("this is nuggle.shape")
-            #print(nuggle.shape)
             temp_frame[new_slice]=nuggle
-            #print("this is temp_frame")
-            #print(temp_frame)
             self[field]=temp_frame
+    
 
 
     def p(self,particle_list,field):
