@@ -10,8 +10,8 @@ reload(looper)
 if 'this_simname' not in dir():
     this_simname = 'u301'
 
-mountain_top_fname = "%s_mountain_tops_take_8.h5"%this_simname
-outname = 'u301_new_tracks_take_9.h5'
+mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%this_simname
+outname = 'u301_new_tracks_take_x.h5'
 
 if 1:
     """this set of parameters extracts all primitive quantities"""
@@ -49,7 +49,7 @@ if 0:
     new_looper.save_bad_particles('%s_bad_particles_full.h5'%this_simname)
 
 if 1:
-    new_looper.read_bad_particles('%s_bad_particles_full_b.h5'%this_simname)
+    new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
     new_looper.remove_bad_particles()
     new_looper.get_tracks()
 
