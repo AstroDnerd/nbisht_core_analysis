@@ -19,6 +19,15 @@ for this_simname in ['u05','u10','u11']:
     p_tc_raw = product.product('Tc_raw',fname='%s/data_small/%s_ct.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400)
 
     p_tc_global = product.product('Tc_global',fname='%s/data_small/%s_ct_glob.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400)
+    p_tc_raw = product.product('Tc_raw',fname='%s/data_small/%s_ct.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400)
+    #p_tc_raw_log = product.product('Log Tc_raw',fname='%s/data_small/%s_ct_log.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400,number_format="%0.2f")
+    p_tc_raw_log = product.product('Log Tc_raw',fname='%s/data_small/%s_mean_collapse_log.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400,number_format="%0.2f")
+
+    p_distance = product.product('Log Distance to Next',fname='%s/data_small/%s_neighbors_distance_0_log.h5'%(basedir,this_simname),field='distance_0',style='value',width=400,number_format='%0.2f')
+    p_mean_density = product.product('Log Core Density',fname='%s/data_small/%s_neighbors_mean_density_log.h5'%(basedir,this_simname),field='mean_density',style='value',width=400, number_format='%0.2f')
+    #u05_neighbors_distance_0.h5
+    #u05_neighbors_mean_density.h5
+
 
     g2 = "%s/alpha_time/%s/%s_density_radius_c????.png"%(basedir, this_simname, this_simname)
     r2 = re.compile(r"%s/alpha_time/%s/%s_density_radius_c(\d\d\d\d).png"%(basedir, this_simname, this_simname))
@@ -44,6 +53,11 @@ for this_simname in ['u05','u10','u11']:
 
 
 
+    g_vorticity = "%s/vorticity/%s/%s_vorticity_c????.png"%(basedir, this_simname, this_simname)
+    r_vorticity = re.compile(r"%s/vorticity/%s/%s_vorticity_c(\d\d\d\d).png"%(basedir, this_simname, this_simname))
+    p_vorticity = product.product("vorticity", regexp=r_vorticity, myglob=g_vorticity, parameters=['core_id'],style='single',width=400)
+    p_vorticity.get_frames()
+
     g3  = r"%s/proj_follow/%s/%s_c????_n????_centered_Projection_x_density.png"%(basedir,this_simname,this_simname)
     r3   = re.compile(r"%s/proj_follow/%s/%s_c(\d\d\d\d)_n(\d\d\d\d)_centered_Projection_x_density.png"%(basedir,this_simname,this_simname))
     p_core_proj_follow = product.product('core_proj_follow',regexp=r3,myglob=g3,parameters=['core_id','frame'],style='frames',width=400)
@@ -56,7 +70,9 @@ for this_simname in ['u05','u10','u11']:
     p_vel_time.get_frames()
 
 
-    product_list=[p_tc_global,p_rho_t,p_alpha_time,p_vel_time,p_core,p_core_proj_follow,p_neighbor,p_hull]
+    #future self: merge conflict, not sure which was right.
+    #product_list=[p_tc_global,p_rho_t,p_alpha_time,p_vel_time,p_core,p_core_proj_follow,p_neighbor,p_hull]
+    #product_list=[p_distance, p_mean_density,p_tc_raw,p_tc_raw_log,p_vorticity,p1,p2,p3]
     cl=make_page.make_page(product_list, core_list=None,htmlname='browser/output_%s.html'%(this_simname))
 
 

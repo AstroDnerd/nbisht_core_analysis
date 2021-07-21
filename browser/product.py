@@ -1,19 +1,35 @@
 
 from starter2 import *
 from collections import defaultdict
+import fnmatch
 
 class plot():
     """container object that connects images with parameters"""
     def __init__(self,fname=".",parameters={}):
         self.fname=fname
         self.parameters=parameters
+        
+class core_target():
+    def __init__(self, h5ptr=None):
+        self.q={}
+        if h5ptr:
+            self.q['min_density'] = h5ptr['min_density'][()]
+            self.q['nzones']        = h5ptr['nzones'][()]
+            self.q['particle_index']= h5ptr['particle_index'][()]
+            self.q['peak_density']  = h5ptr['peak_density'][()]
+            self.q['peak_id']       = h5ptr['peak_id'][()]
+            self.q['peak_location'] = h5ptr['peak_location'][()]
 
 class product():
     """A tool to collect plots.  Takes
-    myglob: a list of files. It's kind of redundant.
-    regexp: a regular expression to match and extract parameters from.  For example, 
-                /scratch/user/images/projection_x_c0123_n0100.png
-            would want a regular expression to extract the core id (c0123) and frame (n0100)
+    regexp: the regular expression to match files and get parameters from filenames.
+        Should like something like
+        "/path/to/file/%s_projection_c(\d\d\d\d).png"%(this_simname)
+        The first %s gets repladed by simname
+        (\d\d\d\d) is four digits enclosed in parenthesis to make a group.  So
+        u301_projection_c0012.png
+        would be
+        r"%s_projection_c(\d\d\d\d).png"%this_simname
     name: title on the column
     style: how to display the image.  Options are
         single: just make an img tag with each file name
@@ -23,11 +39,12 @@ class product():
                It expexts a record that looks like
                    fname.h5[field]['core_id']
             """
-    def __init__(self, name="P", regexp="reg",myglob="glob",
+    def __init__(self, name="P", regexp=None,myglob="glob",
                  parameters=['core_id','frame'],style='single',width=200,
-                 fname=None,field=None):
-        self.myglob=myglob
-        self.regexp=regexp
+                 fname=None,field=None,number_format="%0.2e"):
+        if regexp is not None:
+            self.regexp=re.compile(regexp)
+            self.re_string=regexp
         self.name=name
         self.parameters=parameters
         self.plots=defaultdict(lambda: list())
@@ -44,10 +61,13 @@ class product():
             self.render = self.value_render
         elif style == 'numbertest':
             self.render = self.number_render
+        elif style == 'value_target_file':
+            self.render = self.value_render_target_file
         else:
             self.render = None
         
         self.width=width
+        self.number_format=number_format
 
     def render_head(self):
         return "<th> %s </th>"%self.name
@@ -61,13 +81,12 @@ class product():
         print(file_list)
 
     def get_frames(self):
-        file_list = glob.glob(self.myglob)
-        print(self.myglob)
+        dirname = os.path.dirname(self.re_string)
+        file_list = glob.glob(dirname+"/*")
         for fname in file_list:
             match = self.regexp.match(fname)
             if match is None:
-                print("Error with regexp match")
-                raise
+                continue
             mygroups = match.groups()
             params = dict(zip(self.parameters,mygroups))
             core_id = int(params['core_id'])
@@ -108,7 +127,7 @@ class product():
                 back_fname = self.plots[core_id][nplot-1].fname
                 next_fname = self.plots[core_id][next_frame].fname
                 img += "<button onclick=set_image('%s','%s')> n%04d</button>\n"%(myid,plt.fname,int(plt.parameters['frame']))
-                print("render c%04d %s"%(core_id,str(plt.parameters)))
+                #print("render c%04d %s"%(core_id,str(plt.parameters)))
         out1 = "<td>%s</td>"%img
         return out1
 
@@ -120,13 +139,29 @@ class product():
             self.values = dict(zip(core_ids,values))
             fptr.close()
             #print(self.values)
-        self.format='%0.2e'
         if core_id in self.values:
-            out_str = self.format%self.values[core_id]
+            out_str = self.number_format%self.values[core_id]
         else:
-            out_str = 'xx'
+            out_str = '-1'
         return "<td>%s </td>"%out_str
 
+
+    def value_render_target_file(self,core_id):
+
+        if 'targets' not in self.__dict__:
+            fptr = h5py.File(self.fname,'r')
+            self.targets={}
+            for group in fptr:
+                peak_id = fptr[group]['peak_id'][()]
+                self.targets[peak_id] = core_target(h5ptr=fptr[group])
+
+            fptr.close()
+            #print(self.values)
+        if core_id in self.targets:
+            out_str = self.number_format%self.targets[core_id].q[self.field]
+        else:
+            out_str = '-1'
+        return "<td>%s </td>"%out_str
 
     def number_render(self,core_id):
         out = "<td>%0.2f</td>"%np.random.random()
