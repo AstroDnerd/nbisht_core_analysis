@@ -14,12 +14,25 @@ for this_simname in ['u05','u10','u11']:
     p1 = product.product('rho_t', regexp=reg1, myglob=glob1, parameters=['core_id'],style='single',width=400)
     p1.get_frames()
 
-    p13 = product.product('Tc_raw',fname='%s/data_small/%s_ct.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400)
+    p_tc_raw = product.product('Tc_raw',fname='%s/data_small/%s_ct.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400)
+    #p_tc_raw_log = product.product('Log Tc_raw',fname='%s/data_small/%s_ct_log.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400,number_format="%0.2f")
+    p_tc_raw_log = product.product('Log Tc_raw',fname='%s/data_small/%s_mean_collapse_log.h5'%(basedir,this_simname),field='collapse_times',style='value',width=400,number_format="%0.2f")
+
+    p_distance = product.product('Log Distance to Next',fname='%s/data_small/%s_neighbors_distance_0_log.h5'%(basedir,this_simname),field='distance_0',style='value',width=400,number_format='%0.2f')
+    p_mean_density = product.product('Log Core Density',fname='%s/data_small/%s_neighbors_mean_density_log.h5'%(basedir,this_simname),field='mean_density',style='value',width=400, number_format='%0.2f')
+    #u05_neighbors_distance_0.h5
+    #u05_neighbors_mean_density.h5
+
 
     g2 = "%s/alpha_time/%s/%s_density_radius_c????.png"%(basedir, this_simname, this_simname)
     r2 = re.compile(r"%s/alpha_time/%s/%s_density_radius_c(\d\d\d\d).png"%(basedir, this_simname, this_simname))
     p2 = product.product("alpha-time", regexp=r2, myglob=g2, parameters=['core_id'],style='single',width=400)
     p2.get_frames()
+
+    g_vorticity = "%s/vorticity/%s/%s_vorticity_c????.png"%(basedir, this_simname, this_simname)
+    r_vorticity = re.compile(r"%s/vorticity/%s/%s_vorticity_c(\d\d\d\d).png"%(basedir, this_simname, this_simname))
+    p_vorticity = product.product("vorticity", regexp=r_vorticity, myglob=g_vorticity, parameters=['core_id'],style='single',width=400)
+    p_vorticity.get_frames()
 
     g3  = r"%s/proj_follow/%s/%s_c????_n????_centered_Projection_x_density.png"%(basedir,this_simname,this_simname)
     r3   = re.compile(r"%s/proj_follow/%s/%s_c(\d\d\d\d)_n(\d\d\d\d)_centered_Projection_x_density.png"%(basedir,this_simname,this_simname))
@@ -28,7 +41,7 @@ for this_simname in ['u05','u10','u11']:
     p3.get_frames()
 
 
-    product_list=[p13,p1,p2,p3]
+    product_list=[p_distance, p_mean_density,p_tc_raw,p_tc_raw_log,p_vorticity,p1,p2,p3]
     cl=make_page.make_page(product_list, core_list=None,htmlname='browser/output_%s.html'%(this_simname))
 
 
