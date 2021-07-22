@@ -11,7 +11,7 @@ if 'this_simname' not in dir():
     this_simname = 'u302'
 
 mountain_top_fname = "%s_mountain_tops_take_8.h5"%this_simname
-outname = 'u302_new_tracks_take_8.h5'
+outname = 'u302_new_tracks_take_9.h5'
 
 if 1:
     """this set of parameters extracts all primitive quantities"""

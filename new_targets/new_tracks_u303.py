@@ -10,7 +10,7 @@ reload(looper)
 if 'this_simname' not in dir():
     this_simname = 'u303'
 
-mountain_top_fname = "%s_mountain_tops_take_8.h5"%this_simname
+mountain_top_fname = "%s_mountain_tops_take_9.h5"%this_simname
 outname = 'u303_new_tracks_take_9.h5'
 
 if 1:
@@ -39,18 +39,18 @@ if 'new_looper' not in dir() and disk_or_new:
     new_looper.read_targets(mountain_top_fname)
 
 
-if 1:
-    for frame in range(target_frame):
+if 0:
+    for frame in frame_list: #range(target_frame):
         new_looper.verify_all_particles(frame)
     new_looper.remove_bad_particles()
     new_looper.save_bad_particles('%s_bad_particles_full.h5'%this_simname)
 
-if 0:
+if 1:
     new_looper.read_bad_particles('%s_bad_particles_full.h5'%this_simname)
     new_looper.get_tracks()
 
 
-if 0:
+if 1:
     new_looper.get_tracks()
     #loop_tools.re_shift_snaps(new_looper)
     #new_looper.save('TEMP.h5')
