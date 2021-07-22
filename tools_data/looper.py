@@ -540,25 +540,30 @@ class snapshot():
         verbose=False
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
         gridlist = self.ds.index.grids[-1::-1]
+        particle_fields = ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index', 'test_field']
         for ngrid, grid in enumerate(gridlist):
             if verbose:
                 print("grid %d / %d"%(ngrid, len(gridlist)))
-            grid_selector = np.zeros([3,good_index_sort_np.size],dtype='int32') #grid i,j,k index selector.
-            particle_selector = np.zeros(good_index_sort_np.size,dtype='int32') #mask between all particles and this grid.
+            #grid i,j,k index selector.
+            grid_selector = np.zeros([3,good_index_sort_np.size],dtype='int32') 
+            #mask between all particles and this grid.
+            particle_selector = np.zeros(good_index_sort_np.size,dtype='int32') 
             #mask_to_get_3 = np.zeros(good_index_sort_np.shape, dtype='int32')   #particles in this grid.  This is only for existence checking.
             #this gives the particles that live in _this grid._
             #found_any_g, mask_g = particle_ops.mask_particles(good_index_sort_np, grid['particle_index'].astype('int64'), mask_to_get_3)
 
+
             Nxyz = grid.ActiveDimensions
-            i =((self.pos[:,0] - grid.LeftEdge[0])/grid.dds[0]).astype('int32')
-            j =((self.pos[:,1] - grid.LeftEdge[1])/grid.dds[1]).astype('int32')
-            k =((self.pos[:,2] - grid.LeftEdge[2])/grid.dds[2]).astype('int32')
-            particle_selector = (i >= 0 ) * ( j >= 0) * ( k >= 0 ) * ( i < Nxyz[0])*(j<Nxyz[1])*(k<Nxyz[2])
+            pi =np.floor((self.pos[:,0] - grid.LeftEdge[0])/grid.dds[0]).astype('int32')
+            pj =np.floor((self.pos[:,1] - grid.LeftEdge[1])/grid.dds[1]).astype('int32')
+            pk =np.floor((self.pos[:,2] - grid.LeftEdge[2])/grid.dds[2]).astype('int32')
+            particle_selector = (pi >= 0 ) * ( pj >= 0) * ( pk >= 0 ) * ( pi < Nxyz[0])*(pj<Nxyz[1])*(pk<Nxyz[2])
             if particle_selector.sum() == 0:
                 continue
-            grid_selector = [i,j,k]
+            grid_selector = [pi,pj,pk]
             #this is giving a depreciation warning
-            subgrid_mask = grid.child_mask[[grid_selector[i][particle_selector] for i in [0,1,2]]]
+            grid_to_particle = [grid_selector[i][particle_selector] for i in [0,1,2]]
+            subgrid_mask = grid.child_mask[grid_to_particle]
             particle_selector[particle_selector] = particle_selector[particle_selector]*subgrid_mask
             if verbose:
                 print("   work1")
@@ -570,13 +575,18 @@ class snapshot():
             if particle_selector.max() > 0:  #if we have found any particles
 
                 particle_selector = particle_selector.astype('bool')
-                if particle_selector.sum() == 0:
-                    continue
                 for field in self.field_values:
+                    if field in particle_fields:
+                        continue
+                    #NOTE this mask can be move outside of the field loop.
                     values = grid[field][[grid_selector[i][particle_selector] for i in [0,1,2]]]
                     self.field_values[field][particle_selector] = values
                 if verbose:
                     print("   work2")
+                self.field_values['particle_pos_x']=self.pos[:,0]
+                self.field_values['particle_pos_y']=self.pos[:,1]
+                self.field_values['particle_pos_z']=self.pos[:,2]
+                self.field_values['particle_index']=self.ind
                           
         #error check.
         if  (self.field_values['cell_volume'] < 0).any():
