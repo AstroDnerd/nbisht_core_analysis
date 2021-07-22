@@ -30,40 +30,49 @@ def gaussian(the_x,norm,x0,sigma):
 
 if 'loop_dict' not in dir():
     if 0:
+        #take 1, not enough particles.
         import three_loopers_1tff as tl
         loop_dict = {'u201':tl.looper1, 'u202':tl.looper2, 'u203':tl.looper3}
-    else:
+    elif 0:
+        #take 1.5, a slightly different core set
         loop_dict = {}
         core_list={}
         core_set={'u05':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/all_cores_n0000.h5',
                   'u10':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u10_primitives_cXXXX_n0000.h5',
                   'u11':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/u11_primitives_cXXXX_n0000.h5'}
-    for this_simname in ['u05','u10','u11']:
-        directory = dl.sims[this_simname]
-        save_field = core_set[this_simname]
-        print("LOAD", this_simname)
-        loop_dict[this_simname] = looper.core_looper(directory= directory,savefile=save_field)
-        core_list[this_simname] =looper.get_all_nonzero(dl.n_particles[this_simname])
+    elif 0:
+        for this_simname in ['u05','u10','u11']:
+            directory = dl.sims[this_simname]
+            save_field = core_set[this_simname]
+            print("LOAD", this_simname)
+            loop_dict[this_simname] = looper.core_looper(directory= directory,savefile=save_field)
+            core_list[this_simname] =looper.get_all_nonzero(dl.n_particles[this_simname])
+    else:
+        import three_loopers_mountain_top as TLM
+        reload(TLM)
+        loop_dict = TLM.loops
 
 
 
 
 vrms = {'u201':5.2, 'u202':5.1, 'u203':5.4}
+vrms = {'u301':5.2, 'u302':5.1, 'u303':5.4}
 vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 
-for this_simname in ['u05','u10','u11']:# ['u201','u202','u203']:
+for this_simname in ['u301']:#,'u302','u303']:#['u05','u10','u11']:# ['u201','u202','u203']:
     #if this_simname != 'u11':# and skipper==True:
     #    continue
 
     this_looper = loop_dict[this_simname]
 
 
-    #FIELD = 'density'
+    FIELD = 'density'
     #FIELD = 'velocity_magnitude'
-    FIELD = 'magnetic_field_strength'
+    #FIELD = 'magnetic_field_strength'
     #FIELD = 'PotentialField'
     #eta1 = 0.040253639221191406 # = number of core particles / total
-    all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list[this_simname]])
+    all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in this_looper.core_list])
+    all_target_indices = all_target_indices.astype('int64')
     eta1 = len(all_target_indices)/128**3
     print("ETA 1 %s %0.4f"%(this_simname, eta1))
         #for core in this_looper.target_indices:
@@ -81,25 +90,50 @@ for this_simname in ['u05','u10','u11']:# ['u201','u202','u203']:
     print(prof_full_fname)
 
     if os.path.exists(prof_full_fname):
+        print("READ FROM DISK")
         bbb1, bcen1, vals1, db1 = dpy(prof_full_fname, ['bin_edge','bin_center','vals','db'])
         bbb2, bcen2, vals2, db2 = dpy(prof_part_fname, ['bin_edge','bin_center','vals','db'])
     else:
+        print("MAKE NEW PROFILES")
         if 1:
             ds = this_looper.load(frame=frame,derived=[em.add_tracer_density])
             em.add_tracer_density(ds)
             ad = ds.all_data() #ds.region([0.5]*3,[0.4]*3,[0.6]*3)
         #ad[deposit_tuple]
-        all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list[this_simname]])
+        #all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list[this_simname]])
         ad.set_field_parameter('target_indices',all_target_indices)
         ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
         #bins={'velocity_x':np.linspace(-25,25,64)}
         #bins['PotentialField']= np.linspace(-50,50,64)
-        bins = {'PotentialField':np.linspace(-32,32,64),'density':None,'magnetic_field_strength':None,'velocity_magnitude':None}
-        prof_all_density  = yt.create_profile(ad,bin_fields=[FIELD],fields=['cell_volume'],weight_field=None, override_bins=bins)
-        prof_mask_density = yt.create_profile(ad,bin_fields=[FIELD],fields=[deposit_tuple],weight_field=None, override_bins=bins)
+        bins = {'PotentialField':np.linspace(-32,32,64),
+                'density':np.logspace(np.log10(5e-3),2,32),
+                'magnetic_field_strength':None,'velocity_magnitude':None}
+        if 0:
+            prof_all_density  = yt.create_profile(ad,bin_fields=[FIELD],fields=['cell_volume'],weight_field=None, override_bins=bins)
+            bbb1, bcen1, vals1, db1= toplot(prof_all_density)
+        if 0:
+            prof_mask_density = yt.create_profile(ad,bin_fields=[FIELD],fields=[deposit_tuple],weight_field=None, override_bins=bins)
+            bbb2, bcen2, vals2, db2 = toplot(prof_mask_density,quan=deposit_tuple[1])
+        if 1:
+            density1 = ad[FIELD]
+            bbb1 = bins[FIELD]
+            cell_volume1 = ad['cell_volume']
+            vals1, bbb1 = np.histogram(density1, weights=cell_volume1, bins=bbb1)
+            bcen1=0.5*(bbb1[1:]+bbb1[:-1])
+            db1 = bbb1[1:]-bbb1[:-1]
+        if 1:
+            frame_ind = np.where(this_looper.tr.frames == frame)[0][0]
+            density2 = this_looper.tr.track_dict[FIELD][:,frame_ind]
+            cell_volume2 = this_looper.tr.track_dict['cell_volume'][:,frame_ind]
+            vals2, bbb2 = np.histogram(density2, weights=cell_volume2, bins=bbb1)
+            bcen2=0.5*(bbb2[1:]+bbb2[:-1])
+            db2 = bbb2[1:]-bbb2[:-1]
 
-        bbb1, bcen1, vals1, db1= toplot(prof_all_density)
-        bbb2, bcen2, vals2, db2 = toplot(prof_mask_density,quan=deposit_tuple[1])
+
+
+
+
+
 
         fptr1 = h5py.File(prof_full_fname,'w')
         fptr1.create_dataset( 'bin_edge', data=bbb1)
