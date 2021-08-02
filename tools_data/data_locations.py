@@ -52,9 +52,9 @@ if machine == 'Nazare':
     u201_every_ten = None
     u202_every_ten = None
     u203_every_ten = None
-    mountain_top = {'u301':"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u301_new_tracks_take_9b.h5 ",
-                    "u302":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u302_new_tracks_take_9b.h5 ",
-                    "u303":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u303_new_tracks_take_9b.h5 "}
+    mountain_top = {'u301':"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u301_new_tracks_take_9b.h5",
+                    "u302":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u302_new_tracks_take_9b.h5",
+                    "u303":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u303_new_tracks_take_9b.h5"}
 elif machine == 'cloudbreak':
     sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
