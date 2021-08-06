@@ -30,13 +30,18 @@ if 0:
 if 1:
     import three_loopers_mountain_top as TLM
     reload(TLM)
-if 0:
-    mt1 = mass_tools.mass_tool(TLM.loops['u301'])
-    mt1.run()
 if 1:
-    fig,ax = plt.subplots(1,1)
-    mass_tools.plot_mass_tracks(mt1, ax)
-    fig.savefig('plots_to_sort/u301_mass_time.png')
+    mt_dict={}
+    for this_simname in ['u301','u302','u303']:
+
+        mt_dict[this_simname] = mass_tools.mass_tool(TLM.loops[this_simname])
+        mt_dict[this_simname].run()
+if 1:
+    for this_simname in ['u301','u302','u303']:
+        fig,ax = plt.subplots(1,1)
+        mass_tools.plot_mass_tracks(mt_dict[this_simname], ax)
+        fig.savefig('plots_to_sort/%s_mass_time.png'%this_simname)
+        plt.close(fig)
 if 0:
     import three_loopers_1tff as tl
     if 'clobber' not in dir():
