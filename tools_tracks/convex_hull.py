@@ -12,18 +12,19 @@ color.update({'u201':'r','u202':'g','u203':'b'})
 import convex_hull_tools as CHT
 reload(CHT)
 
-import three_loopers_1tff as tl
+#import three_loopers_1tff as tl
+import three_loopers_mountain_top as TLM
 
 if 'clobber' not in dir():
     clobber=False
 
 if 'ht1' not in dir() or clobber: 
-    ht1 = CHT.hull_tool(tl.looper1)
+    ht1 = CHT.hull_tool(TLM.loops['u301'])
 if 'ht2' not in dir() or clobber:
-    ht2 = CHT.hull_tool(tl.looper2)
+    ht2 = CHT.hull_tool(TLM.loops['u302'])
     #ht2.plot_2d(frames=[0])
 if 'ht3' not in dir() or clobber:
-    ht3 = CHT.hull_tool(tl.looper3)
+    ht3 = CHT.hull_tool(TLM.loops['u303'])
 
 if 0:
     CHT.plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
