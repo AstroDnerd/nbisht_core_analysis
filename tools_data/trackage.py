@@ -269,6 +269,7 @@ def shift_6(pos):
         out[Is:Ie]  += Sgn
     return out
 
+
 def shift_4(arr):
     #Loop over particles in the array and call shift_6
     out = np.zeros_like(arr)
@@ -472,4 +473,15 @@ class mini_scrubber():
         self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
         self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
         self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+    def make_floats(self, core_id):
+        self.float_x = self.trk.c([core_id],'particle_pos_x')
+        self.float_y = self.trk.c([core_id],'particle_pos_y')
+        self.float_z = self.trk.c([core_id],'particle_pos_z')
+        shift_x = self.this_x - self.raw_x
+        shift_y = self.this_y - self.raw_y
+        shift_z = self.this_z - self.raw_z
+        self.float_x += shift_x
+        self.float_y += shift_y
+        self.float_z += shift_z
+
 
