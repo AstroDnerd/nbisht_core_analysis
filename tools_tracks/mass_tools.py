@@ -49,7 +49,6 @@ class mass_tool():
                 self.total_mass[core_id].append( total_mass)
                 self.unique_mass[core_id].append(unique_mass)
                 self.dof[core_id].append( mask2.sum())
-            print("WWWWWW", self.unique_mass[core_id])
 
 
 def plot_mass_tracks(tool, ax):
