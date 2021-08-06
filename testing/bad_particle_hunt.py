@@ -31,7 +31,7 @@ def check_particles(ds):
 #g=check_particles(this_looper.ds_list[120])
 bad_list = []
 #frame_list = list(range(122))+[125]
-this_simname = 'u203'
+this_simname = 'u201'
 frame_list = range( dl.target_frames[this_simname]+1)
 directory= dl.sims[this_simname]
 
