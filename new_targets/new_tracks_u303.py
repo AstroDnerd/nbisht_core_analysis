@@ -10,8 +10,8 @@ reload(looper)
 if 'this_simname' not in dir():
     this_simname = 'u303'
 
-mountain_top_fname = "%s_mountain_tops_take_9.h5"%this_simname
-outname = 'u303_new_tracks_take_9.h5'
+mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%this_simname
+outname = 'u303_new_tracks_take_9b.h5'
 
 if 1:
     """this set of parameters extracts all primitive quantities"""
@@ -21,6 +21,7 @@ if 1:
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
     fields += ['PotentialField']
+    fields += ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index']
     derived=[]
 
 disk_or_new = 'new'
@@ -46,12 +47,11 @@ if 0:
     new_looper.save_bad_particles('%s_bad_particles_full.h5'%this_simname)
 
 if 1:
-    new_looper.read_bad_particles('%s_bad_particles_full.h5'%this_simname)
+    new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
+    new_looper.remove_bad_particles()
     new_looper.get_tracks()
 
 
-if 1:
-    new_looper.get_tracks()
     #loop_tools.re_shift_snaps(new_looper)
     #new_looper.save('TEMP.h5')
     import tracks_read_write
