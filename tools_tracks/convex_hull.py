@@ -5,32 +5,33 @@ from scipy.spatial import ConvexHull
 import matplotlib.patches as patches
 import data_locations as dl
 reload(dl)
+import colors
 plt.close('all')
-color={'u05':'r','u10':'g','u11':'b'}
-color.update({'u201':'r','u202':'g','u203':'b'})
 
 import convex_hull_tools as CHT
 reload(CHT)
 
-import three_loopers_1tff as tl
+#import three_loopers_1tff as tl
+import three_loopers_mountain_top as TLM
 
 if 'clobber' not in dir():
     clobber=False
 
 if 'ht1' not in dir() or clobber: 
-    ht1 = CHT.hull_tool(tl.looper1)
+    ht1 = CHT.hull_tool(TLM.loops['u301'])
 if 'ht2' not in dir() or clobber:
-    ht2 = CHT.hull_tool(tl.looper2)
+    ht2 = CHT.hull_tool(TLM.loops['u302'])
     #ht2.plot_2d(frames=[0])
 if 'ht3' not in dir() or clobber:
-    ht3 = CHT.hull_tool(tl.looper3)
+    ht3 = CHT.hull_tool(TLM.loops['u303'])
 
-if 0:
-    CHT.plot_2d(ht1,frames=[0],core_list=[85,86, 306, 307, 308], accumulate=True)
+#
+# BIG PLOT
+#
 if 0:
     CHT.plot_2d(ht1,frames=[0], accumulate=True, label_cores=[323])
-if 1:
-    CHT.plot_2d(ht2,frames=[0], accumulate=True, label_cores=[-1])
+if 0:
+    CHT.plot_2d(ht2,frames=[0], accumulate=True, label_cores=[])
 if 0:
     CHT.plot_2d(ht3,frames=[0], accumulate=True, label_cores=[])
 
@@ -38,7 +39,7 @@ if 0:
     fractions,cores=get_overlapping_cores(ht3,185)
     catman = np.concatenate
     cores = catman([cores,[185]])[::-1]
-    ht3b = hull_tool(tl.looper3)
+    ht3b = hull_tool(TLM.loopes['u303'])
     ht3b.plot_2d(core_list = cores, accumulate=True)
 
 if 'did_hulls' not in dir():
@@ -72,7 +73,7 @@ if 0:
     #ax3a=ax3[0]
     #ax3b=ax3[1]
     for htool in [ht1, ht2, ht3]:
-        c=color[ htool.this_looper.out_prefix]
+        c=colors.color[ htool.this_looper.out_prefix]
         next_fraction=[]
         no_overlap=0
         all_overlap = 0
@@ -87,25 +88,23 @@ if 0:
         ax3a.hist( next_fraction, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=16)
         #ax3b.hist( next_fraction, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=16, cumulative=True, density=True)
         ax3a.scatter([0],[no_overlap],c=c,marker="*")#,s=1.)
-        #ax3a.scatter([1],[all_overlap],c=c,marker="*")#,s=1.)
+        ax3a.scatter([1],[all_overlap],c=c,marker="*")#,s=1.)
         ax3a.legend(loc=2)
         #axbonk(ax3b,xlabel=r'$\rm{Overlap\ fraction\ with\ nearest\ neighbor}$',ylabel=r'$f_{\rm{cores}}$')
-        axbonk(ax3a,xlabel=r'$\rm{Overlap\ fraction\ with\ nearest\ neighbor}$',ylabel=r'$N_{\rm{cores}}$',ylim=[0,70])
+        axbonk(ax3a,xlabel=r'$\rm{Overlap\ fraction\ with\ nearest\ neighbor}$',ylabel=r'$N_{\rm{cores}}$',ylim=[0,100])
         #fig.savefig('plots_to_sort/%s_overlaps.png'%htool.this_looper.out_prefix)
     fig3.savefig('plots_to_sort/next_overlap_dist_n%04d.png'%frame)
                 
-if 0:
+if 1:
     #
     # Number of neghbors with more than X
     #
     frame=0
-    for htool in [ht1, ht2, ht3]:
-        htool.make_hulls(frames=[frame])
 
     if 1:
-        fig3,ax3=plt.subplots(3,1, figsize=(4,12))
+        fig3,ax3=plt.subplots(1,3, figsize=(12,4))
         for htool in [ht1, ht2, ht3]:
-            c=color[ htool.this_looper.out_prefix]
+            c=colors.color[ htool.this_looper.out_prefix]
             for nf, frac in enumerate([.2, .5, .9]):
                 N_over_M = []
                 for core_1 in htool.cores_used:
@@ -115,7 +114,7 @@ if 0:
                 N_bins = max(N_over_M)+1
                 ax3[nf].hist( N_over_M, histtype='step',color=c,label="%s"%htool.this_looper.out_prefix,bins=N_bins)
                 #ax3[nf].legend(loc=1)
-                axbonk(ax3[nf],ylabel=r'$N_{cores}$',xlabel=r'$N_{> %d %s }$'%(int(100*frac),"\\%"),xlim=[0,22])#,ylim=[0,70])
+                axbonk(ax3[nf],ylabel=r'$N_{cores}$',xlabel=r'$F_{> %d %s }$'%(int(100*frac),"\\%"),xlim=[0,22])#,ylim=[0,70])
                 #fig.savefig('plots_to_sort/%s_overlaps.png'%htool.this_looper.out_prefix)
         fig3.savefig('plots_to_sort/next_neighbor_over_M_%04d.pdf'%frame)
 
@@ -149,7 +148,7 @@ if 0:
     #
     fig,ax=plt.subplots(1,1)
     for nrun,ht in enumerate([ht1,ht2,ht3]):
-        c=color[ ht.this_looper.out_prefix]
+        c=colors.color[ ht.this_looper.out_prefix]
         hull_lengths = nar(ht.hull_volumes)**(1./3)
         vals, bins = np.histogram(hull_lengths)
         bc = 0.5*(bins[1:]+bins[:-1])
@@ -181,33 +180,6 @@ if 0:
             for iN in range(max(N_nei)+1):
                 N_nei_f[iFr,iN] = (N_nei >= iN).sum()
 
-if 0:
-    #
-    # Hull volume vs total cell volume
-    #
-    frame = 10
-    fig,axess=plt.subplots(1,3)
-    if 'ext_hull' not in dir():
-        ext_hull=extents()
-    for nrun,ht in enumerate([ht1,ht2,ht3]):
-        if nrun != 2:
-            continue
-        ax=axess[nrun]
-        ax.clear()
-        name = ht.this_looper.out_prefix
-        ht.make_hulls(frames=[frame])
-        odd = nar(ht.hull_volumes) < nar(ht.cell_volumes)
-        not_odd = nar(ht.hull_volumes) >= nar(ht.cell_volumes)
-        ax.scatter(ht.hull_volumes,ht.cell_volumes,c='k')
-        ax.scatter(nar(ht.hull_volumes)[odd],nar(ht.cell_volumes)[odd],c='r')
-        ax.set_aspect('equal')
-        #axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',xlim=[0,0.07],ylim=[0,0.07])
-        ext_hull(nar(ht.hull_volumes))
-        ext_hull(nar(ht.cell_volumes))
-        ax.plot(ext_hull.minmax, ext_hull.minmax,c='g')
-        axbonk(ax,xlabel=r'$\rm{Hull\ Volume}$',ylabel=r'$\rm{Cell\ Volume}$',
-               xlim=ext_hull.minmax,ylim=ext_hull.minmax, xscale='log',yscale='log')
-    fig.savefig("plots_to_sort/hull_volume_n%04d.png"%(frame))
 
 if 0:
     #
@@ -216,7 +188,7 @@ if 0:
     hull_by_frame = {}
     hullvol = defaultdict(list)
     cellvol = defaultdict(list)
-    looper_list=[tl.looper1,tl.looper2,tl.looper3]
+    looper_list=[TLH.loops['u301'],TLH.loops['u302'],TLH.loops['u303']]
     loopers = dict(zip([ looper.out_prefix for looper in looper_list], looper_list))
 
     for loop in looper_list:
