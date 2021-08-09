@@ -161,6 +161,55 @@ class target_info():
         group.create_dataset("nzones",        data = self.nzones)
         group.create_dataset("particle_index",data = self.particle_index)
 
+class target_tree():
+    def __init__(self,ds=None,fname=None):
+        self.targets=None
+        self.target_indices={}
+        self.leaves={}
+        self.ds=ds
+        if fname is not None:
+            self.read_targets(fname)
+    def read_targets(self,target_fname):
+        self.all_particles=np.array([])
+        self.core_ids_by_particle=np.array([])
+        if self.targets is None:
+            self.targets = {}
+        h5ptr = h5py.File(target_fname,'r')
+        for group_name in h5ptr:
+            core_id = h5ptr[group_name]['peak_id'][()]
+            #read from disk
+            self.targets[core_id] = target_info(h5ptr=h5ptr[group_name])
+            self.target_indices[core_id] = self.targets[core_id].particle_index
+
+            #check for uniqueness
+            self.all_particles=np.append(self.all_particles, self.target_indices[core_id] )
+            if np.unique(self.all_particles).size - self.all_particles.size:
+                print("FATAL ERROR: repeated particle, ", core_id)
+                pdb.set_trace()
+            #I might need this later when I revamp get_tracks again.
+            these_core_ids=[core_id]*self.target_indices[core_id].size
+            self.core_ids_by_particle=np.append(self.core_ids_by_particle, these_core_ids)
+
+        h5ptr.close()
+        self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
+    def make_leaves_check(self):
+        if self.leaves is None:
+            self.leaves={}
+        for core_id in self.targets:
+            T = self.targets[core_id]
+            sph = self.ds.sphere( T.peak_location, 1e-2)
+            clump = Clump(sph,('gas','density'))
+            clump.find_children( T.min_density, T.peak_density)
+            for leaf1 in clump.children:
+                min_radius=leaf1['radius'].min()
+                if min_radius < 1./2048:
+                    break
+            self.leaves[core_id] = leaf1
+
+            self.leaves
+
+
+
 def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directory = None, frame = None, peak_fname=None, work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
                     verify=None, leaf_storage=None,radius=1e-2, cut_override={}, radius_dict={}):
     meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname)
@@ -188,7 +237,7 @@ def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directo
 
 
         if leaf_storage is not None and type(leaf_storage) == dict and write_dataset:
-            leaf_storage[peak_id] = ds,top1.leaf
+            leaf_storage[peak_id] = top1,top1.leaf
 
 
         if write_dataset:
@@ -338,7 +387,7 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
         print("ZZZ Core 1:  rhomax %0.2e rhomin %0.2enew %0.2e"%( top1.rhomax, top1.rhomin,output[peak_1]))
         print("ZZZ Core 2:  rhomax %0.2e rhomin %0.2enew %0.2e"%( top2.rhomax, top2.rhomin,output[peak_2]))
     if do_projections:
-        proj = ds.proj('density',1,center=top1.location,data_source=top1.region)
+        proj = ds.proj('density',0,center=top1.location,data_source=top1.region)
         pw = proj.to_pw()
         pw.set_cmap('density','Greys')
         pw.set_axes_unit('code_length')
