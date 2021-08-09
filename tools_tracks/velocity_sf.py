@@ -108,15 +108,16 @@ if 'do_all_plots' not in dir():
     do_all_plots = False
 
 #import three_loopers as TL
-import three_loopers_1tff as TL
+#import three_loopers_1tff as TL
+import three_loopers_mountain_top as TLM
 import sf2
 frame=0
 if 0:
-    run1 = trial(TL.looper1)
+    run1 = trial(TLM.loops['u301'])
     run1.by_frame(frame)
-    run2 = trial(TL.looper2) 
+    run2 = trial(TLM.loops['u302']) 
     run2.by_frame(frame)
-    run3 = trial(TL.looper3)
+    run3 = trial(TLM.loops['u303'])
     run3.by_frame(frame)
 #for frame in [0]: #range(0,110,10):
 #    run1.plot(frame)
@@ -133,6 +134,12 @@ def plot(self,frame, my_sf2=None,longorno=''):
     vr_min = min([ 0.1, my_sf2[1].min()])
     norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
     for r,v in zip(self.r,self.vr):
+        #the index at r=.1
+        #does not work.  Makes a bowtie.
+        i_r01 = np.argmin( np.abs( r-0.1))
+        sf_r01 = np.argmin( np.abs(my_sf2[0] -0.1))
+        scale = my_sf2[1][sf_r01]/v[i_r01] 
+        #ax.plot(r,v*scale,c=[0.5,0.5,0.5,0.6],lw=0.1)
         ax.plot(r,v,c=[0.5,0.5,0.5,0.6],lw=0.1)
     for nc,rv in enumerate(zip(self.r,self.vr)):
         r,v=rv
@@ -165,9 +172,9 @@ if 'R' not in dir():
     R = [[],[],[]]
     SF2L = [[],[],[]]
     Things = []
-    R[0], SF2L[0] = dpy('SF2_L_subset_2_u05.h5',['Rmag','SF2_L'])
-    R[1], SF2L[1] = dpy('SF2_L_subset_2_u10.h5',['Rmag','SF2_L'])
-    R[2], SF2L[2] = dpy('SF2_L_subset_2_u11.h5',['Rmag','SF2_L'])
+    R[0], SF2L[0] = dpy(dl.sf_path + '/SF2_L_subset_2_u05.h5',['Rmag','SF2_L'])
+    R[1], SF2L[1] = dpy(dl.sf_path + '/SF2_L_subset_2_u10.h5',['Rmag','SF2_L'])
+    R[2], SF2L[2] = dpy(dl.sf_path + '/SF2_L_subset_2_u11.h5',['Rmag','SF2_L'])
     SCALE = 128**6
     SCALE = 1/128**3
     import radial_binner as rb
