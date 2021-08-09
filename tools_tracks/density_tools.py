@@ -42,7 +42,7 @@ class trial():
             ms = trackage.mini_scrubber(thtr,core_id)
             if ms.nparticles < 3:
                 continue
-            print('go ', core_id)
+            #print('go ', core_id)
             self.cores_used.append(core_id)
             n0=0
 
@@ -66,7 +66,6 @@ class trial():
                 if do_all_plots:
                     ax.plot( [tc_mean-0.005, tc_mean+0.005],[rho_col_mean,rho_col_mean],c=[0.5]*3)
                     ax.plot( [tc_mean      , tc_mean     ], [rho_col_mean/5,5*rho_col_mean],c=[0.5]*3)
-                    print('WWWW ',tc_mean, rho_col_mean)
 
 
             else:
@@ -111,11 +110,14 @@ class trial():
                 if rho_col > 0:
                     tc =t_collapse*(1-(rho_col/rho0)**(-1./alpha))**-0.5
                     rho_c = 3*np.pi/(32*G*tc**2)
-                    rho_tc = rho_c*(1-(tsorted/tc)**2)**-alpha
-                    ax.plot( tsorted, rho_tc, c='g')
-                    print("stuff rhoc/rho0 %0.2f"%(rho_c/rho0))
-                    rho_tff = rho0*(1-(tsorted/tff_local)**2)**-alpha
-                    ax.plot( tsorted, rho_tff, c='b')
+                    inside = 1-(tsorted/tc)**2
+                    ok = inside > 0
+                    rho_tc = rho_c*(inside[ok])**-alpha
+                    ax.plot( tsorted[ok], rho_tc, c='g')
+                    inside = 1-(tsorted/tff_local)**2
+                    ok = inside > 0
+                    rho_tff = rho0*(inside[ok])**-alpha
+                    ax.plot( tsorted[ok], rho_tff, c='b')
                     #rho_c = 3*np.pi/(32*G*tc**2)
                     self.tc.append(tc)
                     self.rho_c_list.append(rho_c)
@@ -123,12 +125,12 @@ class trial():
                     self.tc.append(-1)
                     self.rho_c_list.append(-1)
 
-                ax.legend(loc=0)
+                #ax.legend(loc=0)
                 ylim = [thtr.track_dict['density'].min(), thtr.track_dict['density'].max()]
                 xlim = [0,thtr.times.max()]
 
                 axbonk(ax,xscale='linear',yscale='log',xlabel='t',ylabel=r'$\rho$', ylim=ylim,xlim=xlim)
                 oname = "%s/%s_density_6_c%04d"%(dl.output_directory,self.this_looper.out_prefix,core_id)
-                print(oname)
                 fig.savefig(oname)
+                plt.close(fig)
                 print("Saved "+oname)
