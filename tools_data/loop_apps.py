@@ -47,9 +47,13 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
 import annotate_particles_3
 reload(annotate_particles_3)
 def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
-                    core_list=None,frame_list=None, clobber=True,zoom=True, grids=True, particles=True, moving_center=False, 
-                    only_sphere=True, center_on_sphere=True, slab=None, fields=False, velocity=False, code_length=True, lic=False, 
-                      tracker_positions=True, annotate=False, shifted_tracker=True):
+                    core_list=None,frame_list=None, clobber=True,
+                       only_sphere=True, center_on_sphere=True,
+                       zoom=True, moving_center=False, slab=None,
+                       grids=True, particles=True, annotate=False, 
+                      fields=False, velocity=False, lic=False, 
+                       code_length=True, 
+                      tracker_positions=True, shifted_tracker=True):
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
@@ -71,8 +75,13 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             print("File exists, skipping")
             return
         #get extents and bounding region
-        left =  np.array([1,1,1])
-        right = np.array([0,0,0])
+        left =  ds.domain_right_edge.v
+        right = ds.domain_left_edge.v
+
+        #
+        # Find the extents of all cores.
+        # Fill position array.
+        #
         position_dict={}
         for core_id in core_list:
             if tracker_positions:
@@ -94,6 +103,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 if snapshot.R_centroid is None:
                     snapshot.get_all_properties()
                 positions = snapshot.pos
+                position_dict[core_id]=positions
             this_left =  positions.min(axis=0)
             this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
@@ -108,6 +118,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         if not center_on_sphere:
             center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
 
+        #
+        # main plot loop
+        #
         for ax in axis_list:
             Rmax = np.sqrt( ( (right-left)**2).sum(axis=0)).max()
             scale_min = ds.arr(0.05,'code_length')
