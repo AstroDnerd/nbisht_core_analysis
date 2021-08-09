@@ -90,7 +90,10 @@ elif machine == 'cloudbreak':
     mountain_top = {'u301':"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u301_new_tracks_take_9c.h5",
                     "u302":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u302_new_tracks_take_9b.h5",
                     "u303":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u303_new_tracks_take_9b.h5"}
+    #path for structure functions
+    sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
 else:
+    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF"
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
