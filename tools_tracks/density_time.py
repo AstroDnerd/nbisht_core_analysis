@@ -15,8 +15,9 @@ import three_loopers_mountain_top as TLM
 
 if 1:
     dt3={}
-    dt3['u301'] = density_tools.trial( TLM.loops['u301'])
-    dt3['u301'].run()
+    for this_simname in ['u301','u302','u303']:
+        dt3[this_simname] = density_tools.trial( TLM.loops[this_simname])
+        dt3[this_simname].run()
 
 
 
