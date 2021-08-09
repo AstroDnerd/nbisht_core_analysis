@@ -232,6 +232,8 @@ def load_trackage_only(self,fname):
             if value in fptr:
                 the_value = fptr[value][()]
                 if value in ['frame_list','core_list']:
+                    if value not in self.__dict__:
+                        self.__dict__[value]=[]
                     for iii in the_value:
                         if iii not in self.__dict__[value]:
                             self.__dict__[value].append(iii)
