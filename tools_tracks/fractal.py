@@ -131,26 +131,26 @@ class fractal_tool():
                 plt.savefig('plots_to_sort/%s_counts_c%04d.png'%(self.this_looper.out_prefix,core_id))
 
 
-import three_loopers_1tff as tl
+#import three_loopers_1tff as tl
+import three_loopers_mountain_top as TLM
 
 if 'ft1' not in dir() or clobber:
-    ft1=fractal_tool(tl.looper1)
+    ft1=fractal_tool(TLM.loops['u301'])
     ft1.run()
 if 'ft2' not in dir() or clobber:
-    ft2=fractal_tool(tl.looper2)
+    ft2=fractal_tool(TLM.loops['u302'])
     ft2.run()
 if 'ft3' not in dir() or clobber:
-    ft3=fractal_tool(tl.looper3)
+    ft3=fractal_tool(TLM.loops['u303'])
     ft3.run()
 
 plt.clf()
-color={'u05':'r','u10':'g','u11':'b', 'u201':'r', 'u202':'g','u203':'b'}
 
-if 0:
+if 1:
     for nf,ft in enumerate([ft1,ft2,ft3]):
         name=ft.this_looper.out_prefix
-        plt.hist(ft.fractal_dim,histtype='step',bins=10,color=color[name],label=name)
-        plt.savefig("plots_to_sort/wtf_%d.png"%nf)
+        plt.hist(ft.fractal_dim,histtype='step',bins=10,color=colors.color[name],label=name)
+        #plt.savefig("plots_to_sort/wtf_%d.png"%nf)
 
     plt.legend(loc=0)
     plt.savefig('plots_to_sort/fractal_dist.png')
@@ -175,7 +175,7 @@ if 0:
             toolshed[name][frame] = fractal_tool( looper )
             toolshed[name][frame].run(nf=nframe)
 
-if 1:
+if 0:
     rm = rainbow_map(10)
     for name in toolshed:
         dims = []
