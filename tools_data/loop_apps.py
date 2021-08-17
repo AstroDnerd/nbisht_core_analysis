@@ -46,6 +46,8 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
 
 import annotate_particles_3
 reload(annotate_particles_3)
+if 'monotone' not in dir():
+    monotone = {}
 def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
                     core_list=None,frame_list=None, clobber=True,
                        only_sphere=True, center_on_sphere=True,
@@ -53,7 +55,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                        grids=True, particles=True, annotate=False, 
                       fields=False, velocity=False, lic=False, 
                        code_length=True, 
-                      tracker_positions=True, shifted_tracker=True):
+                      tracker_positions=True, shifted_tracker=True, monotonic=False):
+    global monotone
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
@@ -141,7 +144,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             
             if zoom:
                 pw.zoom(1./(2*scale))
-            pw.set_cmap(field,'gray')
+            pw.set_cmap(field,'Greys')
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
