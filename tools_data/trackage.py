@@ -269,17 +269,14 @@ def shift_6(pos):
         out[Is:Ie]  += Sgn
     return out
 
-<<<<<<< HEAD
-def shift_4_minues(arr):
+def shift_4_minus(arr):
     #Loop over particles in the array and call shift_6
     #first version, kill later
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
     return out  
-=======
 
->>>>>>> 5cce1065cef353ca86d7b02e2067830317fbb7a3
 def shift_4(arr):
     #Loop over particles in the array and call shift_6
     #first shift based on each particles endpoints
