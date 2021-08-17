@@ -1,4 +1,3 @@
-
 from starter2 import *
 from collections import defaultdict
 import scipy
@@ -35,74 +34,70 @@ class lyapunov_tool():
             return
 
         for core_id in core_list:
-            ms = trackage.mini_scrubber(thtr,core_id)
+            ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             ms.particle_pos(core_id)
             self.ms = ms
 
             if ms.nparticles < 10:
                 continue
-
             self.cores_used.append(core_id)
-            times = thtr.times
-            r = ms.r
-            this_x = ms.this_x 
-            this_y = ms.this_y
-            this_z = ms.this_z
-            king = np.argmin(r[:,0])
-
-            dx = this_x - this_x[king]
-            dy = this_y - this_y[king]
-            dz = this_z - this_z[king]
-            r = np.sqrt( dx**2+dy**2+dz**2)
-            #fig,ax=plt.subplots(1,1)
-
-            #x0 = dx[:,0]
-            #tf = times[-1]
-            #for myr in r:
-            #    ok = myr>0
-            #    ax.plot(times[ok], np.log10(myr[ok]))
-            #for xonly in dx:
-                #XXX = np.abs(xonly)
-                #pfit = np.polyfit( times,XXX,1)
-                ##x2 = XXX[0] - XXX[0]/tf*times
-                #x3 = pfit[0]*times+pfit[1]
-                #self.slopes.append(pfit[1])
-                #ax.plot(times,x3)
-                #ax.plot( np.abs(XXX- x2))
-
-            #outname = 'plots_to_sort/%s_lyapunov_c%04d.png'%(self.name, core_id)
-            #fig.savefig(outname)
-            #print(outname)
-            #plt.close(fig)
-            #plt.clf()
-            #plt.hist(self.slopes,histtype='step')
-            #plt.savefig('plots_to_sort/%s_slopes_c%04d.png'%(self.name,core_id))
-
-            #plt.clf()
-            #for ip in range(dx.shape[0]):
-            #    dy3 = ms.particle_y[ip,:]-ms.mean_yc
-            #    dz3 = ms.particle_z[ip,:]-ms.mean_zc
-            #    plt.plot(   dy3, dz3, c=[0.5]*3, linewidth=0.1)
-            #    plt.scatter(dy3[0], dz3[0], c='k', s=0.3)
-            #plt.savefig('plots_to_sort/%s_hair_c%04d.pdf'%(self.name,core_id))
-
+            if 0:
+                fig,ax=plt.subplots(1,1, figsize=(12,8))
+                for ip in range(ms.nparticles):
+                    ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=[0.5]*3, linewidth=0.1)
+                ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c='k', s=0.3)
+                ax.scatter(ms.particle_y[:,-1], ms.particle_z[:,-1], c='r', s=0.3)
+                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.name, core_id))
+                outname = 'plots_to_sort/%s_blowing_hair_c%04d.png'%(self.name,core_id)
+                fig.savefig(outname)
+                print(outname)
+                plt.close(fig)
             if 1:
+                cy = np.tile( ms.particle_y.mean(axis=0), (ms.nparticles,1))
+                cz = np.tile( ms.particle_z.mean(axis=0), (ms.nparticles,1))
+                dy2 = ms.particle_y - cy
+                dz2 = ms.particle_z - cz
+
+                if 0:
+                    theta = np.arctan2(dz2,dy2)
+                    r = np.sqrt(dy2**2+dz2**2)
+
+                    the_x = r**0.5*np.cos(theta)
+                    the_y = r**0.5*np.sin(theta)
+
+                    dy2 = the_x
+                    dz2 = the_y
+
+
+
+                fig,ax=plt.subplots(1,1, figsize=(12,8))
+                for ip in range(ms.nparticles):
+                    ax.plot(   dy2[ip,:], dz2[ip,:], c=[0.5]*3, linewidth=0.1)
+                    #ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=[0.5]*3, linewidth=0.1)
+                ax.scatter(dy2[:,0],  dz2[:,0], c='k', s=0.3)
+                ax.scatter(dy2[:,-1], dz2[:,-1], c='r', s=0.3)
+                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.name, core_id))
+
+            if 0:
                 #fig,ax=plt.subplots(2,2,figsize=(8,8))
-                fig,ax=plt.subplots(1,1)
+                fig,ax=plt.subplots(1,1, figsize=(12,8))
                 #ax.set_aspect('equal')
-                endy,endz=ms.particle_y[:,-1].mean(), ms.particle_z[:,-1].mean()
-                dy2 = ms.particle_y -endy
-                dz2 = ms.particle_z -endz
+                centroid_y = ms.mean_yc
+                centroid_y.shape = (1,centroid_y.shape[0])
+                centroid_z = ms.mean_zc
+                centroid_z.shape = (1,centroid_z.shape[0])
+                cy = np.tile( ms.particle_y.mean(axis=0), (ms.nparticles,1))
+                cz = np.tile( ms.particle_z.mean(axis=0), (ms.nparticles,1))
+
+                dy2 = ms.particle_y -cy
+                dz2 = ms.particle_z -cz
+                dy2 = ms.particle_y
+                dz2 = ms.particle_z
 
                 SL = slice(None)
-                for ip in range(dx.shape[0])[SL]:
-                    ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=[0.5]*3, linewidth=0.1)
-
+                for ip in range(ms.nparticles):
+                    ax.plot(   dy2, dz2, c=[0.5]*3, linewidth=0.1)
                     continue
-                    dy3 = ms.particle_y[ip,:]-ms.mean_yc
-                    dz3 = ms.particle_z[ip,:]-ms.mean_zc
-                    ax[0][1].plot(   dy3, dz3, c=[0.5]*3, linewidth=0.1)
-                    ax[0][1].scatter(dy3[0], dz3[0], c='k', s=0.3)
                     #ax[0].plot(   dy2[ip,:], dz2[ip,:], c=[0.5]*3, linewidth=0.1)
                     #ax[0].scatter(dy2[ip,0], dz2[ip,0], c='k', s=0.3)
 
@@ -117,12 +112,13 @@ class lyapunov_tool():
                     ax[1][0].plot( the_x, the_y, c=[0.5]*3, linewidth=0.1)
                     ax[1][0].scatter( the_x[0], the_y[0], c=[[0.5]*3], s=0.3)
                     ax[1][0].scatter( the_x[-1], the_y[-1], c='g', s=0.3, marker='*')
-                ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c='k', s=0.3)
-                ax.scatter(ms.particle_y[:,-1], ms.particle_z[:,-1], c='r', s=0.3)
+                ax.scatter(dy2[:,0],  dz2[:,0],  c='k', s=0.3)
+                ax.scatter(dy2[:,-1], dz2[:,-1], c='r', s=0.3)
                 ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.name, core_id))
 
 
-                outname = 'plots_to_sort/%s_blowing_hair_c%04d.png'%(self.name,core_id)
+            if 1:
+                outname = 'plots_to_sort/%s_with_hair_c%04d.png'%(self.name,core_id)
                 fig.savefig(outname)
                 print(outname)
                 plt.close(fig)
@@ -164,10 +160,10 @@ class lyapunov_tool():
             #print('b2')
 
 
-import three_loopers_mountain_top as TLM
 sim_list=['u301','u302','u303']
 #sim_list=['u302','u303']
 if 'lylist' not in dir() or True:
+    import three_loopers_mountain_top as TLM
     lylist={}
     for this_simname in sim_list:
         lylist[this_simname]= lyapunov_tool( TLM.loops[this_simname])
@@ -175,9 +171,46 @@ if 'lylist' not in dir() or True:
 #    for this_simname in  sim_list:
 #        lylist[this_simname].run( )#core_list=[10,11])#core_list=[10])
 
-    lylist['u301'].run( core_list = [0,8,27,32,37,44,84,275])
-    lylist['u301'].run( core_list = [323])
-    lylist['u302'].run( core_list = [30,32])
-    lylist['u303'].run( core_list = [233,235])
+    #lylist['u301'].run( core_list = [0,8,27,32,37,44,84,275])
+    #lylist['u301'].run( core_list = [323])
+    #lylist['u301'].run( core_list = [24])
+    #lylist['u302'].run( core_list = [30,32])
+    #lylist['u303'].run( core_list = [233,235])
+    #lylist['u303'].run( core_list = [184])
+    lylist['u303'].run( core_list = [186])
+
+
+if 'set_looper' not in dir():
+    savefile='u301_long_pos_only.h5'
+    set_looper=looper.core_looper(directory= dl.sims['u301'],savefile_only_trackage=savefile)
+    thtr = set_looper.tr
+    set_looper.out_prefix='core_13etal'
+    thtr.sort_time()
+
+    bad = np.where(thtr.track_dict['density'] <= 0)
+    bad_pids = thtr.particle_ids[bad[0]]
+    for bad_id in bad_pids:
+        print(" strip bad particle ", bad_id)
+        n_bad_densities= (thtr.p([bad_id],'density')  <= 0).sum()
+        if n_bad_densities == 0:
+            print("No bad densities.")
+            raise
+        particle_index = np.where( thtr.particle_ids == bad_id)
+        for field in thtr.track_dict.keys():
+            arr = thtr.track_dict[field]
+            smaller = np.delete( arr, particle_index,axis=0)
+            thtr.track_dict[field]=smaller
+        thtr.particle_ids =  np.delete(thtr.particle_ids, particle_index)
+        thtr.core_ids =  np.delete(thtr.core_ids, particle_index)
+
+
+
+
+stillbad = np.where(thtr.track_dict['density'] <= 0)
+print("STILL BAD", stillbad)
+
+if 0:
+    long_tool = lyapunov_tool( set_looper)
+    long_tool.run( core_list=[24])#,24,184])
 
 
