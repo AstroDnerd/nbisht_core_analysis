@@ -42,7 +42,7 @@ class trial():
             fig,ax=plt.subplots(1,1)
         rmin, rmax = 1./2048, 0.4
         vmin, vmax = 0.1, 100
-        nx=ny=64
+        nx=67; ny=64
         self.rbins = np.logspace(np.log10(rmin), np.log10(vmax),nx+1)
         #self.vbins = np.linspace(vmin, vmax, ny+1)
         self.vbins = np.logspace(np.log10(vmin), np.log10(vmax), ny+1)
@@ -112,7 +112,7 @@ if 'do_all_plots' not in dir():
 import three_loopers_mountain_top as TLM
 import sf2
 frame=0
-if 0:
+if 'run1' not in dir():
     run1 = trial(TLM.loops['u301'])
     run1.by_frame(frame)
     run2 = trial(TLM.loops['u302']) 
@@ -136,11 +136,16 @@ def plot(self,frame, my_sf2=None,longorno=''):
     for r,v in zip(self.r,self.vr):
         #the index at r=.1
         #does not work.  Makes a bowtie.
-        i_r01 = np.argmin( np.abs( r-0.1))
-        sf_r01 = np.argmin( np.abs(my_sf2[0] -0.1))
-        scale = my_sf2[1][sf_r01]/v[i_r01] 
+        #i_r01 = np.argmin( np.abs( r-0.1))
+        #sf_r01 = np.argmin( np.abs(my_sf2[0] -0.1))
+        #scale = my_sf2[1][sf_r01]/v[i_r01] 
         #ax.plot(r,v*scale,c=[0.5,0.5,0.5,0.6],lw=0.1)
-        ax.plot(r,v,c=[0.5,0.5,0.5,0.6],lw=0.1)
+        ax.plot(r,v,c=[0.5,0.5,0.5,0.1],lw=0.1)
+    fig2,ax2=plt.subplots(1,1)
+    mean_of_sigma = (self.TheY*pdf).sum(axis=1)/pdf.sum(axis=1)
+    ax.plot(self.TheX[:,0], mean_of_sigma)
+    fig2.savefig('plots_to_sort/temp.png')
+
     for nc,rv in enumerate(zip(self.r,self.vr)):
         r,v=rv
         core_id = self.cores_used[nc]
