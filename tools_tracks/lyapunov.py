@@ -32,13 +32,16 @@ if 'set_looper' not in dir():
 
 if 1:
     thtr = set_looper.tr
+    name = 'u301_long'
     core_id = 24
 
 if 0:
     thtr = TLM.loops['u303'].tr 
+    name='u303'
     core_id = 186
 if 0:
     thtr = TLM.loops['u301'].tr 
+    name='u301'
     core_id = 24
 
 
@@ -97,7 +100,7 @@ if 1:
     #    color=rainbow_map(len(t))(nt)
     #    ax[1][0].hist( drdt[:,nt], histtype='step',color=color)
         
-    fig.savefig('plots_to_sort/shift_test.png')
+    fig.savefig('plots_to_sort/%s_lyapunov_test_c%04d.png'%(name,core_id))
     
 
 
