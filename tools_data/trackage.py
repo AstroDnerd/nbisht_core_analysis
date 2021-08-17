@@ -269,6 +269,7 @@ def shift_6(pos):
         out[Is:Ie]  += Sgn
     return out
 
+<<<<<<< HEAD
 def shift_4_minues(arr):
     #Loop over particles in the array and call shift_6
     #first version, kill later
@@ -276,6 +277,9 @@ def shift_4_minues(arr):
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
     return out  
+=======
+
+>>>>>>> 5cce1065cef353ca86d7b02e2067830317fbb7a3
 def shift_4(arr):
     #Loop over particles in the array and call shift_6
     #first shift based on each particles endpoints
@@ -499,5 +503,15 @@ class mini_scrubber():
         self.particle_x = self.trk.c([core_id],'particle_pos_x') + shift_x
         self.particle_y = self.trk.c([core_id],'particle_pos_y') + shift_y
         self.particle_z = self.trk.c([core_id],'particle_pos_z') + shift_z
+    def make_floats(self, core_id):
+        self.float_x = self.trk.c([core_id],'particle_pos_x')
+        self.float_y = self.trk.c([core_id],'particle_pos_y')
+        self.float_z = self.trk.c([core_id],'particle_pos_z')
+        shift_x = self.this_x - self.raw_x
+        shift_y = self.this_y - self.raw_y
+        shift_z = self.this_z - self.raw_z
+        self.float_x += shift_x
+        self.float_y += shift_y
+        self.float_z += shift_z
 
 

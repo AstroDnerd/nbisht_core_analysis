@@ -16,7 +16,7 @@ outname = 'u301_new_tracks_take_9b.h5'
 if 1:
     """this set of parameters extracts all primitive quantities"""
     target_frame = dl.target_frames[this_simname]
-    frame_list = list(range(0,target_frame,10))+[target_frame]
+    frame_list =list(range(0,target_frame,10))+[target_frame]
     fields = ['x','y','z','density','velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
@@ -50,6 +50,14 @@ if 0:
 
 if 1:
     new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
+    bad_particle_id = [ 724134,  635702,  661226,  743270,  751995,  718196, 1354060,
+                                1362500,  610123,  610189, 1930558, 1046537, 1841352, 1844125,
+                                1845574, 1849410, 1853445, 1300291]
+    bad_core_id = [ 24,  85,  85,  85,  85,  87, 180, 180, 253, 254, 265, 269, 269,
+                                269, 269, 269, 269, 277]
+    for bad_core, bad_part in zip(bad_core_id, bad_particle_id):
+        new_looper.bad_particles[bad_core]=np.append(
+                new_looper.bad_particles[bad_core], bad_part)
     new_looper.remove_bad_particles()
     new_looper.get_tracks()
 

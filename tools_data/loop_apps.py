@@ -55,8 +55,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                        grids=True, particles=True, annotate=False, 
                       fields=False, velocity=False, lic=False, 
                        code_length=True, 
-                      tracker_positions=True, shifted_tracker=True, monotonic=False):
-    global monotone
+                      tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False):
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
@@ -98,6 +97,12 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                     this_x=ds.arr(ms.raw_x[:,frame_ind],"code_length")
                     this_y=ds.arr(ms.raw_y[:,frame_ind],"code_length")
                     this_z=ds.arr(ms.raw_z[:,frame_ind],"code_length")
+                if float_positions:
+                    ms.make_floats(core_id)
+                    this_x = ds.arr( ms.float_x[:,frame_ind], 'code_length')
+                    this_y = ds.arr( ms.float_y[:,frame_ind], 'code_length')
+                    this_z = ds.arr( ms.float_z[:,frame_ind], 'code_length')
+
 
                 positions = np.column_stack([this_x,this_y,this_z])
                 position_dict[core_id] = positions
@@ -159,7 +164,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                                      inset_box_args={'visible':False},
                                      coord_system='data')
                 if particles:
-                    pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions)
+                    pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions, 
+                                                 p_size=marker_size)
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
         if fields:

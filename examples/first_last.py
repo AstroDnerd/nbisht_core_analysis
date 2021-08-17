@@ -42,14 +42,16 @@ def three_way_bean():
 
     return axScatter,axHistx, axHisty
 
-import three_loopers_1tff as tl
 
-if 0:
+output_name = '%s_first_last_t3_nXXX0.h5'%(this_simname)
+if 'this_looper' not in dir():
     #
     # make first_last object
     #
     core_list =  [0]
-    frame_list = [0, dl.target_frames[this_simname]]
+    target = dl.target_frames[this_simname]
+    frame_list = [0, target]
+    frame_list = list(range(0,target,10)) + [target]
 
     #frame_list = list(range(0, dl.target_frames[this_simname],10))+[dl.target_frames[this_simname]]
     fields = ['x','y','z','density','velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
@@ -59,7 +61,7 @@ if 0:
     output_base = "primitive_test"
     derived=[]
 
-    output_name = '%s_first_last_t2_nXXX0.h5'%(this_simname)
+
     this_looper = looper.core_looper(directory= dl.sims[this_simname],
                                      sim_name = this_simname,
                                      out_prefix = this_simname,
@@ -76,9 +78,10 @@ if 0:
     this_looper.save(output_name)
 
 if 1:
-    savefile = '%s_first_last_t2_nXXX0.h5'%(this_simname)
+    print("READ FROM DISK")
+
     new_loop = looper.core_looper(directory= dl.sims[this_simname])
-    new_loop.load_loop(savefile)
+    new_loop.load_loop(output_name)
 
     field = 'magnetic_field_strength'
     plotdir = "./plots_to_sort/"
@@ -113,10 +116,10 @@ if 1:
     ploot=ax.pcolormesh(TheX, TheY, pdf,cmap=cmap,norm=norm)#,alpha=0.2)
     ax.plot([1e-3,1e2],[1e-3,1e2],c='k')
 
-    track_array= tl.looper2.tr.track_dict[field]
-    xxx = track_array[:,0]
-    yyy = track_array[:,-1]
-    ax.scatter(xxx,yyy,s=0.1,c='r')
+    #track_array= tl.looper2.tr.track_dict[field]
+    #xxx = track_array[:,0]
+    #yyy = track_array[:,-1]
+    #ax.scatter(xxx,yyy,s=0.1,c='r')
 
 
 
