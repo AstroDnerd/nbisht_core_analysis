@@ -78,7 +78,7 @@ def mask_particles_sorted_t7(np.ndarray[np.int64_t, ndim=1] ids_to_get,
                    np.ndarray[np.int64_t, ndim=1] p_ids,
                    np.ndarray[np.int32_t, ndim=1] mask_to_get):
     #Assumes p_ids is sorted.
-    print('particles take 4')
+    #print('particles take 7')
     cdef int n1, n2, i1, i2
     n1 = ids_to_get.shape[0]
     n2 = p_ids.shape[0]

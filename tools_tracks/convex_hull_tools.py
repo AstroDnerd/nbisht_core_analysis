@@ -220,11 +220,13 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
         core_list = all_cores
     fig_many, ax = plt.subplots(1,1,figsize=(8,8))
     x_min, x_max, y_min, y_max = [1,0,1,0]
-    color_dict = make_core_cmap( core_list)
+    import colors
+    color_dict = colors.make_core_cmap( core_list)
     for ncore,core_id in enumerate(core_list):
         ms = trackage.mini_scrubber(thtr,core_id)
         if ms.r.shape[0] <= 4:
             continue
+        print('plot core %s %d'%(htool.this_looper.out_prefix,core_id))
         delta=0.1
 
         mask = slice(None)
@@ -254,7 +256,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
                 this_ax = ax
                 n_particles = len(this_p[0])
-                this_ax.scatter(this_p[x], this_p[y],s=2, c=color_dict[core_id]*n_particles)
+                this_ax.scatter(this_p[x], this_p[y],s=2, c=[color_dict[core_id]]*n_particles)
 
                 if do_hull:
                     points_2d = np.array(list(zip(this_p[x],this_p[y])))

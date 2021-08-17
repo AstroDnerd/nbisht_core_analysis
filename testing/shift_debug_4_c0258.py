@@ -74,4 +74,24 @@ if 'missing_loop' not in dir() :
     #                                 bad_particle_list=dl.bad_particles.get(this_simname,None))
     missing_loop.get_tracks()
     loop_tools.re_shift_snaps( missing_loop)
-loop_apps.core_proj_multiple( missing_loop, axis_list=[0], color_dict=color_dict)
+#loop_apps.core_proj_multiple( missing_loop, axis_list=[0], color_dict=color_dict)
+
+
+if 1:
+    fig,ax=plt.subplots(2,1)
+    ms = trackage.mini_scrubber( missing_loop.tr, 2580, do_velocity=False)
+    for ppp in missing_loop.tr.track_dict['y']:
+        ax[0].plot(ppp)
+    for ppp in ms.this_y:
+        ax[1].plot(ppp)
+    fig.savefig('plots_to_sort/shift.png')
+    
+if 1:
+
+    frame=60
+    frame_ind = np.where(missing_loop.tr.frames == frame)[0]
+    pos = np.column_stack( [ms.this_x[:,frame_ind], ms.this_y[:,frame_ind], ms.this_z[:,frame_ind]])
+import annotate_particles_3
+reload(annotate_particles_3)
+    
+loop_apps.core_proj_multiple( missing_loop, axis_list=[0], color_dict=color_dict, zoom=False, center_on_sphere=False, only_sphere=False)

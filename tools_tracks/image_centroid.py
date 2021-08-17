@@ -6,7 +6,8 @@ import data_locations as dl
 reload(dl)
 plt.close('all')
 
-import three_loopers_1tff as tl
+#import three_loopers_1tff as tl
+import three_loopers_mountain_top as TLM
 
 class image_track():
     def __init__(self,loop):
@@ -58,7 +59,12 @@ class image_track():
         plt.close(fig)
 
 centroids={}
-for loop in [tl.looper1, tl.looper2, tl.looper3]:
+#for loop in [tl.looper1, tl.looper2, tl.looper3]:
+#    name = loop.out_prefix
+#    centroids[name] = image_track(loop)
+#    centroids[name].run()
+for this_simname in TLM.loops:
+    loop = TLM.loops[this_simname]
     name = loop.out_prefix
     centroids[name] = image_track(loop)
     centroids[name].run()

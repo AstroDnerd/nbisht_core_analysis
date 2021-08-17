@@ -40,7 +40,7 @@ def make_page(product_list,core_list=None, htmlname="./output.html"):
 
     for nc,core_id in enumerate(core_list):
         fptr.write('<tr>')
-        fptr.write('<th> Core %d </th>'%core_id)
+        fptr.write('<th> %d </th>'%core_id)
         for p in product_list:
             fptr.write(p.render(core_id))
         fptr.write('</tr>\n')

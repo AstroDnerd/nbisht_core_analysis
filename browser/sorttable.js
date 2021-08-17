@@ -18,6 +18,7 @@
 */
 var sorttable = {
 	RE_NUMERIC: /^[+\-£$¤¥]{0,2}\s*(?:\d+(?:([ ',\.])(?:\d{3}([ ',\.]))*(\d*))?|([,\.])\d+)\s*[€₽%]?$/,
+	RE_NUMERIC_D: /^[+\-£$¤¥]{0,2}\s*(?:\d+(?:([ ',\.])(?:\d{3}([ ',\.]))*(\d*))?|([,\.])\d+)(?:e[+\-]\d+)*$/,
 	RE_DATE: /^(\d\d?)[\/\.\-](\d\d?)[\/\.\-](\d{4})$/,
 	CLASS_SORT: ['sorttable_sorted','sorttable_sorted_reverse'],
 	CLASS_ARROW: ['sorttable_sortfwdind','sorttable_sortrevind'],
@@ -101,7 +102,7 @@ var sorttable = {
 				text = sorttable.getInnerText(rows[i].cells[column]);
 				sortle.val.push([text,rows[i]]);
 				if (i < 100) {
-					if (guess&NUMERIC && (mtch = sorttable.RE_NUMERIC.exec(text))) {
+					if ( guess&NUMERIC && (mtch = sorttable.RE_NUMERIC_D.exec(text))) {
 						guess&=~DATE;
 						var decimal_point = null;
 						if (mtch[4]) {
@@ -334,8 +335,8 @@ var sorttable = {
 	   each sort function takes two parameters, a and b
 	   you are comparing a[0] and b[0] */
 	sort_numeric: function(a,b) {
-		var aa = parseFloat(a[0].replace(/[^\-\d.]/g,'')) || 0;
-		var bb = parseFloat(b[0].replace(/[^\-\d.]/g,'')) || 0;
+		var aa = parseFloat(a[0].replace(/[^\-\d.e]/g,'')) || 0;
+		var bb = parseFloat(b[0].replace(/[^\-\d.e]/g,'')) || 0;
 		return aa - bb;
 	},
 	sort_numeric_comma: function(a,b) {

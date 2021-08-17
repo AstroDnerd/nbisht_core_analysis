@@ -33,9 +33,6 @@ class dr_thing():
 
         tsorted = thtr.times
         self.core_list=core_list
-        fig, axd=plt.subplots(2,2)
-        axd1 = axd[0][0]; axd2=axd[0][1]#sorry
-        axd3 = axd[1][0]; axd4=axd[1][1]
 
         ds= self.this_looper.load(0)
         ad = ds.all_data()
@@ -47,6 +44,9 @@ class dr_thing():
             if ms.nparticles < 10:
                 continue
             self.cores_used.append(core_id)
+            fig, axd=plt.subplots(2,2)
+            axd1 = axd[0][0]; axd2=axd[0][1]#sorry
+            axd3 = axd[1][0]; axd4=axd[1][1]
 
             tmap=rainbow_map(ms.ntimes)
             asort =  np.argsort(thtr.times)
@@ -74,13 +74,16 @@ class dr_thing():
                              xlim=self.r_extents.minmax, ylim=self.rho_extents.minmax)
             davetools.axbonk(axd2,xscale='linear',yscale='log',xlabel='r',ylabel=r'$\rho$',
                              xlim=np.log10(self.rho_extents.minmax))
-        #outname = '%s/density_radius_c%04d'%(dl.output_directory,core_id)
-        outname = '%s/density_radius_n0000.png'%(dl.output_directory)
-        fig.savefig(outname)
-        print("saved "+outname)
-        plt.close(fig)
+            outname = '%s/density_radius_c%04d.png'%(dl.output_directory,core_id)
+            #outname = '%s/density_radius_n0000.png'%(dl.output_directory)
+            fig.savefig(outname)
+            print("saved "+outname)
+            plt.close(fig)
 
-import three_loopers_1tff as TL
-
-r1 = dr_thing(TL.looper1)
+#import three_loopers_1tff as TL
+#
+#r1 = dr_thing(TL.looper1)
+#r1.run()
+import three_loopers_mountain_top as TLM
+r1 = dr_thing(TLM.loops['u301'])
 r1.run()
