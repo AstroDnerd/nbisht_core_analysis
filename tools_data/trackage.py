@@ -269,11 +269,26 @@ def shift_6(pos):
         out[Is:Ie]  += Sgn
     return out
 
-def shift_4(arr):
+def shift_4_minues(arr):
     #Loop over particles in the array and call shift_6
+    #first version, kill later
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
+    return out  
+def shift_4(arr):
+    #Loop over particles in the array and call shift_6
+    #first shift based on each particles endpoints
+    out = np.zeros_like(arr)
+    for n,p in enumerate(arr):
+        out[n,:]=shift_6(arr[n,:])
+    #the shift entire tracks that are on the wrong side
+    centroid = out[:,-1].mean()
+    delta = out[:,-1]-centroid
+    if ( delta > 0.5).any():
+        more_shift = np.where( delta>0.5)[0]
+        shift = np.sign(delta[more_shift])
+        out[more_shift,:] -= shift
     return out  
 
 
@@ -301,6 +316,11 @@ class mini_scrubber():
         mask2 = mask[ rs]
         return mask2
     def scrub(self,core_id, axis=0, do_velocity=True):
+
+        if core_id not in self.trk.core_ids:
+            print("Core %d not found in looper"%core_id)
+            print("  (also please write a better error handler)")
+            raise
         self.raw_x = self.trk.c([core_id],'x')
         self.raw_y = self.trk.c([core_id],'y')
         self.raw_z = self.trk.c([core_id],'z')
@@ -472,4 +492,12 @@ class mini_scrubber():
         self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
         self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
         self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+    def particle_pos(self,core_id):
+        shift_x = self.this_x - self.raw_x
+        shift_y = self.this_y - self.raw_y
+        shift_z = self.this_z - self.raw_z
+        self.particle_x = self.trk.c([core_id],'particle_pos_x') + shift_x
+        self.particle_y = self.trk.c([core_id],'particle_pos_y') + shift_y
+        self.particle_z = self.trk.c([core_id],'particle_pos_z') + shift_z
+
 
