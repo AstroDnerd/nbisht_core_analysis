@@ -105,7 +105,7 @@ if 1:
         #Make a 2d histogram.
         #There are probably better ways to do this.
         angle_bins_edge = np.linspace(0,180,32)
-        angle_bins_edge = np.linspace(0,180,32)
+        #angle_bins_edge = np.linspace(0,180,32)
         xbins = these_times
         ybins = 0.5*(angle_bins_edge[1:]+angle_bins_edge[:-1])
         nx = len(xbins) ; ny=len(ybins)
