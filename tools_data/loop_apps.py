@@ -46,6 +46,7 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
 
 import annotate_particles_3
 reload(annotate_particles_3)
+<<<<<<< HEAD
 def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},
                        force_log=None,linthresh=100,
                        core_list=None,frame_list=None, clobber=True,
@@ -54,12 +55,107 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                        moving_center=False, only_sphere=True, center_on_sphere=True, slab=None, zoom=True, 
                        marker_size = 1,
                       tracker_positions=True, shifted_tracker=True, float_positions=False):
+=======
+class MonotoneEnforcer():
+    def __init__(self):
+        self.prev=[]
+        self.sign=None
+    def __call__(self,val,verbose=False):
+        if len(self.prev) < 2:
+            new_val = val
+        else:
+            delta_i = val - self.prev[-1]
+            delta_im1 = self.prev[-1]-self.prev[-2]
+            if self.sign is None:
+                if (delta_im1 ==0).all():
+                    if verbose:
+                        print("I'm not sure what to do if delta_im1==0.  Check that the colorbar is right.")
+                    delta_im1 = delta_i +0
+                self.sign = np.sign(delta_im1)
+            direction = np.sign( delta_i * self.sign)
+            print(self.sign)
+            new_val = copy.copy(val)
+            new_val[ direction <= 0] = self.prev[-1][direction<=0]
+            if verbose:
+                print( "MONO pre ", self.prev[-1])
+                print( "MONO val ", val)
+                print( "MONO val ", new_val)
+                print( "MONO pre ", self.prev)
+                print( "MONO dir ", direction)
+                print( "MONO delm", delta_im1)
+                print( "MONO deli", delta_i)
+        self.prev.append(new_val)
+        return new_val
+class MonotoneEnforcer2():
+    def __init__(self):
+        self.values=[]
+        self.extrema=[]
+        self.sign=None
+    def __call__(self,val,verbose=False):
+        if len(self.values) < 2:
+            new_val = val
+        else:
+            delta_i = val - self.values[-1]
+            delta_im1 = self.values[-1]-self.values[-2]
+            if self.sign is None:
+                if (delta_im1 ==0).all():
+                    if verbose:
+                        print("I'm not sure what to do if delta_im1==0.  Check that the colorbar is right.")
+                    delta_im1 = delta_i +0
+                self.sign = np.sign(delta_im1)
+            if len(self.values) > 3:
+                arr = np.column_stack(self.values[-4:])
+                this_sign = np.zeros(len(val))
+                for nv in np.arange( len(val)):
+                    pfit = np.polyfit( np.arange(4), arr[nv,:],1)
+                    this_sign=np.sign(pfit[0])
+                self.sign=this_sign
+                if verbose:
+                    print(self.sign)
+                
+
+
+
+            direction = np.sign( delta_i * self.sign)
+            new_val = copy.copy(val)
+            new_val[ direction <= 0] = self.extrema[-1][direction<=0]
+            #if verbose:
+            #    print( "MONO pre ", self.prev[-1])
+            #    print( "MONO val ", val)
+            #    print( "MONO val ", new_val)
+            #    print( "MONO pre ", self.prev)
+            #    print( "MONO dir ", direction)
+            #    print( "MONO delm", delta_im1)
+            #    print( "MONO deli", delta_i)
+        self.extrema.append(new_val)
+        self.values.append(val)
+        return new_val
+
+
+
+
+def annoying_limiter(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
+                    core_list=None,frame_list=None, clobber=True,
+                       only_sphere=True, center_on_sphere=True,
+                       zoom=True, moving_center=False, slab=None,
+                       grids=True, particles=True, annotate=False, 
+                      fields=False, velocity=False, lic=False, 
+                       code_length=True, 
+                      tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
+                      marker_size=1):
+>>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
         frame_list = looper.frame_list
     all_png = glob.glob("*png")
     tr = looper.tr
+    if monotonic is True:
+        monotonic  ={'zlim':MonotoneEnforcer2(), 'left':MonotoneEnforcer2(),'right':MonotoneEnforcer2()}
+        #monotonic  ={'zlim':MonotoneEnforcer(), 'left':MonotoneEnforcer(),'right':MonotoneEnforcer()}
+    mini_scrubbers = {}
+    for core_id in core_list:
+        mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
     for frame in frame_list:
         ds = looper.load(frame)
 
@@ -75,12 +171,23 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             print("File exists, skipping")
             return
         #get extents and bounding region
+<<<<<<< HEAD
         left =  np.array([1,1,1])
         right = np.array([0,0,0])
+=======
+        #it's backwards because we're looking for extrema
+        left =  ds.domain_right_edge.v
+        right = ds.domain_left_edge.v
+
+        #
+        # Find the extents of all cores.
+        # Fill position array.
+        #
+>>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
         position_dict={}
         for core_id in core_list:
+            ms = mini_scrubbers[core_id]
             if tracker_positions:
-                ms = trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
                 frame_ind = np.where(looper.tr.frames == frame)[0]
                 if shifted_tracker:
                     this_x=ds.arr(ms.this_x[:,frame_ind],"code_length")
@@ -96,6 +203,122 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                     this_y = ds.arr( ms.float_y[:,frame_ind], 'code_length')
                     this_z = ds.arr( ms.float_z[:,frame_ind], 'code_length')
 
+                positions = np.column_stack([this_x,this_y,this_z])
+                position_dict[core_id] = positions
+            else:
+                snapshot = looper.snaps[frame][core_id]
+                if snapshot.R_centroid is None:
+                    snapshot.get_all_properties()
+                positions = snapshot.pos
+                position_dict[core_id]=positions
+            this_left =  positions.min(axis=0)
+            this_right = positions.max(axis=0)
+            left = np.row_stack([this_left,left]).min(axis=0)
+            right = np.row_stack([this_right,right]).max(axis=0)
+
+        center = 0.5*(left+right)
+        left = np.row_stack([left,center - 1/128]).min(axis=0)
+        right = np.row_stack([right,center + 1/128]).max(axis=0)
+        left = ds.arr(left,'code_length')
+        right = ds.arr(right,'code_length')
+        center = 0.5*(left+right)
+        center = ds.arr(center,'code_length')
+
+
+        if not center_on_sphere:
+            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
+
+        if monotonic:
+            left = monotonic['left'](left, verbose=True)
+            right  = monotonic['right'](right)
+            center = 0.5*(left+right)
+
+            #jleft = np.row_stack([this_left,left]).min(axis=0)
+            #jright = np.row_stack([this_right,right]).max(axis=0)
+    fig,ax=plt.subplots(1,1, figsize=(12,12))
+    for core_id in core_list:
+        for ny in np.arange(mini_scrubbers[core_id].nparticles):
+            ax.plot(mini_scrubbers[core_id].float_y[ny,:],linewidth=0.1)
+        RRR=np.column_stack(monotonic['right'].values)
+        LLL=np.column_stack(monotonic['left'].values)
+        ax.plot( RRR[1,:],c='r')
+        ax.plot( LLL[1,:],c='k')
+
+    fig.savefig('plots_to_sort/Y.png')
+    return monotonic, RRR
+
+
+        #
+        # main plot loop
+
+
+
+def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
+                    core_list=None,frame_list=None, clobber=True,
+                       only_sphere=True, center_on_sphere=True,
+                       zoom=True, moving_center=False, slab=None,
+                       grids=True, particles=True, annotate=False, 
+                      fields=False, velocity=False, lic=False, 
+                       code_length=True, 
+                      tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
+                      marker_size=1):
+    if core_list is None:
+        core_list = looper.core_list
+    if frame_list is None:
+        frame_list = looper.frame_list
+    all_png = glob.glob("*png")
+    tr = looper.tr
+    if monotonic is True:
+        monotonic  ={'zlim':MonotoneEnforcer2(), 'left':MonotoneEnforcer2(),'right':MonotoneEnforcer2()}
+        #monotonic  ={'zlim':MonotoneEnforcer(), 'left':MonotoneEnforcer(),'right':MonotoneEnforcer()}
+    mini_scrubbers = {}
+    fig,ax=plt.subplots(1,1)
+    for core_id in core_list:
+        mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
+        for ny in np.arange(mini_scrubbers[core_id].nparticles):
+            ax.plot(mini_scrubbers[core_id].this_y[ny,:])
+    fig.savefig('plots_to_sort/Y.png')
+    for frame in frame_list:
+        ds = looper.load(frame)
+
+        # Check to see if the image was made already,
+        # and skips it if it has.
+        outname = "%s/%s_n%04d_multi"%(looper.plot_directory,looper.out_prefix, frame)
+        got_one = False
+        for i in all_png:
+            if i.startswith(outname):
+                print(i)
+                got_one=True
+        if got_one and not clobber:
+            print("File exists, skipping")
+            return
+        #get extents and bounding region
+        #it's backwards because we're looking for extrema
+        left =  ds.domain_right_edge.v
+        right = ds.domain_left_edge.v
+
+        #
+        # Find the extents of all cores.
+        # Fill position array.
+        #
+        position_dict={}
+        for core_id in core_list:
+            ms = mini_scrubbers[core_id]
+            if tracker_positions:
+                frame_ind = np.where(looper.tr.frames == frame)[0]
+                if shifted_tracker:
+                    this_x=ds.arr(ms.this_x[:,frame_ind],"code_length")
+                    this_y=ds.arr(ms.this_y[:,frame_ind],"code_length")
+                    this_z=ds.arr(ms.this_z[:,frame_ind],"code_length")
+                else:
+                    this_x=ds.arr(ms.raw_x[:,frame_ind],"code_length")
+                    this_y=ds.arr(ms.raw_y[:,frame_ind],"code_length")
+                    this_z=ds.arr(ms.raw_z[:,frame_ind],"code_length")
+                if float_positions:
+                    ms.make_floats(core_id)
+                    this_x = ds.arr( ms.float_x[:,frame_ind], 'code_length')
+                    this_y = ds.arr( ms.float_y[:,frame_ind], 'code_length')
+                    this_z = ds.arr( ms.float_z[:,frame_ind], 'code_length')
 
                 positions = np.column_stack([this_x,this_y,this_z])
                 position_dict[core_id] = positions
@@ -108,38 +331,71 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
             right = np.row_stack([this_right,right]).max(axis=0)
+
         center = 0.5*(left+right)
-        left = np.row_stack([this_left,center - 1/128]).min(axis=0)
-        right = np.row_stack([this_right,center + 1/128]).max(axis=0)
+        left = np.row_stack([left,center - 1/128]).min(axis=0)
+        right = np.row_stack([right,center + 1/128]).max(axis=0)
         left = ds.arr(left,'code_length')
         right = ds.arr(right,'code_length')
+        center = 0.5*(left+right)
         center = ds.arr(center,'code_length')
 
         if not center_on_sphere:
             center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
 
+<<<<<<< HEAD
+=======
+        if monotonic:
+            left = monotonic['left'](left)
+            right  = monotonic['right'](right)
+            center = 0.5*(left+right)
+
+            #jleft = np.row_stack([this_left,left]).min(axis=0)
+            #jright = np.row_stack([this_right,right]).max(axis=0)
+
+
+        #
+        # main plot loop
+        #
+>>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
         for ax in axis_list:
             Rmax = np.sqrt( ( (right-left)**2).sum(axis=0)).max()
-            scale_min = ds.arr(0.05,'code_length')
             scale = Rmax.v #2*max([Rmax, scale_min]).v
+            print("SCALE", scale)
             scale = min([scale,1])
             if only_sphere:
                 sph = ds.region(center,left,right)
+                #sph = ds.sphere(center,Rmax)
                 proj = ds.proj(field,ax,center=center, data_source = sph) 
             else:
                 proj = ds.proj(field,ax,center=center)
             looper.proj=proj
-            if moving_center:
-                #not quite working.
-                pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
-                pw.set_center([center[0],center[1]])
-            else:
-                pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+            #if moving_center:
+            #    #not quite working.
+            #    pw = proj.to_pw(center=[0.5]*3, origin = 'native')#center = center,width=(1.0,'code_length'))
+            #    pw.set_center([center[0],center[1]])
+            #else:
+            #    pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
+            pw = proj.to_pw(center = center, origin='domain')
             
             if zoom:
+<<<<<<< HEAD
                 pw.zoom(1./(2*scale))
 
             pw.set_cmap(field,'gray')
+=======
+                pw.zoom(1./(scale))
+            if monotonic:
+                array = proj[field]
+                used_min = proj[field][ proj['weight_field']>0].min()
+                zmin,zmax = used_min, proj[field].max()
+                zlim = nar([zmin,zmax])
+                zlim = monotonic['zlim'](zlim, verbose=True)
+                pw.set_zlim(field,zlim[0],zlim[1])
+                print("ZZZZ %0.2e %0.2e MMM %0.2e %0.2e"%(zmin,zmax,zlim[0],zlim[1]))
+
+            pw.set_cmap(field,'Greys')
+>>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
@@ -148,7 +404,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 if annotate:
                     #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
                     centroid=positions.mean(axis=0).v
-                    print("CENTROID",centroid)
                     pw.annotate_text(centroid,
                                      "%d"%core_id,text_args={'color':color}, 
                                      inset_box_args={'visible':False},
@@ -156,6 +411,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 if particles:
                     pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions, 
                                                  p_size=marker_size)
+        pw.save('plots_to_sort/P3')
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
         if fields:
