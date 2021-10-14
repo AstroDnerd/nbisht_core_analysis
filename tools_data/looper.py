@@ -274,11 +274,21 @@ class core_looper():
         for particle_id, core_id in zip(missing_particles,missing_cores):
             self.bad_particles[core_id].append( particle_id)
 
+        bad_index = loop_tools.check_particles(self.ds_list[frame])
+        for particle_id in bad_index:
+            loc = np.where( all_target_particles == particle_id)[0]
+            if len(loc) == 1:
+                core_id = core_id_by_particle[loc[0]]
+                self.bad_particles[core_id].append(particle_id)
+
+
 
     def remove_bad_particles(self):
 
         for core_id in self.bad_particles:
             these_bad_particles = self.bad_particles[core_id]
+            if core_id not in self.target_indices:
+                continue
             keepers = np.ones( self.target_indices[core_id].size, dtype='bool')
             for particle in self.bad_particles[core_id]:
                 found_it =  np.where( self.target_indices[core_id] == particle)
@@ -592,6 +602,7 @@ class snapshot():
         if  (self.field_values['cell_volume'] < 0).any():
             NM= (self.field_values['cell_volume'] < 0).sum()
             print("ERROR: some particles (%d of them) not found.  This is problematic."%NM)
+            pdb.set_trace()
         if verbose:
             print("   work3")
 
