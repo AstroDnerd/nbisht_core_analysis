@@ -17,6 +17,20 @@ from yt.data_objects.level_sets.clump_handling import \
             find_clumps, \
             get_lowest_clumps
 
+def check_particles(ds):
+    bad_index=[]
+    for grid in ds.index.grids:
+        pos = grid['particle_position']
+        for i in [0,1,2]:
+            check=pos[:,i] > grid.RightEdge[i]
+
+            check=np.logical_or(check,pos[:,i] < grid.LeftEdge[i])
+            if check.any():
+                locations=np.where(check)
+                particles= grid['particle_index'][check].v
+                bad_index+= list(particles)
+    return bad_index
+#g=check_particles(this_looper.ds_list[120])
 def get_leaf_clumps(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
                      subset=None, peak_radius=1.5,bad_particle_list=None, small_test=False, master_region=None):
     """get all the leaf indices for peaks in *ds*.
