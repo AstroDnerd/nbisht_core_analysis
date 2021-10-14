@@ -130,24 +130,30 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        if hasattr(snapshot,'ind'):
-            #This is the thing that should be done.
-            particle_ids = copy.copy(snapshot.ind)
-        else:
-            #THis is a stop-gap for some old datasets that were written wrong.
-            #It is actually incorrect and can possibly lead to errors, espectially when
-            #using the new shift tool.
-            particle_ids = copy.copy(snapshot.target_indices)
-        if snapshot.core_id not in self.core_ids:
-            #this might not be the best place for the parent step.
-            core_ids = np.ones_like(particle_ids) * snapshot.core_id
-            if hasattr(core_ids,'v'):
-                core_ids = core_ids.v #need it to not have units.
-            self.core_ids = np.append(self.core_ids, core_ids)
-            self.particle_ids = np.append(self.particle_ids, particle_ids)
+        particle_ids = copy.copy(snapshot.ind)
 
-        particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
-        particle_end=particle_start+particle_ids.size
+        if hasattr(snapshot, 'core_id'):
+            """old style looper"""
+            if snapshot.core_id not in self.core_ids:
+                #this might not be the best place for the parent step.
+                core_ids = np.ones_like(particle_ids) * snapshot.core_id
+                if hasattr(core_ids,'v'):
+                    core_ids = core_ids.v #need it to not have units.
+                self.core_ids = np.append(self.core_ids, core_ids)
+                self.particle_ids = np.append(self.particle_ids, particle_ids)
+
+            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            particle_end=particle_start+particle_ids.size
+        else:
+            """looper2"""
+
+            if len(self.particle_ids) == 0:
+                self.particle_ids = particle_ids
+                self.core_ids = snapshot.core_ids
+            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            particle_end=particle_start+particle_ids.size
+
+
 
         #check that the particles we're inserting
         #are in the same order as the previous ones
