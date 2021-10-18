@@ -46,18 +46,23 @@ if 'loop_dict' not in dir():
             print("LOAD", this_simname)
             loop_dict[this_simname] = looper.core_looper(directory= directory,savefile=save_field)
             core_list[this_simname] =looper.get_all_nonzero(dl.n_particles[this_simname])
-    else:
+    elif 0:
         import three_loopers_mountain_top as TLM
         reload(TLM)
         loop_dict = TLM.loops
+    else:
+        import three_loopers_tenfour as TL4
+        loop_dict = TL4.loops
 
 
 
 
 vrms = {'u201':5.2, 'u202':5.1, 'u203':5.4}
 vrms.update( {'u301':5.2, 'u302':5.1, 'u303':5.4} )
+vrms.update( {'u401':5.2, 'u402':5.1, 'u403':5.4} )
 vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 sims_to_use = ['u301', 'u302','u303']
+sims_to_use = ['u401', 'u402','u403']
 #sims_to_use = ['u05','u10','u11']
 #sims_to_use = ['u201', 'u202','u203']
 for this_simname in sims_to_use:
@@ -67,9 +72,9 @@ for this_simname in sims_to_use:
     this_looper = loop_dict[this_simname]
 
 
-    #FIELD = 'density'
+    FIELD = 'density'
     #FIELD = 'velocity_magnitude'
-    FIELD = 'magnetic_field_strength'
+    #FIELD = 'magnetic_field_strength'
     #FIELD = 'PotentialField'
 
     #core_list = [10,32,84]
