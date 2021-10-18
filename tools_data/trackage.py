@@ -289,6 +289,7 @@ def shift_4(arr):
     if ( delta > 0.5).any():
         more_shift = np.where( delta>0.5)[0]
         shift = np.sign(delta[more_shift])
+        shift.shape = shift.size,1
         out[more_shift,:] -= shift
     return out  
 
@@ -464,6 +465,29 @@ class mini_scrubber():
         self.rc_vmag = self.rx_hat*self.cen_vx+\
                        self.ry_hat*self.cen_vy+\
                        self.rz_hat*self.cen_vz
+    def get_central_velocity2(self,core_id,nt):
+
+        #relative to the density weighted center.
+        this_r = self.rc[:,nt]
+        vx = self.trk.c([core_id],'velocity_x')[:,nt]
+        vy = self.trk.c([core_id],'velocity_y')[:,nt]
+        vz = self.trk.c([core_id],'velocity_z')[:,nt]
+
+        asort = np.argsort(this_r)
+        ind_min = asort[0]
+
+        vxc = vx[ind_min]
+        vyc = vy[ind_min]
+        vzc = vz[ind_min]
+
+        self.d_cen_vx = self.raw_vx-vxc
+        self.d_cen_vy = self.raw_vy-vyc
+        self.d_cen_vz = self.raw_vz-vzc
+        self.d_cen_vmag = (self.d_cen_vx**2+self.d_cen_vy**2+self.d_cen_vz**2)**(0.5)
+
+        self.rcd_vmag = self.rx_hat*self.d_cen_vx+\
+                       self.ry_hat*self.d_cen_vy+\
+                       self.rz_hat*self.d_cen_vz
     def Moment(self):
         self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
         self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
