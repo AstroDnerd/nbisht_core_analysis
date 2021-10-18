@@ -47,17 +47,17 @@ if 1:
         del new_looper.target_indices[core_id]
     new_looper.core_list = new_looper.core_list[ keep ]
 
-if 1:
+if 0:
     #verify and remove bad particles.
     #Don't need to do this every time, it takes a minute.
     #need to have the bad_particles file 
     for frame in new_looper.frame_list:
         print('check particles, frame',frame)
         new_looper.verify_all_particles(frame)
-    new_looper.save_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
+    new_looper.save_bad_particles('datasets_small/%s_bad_particles_full.h5'%other_simname)
 
 if 1:
-    new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
+    new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%other_simname)
     new_looper.remove_bad_particles()
     new_looper.get_tracks()
 
