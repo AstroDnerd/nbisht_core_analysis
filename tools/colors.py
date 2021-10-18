@@ -3,6 +3,7 @@ from starter2 import *
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
 color.update({'u301':'r','u302':'g','u303':'b'})
+color.update({'u401':'r','u402':'g','u403':'b'})
 
 #temporary definition, should be redudnant to davetools.
 class rainbow_map():
@@ -17,12 +18,18 @@ class rainbow_map():
             this_value = [this_value]*n_fields
         return this_value
 
-def make_core_cmap(core_list):
-    np.random.seed(2653417)
+def make_core_cmap(core_list, cmap='Spectral',seed=2653417):
     ncolors = max([ len(core_list), 400])
-    mymap = rainbow_map( ncolors, cmap = 'Spectral')
+    if seed > 0:
+        np.random.seed(seed)
+        rands = np.random.random( len(core_list) ) * ncolors
+        rands = np.round(rands)
+    else:
+        rands = np.linspace(0,ncolors, len(core_list)).astype('float')
+        print(rands)
+
+    mymap = rainbow_map( ncolors, cmap = cmap)
     #mymap = rainbow_map( ncolors, cmap = 'tab20')
-    rands = np.random.random( len(core_list) ) * ncolors
     color = [mymap(R) for R in rands]
     dic = dict( zip( core_list,color))
     return dic
