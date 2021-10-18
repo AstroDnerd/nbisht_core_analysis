@@ -34,11 +34,23 @@ def in_hull(p, hull):
 class hull_tool():
     def __init__(self,this_looper):
         self.this_looper=this_looper
+        self.name = this_looper.sim_name
         self.cell_volumes=[]
+        self.unique_volumes=[]
         self.hull_volumes=[]
         self.hulls={}
         self.points_3d={}
         self.cores_used=[]
+    def make_overlaps(self):
+        self.overlaps=defaultdict(list)
+        #self.make_hulls(frames=[frame])
+        for core_1 in self.cores_used:
+            print("overlap li,", self.name, core_1)
+            for core_2 in self.cores_used:
+                result = self.check_hull_overlap(core_1,core_2)
+                if core_1 == core_2:
+                    result = -result
+                self.overlaps[core_1].append(result)
     def check_hull_overlap(self,core_1, core_2, do_plots=False):
         hull_1 =  self.hulls[core_1]
         hull_2 =  self.hulls[core_2]
@@ -89,10 +101,10 @@ class hull_tool():
         if core_list == "short":
             core_list = all_cores[:10]
         for core_id in core_list:
-            ms = trackage.mini_scrubber(thtr,core_id)
+            ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             if ms.r.shape[0] <= 10:
                 continue
-            print("hull on ", core_id)
+            print("hull on %s n%04d c%04d"%(self.this_looper.sim_name, frames[0], core_id))
             self.cores_used.append(core_id)
             asort =  np.argsort(thtr.times)
             delta=0.1
@@ -100,6 +112,7 @@ class hull_tool():
             mask = slice(None)
             for it,frame in enumerate(frames):#asort):
                 nt= np.where( nar(thtr.frames) == frame)[0][0]
+                mask2 = ms.compute_unique_mask(core_id, dx=1./2048,frame=nt)
 
                 this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
                 this_p = [this_x,this_y,this_z]
@@ -116,6 +129,8 @@ class hull_tool():
                     self.hull_volumes.append(0)
                 self.cell_volumes.append( thtr.c([core_id],'cell_volume')[mask,nt].sum())
 
+                self.unique_volumes.append( thtr.c([core_id],'cell_volume')[mask2,nt].sum())
+
                 if do_3d_plots:
                     plt.clf()
                     plt.scatter( this_x, this_y)
@@ -126,7 +141,23 @@ class hull_tool():
                     plt.savefig(outname)
                     print(outname)
 
-def plot_2d_full(htool,core_list=None,accumulate=False,frames=[0], all_plots=False):
+class rainbow_trout():
+    def __init__(self,n=None, vmin=None,vmax=None, cmap='jet'):
+        norm = mpl.colors.Normalize()
+        if vmin is not None and vmax is not None:
+            norm.autoscale([vmin,vmax])
+        else:
+            norm.autoscale(np.arange(n))
+        #cmap = mpl.cm.jet
+        self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap=cmap)
+    def __call__(self,val,n_fields=0):
+        this_value = self.color_map.to_rgba(val)
+        if n_fields > 0:
+            this_value = [this_value]*n_fields
+        return this_value
+
+def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
+            color_dict=None,axis_to_plot=[0]):
 
     thtr = htool.this_looper.tr
     all_cores = np.unique(thtr.core_ids)
@@ -135,111 +166,73 @@ def plot_2d_full(htool,core_list=None,accumulate=False,frames=[0], all_plots=Fal
         frames = thtr.frames
     if core_list is None:
         core_list = all_cores
-    fig_many, ax_many = plt.subplots(2,2,figsize=(8,8))
-    ax_all = [ax_many[0][0], ax_many[0][1], ax_many[1][0]]
-    ax4 = ax_many[1][1]
+
+    if -1 in axis_to_plot:
+        fig_many, ax = plt.subplots(2,2,figsize=(8,8))
+        ax=ax.flatten()
+    else:
+        fig_many, ax = plt.subplots(1,1,figsize=(8,8))
+    x_min, x_max, y_min, y_max = [1,0,1,0]
+    import colors
+    if color_dict is  None:
+        color_dict = colors.make_core_cmap( core_list)
+
+    ms_dict={}
     for ncore,core_id in enumerate(core_list):
         ms = trackage.mini_scrubber(thtr,core_id)
-        if ms.r.shape[0] <= 4:
-            continue
-        delta=0.1
+        ms.particle_pos(core_id)
+        ms_dict[core_id]=ms
 
-        mask = slice(None)
-        for it,frame in enumerate(frames):#asort):
-            nt= np.where( nar(thtr.frames) == frame)[0][0]
+    vx1 = thtr.c(core_list[:1], 'velocity_x')[:,0]
+    vy1 = thtr.c(core_list[:1], 'velocity_y')[:,0]
+    vz1 = thtr.c(core_list[:1], 'velocity_z')[:,0]
+    vx2 = thtr.c(core_list[1:], 'velocity_x')[:,0]
+    vy2 = thtr.c(core_list[1:], 'velocity_y')[:,0]
+    vz2 = thtr.c(core_list[1:], 'velocity_z')[:,0]
+    VM1 = np.sqrt(vx1**2+vy1**2+vz1**2)
+    VM2 = np.sqrt(vx2**2+vy2**2+vz2**2)
+    vx1bar=np.mean(vx1)
+    vy1bar=np.mean(vy1)
+    vz1bar=np.mean(vz1)
+    vmbar = np.sqrt(vx1bar**2+vy1bar**2+vz1bar**2)
+    cosine1 =(vx1*vx1bar+vy1*vy1bar+vz1*vz1bar)/(VM1*vmbar)
+    cosine2 =(vx2*vx1bar+vy2*vy1bar+vz2*vz1bar)/(VM2*vmbar)
+    colors=[cosine1,cosine2]
+    rtmap = rainbow_trout(vmin=-1,vmax=1)
+    for it,frame in enumerate(frames):#asort):
+        nt= np.where( nar(thtr.frames) == frame)[0][0]
+        if -1 in axis_to_plot:
+            for aaa in ax:
+                aaa.clear()
+        else:
+                ax.clear()
+        for ncore,core_id in enumerate(core_list):
+            ms = ms_dict[core_id]
+            if ms.r.shape[0] <= 4:
+                continue
+            print('plot core %s %d'%(htool.this_looper.out_prefix,core_id))
+            delta=0.1
+
+            mask = slice(None)
 
             if not accumulate:
-                for ax in ax_all:
+                if -1 in axis_to_plot:
+                    for aaa in ax:
+                        aaa.clear()
+                        aaa.set_aspect('equal')
+                        aaa.plot([0,1,1,0,0],[0,0,1,1,0])
+                else:
                     ax.clear()
                     ax.set_aspect('equal')
                     ax.plot([0,1,1,0,0],[0,0,1,1,0])
-                ax4.clear()
-            this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
+            #this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
+            this_x,this_y,this_z=ms.particle_x[mask,nt],ms.particle_y[mask,nt], ms.particle_z[mask,nt]
+
+            all_x,all_y,all_z=ms.particle_x,ms.particle_y, ms.particle_z
+            all_p = [all_x,all_y,all_z]
 
             do_hull = True
-            if np.unique(this_x).size < 4  or\
-               np.unique(this_y).size < 4  or\
-               np.unique(this_z).size < 4 :
-                print("Not enough degrees of freedom")
-                ax4.text(0,0,"Not enought DOF")
-                do_hull = False
 
-            this_p = [this_x,this_y,this_z]
-
-
-            for LOS in [0,1,2]:
-                print("WARNING these LOS are wrong")
-                x = [0,2,0][LOS]
-                y = [1,1,2][LOS]
-                xlab='xyz'[x]
-                ylab='yzx'[y]
-
-
-
-                ax_all[LOS].scatter(this_p[x], this_p[y],s=0.1)
-
-                if do_hull:
-                    points_2d = np.array(list(zip(this_p[x],this_p[y])))
-                    hull_2d = ConvexHull(points_2d)
-                    vert_x = points_2d[hull_2d.vertices,0]
-                    vert_y = points_2d[hull_2d.vertices,1]
-                    vert_x = np.concatenate([vert_x,vert_x[0:1]])
-                    vert_y = np.concatenate([vert_y,vert_y[0:1]])
-                    ax_all[LOS].plot(vert_x, vert_y, 'k')
-
-                x_min = min([this_p[x].min(), -delta])
-                x_max = max([this_p[x].max(), 1+delta])
-                y_min = min([this_p[y].min(), -delta])
-                y_max = max([this_p[y].max(), 1+delta])
-
-
-                axbonk(ax_all[LOS],xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
-                #ax_many.set_title(title)
-            cumltext=""
-            if accumulate:
-                cumltext="%04d"%ncore
-            if all_plots:
-                raise
-                outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
-                fig_many.savefig(outname)
-                print("Wrote "+outname)
-    if accumulate:
-        outname = '%s/%s_hull_3d_t_cXXXX_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,frame)
-        fig_many.savefig(outname)
-        print("Wrote "+outname)
-
-
-def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[]):
-
-    thtr = htool.this_looper.tr
-    all_cores = np.unique(thtr.core_ids)
-    rm = rainbow_map(len(all_cores))
-    if frames is None:
-        frames = thtr.frames
-    if core_list is None:
-        core_list = all_cores
-    fig_many, ax = plt.subplots(1,1,figsize=(8,8))
-    x_min, x_max, y_min, y_max = [1,0,1,0]
-    import colors
-    color_dict = colors.make_core_cmap( core_list)
-    for ncore,core_id in enumerate(core_list):
-        ms = trackage.mini_scrubber(thtr,core_id)
-        if ms.r.shape[0] <= 4:
-            continue
-        print('plot core %s %d'%(htool.this_looper.out_prefix,core_id))
-        delta=0.1
-
-        mask = slice(None)
-        for it,frame in enumerate(frames):#asort):
-            nt= np.where( nar(thtr.frames) == frame)[0][0]
-
-            if not accumulate:
-                ax.clear()
-                ax.set_aspect('equal')
-                ax.plot([0,1,1,0,0],[0,0,1,1,0])
-            this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
-
-            do_hull = True
             if np.unique(this_x).size < 4  or\
                np.unique(this_y).size < 4  or\
                np.unique(this_z).size < 4 :
@@ -249,14 +242,31 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
             this_p = [this_x,this_y,this_z]
 
 
-            for LOS in [0]:#,1,2]:
+            if -1 in axis_to_plot:
+                axis_to_actually_plot = [0,1,2]
+            else:
+                axis_to_actually_plot=axis_to_plot
+            for LOS in axis_to_actually_plot:
                 x = [1,0,0][LOS]
                 y = [2,2,1][LOS]
                 xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
                 ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
-                this_ax = ax
+
+
+                if -1 in axis_to_plot:
+                    this_ax = ax[LOS]
+                else:
+                    this_ax = ax
                 n_particles = len(this_p[0])
-                this_ax.scatter(this_p[x], this_p[y],s=2, c=[color_dict[core_id]]*n_particles)
+
+                #
+                # the plot
+                #
+                this_ax.scatter(this_p[x], this_p[y],s=2, c=colors[ncore])
+
+                #streaks.  Use with caution.
+                #this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
+
 
                 if do_hull:
                     points_2d = np.array(list(zip(this_p[x],this_p[y])))
@@ -286,10 +296,150 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
                 fig_many.savefig(outname)
                 print("Wrote "+outname)
-    if accumulate:
-        outname = '%s/%s_hull_3d_t_cXXXX_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,frames[0])
-        fig_many.savefig(outname)
-        print("Wrote "+outname)
+        if accumulate:
+            outname = '%s/%s_hull_3d_t_%scXXXX_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,prefix,frame)
+            fig_many.savefig(outname)
+            print("Wrote "+outname)
+
+
+def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
+            color_dict=None,axis_to_plot=[0]):
+
+    thtr = htool.this_looper.tr
+    all_cores = np.unique(thtr.core_ids)
+    rm = rainbow_map(len(all_cores))
+    if frames is None:
+        frames = thtr.frames
+    if core_list is None:
+        core_list = all_cores
+
+    if -1 in axis_to_plot:
+        fig_many, ax = plt.subplots(2,2,figsize=(8,8))
+        ax=ax.flatten()
+    else:
+        fig_many, ax = plt.subplots(1,1,figsize=(8,8))
+    x_min, x_max, y_min, y_max = [1,0,1,0]
+    import colors
+    if color_dict is  None:
+        color_dict = colors.make_core_cmap( core_list)
+
+    ms_dict={}
+    for ncore,core_id in enumerate(core_list):
+        ms = trackage.mini_scrubber(thtr,core_id)
+        ms.particle_pos(core_id)
+        ms_dict[core_id]=ms
+
+    for it,frame in enumerate(frames):#asort):
+        nt= np.where( nar(thtr.frames) == frame)[0][0]
+        if -1 in axis_to_plot:
+            for aaa in ax:
+                aaa.clear()
+        else:
+                ax.clear()
+        for ncore,core_id in enumerate(core_list):
+            ms = ms_dict[core_id]
+            if ms.r.shape[0] <= 4:
+                continue
+            print('plot core %s %d'%(htool.this_looper.out_prefix,core_id))
+            delta=0.1
+
+            mask = slice(None)
+
+            if not accumulate:
+                if -1 in axis_to_plot:
+                    for aaa in ax:
+                        aaa.clear()
+                        aaa.set_aspect('equal')
+                        aaa.plot([0,1,1,0,0],[0,0,1,1,0])
+                else:
+                    ax.clear()
+                    ax.set_aspect('equal')
+                    ax.plot([0,1,1,0,0],[0,0,1,1,0])
+            #this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
+            this_x,this_y,this_z=ms.particle_x[mask,nt],ms.particle_y[mask,nt], ms.particle_z[mask,nt]
+
+            all_x,all_y,all_z=ms.particle_x,ms.particle_y, ms.particle_z
+            all_p = [all_x,all_y,all_z]
+
+            do_hull = True
+
+            if np.unique(this_x).size < 4  or\
+               np.unique(this_y).size < 4  or\
+               np.unique(this_z).size < 4 :
+                print("Not enough degrees of freedom")
+                do_hull = False
+
+            this_p = [this_x,this_y,this_z]
+
+
+            if -1 in axis_to_plot:
+                axis_to_actually_plot = [0,1,2]
+            else:
+                axis_to_actually_plot=axis_to_plot
+            for LOS in axis_to_actually_plot:
+                x = [1,0,0][LOS]
+                y = [2,2,1][LOS]
+                xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
+                ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
+
+
+                if -1 in axis_to_plot:
+                    this_ax = ax[LOS]
+                else:
+                    this_ax = ax
+                n_particles = len(this_p[0])
+
+
+                #
+                # color games
+                #
+
+
+
+
+     
+
+                #
+                # the plot
+                #
+                this_ax.scatter(this_p[x], this_p[y],s=2, c=[color_dict[core_id]]*n_particles)
+
+                #streaks.  Use with caution.
+                this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
+
+
+                if do_hull:
+                    points_2d = np.array(list(zip(this_p[x],this_p[y])))
+                    hull_2d = ConvexHull(points_2d)
+                    vert_x = points_2d[hull_2d.vertices,0]
+                    vert_y = points_2d[hull_2d.vertices,1]
+                    vert_x = np.concatenate([vert_x,vert_x[0:1]])
+                    vert_y = np.concatenate([vert_y,vert_y[0:1]])
+                    this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
+
+                if core_id in label_cores or -1 in label_cores:
+                    this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
+                x_min = min([x_min,this_p[x].min(), -delta])
+                x_max = max([x_max,this_p[x].max(), 1+delta])
+                y_min = min([y_min,this_p[y].min(), -delta])
+                y_max = max([y_max,this_p[y].max(), 1+delta])
+
+                this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
+
+
+                axbonk(this_ax,xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
+                #ax_many.set_title(title)
+            cumltext=""
+            if accumulate:
+                cumltext="%04d"%ncore
+            if all_plots:
+                outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
+                fig_many.savefig(outname)
+                print("Wrote "+outname)
+        if accumulate:
+            outname = '%s/%s_hull_3d_t_%scXXXX_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,prefix,frame)
+            fig_many.savefig(outname)
+            print("Wrote "+outname)
 
 def image_overlap(self,core_1, core_2, do_plots=False):
     hull_1 =  self.hulls[core_1]
