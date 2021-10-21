@@ -80,8 +80,8 @@ class sub_trial():
                 self.r.append(rsort)
                 dv = cell_volume[asort]
 
-                #ms.get_central_velocity(core_id,nt)
-                ms.get_central_velocity2(core_id,nt)
+                ms.get_central_velocity(core_id,nt)
+                #ms.get_central_velocity2(core_id,nt)
                 if 0:
                     self.lab='rel'
                     #radial relative to raw-mean position and raw-mean velocity
