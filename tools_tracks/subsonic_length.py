@@ -99,12 +99,13 @@ class sub_trial():
                     #cen_vmag = ||raw_v - vcentral||
                     self.lab='cen'
                     vr = ms.cen_vmag[:,nt]  #testing
-                if 0:
+                if 1:
+                    #THIS ONE.
                     #the one that make S2.
                     #rc_vmag = ( v - v_central)dot \hat{r_rel}
                     self.lab='RC'
                     vr = ms.rc_vmag[:,nt]  #testing
-                if 1:
+                if 0:
                     #the one that make S2.
                     #r_rel now relative to density-weighted center
                     #rc_vmag = ( v - v_central)dot \hat{r_rel}
