@@ -182,6 +182,9 @@ def load_loop(self,fname):
 def save_loop_trackage_only(self,fname):
     fptr = h5py.File(fname,'w')
     fptr['savefile_type'] = 'trackage'
+    looper_version = 1
+    if hasattr(self, 'looper_version'):
+        looper_version = self.looper_version
     try:  #the try-except-finally is for clean failures with the hdf5 file
 
         #
@@ -204,9 +207,14 @@ def save_loop_trackage_only(self,fname):
         # write fields
         fptr.create_dataset('fields_from_grid',data=np.array( [np.string_(s) for s in self.fields_from_grid]))
         # write target_indices
-        ti_grp=fptr.create_group('target_indices')
-        for core in self.target_indices:
-            ti_grp.create_dataset(str(core),data=self.target_indices[core])
+        if looper_version == 1:
+            ti_grp=fptr.create_group('target_indices')
+            for core in self.target_indices:
+                ti_grp.create_dataset(str(core),data=self.target_indices[core])
+        elif looper_version == 2:
+            fptr.create_dataset( 'target_indices', data=self.target_indices)
+            fptr.create_dataset('core_ids',data=self.core_ids)
+        fptr.create_dataset('looper_version',data=looper_version)
 
         tr_gr=fptr.create_group('track_manager')
         self.tr.write(fptr=tr_gr)
@@ -241,11 +249,19 @@ def load_trackage_only(self,fname):
                     self.__dict__[value] = the_value
         if self.directory is None:
             self.directory = fptr['directory'][()]
+        if 'looper_version' in fptr:
+            self.looper_version = fptr['looper_version'][()]
+        else:
+            self.looper_version = 1
         #ti_grp=fptr.create_group('target_indices')
         #for core in self.target_indices:
         #    ti_grp.create_dataset(str(core),data=self.target_indices[core])
-        for core in fptr['target_indices']:
-            self.target_indices[int(core)]=fptr['target_indices'][core][()]
+        if self.looper_version == 1:
+            for core in fptr['target_indices']:
+                self.target_indices[int(core)]=fptr['target_indices'][core][()]
+        elif self.looper_version == 2:
+            self.target_indices = fptr['target_indices'][()]
+            self.core_ids = fptr['core_ids'][()]
         if 'track_manager' not in fptr:
             print("No track manager in this file.")
             raise
