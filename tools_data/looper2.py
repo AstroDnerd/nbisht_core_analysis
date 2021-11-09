@@ -7,6 +7,26 @@ reload(loop_tools)
 import tracks_read_write
 reload(tracks_read_write)
 verbose=True
+
+def load_looper(fname):
+    import looper
+    h5ptr=h5py.File(fname,'r')
+    looper_version=1
+    if 'looper_version' in h5ptr:
+        looper_version=h5ptr['looper_version'][()]
+
+    if looper_version==2:
+        looper_main = core_looper2
+    else:
+        looper_main = looper.core_looper
+
+    directory = h5ptr['directory'][()]
+    new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
+
+    return new_looper
+
+
+
 def count_particles(fname='tools_data/n_particles.txt'):
     fptr = open(fname,'r')
     lines=fptr.readlines()
@@ -69,6 +89,7 @@ class core_looper2():
                  derived=None, do_shift=True, 
                  bad_particles=None):
         #set defaults and/or arguments.
+        self.looper_version = 2
         self.current_frame = None
         self.data_template = data_template
         self.sim_name      = sim_name
@@ -175,6 +196,12 @@ class core_looper2():
         #and a list of core_ids for each particle.
         self.target_indices = np.concatenate([new_indices[core_id] for core_id in new_indices])
         self.core_ids       = np.concatenate([new_indices[core_id]*0+core_id for core_id in new_indices])
+
+        #Sort the particles by index.
+        args = np.argsort(self.target_indices)
+        self.target_indices = self.target_indices[args]
+        self.core_ids = self.core_ids[args]
+        print('SORTING CORE IDS')
         
 
     def get_region(self,frame=None):
@@ -204,9 +231,9 @@ class core_looper2():
             #read from disk
             self.targets[core_id] = mountain_top.target_info(h5ptr=h5ptr[group_name])
             these_targets= self.targets[core_id].particle_index
-            self.target_indices = np.concatenate([self.target_indices, these_targets])
+            self.target_indices = np.concatenate([self.target_indices, these_targets]).astype('int')
             this_id_array = np.array([core_id]*these_targets.size)
-            self.core_ids = np.concatenate([self.core_ids, this_id_array])
+            self.core_ids = np.concatenate([self.core_ids, this_id_array]).astype('int')
             #self.target_indices = self.targets[core_id].particle_index
 
             #check for uniqueness
@@ -216,6 +243,12 @@ class core_looper2():
 
         h5ptr.close()
         self.core_list = np.sort( np.unique( self.core_ids) )
+
+        args = np.argsort(self.target_indices)
+        self.target_indices = self.target_indices[args]
+        self.core_ids = self.core_ids[args]
+        print('SORTING CORE IDS')
+        
 
     def verify_all_particles(self,frame):
 
@@ -228,8 +261,8 @@ class core_looper2():
             all_target_particles = all_target_particles.v
 
         #check for repeated particles.  
-        if np.unique(all_target_particles).size - all_target_particles.size:
-            print("Fatal error: repeated particle.")
+        if np.abs(np.unique(all_target_particles).size - all_target_particles.size):
+            print("Fatal error: repeated/missing particle.")
             raise
 
         #we'll need to know which cores have missing particles,
@@ -293,9 +326,9 @@ class core_looper2():
         core_ids = []
         for group in h5ptr:
             core_ids.append(group)
-        core_ids = np.sort(core_ids)
+        core_ids = np.sort(core_ids).astype('int')
         for core_id in core_ids:
-            self.bad_particles[int(core_id)] = h5ptr[core_id][()]
+            self.bad_particles[int(core_id)] = h5ptr[str(core_id)][()]
         h5ptr.close()
 
 
@@ -309,7 +342,11 @@ class core_looper2():
             this_snapshot = self.make_snapshot(frame)
             if this_snapshot.R_centroid is None:
                 this_snapshot.get_all_properties()
-            this_snapshot.get_particle_values_from_grid()
+                #get_current_mask
+                #get_pos_vel
+                #get_particle_values_from_grid
+
+            #this_snapshot.get_particle_values_from_grid()
             error=np.abs(np.sort(this_snapshot.ind) - this_snapshot.ind)
             if error.max() != 0:
                 print("FATAL ERROR: particle order error")
@@ -387,19 +424,19 @@ class snapshot():
     def get_current_mask(self):
         """get the particle mask that relates particles for this core_id and this frame
         to the particles in the target_indices from the target_frame"""
-        particle_ids=self.target_indices.astype('int64')
-        if type(particle_ids) == yt.units.yt_array:
-            particle_ids = particle_ids.v
+        target_ids=self.target_indices.astype('int64')
+        if type(target_ids) == yt.units.yt_array:
+            target_ids = target_ids.v
 
-        mask_to_get=np.zeros(particle_ids.shape,dtype='int32')
+        mask_to_get=np.zeros(target_ids.shape,dtype='int32')
         all_indices = self.loop.all_particle_index
         
-        core_order = np.argsort( particle_ids)
-        sorted_cores = particle_ids[core_order]
+        target_order = np.argsort( target_ids)
+        sorted_targets = target_ids[target_order]
         all_order = np.argsort(all_indices)
         all_return = np.argsort(all_order)
         sorted_all = all_indices[all_order]
-        found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_cores,sorted_all,mask_to_get)
+        found_any, all_mask = particle_ops.mask_particles_sorted_t7(sorted_targets,sorted_all,mask_to_get)
 
         if mask_to_get.sum() != mask_to_get.size:
             pdb.set_trace()
@@ -496,7 +533,7 @@ class snapshot():
         if number_of_new_fields == 0:
             return
 
-        verbose=True
+        verbose=False
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
         gridlist = self.ds.index.grids[-1::-1]
         particle_fields = ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index', 'test_field']
@@ -515,6 +552,7 @@ class snapshot():
             pi =np.floor((self.pos[:,0] - grid.LeftEdge[0])/grid.dds[0]).astype('int32')
             pj =np.floor((self.pos[:,1] - grid.LeftEdge[1])/grid.dds[1]).astype('int32')
             pk =np.floor((self.pos[:,2] - grid.LeftEdge[2])/grid.dds[2]).astype('int32')
+            pi=pi.v;pj=pj.v;pk=pk.v
             particle_selector = (pi >= 0 ) * ( pj >= 0) * ( pk >= 0 ) * ( pi < Nxyz[0])*(pj<Nxyz[1])*(pk<Nxyz[2])
             if particle_selector.sum() == 0:
                 continue
@@ -523,16 +561,26 @@ class snapshot():
             grid_to_particle = tuple([grid_selector[i][particle_selector] for i in [0,1,2]])
             subgrid_mask = grid.child_mask[grid_to_particle]
             particle_selector[particle_selector] = particle_selector[particle_selector]*subgrid_mask
-            if verbose:
-                print("   work1")
-            if particle_selector.max() > 0:  #if we have found any particles
+            if particle_selector.max() > 0:  
+                if verbose:
+                    print("   work1")
 
+                grid_to_particle_index = pk[particle_selector] + Nxyz[2]*(pj[particle_selector]+Nxyz[1]*pi[particle_selector])
+                particle_sort_by_index = np.argsort(grid_to_particle_index)
+                sorted_to_code_order = np.argsort(particle_sort_by_index)
+                get_these_indices = grid_to_particle_index[particle_sort_by_index]
                 particle_selector = particle_selector.astype('bool')
                 for field in self.field_values:
                     if field in particle_fields:
                         continue
                     #NOTE this mask can be move outside of the field loop.
-                    values = grid[field][grid_to_particle]#grid_selector_tuple]
+                    if verbose:
+                        print("   work1b")
+                    arr = np.ascontiguousarray(grid[field].v).ravel()
+                    values = arr[get_these_indices][sorted_to_code_order]
+                    #values = grid[field][grid_to_particle]#grid_selector_tuple]
+                    if verbose:
+                        print("   work1c")
                     self.field_values[field][particle_selector] = values
                 if verbose:
                     print("   work2")
