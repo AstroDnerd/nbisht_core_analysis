@@ -1,4 +1,8 @@
-#
+
+
+# original copy: new_tracks_derived.py; this seems to be a combo of new fields + data puller
+
+
 # run get_mountain_tops first
 #
 from starter2 import *
@@ -14,8 +18,8 @@ mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%this_simname
 outname = 'u301_new_tracks_take_9b.h5'
 
 
-#TO CHANGE
-#yt derived field gets defined here
+# TO CHANGE
+# yt derived field gets defined here
 def add_energies(obj):
     if obj.parameters['SelfGravity']:
         def grav_energy(field,data):
@@ -42,8 +46,24 @@ def add_energies(obj):
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
 
+# for the grad operator look at: /home/luzlourdes/scripts/F2017/lorentzinduction_terms.py 
+# B dot Grad Q definitions  
+def magGradVelocity(field,data):  # could compare with gradient velocity given 'velocity_divergence'
+    salutation = 'velocity divergence'
+    return salutation
 
-if 1:
+def magGradDensity(field,data):
+    salutation = 'density divergence'
+    return salutation
+
+def magGradAnything(field,data):
+    salutation = 'anything divergence'
+    return salutation
+
+
+
+# THIS SEEMS TO BE THE data_puller.py PART
+if 0:  # this was ON
     """this set of parameters extracts all primitive quantities"""
     target_frame = dl.target_frames[this_simname]
     frame_list =list(range(0,target_frame,10))+[target_frame]
@@ -70,6 +90,7 @@ if ('new_looper' not in dir() and disk_or_new) or True:
     new_looper.read_targets(mountain_top_fname)
 
 
+# - - - - - - - - - - - - - - - - - - 
 if 0:
     #verify and remove bad particles.
     #Don't need to do this every time, it takes a minute.
@@ -78,7 +99,7 @@ if 0:
         new_looper.verify_all_particles(frame)
     new_looper.save_bad_particles('%s_bad_particles_full.h5'%this_simname)
 
-if 1:
+if 0:  # this was ON
     new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
     bad_particle_id = [ 724134,  635702,  661226,  743270,  751995,  718196, 1354060,
                                 1362500,  610123,  610189, 1930558, 1046537, 1841352, 1844125,
@@ -91,7 +112,10 @@ if 1:
     new_looper.remove_bad_particles()
     new_looper.get_tracks()
 
-#this hasn't been tested
+
+# BELOW THIS LINE, UNSURE about the purpose
+# THIS SEEMS TO BE WHAT MADE IT ON three_loopers_tenfour.py
+# this hasn't been tested
 def cut_cores_tenfour(loop):
     mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%mountain_sim
     loops[new_sim].read_targets(mountain_top_fname)
@@ -114,13 +138,13 @@ def cut_cores_tenfour(loop):
         del loop.target_indices[core_id]
 
 
-cut_cores_tenfour( new_looper )
+# WAS UNCOMMENTED 
+# cut_cores_tenfour( new_looper )
 
 
-if 1:
+if 0:  # this was ON
     import tracks_read_write
     tracks_read_write.save_loop_trackage_only( new_looper, outname)
-
 
 if 0:
     print("ZEROS: %d"%( (new_looper.tr.track_dict['density']==0).sum() ))
@@ -135,7 +159,6 @@ if 'new_looper' not in dir() and disk_or_new == 'disk':
     new_looper.tr.sort_time()
     #import loop_tools
     #loop_tools.re_shift_snaps(new_looper)
-
 
 if 0:
     import colors

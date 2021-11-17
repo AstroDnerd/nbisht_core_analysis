@@ -98,7 +98,7 @@ valsC = []
 
 print("READY")
 for index,frame in enumerate(frame_list):
-    if 1: 
+    if 1:  #skip 
         ds = this_looper.load(frame=frame,derived=[em.add_tracer_density])
         em.add_tracer_density(ds)  
         ad = ds.all_data()
@@ -149,7 +149,7 @@ for index,frame in enumerate(frame_list):
 
         # 4 PLOTS PER FRAME (all_data, core_data, phase-all_data + scatter plot) 
         if 1:
-            p = yt.ParticlePhasePlot.from_profile(phase_all) 
+            p = yt.ParticlePhasePlot.from_profile(phase_all)   
             #p.set_ylim(1e0,1e5)  # vorticity VS B/rho 
             #p.set_ylim(1e-2,1e6)  # vorticity/rho VS B/rho 
             p.set_ylim(1e0,1e5)  # vorticity VS B,rho 
@@ -167,7 +167,7 @@ for index,frame in enumerate(frame_list):
             this_axes = cell_plot.axes
             this_axes.plot(bcen1,vals1,c='k')
             this_axes.plot(bcen2,vals2,c='k',linestyle='dashed') 
- 
+             
             #nframe = index  #works only if all frames are in order; check what is best +1,+2,0...find the general trend...? 
             #brp.plot_particles(this_axes,nframe) 
             p.save('threeplots_%d_%s'%(frame,this_simname)) 

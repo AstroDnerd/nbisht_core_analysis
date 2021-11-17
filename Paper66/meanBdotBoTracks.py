@@ -13,16 +13,12 @@ plt.close('all')
 class magfield_density_tool():  # was mass_tool()
     def __init__(self,this_looper):
         self.this_looper=this_looper
-        self.mean_rho=defaultdict(list)
-        self.mean_rho_py=defaultdict(list)
-
-        self.mean_field=defaultdict(list)
-        self.mean_field_py=defaultdict(list)
         
-        self.mean_field_comps=defaultdict(list) 
-        self.mean_field_comps_py=defaultdict(list) 
-          
-        self.angle_mean = defaultdict(list)
+        self.mean_rho=defaultdict(list)
+        self.mean_field_comps=defaultdict(list)  
+        self.mean_angle = defaultdict(list)
+        self.mean_BdotBo = defaultdict(list) 
+
         self.cores_used=[] 
 
 
@@ -49,7 +45,7 @@ class magfield_density_tool():  # was mass_tool()
             frames = thtr.frames 
 
             for nf,frame in enumerate(thtr.frames): 
-                print('thtr.frames',thtr.frames)
+                #print('thtr.frames',thtr.frames)
                 mask = ms.compute_unique_mask(core_id, dx=1./2048,frame=nf)
 
                 density = thtr.c([core_id],'density')[mask,nf]
@@ -68,42 +64,36 @@ class magfield_density_tool():  # was mass_tool()
                 bb_o = np.sqrt(bx_o*bx_o + by_o*by_o + bz_o*bz_o)
                 
                 BtdotBo = bx*bx_o + by*by_o + bz*bz_o 
-                costheta = BtdotBo/(bb*bb_o)
+                costheta = BtdotBo/(bb*bb_o)     
 
-                mean_cos_theta = (density*cell_volume*costheta).sum()/(density*cell_volume).sum()
-               
-                #self.mean_field[core_id].append((magfield * cell_volume).sum()/cell_volume.sum())
-                #self.mean_field_py[core_id].append(magfield.mean())
-
-                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())
-                #self.mean_field_comps_py[core_id].append(bb_comps.mean())  
-
+                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum()) 
+                
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
-                #self.mean_rho_py[core_id].append(density.mean())  
 
-                self.angle_mean[core_id].append(mean_cos_theta) 
+                mean_costheta = (density*cell_volume*costheta).sum()/(density*cell_volume).sum()
+                self.mean_angle[core_id].append(mean_costheta) 
 
-                if 1:
-                    # PLOT PDFs for the last frame:
-                    if frame == frames[-1]:
-                        print('entered the pdf making')  #need to make explicit ad, the fields, etc LOOK UP CREATE PROFILE...or tools_pdf!!
-                        pdf_test = yt.create_profile(ad,bin_fields=['BtdotBo'],fields=['cell_volume'],weight_field='None', override_bins=bins)
+                # to mimic process of costheta, although the latter was made with the core loop
+                # also, would it still be mass weighted?
+                mean_BtdotBo = (density*cell_volume*BtdotBo).sum()/(density*cell_volume).sum()
+                self.mean_BdotBo[core_id].append(mean_BtdotBo) 
+               
 
-
-import three_loopers_mountain_top as TLM
+#import three_loopers_mountain_top as TLM
+import three_loopers_tenfour as TLTF
 if 'clobber' not in dir():
     clobber=True
 if 'mag_den1' not in dir() or clobber:
-    mag_den1=magfield_density_tool(TLM.loops['u301'])
-    simname1 = 'u301'
+    mag_den1=magfield_density_tool(TLTF.loops['u401'])
+    simname1 = 'u401'
     mag_den1.run()
 if 'mag_den2' not in dir() or clobber:
-    mag_den2=magfield_density_tool(TLM.loops['u302'])
-    simname2 = 'u302'
+    mag_den2=magfield_density_tool(TLTF.loops['u402'])
+    simname2 = 'u402'
     mag_den2.run()
 if 'mag_den3' not in dir() or clobber:
-    mag_den3=magfield_density_tool(TLM.loops['u303'])
-    simname3 = 'u303'
+    mag_den3=magfield_density_tool(TLTF.loops['u403'])
+    simname3 = 'u403'
     mag_den3.run()
 simnames = [simname1, simname2, simname3]
 
@@ -115,7 +105,7 @@ if 0:
     fig,ax=plt.subplots(1,3, figsize=(12,4))
     axes=ax.flatten()
 
-if 0:
+if 1:
     for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
         # SET UP THE VARIABLE
         G=1620./(4*np.pi)
@@ -127,29 +117,55 @@ if 0:
         rhos = np.zeros([ntimes,ncores])
         fields = np.zeros([ntimes,ncores])
         angles = np.zeros([ntimes,ncores])
-        outname='BoBang_tracks_%s'%simnames[nt]
+        outname='BoBang_pl_meanstdvar_%s'%simnames[nt]
 
-        if 0: # just the tracks 
+        if 1: # just the tracks 
             fig, ax1=plt.subplots(1,1)
 
+    
+        all_angles = np.empty([0],dtype=float)
+        all_stds = np.empty([0],dtype=float)
+        all_vars = np.empty([0],dtype=float)
+        all_means = np.empty([0],dtype=float)
         # MAKE THE FIELDS INTO A 2D ARRAY WE CAN PLOT
         for ncore,core_id in enumerate(tool.cores_used):
             this_rho = tool.mean_rho[core_id] 
             this_field = tool.mean_field_comps[core_id] 
-            this_ang = tool.angle_mean[core_id]
+            this_ang = tool.mean_angle[core_id]
  
             rhos[:,ncore]= np.log10(this_rho)
             fields[:,ncore]= np.log10(this_field)
-            angles[:,ncore]= np.arccos(this_ang)*180/np.pi
-
+            #angles[:,ncore]= np.arccos(this_ang)*180/np.pi
+            angles[:,ncore]= this_ang  #to plot costheta
+            
+            this_ang=angles[:,ncore]
+            all_angles = np.append(all_angles,this_ang)
+         
             this_rho = rhos[:,ncore] 
             this_field = fields[:,ncore]
 
             if 1: # (just) all the tracks
-                this_ang=angles[:,ncore]
                 ax1.plot(these_times,this_ang,c=[0.5]*4)  
-        if 0:
-            ax1.plot([0,1],[90,90],'--',c='k') 
+ 
+        if 1: 
+            numcores = len(all_angles)/len(tool.core_list) 
+            coreint = int(numcores)
+            for i in range(coreint): 
+                ang_vars = np.nanvar(all_angles[i::coreint])
+                all_vars = np.append(all_vars,ang_vars)
+                ang_stds = np.nanstd(all_angles[i::coreint])
+                all_stds = np.append(all_stds,ang_stds)
+                ang_means = np.nanmean(all_angles[i::coreint])
+                all_means = np.append(all_means,ang_means) 
+ 
+            stdpos = all_means + all_stds
+            stdneg = all_means - all_stds
+
+            #ax1.plot([0,1],[90,90],'--',c='k')  #make better extents  
+            ax1.plot(these_times,stdneg,'--',c='r') 
+            ax1.plot(these_times,stdpos,'--',c='r')
+            ax1.plot(these_times,all_means, '--',c='k')
+            ax1.plot(these_times,all_vars, '--',c='b') 
             fig.savefig(outname)
             print('saved')
 
@@ -188,9 +204,9 @@ if 0:
             norm = mpl.colors.LogNorm(vmin=1,vmax=33)
             ploot=axes[nt].pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
             axbonk(axes[nt],ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='linear', ylim=[0,180])
-
-    axes[0].set_ylabel(r'$<\theta>$')
-    fig.colorbar(ploot)
-    fig.savefig(outname)
-    print(outname)
+    if 0:
+        axes[0].set_ylabel(r'$<\theta>$')
+        fig.colorbar(ploot)
+        fig.savefig(outname)
+        print(outname)
 

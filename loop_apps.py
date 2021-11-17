@@ -46,16 +46,6 @@ def proj_cores(self, axis_list=[0,1,2],core_list=[], field='density'):
 
 import annotate_particles_3
 reload(annotate_particles_3)
-<<<<<<< HEAD
-def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},
-                       force_log=None,linthresh=100,
-                       core_list=None,frame_list=None, clobber=True,
-                       grids=True, particles=True, 
-                       fields=False, velocity=False, code_length=True, lic=False, annotate=False, 
-                       moving_center=False, only_sphere=True, center_on_sphere=True, slab=None, zoom=True, 
-                       marker_size = 1,
-                      tracker_positions=True, shifted_tracker=True, float_positions=False):
-=======
 class MonotoneEnforcer():
     def __init__(self):
         self.prev=[]
@@ -143,7 +133,6 @@ def annoying_limiter(looper, field='density', axis_list=[0,1,2], color_dict={},f
                        code_length=True, 
                       tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
                       marker_size=1):
->>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
     if core_list is None:
         core_list = looper.core_list
     if frame_list is None:
@@ -171,10 +160,6 @@ def annoying_limiter(looper, field='density', axis_list=[0,1,2], color_dict={},f
             print("File exists, skipping")
             return
         #get extents and bounding region
-<<<<<<< HEAD
-        left =  np.array([1,1,1])
-        right = np.array([0,0,0])
-=======
         #it's backwards because we're looking for extrema
         left =  ds.domain_right_edge.v
         right = ds.domain_left_edge.v
@@ -183,7 +168,6 @@ def annoying_limiter(looper, field='density', axis_list=[0,1,2], color_dict={},f
         # Find the extents of all cores.
         # Fill position array.
         #
->>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
         position_dict={}
         for core_id in core_list:
             ms = mini_scrubbers[core_id]
@@ -327,6 +311,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 if snapshot.R_centroid is None:
                     snapshot.get_all_properties()
                 positions = snapshot.pos
+                position_dict[core_id]=positions
             this_left =  positions.min(axis=0)
             this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
@@ -343,8 +328,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         if not center_on_sphere:
             center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
 
-<<<<<<< HEAD
-=======
         if monotonic:
             left = monotonic['left'](left)
             right  = monotonic['right'](right)
@@ -357,7 +340,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         #
         # main plot loop
         #
->>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
         for ax in axis_list:
             Rmax = np.sqrt( ( (right-left)**2).sum(axis=0)).max()
             scale = Rmax.v #2*max([Rmax, scale_min]).v
@@ -379,11 +361,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             pw = proj.to_pw(center = center, origin='domain')
             
             if zoom:
-<<<<<<< HEAD
-                pw.zoom(1./(2*scale))
-
-            pw.set_cmap(field,'gray')
-=======
                 pw.zoom(1./(scale))
             if monotonic:
                 array = proj[field]
@@ -395,7 +372,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 print("ZZZZ %0.2e %0.2e MMM %0.2e %0.2e"%(zmin,zmax,zlim[0],zlim[1]))
 
             pw.set_cmap(field,'Greys')
->>>>>>> 40e1c991ca757f3dced34474fd2958b18fc829ea
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
