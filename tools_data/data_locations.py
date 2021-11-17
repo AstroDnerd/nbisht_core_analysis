@@ -45,6 +45,10 @@ if machine == 'Nazare':
     sim_u302 = sim_u202
     sim_u303 = sim_u203
 
+    sim_u501 = sim_u201
+    sim_u502 = sim_u202
+    sim_u503 = sim_u203
+
     u101_every_ten = None
     u102_every_ten = None
     u103_every_ten = None
@@ -90,7 +94,14 @@ elif machine == 'cloudbreak':
     mountain_top = {'u301':"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u301_new_tracks_take_9c.h5",
                     "u302":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u302_new_tracks_take_9b.h5",
                     "u303":"/data/cb1/Projects/P19_CoreSimulations/CoreSets/mountain_tops/u303_new_tracks_take_9b.h5"}
+    sim_u501 = sim_u201
+    sim_u502 = sim_u202
+    sim_u503 = sim_u203
+
+    #path for structure functions
+    sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
 else:
+    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF"
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
@@ -129,6 +140,7 @@ else:
 sims={'u05':sim_u05,'u10':sim_u10,'u11':sim_u11,'u101':sim_u101,'u102':sim_u102,'u103':sim_u103}
 sims.update({'u201':sim_u201,'u202':sim_u202,'u203':sim_u203})
 sims.update({'u301':sim_u201,'u302':sim_u202,'u303':sim_u203})
+sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
 sims['u14']=sim_u14
 
 
@@ -153,6 +165,8 @@ peak_list['u14']=peaks_u14
 target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u14':25}
 target_frames.update({'u201':125,'u202':118,'u203':107})
 target_frames.update({'u301':125,'u302':118,'u303':107})
+target_frames.update({'u401':125,'u402':118,'u403':107})
+target_frames.update({'u501':125,'u502':118,'u503':107})
 
 every_ten = {'u05':u05_every_ten,'u10':u10_every_ten,'u11':u11_every_ten, 'u101':u101_every_ten,'u102':u102_every_ten,'u103':u103_every_ten}
 every_ten.update({'u201':u201_every_ten,'u202':u202_every_ten,'u203':u203_every_ten})

@@ -130,24 +130,30 @@ class track_manager():
 
     def ingest(self,snapshot):
         #pdb.set_trace()
-        if hasattr(snapshot,'ind'):
-            #This is the thing that should be done.
-            particle_ids = copy.copy(snapshot.ind)
-        else:
-            #THis is a stop-gap for some old datasets that were written wrong.
-            #It is actually incorrect and can possibly lead to errors, espectially when
-            #using the new shift tool.
-            particle_ids = copy.copy(snapshot.target_indices)
-        if snapshot.core_id not in self.core_ids:
-            #this might not be the best place for the parent step.
-            core_ids = np.ones_like(particle_ids) * snapshot.core_id
-            if hasattr(core_ids,'v'):
-                core_ids = core_ids.v #need it to not have units.
-            self.core_ids = np.append(self.core_ids, core_ids)
-            self.particle_ids = np.append(self.particle_ids, particle_ids)
+        particle_ids = copy.copy(snapshot.ind)
 
-        particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
-        particle_end=particle_start+particle_ids.size
+        if hasattr(snapshot, 'core_id'):
+            """old style looper"""
+            if snapshot.core_id not in self.core_ids:
+                #this might not be the best place for the parent step.
+                core_ids = np.ones_like(particle_ids) * snapshot.core_id
+                if hasattr(core_ids,'v'):
+                    core_ids = core_ids.v #need it to not have units.
+                self.core_ids = np.append(self.core_ids, core_ids)
+                self.particle_ids = np.append(self.particle_ids, particle_ids)
+
+            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            particle_end=particle_start+particle_ids.size
+        else:
+            """looper2"""
+
+            if len(self.particle_ids) == 0:
+                self.particle_ids = particle_ids
+                self.core_ids = snapshot.core_ids
+            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            particle_end=particle_start+particle_ids.size
+
+
 
         #check that the particles we're inserting
         #are in the same order as the previous ones
@@ -269,12 +275,28 @@ def shift_6(pos):
         out[Is:Ie]  += Sgn
     return out
 
-
-def shift_4(arr):
+def shift_4_minus(arr):
     #Loop over particles in the array and call shift_6
+    #first version, kill later
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
+    return out  
+
+def shift_4(arr):
+    #Loop over particles in the array and call shift_6
+    #first shift based on each particles endpoints
+    out = np.zeros_like(arr)
+    for n,p in enumerate(arr):
+        out[n,:]=shift_6(arr[n,:])
+    #the shift entire tracks that are on the wrong side
+    centroid = out[:,-1].mean()
+    delta = out[:,-1]-centroid
+    if ( delta > 0.5).any():
+        more_shift = np.where( delta>0.5)[0]
+        shift = np.sign(delta[more_shift])
+        shift.shape = shift.size,1
+        out[more_shift,:] -= shift
     return out  
 
 
@@ -302,6 +324,11 @@ class mini_scrubber():
         mask2 = mask[ rs]
         return mask2
     def scrub(self,core_id, axis=0, do_velocity=True):
+
+        if core_id not in self.trk.core_ids:
+            print("Core %d not found in looper"%core_id)
+            print("  (also please write a better error handler)")
+            raise
         self.raw_x = self.trk.c([core_id],'x')
         self.raw_y = self.trk.c([core_id],'y')
         self.raw_z = self.trk.c([core_id],'z')
@@ -444,6 +471,29 @@ class mini_scrubber():
         self.rc_vmag = self.rx_hat*self.cen_vx+\
                        self.ry_hat*self.cen_vy+\
                        self.rz_hat*self.cen_vz
+    def get_central_velocity2(self,core_id,nt):
+
+        #relative to the density weighted center.
+        this_r = self.rc[:,nt]
+        vx = self.trk.c([core_id],'velocity_x')[:,nt]
+        vy = self.trk.c([core_id],'velocity_y')[:,nt]
+        vz = self.trk.c([core_id],'velocity_z')[:,nt]
+
+        asort = np.argsort(this_r)
+        ind_min = asort[0]
+
+        vxc = vx[ind_min]
+        vyc = vy[ind_min]
+        vzc = vz[ind_min]
+
+        self.d_cen_vx = self.raw_vx-vxc
+        self.d_cen_vy = self.raw_vy-vyc
+        self.d_cen_vz = self.raw_vz-vzc
+        self.d_cen_vmag = (self.d_cen_vx**2+self.d_cen_vy**2+self.d_cen_vz**2)**(0.5)
+
+        self.rcd_vmag = self.rx_hat*self.d_cen_vx+\
+                       self.ry_hat*self.d_cen_vy+\
+                       self.rz_hat*self.d_cen_vz
     def Moment(self):
         self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
         self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
@@ -473,6 +523,13 @@ class mini_scrubber():
         self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
         self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
         self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+    def particle_pos(self,core_id):
+        shift_x = self.this_x - self.raw_x
+        shift_y = self.this_y - self.raw_y
+        shift_z = self.this_z - self.raw_z
+        self.particle_x = self.trk.c([core_id],'particle_pos_x') + shift_x
+        self.particle_y = self.trk.c([core_id],'particle_pos_y') + shift_y
+        self.particle_z = self.trk.c([core_id],'particle_pos_z') + shift_z
     def make_floats(self, core_id):
         self.float_x = self.trk.c([core_id],'particle_pos_x')
         self.float_y = self.trk.c([core_id],'particle_pos_y')

@@ -46,7 +46,7 @@ class extents():
 
 
 def axbonk(ax,xscale='linear',yscale='linear',xlabel='X',ylabel='Y',xlim=None,ylim=None,
-          linthreshx=0.1,linthreshy=0.1):
+          linthreshx=0.1,linthreshy=0.1,title=None):
     ax.set_xscale(xscale)
     ax.set_yscale(yscale)
     if xscale == 'symlog':
@@ -57,6 +57,8 @@ def axbonk(ax,xscale='linear',yscale='linear',xlabel='X',ylabel='Y',xlim=None,yl
     ax.set_ylabel(ylabel)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
+    if title:
+        ax.set_title(title)
 def lim_down(value):
     return 10**(np.floor(np.log10(value)))
 def lim_up(value):
@@ -210,9 +212,12 @@ def rainbow_01():
     return  color_map.to_rgba
 
 class rainbow_map():
-    def __init__(self,n, cmap='jet'):
+    def __init__(self,n=None, vmin=None,vmax=None, cmap='jet'):
         norm = mpl.colors.Normalize()
-        norm.autoscale(np.arange(n))
+        if vmin is not None and vmax is not None:
+            norm.autoscale([vmin,vmax])
+        else:
+            norm.autoscale(np.arange(n))
         #cmap = mpl.cm.jet
         self.color_map = mpl.cm.ScalarMappable(norm=norm,cmap=cmap)
     def __call__(self,val,n_fields=0):

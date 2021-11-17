@@ -18,12 +18,18 @@ class rainbow_map():
             this_value = [this_value]*n_fields
         return this_value
 
-def make_core_cmap(core_list):
-    np.random.seed(2653417)
+def make_core_cmap(core_list, cmap='Spectral',seed=2653417):
     ncolors = max([ len(core_list), 400])
-    mymap = rainbow_map( ncolors, cmap = 'Spectral')
+    if seed > 0:
+        np.random.seed(seed)
+        rands = np.random.random( len(core_list) ) * ncolors
+        rands = np.round(rands)
+    else:
+        rands = np.linspace(0,ncolors, len(core_list)).astype('float')
+        print(rands)
+
+    mymap = rainbow_map( ncolors, cmap = cmap)
     #mymap = rainbow_map( ncolors, cmap = 'tab20')
-    rands = np.random.random( len(core_list) ) * ncolors
     color = [mymap(R) for R in rands]
     dic = dict( zip( core_list,color))
     return dic

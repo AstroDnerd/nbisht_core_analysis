@@ -1,8 +1,6 @@
 from starter2 import *
-import three_loopers_1tff as tl
+#import three_loopers_1tff as tl
 
-tm = rainbow_map(15)
-#all_cores = all_cores[:10]
 def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_bins=64,extrema=None):
     reg = ds.all_data()
     prof = yt.create_profile(reg,fields[0],fields[1] ,weight_field=weight_field,accumulation=accumulation,
@@ -19,11 +17,6 @@ def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_b
     output['the_y']=the_y
     return output
 
-plt.clf()
-odir=os.environ['HOME']+'/PigPen/'
-odir = "./plots_to_sort/"
-
-
 def return_core_count(self,n_min=1):
     output=[]
     for core_id in self.target_indices:
@@ -35,7 +28,8 @@ def return_core_count(self,n_min=1):
 class means_etc():
     def __init__(self,this_looper,n_min=3):
         thtr=this_looper.tr
-        core_list = return_core_count(this_looper,n_min)
+        self.core_list = return_core_count(this_looper,n_min)
+        core_list=self.core_list
         self.dmeans = np.zeros_like(core_list,dtype='float')
         self.dstds = np.zeros_like(core_list,dtype='float')
         self.d_logmeans = np.zeros_like(core_list,dtype='float')
@@ -95,7 +89,7 @@ def three_way_bean():
     rect_histy = [left_h, bottom, 0.2, height]
 
     # start with a rectangular Figure
-    plt.figure(1, figsize=(8, 8))
+    fig=plt.figure(1, figsize=(8, 8))
 
     axScatter = plt.axes(rect_scatter)
     axHistx = plt.axes(rect_histx)
@@ -105,24 +99,5 @@ def three_way_bean():
     axHistx.xaxis.set_major_formatter(nullfmt)
     axHisty.yaxis.set_major_formatter(nullfmt)
 
-    return axScatter,axHistx, axHisty
+    return fig, axScatter,axHistx, axHisty
 
-#    # the scatter plot
-#    axScatter.scatter(x, y)
-#
-#    # now determine nice limits by hand
-#    binwidth = 0.25
-#    xymax = np.max([np.max(np.fabs(x)), np.max(np.fabs(y))])
-#    lim = (int(xymax/binwidth) + 1) * binwidth
-#
-#    axScatter.set_xlim((-lim, lim))
-#    axScatter.set_ylim((-lim, lim))
-#
-#    bins = np.arange(-lim, lim + binwidth, binwidth)
-#    axHistx.hist(x, bins=bins)
-#    axHisty.hist(y, bins=bins, orientation='horizontal')
-#
-#    axHistx.set_xlim(axScatter.get_xlim())
-#    axHisty.set_ylim(axScatter.get_ylim())
-##
-#    plt.savefig(outname)
