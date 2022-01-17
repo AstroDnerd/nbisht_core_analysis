@@ -92,8 +92,8 @@ def three_way_bean():
     fig=plt.figure(1, figsize=(8, 8))
 
     axScatter = plt.axes(rect_scatter)
-    axHistx = plt.axes(rect_histx)
-    axHisty = plt.axes(rect_histy)
+    axHistx =   plt.axes(rect_histx)
+    axHisty =   plt.axes(rect_histy)
 
     # no labels
     axHistx.xaxis.set_major_formatter(nullfmt)
