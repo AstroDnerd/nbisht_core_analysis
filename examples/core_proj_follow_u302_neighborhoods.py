@@ -7,7 +7,7 @@ reload(dl)
 reload(looper)
 reload(loop_apps)
 reload(loop_tools)
-
+this_simname = 'u403'
 if 0:
     this_simname = 'u301'
     sim_list = ['u301']
@@ -20,29 +20,30 @@ if 0:
     set_looper.plot_directory = "./plots_to_sort"
 if 1:
     import three_loopers_tenfour as TL4
-    set_looper = TL4.loops['u401']
-sim_list = ['u401']
+    set_looper = TL4.loops[this_simname]
+sim_list = ['u403']
 import convex_hull_tools as CHT
 reload(CHT)
-if 'ht_set' not in dir() :
-    ht_set = {}
+if 'ht' not in dir() :
+    ht = {}
     for this_simname in sim_list:
-        ht_set[this_simname] = CHT.hull_tool(set_looper)
-        ht_set[this_simname].make_hulls()
-        ht_set[this_simname].make_overlaps()
+        ht[this_simname] = CHT.hull_tool(set_looper)
+        ht[this_simname].make_hulls()
+        ht[this_simname].make_overlaps()
 
 import supersets
 reload(supersets)
-if 'st_set' not in dir():
-    st_set={}
+if 'st' not in dir():
+    st={}
     for this_simname in sim_list:
-        st_set[this_simname] = supersets.superset( set_looper, ht_set[this_simname])
-        st_set[this_simname].find()
+        st[this_simname] = supersets.superset( set_looper, ht[this_simname])
+        st[this_simname].find()
 
 import colors
 import core_proj
 reload(core_proj)
-for nset,superset in enumerate(st_set[this_simname].supersets):
+stuff=st[this_simname].supersets
+for nset,superset in enumerate(stuff):
     if nset != 1:
         continue
 
@@ -56,6 +57,7 @@ for nset,superset in enumerate(st_set[this_simname].supersets):
 
     frame_list = set_looper.frame_list[1:-1]
     set_looper.out_prefix = '%s_S%02d'%(this_simname,nset)
+if 1:
     mono=core_proj.core_proj_multiple(set_looper,axis_list=[0], 
                                  color_dict=color_dict,
                                  frame_list = frame_list,
