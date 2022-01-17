@@ -11,12 +11,13 @@ if 'this_simname' not in dir():
     this_simname = 'u301'
 
 mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%this_simname
-outname = 'u301_long_pos_only.h5'
+outname = 'u301_long_pos_only_TEST.h5'
 
 if 1:
     """this set of parameters extracts all primitive quantities"""
     target_frame = dl.target_frames[this_simname]
     frame_list = list(range(0,target_frame+1,1))
+    frame_list = range(0,8)
     fields = ['x','y','z','density']#,'velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
     #fields += ['velocity_x','velocity_y','velocity_z']
     #fields += ['magnetic_field_%s'%s for s in 'xyz']
@@ -24,6 +25,7 @@ if 1:
     fields += ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index']
     derived=[]
 
+print("G1 make")
 disk_or_new = 'new'
 if ('new_looper' not in dir() and disk_or_new) or True:
     new_looper = looper.core_looper(directory= dl.sims[this_simname],
@@ -40,16 +42,18 @@ if ('new_looper' not in dir() and disk_or_new) or True:
     new_looper.read_targets(mountain_top_fname)
 
 
-if 1:
+print("G2 verify")
+if 0:
     #verify and remove bad particles.
     #Don't need to do this every time, it takes a minute.
     #need to have the bad_particles file 
-    for frame in range(target_frame):
+    for frame in frame_list:
         new_looper.verify_all_particles(frame)
-    new_looper.save_bad_particles('%s_bad_particles_full_long.h5'%this_simname)
+    new_looper.save_bad_particles('datasets_small/%s_bad_particles_TEST.h5'%this_simname)
 
+print("G3 get new")
 if 1:
-    new_looper.read_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
+    new_looper.read_bad_particles('datasets_small/%s_bad_particles_TEST.h5'%this_simname)
     new_looper.remove_bad_particles()
     new_looper.get_tracks()
 
