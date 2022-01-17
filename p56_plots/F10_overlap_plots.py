@@ -34,10 +34,21 @@ if 'st' not in dir():
 if 'overlap_dict' not in dir():
     overlap_dict={}
     overlap_numb={}
+    particles = {}
+    ratio_matrix={}
+    ratio_matrixb={}
+    particle_matrix={}
+
     for ns,this_simname in enumerate(sim_list):
         htool = ht[this_simname]
         overlap_dict[this_simname] = np.zeros( [len(htool.cores_used)]*2) -1
         overlap_numb[this_simname] = np.zeros( [len(htool.cores_used)]*2) -1
+        ratio_matrix[this_simname] = np.zeros( [len(htool.cores_used)]*2) 
+        ratio_matrixb[this_simname] = []
+        particle_matrix[this_simname] = np.zeros( [len(htool.cores_used)]*2)
+        particles[this_simname]=[]
+        for nc1,core_id_1 in enumerate(htool.cores_used):
+            particles[this_simname].append(htool.nparticles[nc1])
         for nc1,core_id_1 in enumerate(htool.cores_used):
             for nc2,core_id_2 in enumerate(htool.cores_used):
                 val = htool.overlaps[core_id_1][nc2]
@@ -45,42 +56,46 @@ if 'overlap_dict' not in dir():
                 overlap_dict[this_simname][nc1,nc2] = val
                 overlap_numb[this_simname][nc1,nc2] = num
 
-if 'max_dict' not in dir() or True:
-    max_dict={}
-    max_array=[]
-    min_array=[]
-    fig,axlist=plt.subplots(1,3,figsize=(12,8))
-    for ns,this_simname in enumerate(sim_list):
-        htool = ht[this_simname]
-        core_list = np.concatenate( [htool.cores_used, htool.cores_used])
-        for nc1,core_id_1 in enumerate(htool.cores_used):
-            o=overlap_dict[this_simname]
-            both_ways = np.concatenate([o[:,nc1],o[nc1,:]])
-            max_arg = np.argmax(both_ways)
-            if max_arg >= len(htool.cores_used):
-                max_arg -= len(htool.cores_used)
-            max_core = core_list[max_arg]
-            axlist[ns].scatter( o[nc1,max_arg], o[max_arg,nc1])
-    fig.savefig('plots_to_sort/biggest.png')
+                a,b=htool.overlaps[core_id_1][nc2], htool.overlaps[core_id_2][nc1] 
+                ratio = max([a,b])
+                rat= sorted( [a,b])
+                if rat[1] == 0:
+                    ratio = max([a,b])
+                else:
+                    ratio=rat[0]/rat[1]
+                ratio_matrix[this_simname][nc1,nc2]=ratio
+                particle_matrix[this_simname][nc1,nc2] = np.sqrt( particles[this_simname][nc1]*particles[this_simname][nc2])
+
+
 
 import means_etc
 reload(means_etc)
+
 if 1:
+    #Probably the good one.
     for ns,this_simname in enumerate(sim_list):
         on = overlap_numb[this_simname]
         ont = on.transpose()
         of = overlap_dict[this_simname]
+        oft = overlap_dict[this_simname].transpose()
         #how it works:
         #tool.overlaps[core_id] = list of foreign particles in my contour
         #o[core_id,:] = tool.overlaps[core_id]
         #o[core,:] = other particle in my core contour
         #o[:,core] = other contours with my particles
+        both = np.stack([on, ont])
+        minmin = both.min(axis=0)
+
+        ofmin = np.stack([of,oft]).min(axis=0)
+        of = ofmin
+
 
         mask = (on>0.0)*(ont>0.0)
-        overlap = on>0
-
+        overlap = ofmin>0
 
         m1=mask*overlap
+        NumberOfOverlap=(m1).sum(axis=1)
+        Max = (of*mask).max(axis=1)
         NumberOfOverlap=(m1).sum(axis=1)
         Fraction = (of*mask).sum(axis=1)
         Fraction[NumberOfOverlap>0] /= NumberOfOverlap[ NumberOfOverlap > 0]
@@ -92,27 +107,104 @@ if 1:
         plt.clf()
         figa, axa, axtop,axright = means_etc.three_way_bean()
         axa.scatter( NumberOfOverlap, Fraction,c='k')
+        axa.scatter( NumberOfOverlap,Max ,c='r')
         axtop.hist( NumberOfOverlap, bins=bins_n, histtype='step',color='k')
         axright.hist( Fraction, bins=bins_f, histtype='step',color='k',orientation='horizontal')
+        axright.hist( Max, bins=bins_f, histtype='step',color='r',orientation='horizontal')
 
-        axbonk(axa,xlabel=r'$N_{\rm{overlap}}$', ylabel='Average Overlap Fraction')
-        axa.set_xlim([-0.1,nmax+0.1])
-        axbonk(axtop,xlabel='',ylabel=r'$N$')
-        axbonk(axright,xlabel=r'$N$',ylabel='')
-        axright.set_ylim( axa.get_ylim())
-        axtop.set_xlim( axa.get_xlim())
-        axtop.set_xticks([])
-        axright.set_yticks([])
-
-
-
+        if 1:
+            axbonk(axa,xlabel=r'$N_{\rm{overlap}}$', ylabel='Overlap Fraction')
+            axa.set_xlim([-0.1,nmax+0.1])
+            axbonk(axtop,xlabel='',ylabel=r'$N$')
+            axbonk(axright,xlabel=r'$N$',ylabel='')
+            axright.set_ylim( axa.get_ylim())
+            axtop.set_xlim( axa.get_xlim())
+            axtop.set_xticks([])
+            axright.set_yticks([])
 
         figa.savefig('plots_to_sort/%s_overlaps.pdf'%this_simname)
-        #ax2[ns].set_title('No overlap %d'%(NumberOfOverlap==0).sum())
+if 0:
+    fig,ax=plt.subplots(1,2)#, figsize=(12,4))
+    for ns,this_simname in enumerate(sim_list):
+        of = overlap_dict[this_simname]
+        oft = of.transpose()
+        o1 = of.flatten()
+        o2 = oft.flatten()
 
-        #ax[ns].hist(this_in_that, histtype='step', label='this in that',bins=bins)
-        #
-        #ax[ns].hist(that_in_this, histtype='step', label='that in this',bins=bins)
+        no = ~((o1==0)*(o2==0))
+        no = no *( (o1 >=0)+(o2>=0))
+        print((o1[no]==0).sum())
+        b = np.column_stack([o1[no],o2[no]])
+        c = np.min(b,axis=1)
+        ax[0].hist(c,histtype='step',label=this_simname,bins=64)
+
+        no = (( o1 > 0) + (o2 > 0) )*( ~( (o1 ==0)+(o2==0)))
+
+    axbonk(ax[0],xlabel=r'$r1/r2$',ylabel='N',yscale='log')
+    fig.savefig('plots_to_sort/hist.png')
+
+if 0:
+    fig,ax=plt.subplots(1,2)#, figsize=(12,4))
+    for ns,this_simname in enumerate(sim_list):
+        of = overlap_dict[this_simname]
+        oft = of.transpose()
+        o1 = of.flatten()
+        o2 = oft.flatten()
+
+        ok = ~((o1==0)*(o2==0))
+        ok = ok *( (o1 >=0)+(o2>=0))
+        print((o1[ok]==0).sum())
+        b = np.column_stack([o1[ok],o2[ok]])
+        c = np.min(b,axis=1)
+        geo = np.geomspace(1e-2,1,16)
+        bins = np.concatenate( [[0],geo])
+        ax[0].hist(c,histtype='step',label=this_simname,bins=bins, density=True)
+
+        xor = np.logical_xor( (o1==0), (o2==0))
+        bins = np.geomspace( 1e-5,1,16)
+        butins=o1[xor]
+        butins=butins[butins>0]
+        ax[1].hist(butins, histtype='step',label=this_simname,bins=bins, density=True)
+        #ax[1].plot( sorted(butins))
+
+
+    axbonk(ax[0],xlabel=r'$r1/r2$',ylabel='N',yscale='log',xscale='log')
+    axbonk(ax[1],xlabel=r'Lopsides',ylabel='N',yscale='log',xscale='log')
+    fig.savefig('plots_to_sort/hist.png')
+        
+        
+
+
+
+
+if 0:
+
+    fig,ax=plt.subplots(1,3, figsize=(12,4))
+    for ns,this_simname in enumerate(sim_list):
+        on = overlap_numb[this_simname]
+        ont = on.transpose()
+        of = overlap_dict[this_simname]
+        #how it works:
+        #tool.overlaps[core_id] = list of foreign particles in my contour
+        #o[core_id,:] = tool.overlaps[core_id]
+        #o[core,:] = other particle in my core contour
+        #o[:,core] = other contours with my particles
+
+        mask = (on>0.0)*(ont>0.0)
+
+        part = particle_matrix[this_simname].flatten()
+        ratt = ratio_matrix[this_simname].flatten()
+
+        ax[ns].scatter(part,ratt)
+        overlap = on>0
+        m1=mask*overlap
+        NumberOfOverlap=(m1).sum(axis=1)
+        Fraction = (of*mask).sum(axis=1)
+        Fraction[NumberOfOverlap>0] /= NumberOfOverlap[ NumberOfOverlap > 0]
+    fig.savefig('plots_to_sort/part_rat.png')
+
+
+
 
 
 if 0:
