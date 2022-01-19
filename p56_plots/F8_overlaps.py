@@ -37,21 +37,25 @@ if 1:
     for sim in sim_list:
         stool=st[this_simname]
         htool=ht[this_simname]
-        fig,ax=plt.subplots(2,2, figsize=(12,12))
+        fig,ax=plt.subplots(2,2, figsize=(12,7.2))
         fig.subplots_adjust(wspace=0,hspace=0)
+        ax[1][0].set_aspect('equal')
+        #for aaa in ax.flatten():
+        #    aaa.set_aspect('equal')
 
         for nset,this_superset in enumerate(stool.supersets):
             if nset != 1:
                 continue
             for los in [0,1,2]:
-                core_list=list(this_superset)
-                color_dict = colors.make_core_cmap(core_list, cmap = 'tab20c', seed = -1)
+                core_list=np.sort(list(this_superset))
+                color_dict = colors.make_core_cmap(core_list, cmap = 'tab20', seed = -1)
+                #color_dict = colors.make_core_cmap(core_list)
                 if 1:
                     CHT.plot_2d(htool,core_list=core_list,frames=[0],
-                                accumulate=True,label_cores=[0], 
+                                accumulate=True,label_cores=[-1], 
                                 prefix = "S%02d"%nset, color_dict=color_dict,
-                               axis_to_plot=[0,1,2],
-                               plot_square=False,
+                                axis_to_plot=[0,1,2],
+                                plot_square=False,
                                 external_axis=ax.flatten()
                                )
             reload(hair_dryer)
