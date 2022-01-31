@@ -152,7 +152,18 @@ class track_manager():
                 self.core_ids = snapshot.core_ids
             particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
             particle_end=particle_start+particle_ids.size
-
+            
+            
+            self_cores_set=set(self.core_ids)
+            snap_cores_set=set(snapshot.core_ids)
+            if not self_cores_set.issuperset(snap_cores_set):
+                if not self_cores_set.isdisjoint(snap_cores_set):
+                    print(" Don't know what to do with only some of the cores being present.")
+                    pdb.set_trace()
+                self.core_ids = np.concatenate([self.core_ids, snapshot.core_ids])
+                self.particle_ids = np.concatenate([self.particle_ids, particle_ids])
+                particle_start = np.where( self.core_ids ==  snapshot.core_ids[0])[0][0]
+                particle_end = particle_start + particle_ids.size
 
 
         #check that the particles we're inserting
