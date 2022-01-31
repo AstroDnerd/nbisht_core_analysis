@@ -8,7 +8,7 @@ reload(dl)
 plt.close('all')
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
-
+import time
 from scipy.spatial import Delaunay
 def in_hull(p, hull):
     """
@@ -26,7 +26,11 @@ def in_hull(p, hull):
     if not isinstance(hull,Delaunay):
         hull = Delaunay(hull)
 
+
+    #t0 = time.time()
     simplex = hull.find_simplex(p)
+    #t1 = time.time()
+    #print('woot %f'%(t1-t0))
 
     good = simplex >=0
     return good
@@ -395,8 +399,8 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 #
                 add_jitter=True
                 if add_jitter:
-                    dx = np.random.random( n_particles)*1./128
-                    dy = np.random.random( n_particles)*1./128
+                    dx =(np.random.random( n_particles)-0.5)*1./128
+                    dy =(np.random.random( n_particles)-0.5)*1./128
                 else:
                     dx=0
                     dy=0
@@ -404,6 +408,17 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
 
                 #streaks.  Use with caution.
                 #this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
+
+                if plot_square:
+                    x_min = min([x_min,this_p[x].min(), -delta])
+                    x_max = max([x_max,this_p[x].max(), 1+delta])
+                    y_min = min([y_min,this_p[y].min(), -delta])
+                    y_max = max([y_max,this_p[y].max(), 1+delta])
+
+                    this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
+                else:
+                    x_min, x_max = [x_ext,y_ext,z_ext][x].minmax
+                    y_min, y_max = [x_ext,y_ext,z_ext][y].minmax
 
 
                 if do_hull:
@@ -416,17 +431,21 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
 
                 if core_id in label_cores or -1 in label_cores:
-                    this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
-                if plot_square:
-                    x_min = min([x_min,this_p[x].min(), -delta])
-                    x_max = max([x_max,this_p[x].max(), 1+delta])
-                    y_min = min([y_min,this_p[y].min(), -delta])
-                    y_max = max([y_max,this_p[y].max(), 1+delta])
+                    if LOS == 0:
+                        #this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
+                        #the_x=this_p[x].mean()
+                        #the_y=this_p[y].mean()
+                        the_x_tmp = this_p[x] - this_p[x].min()+ 0.1
+                        the_y_tmp = this_p[y] - this_p[y].min()+ 0.1
+                        the_x = 10**np.log10(the_x_tmp).mean() + this_p[x].min() - 0.1
+                        the_y = 10**np.log10(the_y_tmp).mean() + this_p[y].min() - 0.1
+                        text_height=0.02
+                        text_ymax = y_max-text_height
+                        text_y = text_ymax - ncore*text_height
+                        text_x = x_max - 2*text_height
+                        this_ax.text( text_x, text_y, r'$%s$'%core_id, color=color_dict[core_id])
+                        this_ax.plot([the_x,text_x],[the_y,text_y],c='k')
 
-                    this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
-                else:
-                    x_min, x_max = [x_ext,y_ext,z_ext][x].minmax
-                    y_min, y_max = [x_ext,y_ext,z_ext][y].minmax
 
 
                 axbonk(this_ax,xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
