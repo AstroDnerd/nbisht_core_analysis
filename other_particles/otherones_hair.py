@@ -28,7 +28,7 @@ class images():
 
     def run(self, output_prefix='NAME',core_list=None, frames=None,
             verbose=False, los_list=[-1], external_axis=None):
-        print('w3')
+        print('w3',core_list)
         dx=1./2048
         nx = 1./dx
         thtr = self.this_looper.tr
@@ -50,6 +50,7 @@ class images():
         if verbose:
             print("MS 1")
         print('w4')
+        print(core_list)
         
         for core_id in core_list:
             ms=  trackage.mini_scrubber(this_looper.tr,core_id, do_velocity=False)
@@ -104,7 +105,7 @@ class images():
 
 
 
-                outname='plots_to_sort/image_%s_%04d.png'%(output_prefix,frame)
+                outname='plots_to_sort/image_%s_c%04d_%04d.png'%(output_prefix,core_id,frame)
                 fig.savefig(outname)
                 print(outname)
 

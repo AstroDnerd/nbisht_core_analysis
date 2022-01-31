@@ -27,10 +27,19 @@ for this_simname in sim_list:
     if this_simname not in ht:
         ht[this_simname] = CHT.hull_tool(TL4.loops[this_simname])
         ht[this_simname].make_hulls()
+        ht[this_simname].make_overlaps()
+
+if 'st' not in dir():
+    reload(supersets)
+    st={}
+    for this_simname in sim_list:
+        st[this_simname] = supersets.superset( TL4.loops[this_simname], ht[this_simname])
+        st[this_simname].find()
 
 import otherones
 reload(otherones)
-new_looper=otherones.find_other_ones('a002',ht['u402'],core_list=[3])
+core_list=[3,5]
+new_looper=otherones.find_other_ones('a002',ht['u402'],core_list=core_list, superset=st['u402'])
 outname = "otherones_b002_temp.h5"
 if 0:
     import tracks_read_write
