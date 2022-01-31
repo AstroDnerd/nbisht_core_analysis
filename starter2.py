@@ -6,7 +6,8 @@
 from starter1 import *
 #so we can import things from sub directories
 path_list= ["./tools_data", "./tools_pdf", "./testing",\
-            "./tools", "./tools_tracks", "./trash","./new_targets", "./p56_plots"]
+            "./tools", "./tools_tracks", "./trash","./new_targets", "./p56_plots",
+            "./other_particles"]
 for directory in path_list:
     if directory not in sys.path:
         sys.path += [directory]
