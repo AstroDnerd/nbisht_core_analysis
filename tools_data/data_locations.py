@@ -1,4 +1,5 @@
 """
+test2
 A container for code portability.
 Put
 export machine = my_machine_name
@@ -38,8 +39,8 @@ if machine == 'Nazare':
     sim_u103 = '/archive2/dcollins4096/Paper19/u11_r4_l4_128-Beta20/GravPotential'
 
     sim_u201 = '/archive2/dcollins4096/Paper19/u05-r4-l4-128-Beta0.2'
-    sim_u202 = '/scratch1/dcollins/Paper19/u202-Beta2'
-    sim_u203 = '/scratch1/dcollins/Paper19/u203-Beta20'
+    sim_u202 =  '/archive2/dcollins4096/Paper19/u202-Beta2/GravPotential'
+    sim_u203 =  '/archive2/dcollins4096/Paper19/u203-Beta20/GravPotential'
 
     sim_u301 = sim_u201
     sim_u302 = sim_u202
@@ -59,6 +60,9 @@ if machine == 'Nazare':
     mountain_top = {'u301':"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u301_new_tracks_take_9c.h5",
                     "u302":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u302_new_tracks_take_9b.h5",
                     "u303":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u303_new_tracks_take_9b.h5"}
+    u500 = {'u501':"/scratch1/dcollins/Paper19/Datasets/u500/u501_all_frame_all_prim.h5",
+            "u502":"/scratch1/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
+            "u503":"/scratch1/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
 elif machine == 'cloudbreak':
     sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
