@@ -308,14 +308,16 @@ def shift_4(arr):
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
+    #edit: this code is obsolote if we enforce 
+    #      having the last point and enforce the last point is in [0,1]
     #then shift entire tracks that are on the wrong side
-    centroid = out[:,-1].mean()
-    delta = out[:,-1]-centroid
-    if ( delta > 0.5).any():
-        more_shift = np.where( delta>0.5)[0]
-        shift = np.sign(delta[more_shift])
-        shift.shape = shift.size,1
-        out[more_shift,:] -= shift
+    #centroid = out[:,-1].mean()
+    #delta = out[:,-1]-centroid
+    #if ( delta > 0.5).any():
+    #    more_shift = np.where( delta>0.5)[0]
+    #    shift = np.sign(delta[more_shift])
+    #    shift.shape = shift.size,1
+    #    out[more_shift,:] -= shift
     return out  
 
 
@@ -357,6 +359,7 @@ class mini_scrubber():
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
         self.density_tot = self.density.sum(axis=0)
+        self.particle_ids = self.trk.c([core_id],'particle_id')
 
         if 1:
             #do the shift
@@ -368,6 +371,24 @@ class mini_scrubber():
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
+
+        if 0: 
+            #Temp debugging code.  Kill later.
+            if 'shift_x' not in self.trk.track_dict or True:
+                self.trk.track_dict['shift_x']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['shift_y']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['shift_z']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['test_rho']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['test_z']=np.zeros_like( self.trk.track_dict['density'])
+            core_mask = self.trk.core_ids == core_id
+            self.shift_x = self.this_x - self.raw_x
+            self.shift_y = self.this_y - self.raw_y
+            self.shift_z = self.this_z - self.raw_z
+            self.trk.track_dict['shift_x'][core_mask,:]= self.shift_x
+            self.trk.track_dict['shift_y'][core_mask,:]= self.shift_y
+            self.trk.track_dict['shift_z'][core_mask,:]= self.shift_z
+            self.trk.track_dict['test_rho'][core_mask,:]= self.raw_z
+            self.trk.track_dict['test_z'][core_mask,:]= self.this_z
         #print("kludge: raw mean")
         self.mean_x = np.mean(self.this_x,axis=0)
         self.mean_y = np.mean(self.this_y,axis=0)
