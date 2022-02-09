@@ -39,3 +39,6 @@ from collections import defaultdict
 
 x_dict = [1,0,0]
 y_dict = [2,2,1]
+import IPython
+terminal = IPython.get_ipython()
+terminal.pt_app.auto_suggest = None
