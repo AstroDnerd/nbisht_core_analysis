@@ -50,15 +50,21 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         #this_min/=4
         #this_max/=4
         print(this_min,this_max)
-        #ok = ((all_points >= this_min)*(all_points <= this_max)).all(axis=1)
+        ok = ((all_points >= this_min)*(all_points <= this_max)).all(axis=1)
+        print('THIS MIN', this_min)
+        print('THIS MAX', this_max)
 
 
         #do the work.  Wrap it with a timer
         t0=time.time()
 
-        print('do the hull')
-        mask = CHT.in_hull( all_points, this_hull_points)
+        print('do the hull, fix')
+        mask_ok = CHT.in_hull( all_points[ok], this_hull_points)
+        mask = copy.copy(ok)
+        mask[mask] *= mask_ok
+
         found_particles = all_particles[mask]
+        print("KLUDGE min over mask", all_points[mask].min(axis=0))
 
         t1=time.time()
         print("time ", t1-t0)
@@ -87,24 +93,28 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
             for other_core in superset.supersets[my_superset]:
                 this_particles = np.concatenate([this_particles,
                                                  this_loop.target_indices[other_core]])
-        #neighborhoods go here
-        this_set = set(this_particles)
-        found_set = set(found_particles)
-        this_only = found_set.intersection(this_set)
-        otherones = found_set - this_only
-        otherones_mask = np.concatenate([np.ones(len(otherones),dtype='bool'), 
-                                         np.zeros(len(this_only),dtype='bool')])
-        particles_both = np.concatenate([nar(list(otherones)), nar(list(this_only))])
-        sort_both = np.argsort(particles_both)
-        sort1 = np.argsort(found_particles)
-        sort_back = np.argsort(sort1) 
-        mask[ mask] *= otherones_mask[sort_both][sort_back]
+        print("KLUDGE no this removal")
+        if 0:
+
+            #Remove Core particles from Otherones
+            this_set = set(this_particles)
+            found_set = set(found_particles)
+            this_only = found_set.intersection(this_set)
+            otherones = found_set - this_only
+            otherones_mask = np.concatenate([np.ones(len(otherones),dtype='bool'), 
+                                             np.zeros(len(this_only),dtype='bool')])
+            particles_both = np.concatenate([nar(list(otherones)), nar(list(this_only))])
+            sort_both = np.argsort(particles_both)
+            sort1 = np.argsort(found_particles)
+            sort_back = np.argsort(sort1) 
+            mask[ mask] *= otherones_mask[sort_both][sort_back]
 
         otherone_particle_ids = all_particles[mask]
         otherone_core_ids = np.ones_like(otherone_particle_ids,dtype='int')*core_id
         otherone_field_values={}
         for field in other_loop.tr.track_dict:
             otherone_field_values[field]=other_loop.tr.track_dict[field][mask,:]
+        print('kludge minz ', otherone_field_values['z'].min())
         snap = small_snapshot(particle_ids=otherone_particle_ids,
                               core_ids=otherone_core_ids,
                               frames=other_loop.tr.frames,

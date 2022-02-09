@@ -30,17 +30,20 @@ for this_simname in sim_list:
         ht[this_simname].make_overlaps()
 
 if 'st' not in dir():
+    import supersets
     reload(supersets)
     st={}
     for this_simname in sim_list:
         st[this_simname] = supersets.superset( TL4.loops[this_simname], ht[this_simname])
         st[this_simname].find()
 
-import otherones
-reload(otherones)
-core_list=[3,5]
-new_looper=otherones.find_other_ones('a002',ht['u402'],core_list=core_list, superset=st['u402'])
-outname = "otherones_b002_temp.h5"
+if 'new_looper' not in dir():
+    import otherones
+    reload(otherones)
+    core_list=[3,5]
+    print('make new one')
+    new_looper=otherones.find_other_ones('a002',ht['u402'],core_list=core_list)#, superset=st['u402'])
+    outname = "otherones_b002_temp.h5"
 if 0:
     import tracks_read_write
     tracks_read_write.save_loop_trackage_only( new_looper, outname)
@@ -49,6 +52,7 @@ if 1:
     import otherones_hair
     reload(otherones_hair)
     IM = otherones_hair.images(new_looper, TL4.loops['u402'])
-    IM.run(frames=[0,118])
+    IM.run(frames=[0],core_list=[3])
+    #IM.run(frames=[0,118])
 #hd = hair_dryer.hair_tool( this_looper )
 #hd.run()
