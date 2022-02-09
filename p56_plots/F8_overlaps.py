@@ -26,6 +26,7 @@ if 'ct' not in dir():
         ct[this_simname].make_distance()
 
 if 'st' not in dir():
+    reload(supersets)
     st={}
     for this_simname in sim_list:
         st[this_simname] = supersets.superset( TL4.loops[this_simname], ht[this_simname])
