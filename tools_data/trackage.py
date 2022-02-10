@@ -148,10 +148,15 @@ class track_manager():
             """looper2"""
 
             if len(self.particle_ids) == 0:
-                self.particle_ids = particle_ids
-                self.core_ids = snapshot.core_ids
-            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
-            particle_end=particle_start+particle_ids.size
+                self.particle_ids = copy.copy(particle_ids)
+                self.core_ids = copy.copy(snapshot.core_ids)
+            if snapshot.core_ids[0] not in self.core_ids:
+                self.particle_ids = np.concatenate([self.particle_ids, particle_ids])
+                self.core_ids = np.concatenate([self.core_ids,snapshot.core_ids])
+            #particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            #particle_end=particle_start+particle_ids.size
+            particle_start = np.where(self.core_ids == snapshot.core_ids[0])[0][0]
+            particle_end = particle_start + particle_ids.size
             
             
             self_cores_set=set(self.core_ids)
@@ -180,16 +185,26 @@ class track_manager():
             test = iter(frames)
         except:
             frames = [frames]
+        times = snapshot.time
+        try:
+            test = iter(snapshot.time)
+        except:
+            times = [snapshot.time]
 
         for nf,frame in enumerate(frames):
             if frame not in self.frames:
                 self.frames=np.append(self.frames,frame)
-                self.times=np.append(self.times,snapshot.time[nf]) #ds['InitialTime'])
+
+                self.times=np.append(self.times,times[nf]) #ds['InitialTime'])
 
         frame_id = np.where(self.frames == frames[0])[0][0]
 
 
-        for field in snapshot.field_values:
+        for yt_field_name in snapshot.field_values:
+            if type(yt_field_name) is tuple:
+                field = yt_field_name[1]
+            else:
+                field=yt_field_name
             current_shape = self[field].shape
             new_shape = [self.particle_ids.size,
                          self.frames.size]
@@ -199,8 +214,8 @@ class track_manager():
             temp_frame[old_slice]= self[field]
             new_slice = (slice(particle_start,particle_end),
                          slice(frame_id,frame_id+len(frames)))
-            nuggle=np.array(snapshot.field_values[field])
-            #nuggle.shape=(particle_ids.size,len(frames))
+            nuggle=np.array(snapshot.field_values[yt_field_name])
+            nuggle.shape=(particle_ids.size,len(frames)) #does this break something?
             temp_frame[new_slice]=nuggle
             self[field]=temp_frame
     
