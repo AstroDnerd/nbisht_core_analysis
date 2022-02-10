@@ -9,17 +9,18 @@ import otherones
 reload(hair_dryer)
 import looper2
 import three_loopers_tenfour as TL4
-sim_list=['u402']
 if 'this_simname' not in dir():
-    this_simname = 'a002'
-    other_simname = 'u302'
-    save='a002_all_particles.h5'
+    new_simname = 'a001'
+    other_simname = 'u301'
+    this_simname = 'u401'
+    save='a001_all_particles.h5'
     this_looper = looper2.core_looper2( directory = dl.sims[other_simname], savefile_only_trackage=save)
     print('make ms, takes about 90 sec')
     ms = trackage.mini_scrubber(this_looper.tr, 0, do_velocity=False)
     this_looper.ms = ms
 
-    TL4.loops['u402'].big_loop=this_looper
+    TL4.loops[this_simname].big_loop=this_looper
+sim_list=[this_simname]
 
 if 'ht' not in dir():
     ht={}
@@ -40,19 +41,24 @@ if 'st' not in dir():
 if 'new_looper' not in dir():
     import otherones
     reload(otherones)
-    core_list=[3,5]
     print('make new one')
-    new_looper=otherones.find_other_ones('a002',ht['u402'],core_list=core_list)#, superset=st['u402'])
-    outname = "otherones_b002_temp.h5"
-if 0:
-    import tracks_read_write
-    tracks_read_write.save_loop_trackage_only( new_looper, outname)
+    core_list=None
+    core_list=[202]
+    for simname in sim_list:
+        superset = None; name='has_neighbor'
+        superset = st[simname]; name='no_neighbor'
+        new_looper=otherones.find_other_ones(new_simname,ht[this_simname],core_list=core_list,superset=superset)
+        outname = "otherones_%s_%s.h5"%(this_simname,name)
+    if not os.path.exists(outname):
+        tracks_read_write.save_loop_trackage_only( new_looper, outname)
          
 if 1:
     import otherones_hair
     reload(otherones_hair)
-    IM = otherones_hair.images(new_looper, TL4.loops['u402'])
-    IM.run(frames=[0],core_list=[3])
+    core_loop = TL4.loops[this_simname]
+    IM = otherones_hair.images(new_looper, core_loop, output_prefix=this_simname)
+    IM.run(frames=[0, core_loop.target_frame])#,core_list=[3])
+    #IM.run(frames=[0, core_loop.target_frame])#,core_list=[3])
     #IM.run(frames=[0,118])
 #hd = hair_dryer.hair_tool( this_looper )
 #hd.run()

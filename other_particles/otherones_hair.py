@@ -47,65 +47,32 @@ class images():
         self.core_list=core_list
         mini_scrubbers = {}
         other_looper=self.other_looper
-        if verbose:
-            print("MS 1")
-        print('w4')
-        print(core_list)
         
         for core_id in core_list:
+            print('Otherones core %d'%core_id)
             ms=  trackage.mini_scrubber(other_looper.tr,core_id, do_velocity=False)
             #ms.make_floats(core_id)
 
-            for nt,frame in [[0,0]]:#[[0,0],[-1,118]]: #kludge needs to be updates to work on frame only
-                fig,axes=plt.subplots(2,2, figsize=(12,12))
-                ax=axes[0][0]; ax1=axes[0][1]
-                ax2=axes[1][0];ax3=axes[1][1]
+            Ncol = len(frames)
+            frame_index = [ np.where( other_looper.tr.frames == frame)[0][0] for frame in frames]
+            frame_str = "_%04d"*Ncol%tuple(frames)
+            nrows=len(frame_index)
+            counter=-1
+            fig,axes=plt.subplots(2,nrows, figsize=(12,12))
+            for nt,frame in zip(frame_index, frames):
+                counter+=1
+
+
+                ax = axes[counter][0]
+                ax1 = axes[counter][1]
                 ax.set_aspect('equal')
 
+
                 delta = 0.1
-                ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
 
-                mask=slice(None)
-
-                if 1:
-                    #kludge for bad shift
-                    too_low_mask = ms.this_z[:,nt] < -0.3
-                    core_mask = ms.trk.core_ids == core_id
-                    core_particle_ids = ms.trk.particle_ids[core_mask]
-                    wrong_particles = core_particle_ids[ too_low_mask]
-
-                    FirstWrong = np.where(too_low_mask)[0][0]
-                    WP = wrong_particles[0]
-                    print('WP',WP)
-                    d1=other_looper.tr.p([WP],'density')
-                    d2=self.first_looper.big_loop.tr.p([WP],'density')
-                    print(d1)
-                    print(d2)
-                    s1=other_looper.tr.p([WP],'shift_z')
-                    s2=self.first_looper.big_loop.tr.p([WP],'shift_z')
-                    z1=other_looper.tr.p([WP],'z')
-                    z2=self.first_looper.big_loop.tr.p([WP],'z')
-                    r1=other_looper.tr.p([WP],'test_rho')
-                    r2=self.first_looper.big_loop.tr.p([WP],'test_rho')
-
-
-
-
-
-                    #print("Did I get the particles?", np.abs(core_particle_ids - ms.particle_ids).sum())
-
-                    #print( ms.shift_z[too_low_mask,:])
-                    pdb.set_trace()
-                    #for npart, part in enumerate(wrong_particles):
-                    #    print('shiftj',part,other_looper.tr.p([part],'shift_x'))
-                    #    print('shiftk',part,self.first_looper.big_loop.tr.p([part],'shift_x'))
-
-
+                mask = slice(None)
                 this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
-                print("THIS", this_x.shape)
                 this_p = [this_x,this_y,this_z]
-
-
 
                 x=2;y=0
 
@@ -124,10 +91,10 @@ class images():
                 ii[2]-=imin[2]
                 image = np.zeros([ii.max()+1]*3)
                 image[ii[0], ii[1], ii[2]]=1
-                ax.scatter( this_p[x], this_p[y])
+                #ax.scatter( this_p[x], this_p[y])
                 #ax.scatter( ii[x], ii[y])
                 #ax.scatter(ii[x].flatten(), ii[y].flatten())
-                if 0:
+                if 1:
                     TheZ = image.sum(axis=1)
                     norm = mpl.colors.LogNorm(vmin=1,vmax=TheZ.max())
                     cmap=copy.copy(mpl.cm.get_cmap("viridis"))
@@ -135,15 +102,28 @@ class images():
                     #ax.pcolormesh(xx,yy,TheZ, norm=norm,cmap=cmap)
                     ax.imshow(TheZ, cmap=cmap, norm=norm, origin='lower',interpolation='nearest')
 
+                box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
+                box_x, box_y = nar(box_x)*128-imin[x], nar(box_y)*128-imin[y]
+                ax.plot(box_x,box_y, c=[0.5]*3)
 
                 ms2 = trackage.mini_scrubber(self.first_looper.tr, core_id, do_velocity=False)
-                first_x,first_y,first_z=ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]
-                first_p = np.stack([first_x,first_y,first_z]) #*128
 
-                print("WWW", first_p[x].shape)
-                #ax.scatter( first_p[x]-imin[x], first_p[y]-imin[y], s=100)
-                ax.scatter( first_p[x], first_p[y], s=100)
+                first_p = np.stack([ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]])
 
+                ax.scatter( first_p[x]*128-imin[x], first_p[y]*128-imin[y], s=100, facecolors='none',edgecolors='k')
+                #ax.scatter( first_p[x], first_p[y], s=100)
+
+                xticks = np.mgrid[-imin[x]:128-imin[x]:11j]
+                labs = ["%0.1f"%val for val in (xticks+imin[x])/128]
+                ax.set_xticks(xticks)
+                ax.set_xticklabels(labs)
+
+                yticks = np.mgrid[-imin[y]:128-imin[y]:11j]
+                labs = ["%0.1f"%val for val in (yticks+imin[y])/128]
+                ax.set_yticks(yticks)
+                ax.set_yticklabels(labs)
+                ax.set_xlabel(r'$%s$'%('xyz'[x]))
+                ax.set_ylabel(r'$%s$'%('xyz'[y]))
 
                 other_density = other_looper.tr.c([core_id],'density')[:,nt]
                 first_density = self.first_looper.tr.c([core_id],'density')[:,nt]
@@ -152,20 +132,32 @@ class images():
                 other_y = ms.this_y[:,nt]-ms2.mean_y[nt]
                 other_z = ms.this_z[:,nt]-ms2.mean_z[nt]
                 other_r = np.sqrt(other_x**2+other_y**2+other_z**2)
+                rmin = 1/2048
+                rmax=other_r.max()
+                other_r[ other_r < rmin] = rmin
+                rrr=ms2.r[:,nt]+0
+                rrr[rrr<rmin]=rmin
                 r_ext = extents()
                 d_ext = extents()
                 r_ext(other_r); d_ext(other_density)
-                r_ext(ms2.r[:,nt]); d_ext(first_density)
-                ax1.scatter( other_r,other_density, c='r')
-                ax3.scatter( ms2.r[:,nt], first_density, c='g')
-                axbonk(ax1,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax)
-                axbonk(ax3,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax)
+                r_ext(rrr); d_ext(first_density)
+
+                import pcolormesh_helper as pch
+                reload(pch)
+                rho_bins = np.geomspace( other_density.min(), other_density.max(), 64)
+                r_bins = np.geomspace( *r_ext.minmax)
+                hist, xb, yb = np.histogram2d(other_r,other_density, bins=[r_bins,rho_bins])
+                pch.helper(hist,xb,yb,ax=ax1, cmap_name='Reds')
+
+                ax1.scatter( rrr, first_density, s=100, facecolors='none',edgecolors='k')
+                axbonk(ax1,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax, xlabel=r'$r$', ylabel=r'$\rho$')
 
 
 
-                outname='plots_to_sort/image_%s_c%04d_%04d.png'%(output_prefix,core_id,frame)
-                fig.savefig(outname)
-                print(outname)
+            outname='plots_to_sort/otherones_%s_c%04d_%s.png'%(output_prefix,core_id,frame_str)
+            fig.savefig(outname)
+            plt.close(fig)
+            print(outname)
 
 
 if 0:
