@@ -38,7 +38,9 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
                             )
 
     for core_id in core_list:
+        print("Find Otherones c%04d"%core_id)
         ms = trackage.mini_scrubber(this_loop.tr, core_id, do_velocity=False)
+        print('   ms done')
         this_hull_points = hull_tool.points_3d[core_id]
         all_particles = other_loop.target_indices
         all_points = np.column_stack( [oms.this_x[:,frame], oms.this_y[:,frame], oms.this_z[:,frame]])
@@ -49,25 +51,24 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         #print('kludge')
         #this_min/=4
         #this_max/=4
-        print(this_min,this_max)
         ok = ((all_points >= this_min)*(all_points <= this_max)).all(axis=1)
-        print('THIS MIN', this_min)
-        print('THIS MAX', this_max)
-
 
         #do the work.  Wrap it with a timer
         t0=time.time()
 
-        print('do the hull, fix')
+        print('   do hull on %d particles'%ok.sum())
         mask_ok = CHT.in_hull( all_points[ok], this_hull_points)
+
+        #the first mask, ok , cuts out particle that are unrelated.
+        #the second mask, mask_ok, is the selection we want out of this subset.
+        #mask[mask]*=mask_ok updates the first mask with the second mask.
         mask = copy.copy(ok)
         mask[mask] *= mask_ok
 
         found_particles = all_particles[mask]
-        print("KLUDGE min over mask", all_points[mask].min(axis=0))
 
         t1=time.time()
-        print("time ", t1-t0)
+        print("   time ", t1-t0)
 
         
         #Remove core particles from found particles.  
@@ -93,8 +94,7 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
             for other_core in superset.supersets[my_superset]:
                 this_particles = np.concatenate([this_particles,
                                                  this_loop.target_indices[other_core]])
-        print("KLUDGE no this removal")
-        if 0:
+        if 1:
 
             #Remove Core particles from Otherones
             this_set = set(this_particles)
@@ -114,7 +114,6 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         otherone_field_values={}
         for field in other_loop.tr.track_dict:
             otherone_field_values[field]=other_loop.tr.track_dict[field][mask,:]
-        print('kludge minz ', otherone_field_values['z'].min())
         snap = small_snapshot(particle_ids=otherone_particle_ids,
                               core_ids=otherone_core_ids,
                               frames=other_loop.tr.frames,
