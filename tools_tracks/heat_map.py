@@ -31,20 +31,23 @@ def plot_heat(tool=None, quan_dict=None, ax=None, bins=None, norm=False, positiv
         bins = np.linspace( quantity.min(), quantity.max(), 64)
     xbins = these_times
     ybins = 0.5*(bins[1:]+bins[:-1])
+    dv = bins[1:]-bins[:-1]
     nx = len(xbins) ; ny=len(ybins)
     TheX = np.r_[(ny)*[xbins]].transpose()
     TheY = np.r_[(nx)*[ybins]]
     hist = np.zeros( [xbins.size,ybins.size])
     for ntime, time in enumerate(these_times):
-        thishist,bins = np.histogram(quantity[:,ntime],bins=bins)
+        thishist,bins = np.histogram(quantity[:,ntime],bins=bins,density=True)
         hist[ntime,:]=thishist
     cmap = copy.copy(mpl.cm.get_cmap("viridis"))
     cmap.set_under('w')
-    #minmin = hist[hist>0].min()
-    norm = mpl.colors.LogNorm(vmin=1,vmax=33)
+    minmin = hist[hist>0].min()
+    norm = mpl.colors.LogNorm( vmin =minmin, vmax=hist.max())
+    #norm = mpl.colors.LogNorm(vmin=1,vmax=33)
     ploot=ax.pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
     #axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
     #axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
     #axbonk(ax,ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='log')
-    return quantity
+    stuff = {'quantity':quantity, 'TheX':TheX,'TheY':TheY,'hist':hist, 'dv':dv}
+    return stuff
 
