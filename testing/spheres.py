@@ -40,39 +40,40 @@ if 0:
     xc,yc,zc=[0.5]*3
     r = np.sqrt((ray[YT_x].v-xc)**2 + (ray[YT_y].v-yc)**2 + (ray[YT_z].v-zc)**2)
     G = ds['GravitationalConstant']/(np.pi*4)
-    Phi1=ray['GravPotential']
+    Phi_data=ray['GravPotential']
 
 if 1:
     #all the points in the sphere
     ad = ds.all_data()
     xc,yc,zc=[0.5]*3
     r = np.sqrt( (ad[YT_x].v-xc)**2+(ad[YT_y].v-yc)**2+(ad[YT_z].v-zc)**2)
-    Phi1 = ad[YT_potential]
+    Phi_data = ad[YT_potential]
 
 
 #analytic result
 #Dan, make sure you understand what I'm doing here.
-PhiA = np.zeros_like( r)
+Phi_analytic = np.zeros_like( r)
 ok1 = r>rsphere
-PhiA[ok1] = -G*M/r[ ok1]
-PhiA[~ok1] = -G*M*(3*rsphere**2-r[~ok1]**2)/(2*rsphere**3)
+Phi_analytic[ok1] = -G*M/r[ ok1]
+Phi_analytic[~ok1] = -G*M*(3*rsphere**2-r[~ok1]**2)/(2*rsphere**3)
 
 
 def shifter(x,m,b):
-    #Shifter slides the analytic solution PhiA around to match the data
-    if hasattr(PhiA,'v'):
-        Phi = PhiA.v
+    #Shifter slides the analytic solution Phi_analytic around to match the data
+    if hasattr(Phi_analytic,'v'):
+        Phi = Phi_analytic.v
     else:
-        Phi = PhiA
+        Phi = Phi_analytic
     return Phi*m+b
 
 from scipy.optimize import curve_fit
 
 #fit the analytic, which is stored in the function shifter
-popt,pcov = curve_fit( shifter, r, Phi1.v)
-plt.plot( r, Phi1, label='data')
+popt,pcov = curve_fit( shifter, r, Phi_data.v)
+plt.scatter( r, Phi_data, label='data')
 
-plt.plot( r, PhiA, label='Analytic')
+plt.plot( r, Phi_analytic, label='Analytic')
+#check out this syntax.  popt is a list, the star * expands the list into arguments.
 plt.plot( r, shifter( r, *popt), label='shift %0.1f %0.1f'%(popt[0],popt[1]))
 plt.legend(loc=0)
 plt.savefig('plots_to_sort/ray.png')
