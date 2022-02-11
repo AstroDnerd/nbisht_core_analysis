@@ -189,14 +189,49 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
     vx2 = thtr.c(core_list[1:], 'velocity_x')[:,0]
     vy2 = thtr.c(core_list[1:], 'velocity_y')[:,0]
     vz2 = thtr.c(core_list[1:], 'velocity_z')[:,0]
-    VM1 = np.sqrt(vx1**2+vy1**2+vz1**2)
-    VM2 = np.sqrt(vx2**2+vy2**2+vz2**2)
-    vx1bar=np.mean(vx1)
-    vy1bar=np.mean(vy1)
-    vz1bar=np.mean(vz1)
-    vmbar = np.sqrt(vx1bar**2+vy1bar**2+vz1bar**2)
-    cosine1 =(vx1*vx1bar+vy1*vy1bar+vz1*vz1bar)/(VM1*vmbar)
-    cosine2 =(vx2*vx1bar+vy2*vy1bar+vz2*vz1bar)/(VM2*vmbar)
+    gx1 = thtr.c(core_list[:1], 'grav_x')[:,0]
+    gy1 = thtr.c(core_list[:1], 'grav_y')[:,0]
+    gz1 = thtr.c(core_list[:1], 'grav_z')[:,0]
+    gx2 = thtr.c(core_list[1:], 'grav_x')[:,0]
+    gy2 = thtr.c(core_list[1:], 'grav_y')[:,0]
+    gz2 = thtr.c(core_list[1:], 'grav_z')[:,0]
+    dvx1 = thtr.c(core_list[:1], 'velocity_x')[:,2] -thtr.c(core_list[:1], 'velocity_x')[:,0]
+    dvy1 = thtr.c(core_list[:1], 'velocity_y')[:,2] -thtr.c(core_list[:1], 'velocity_y')[:,0]
+    dvz1 = thtr.c(core_list[:1], 'velocity_z')[:,2] -thtr.c(core_list[:1], 'velocity_z')[:,0]
+    dvx2 = thtr.c(core_list[1:], 'velocity_x')[:,2] -thtr.c(core_list[1:], 'velocity_x')[:,0]
+    dvy2 = thtr.c(core_list[1:], 'velocity_y')[:,2] -thtr.c(core_list[1:], 'velocity_y')[:,0]
+    dvz2 = thtr.c(core_list[1:], 'velocity_z')[:,2] -thtr.c(core_list[1:], 'velocity_z')[:,0]
+    if 0:
+        VM1 = np.sqrt(vx1**2+vy1**2+vz1**2)
+        VM2 = np.sqrt(vx2**2+vy2**2+vz2**2)
+        vx1bar=np.mean(vx1)
+        vy1bar=np.mean(vy1)
+        vz1bar=np.mean(vz1)
+        vmbar = np.sqrt(vx1bar**2+vy1bar**2+vz1bar**2)
+        cosine1 =(vx1*vx1bar+vy1*vy1bar+vz1*vz1bar)/(VM1*vmbar)
+        cosine2 =(vx2*vx1bar+vy2*vy1bar+vz2*vz1bar)/(VM2*vmbar)
+    if 0:
+        DVM1 = np.sqrt(dvx1**2+dvy1**2+dvz1**2)
+        DVM2 = np.sqrt(dvx2**2+dvy2**2+dvz2**2)
+        dvx1bar=np.mean(dvx1)
+        dvy1bar=np.mean(dvy1)
+        dvz1bar=np.mean(dvz1)
+        dvmbar = np.sqrt(dvx1bar**2+dvy1bar**2+dvz1bar**2)
+        cosine1 =(dvx1*dvx1bar+dvy1*dvy1bar+dvz1*dvz1bar)/(DVM1*dvmbar)
+        cosine2 =(dvx2*dvx1bar+dvy2*dvy1bar+dvz2*dvz1bar)/(DVM2*dvmbar)
+    if 1:
+        GM1 = np.sqrt(gx1**2+gy1**2+gz1**2)
+        GM2 = np.sqrt(gx2**2+gy2**2+gz2**2)
+        gx1bar=np.mean(gx1)
+        gy1bar=np.mean(gy1)
+        gz1bar=np.mean(gz1)
+        g1bar = np.sqrt(gx1bar**2+gy1bar**2+gz1bar**2)
+        gx2bar=np.mean(gx2)
+        gy2bar=np.mean(gy2)
+        gz2bar=np.mean(gz2)
+        g2bar = np.sqrt(gx2bar**2+gy2bar**2+gz2bar**2)
+        cosine1 =(gx1*gx1bar+gy1*gy1bar+gz1*gz1bar)/(GM1*g1bar)
+        cosine2 =(gx2*gx2bar+gy2*gy2bar+gz2*gz2bar)/(GM2*g2bar)
     colors=[cosine1,cosine2]
     rtmap = rainbow_trout(vmin=-1,vmax=1)
     for it,frame in enumerate(frames):#asort):
@@ -206,6 +241,10 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
                 aaa.clear()
         else:
                 ax.clear()
+        ax[-1].hist(cosine1, label='c%04d'%core_list[0],histtype='step')
+        ax[-1].hist(cosine2, label='c%04d'%core_list[1],histtype='step')
+        ax[-1].legend(loc=0)
+        ax[-1].set_yscale('log')
         for ncore,core_id in enumerate(core_list):
             ms = ms_dict[core_id]
             if ms.r.shape[0] <= 4:
@@ -305,6 +344,7 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
 def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
             color_dict=None,axis_to_plot=[0]):
 
+
     thtr = htool.this_looper.tr
     all_cores = np.unique(thtr.core_ids)
     rm = rainbow_map(len(all_cores))
@@ -325,7 +365,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
 
     ms_dict={}
     for ncore,core_id in enumerate(core_list):
-        ms = trackage.mini_scrubber(thtr,core_id)
+        ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
         ms.particle_pos(core_id)
         ms_dict[core_id]=ms
 

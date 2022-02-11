@@ -1,9 +1,36 @@
 from starter2 import *
-
+import looper2
+reload(looper2)
 import convex_hull_tools as CHT
 reload(CHT)
 import hair_dryer
 reload(hair_dryer)
+import close_tool
+reload(close_tool)
+
+loops={}
+sim_list=['u501']
+loops['u501'] = looper2.load_looper('u501_short_grav.h5')
+
+if 'ht' not in dir() :
+    ht = {}
+    for this_simname in sim_list:
+        ht[this_simname] = CHT.hull_tool(loops[this_simname])
+        ht[this_simname].make_hulls()
+        ht[this_simname].make_overlaps()
+if 'ct' not in dir():
+    ct = {}
+    for this_simname in sim_list:
+        ct[this_simname] = close_tool.close_tool( loops[this_simname])
+        ct[this_simname].make_distance()
+
+import supersets
+reload(supersets)
+if 'st' not in dir():
+    st={}
+    for this_simname in sim_list:
+        st[this_simname] = supersets.superset( loops[this_simname], ht[this_simname])
+        st[this_simname].find()
 
 if 1:
     #every pair
