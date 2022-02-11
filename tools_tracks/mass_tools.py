@@ -97,9 +97,9 @@ def plot_mass_tracks(tool, ax,core_list=None):
     if mass_list is not None:
         a_few = nar(mass_list)
     print(a_few)
-    for ncore in mass_list:
-        rel_mass=masses[:,ncore]
-        ax.plot(these_times, rel_mass,c=[0.5]*4)
+    #for ncore in mass_list:
+    #    rel_mass=masses[:,ncore]
+    #    ax.plot(these_times, rel_mass,c=[0.5]*4)
         #axes[3].plot(these_times, tool.dof[core_id]/tool.dof[core_id][-1],c=[0.5]*4)
     mass_bins_edge = np.logspace(-3,4,101)
     mass_bins_edge = np.logspace(-2,1,101)
