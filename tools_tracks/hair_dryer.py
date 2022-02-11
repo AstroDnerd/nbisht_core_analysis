@@ -49,7 +49,7 @@ class hair_time():
             ax=external_axis
 
 
-        multiplot=True
+        multiplot=False
         if los_list[-1] == -1:
             LOS_actual = [0,1,2,3]
         else:
