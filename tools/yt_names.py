@@ -6,4 +6,11 @@ YT_particle_position = ('all','particle_position')
 YT_particle_velocity = ('all','particle_velocity')
 YT_particle_index = ('all','particle_index')
 YT_density = ('gas','density')
+YT_x = ('gas','x')
+YT_y = ('gas','y')
+YT_z = ('gas','z')
+YT_density = ('gas','density')
+#YT_potential=('gas','GravPotential')
+YT_potential=('enzo','GravPotential')
+
 
