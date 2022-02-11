@@ -36,7 +36,6 @@ class dr_thing():
 
         ds= self.this_looper.load(0)
         ad = ds.all_data()
-        axd2.hist(np.log10(ad['density'].v.flatten()), histtype='step',color='k')
         rmcore=rainbow_map(len(core_list))
         for nc,core_id in enumerate(core_list):
             ms = trackage.mini_scrubber(thtr,core_id)

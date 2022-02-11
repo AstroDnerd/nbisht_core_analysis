@@ -152,7 +152,18 @@ class track_manager():
                 self.core_ids = snapshot.core_ids
             particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
             particle_end=particle_start+particle_ids.size
-
+            
+            
+            self_cores_set=set(self.core_ids)
+            snap_cores_set=set(snapshot.core_ids)
+            if not self_cores_set.issuperset(snap_cores_set):
+                if not self_cores_set.isdisjoint(snap_cores_set):
+                    print(" Don't know what to do with only some of the cores being present.")
+                    pdb.set_trace()
+                self.core_ids = np.concatenate([self.core_ids, snapshot.core_ids])
+                self.particle_ids = np.concatenate([self.particle_ids, particle_ids])
+                particle_start = np.where( self.core_ids ==  snapshot.core_ids[0])[0][0]
+                particle_end = particle_start + particle_ids.size
 
 
         #check that the particles we're inserting
@@ -163,11 +174,19 @@ class track_manager():
             print("Fatal Error: particle order.  Email collins.")
             pdb.set_trace()
 
-        if snapshot.frame not in self.frames:
-            self.frames=np.append(self.frames,snapshot.frame)
-            self.times=np.append(self.times,snapshot.time) #ds['InitialTime'])
+        #check if we were handed a list or an int
+        frames = snapshot.frame
+        try:
+            test = iter(frames)
+        except:
+            frames = [frames]
 
-        frame_id = np.where(self.frames == snapshot.frame)[0][0]
+        for nf,frame in enumerate(frames):
+            if frame not in self.frames:
+                self.frames=np.append(self.frames,frame)
+                self.times=np.append(self.times,snapshot.time[nf]) #ds['InitialTime'])
+
+        frame_id = np.where(self.frames == frames[0])[0][0]
 
 
         for field in snapshot.field_values:
@@ -179,9 +198,9 @@ class track_manager():
                          slice(None,current_shape[1]))
             temp_frame[old_slice]= self[field]
             new_slice = (slice(particle_start,particle_end),
-                         slice(frame_id,frame_id+1))
+                         slice(frame_id,frame_id+len(frames)))
             nuggle=np.array(snapshot.field_values[field])
-            nuggle.shape=(particle_ids.size,1)
+            #nuggle.shape=(particle_ids.size,len(frames))
             temp_frame[new_slice]=nuggle
             self[field]=temp_frame
     
@@ -289,7 +308,7 @@ def shift_4(arr):
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
-    #the shift entire tracks that are on the wrong side
+    #then shift entire tracks that are on the wrong side
     centroid = out[:,-1].mean()
     delta = out[:,-1]-centroid
     if ( delta > 0.5).any():

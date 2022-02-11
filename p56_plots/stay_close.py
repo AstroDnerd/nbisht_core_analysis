@@ -12,6 +12,9 @@ import close_tool
 reload(close_tool)
 
 
+#
+# HAD A MERGE CONFLICT. MAYBE NOT WHAT YOU WANT.
+#
 
 import three_loopers_tenfour as TL4
 import convex_hull_tools as CHT

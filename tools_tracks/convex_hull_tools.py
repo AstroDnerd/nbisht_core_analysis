@@ -8,7 +8,7 @@ reload(dl)
 plt.close('all')
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
-
+import time
 from scipy.spatial import Delaunay
 def in_hull(p, hull):
     """
@@ -26,7 +26,11 @@ def in_hull(p, hull):
     if not isinstance(hull,Delaunay):
         hull = Delaunay(hull)
 
+
+    #t0 = time.time()
     simplex = hull.find_simplex(p)
+    #t1 = time.time()
+    #print('woot %f'%(t1-t0))
 
     good = simplex >=0
     return good
@@ -41,16 +45,20 @@ class hull_tool():
         self.hulls={}
         self.points_3d={}
         self.cores_used=[]
+        self.nparticles=[]
     def make_overlaps(self):
         self.overlaps=defaultdict(list)
+        self.overlap_number=defaultdict(list)
         #self.make_hulls(frames=[frame])
         for core_1 in self.cores_used:
             print("overlap li,", self.name, core_1)
             for core_2 in self.cores_used:
-                result = self.check_hull_overlap(core_1,core_2)
+                fraction,number = self.check_hull_overlap(core_1,core_2)
+                mult=1
                 if core_1 == core_2:
-                    result = -result
-                self.overlaps[core_1].append(result)
+                    mult=-1
+                self.overlaps[core_1].append(mult*fraction)
+                self.overlap_number[core_1].append(mult*number)
     def check_hull_overlap(self,core_1, core_2, do_plots=False):
         hull_1 =  self.hulls[core_1]
         hull_2 =  self.hulls[core_2]
@@ -62,31 +70,10 @@ class hull_tool():
         points_2 = self.points_3d[core_2]
 
         in_1_2 = in_hull(points_1, vert_2)
-        fraction =  in_1_2.sum()/points_1.shape[0]
+        number =  in_1_2.sum()
+        fraction =  number/points_1.shape[0]
 
-        if do_plots:
-            print(in_1_2.shape)
-            fig_many, ax_many = plt.subplots(2,2,figsize=(8,8))
-            ax_all = [ax_many[0][0], ax_many[0][1], ax_many[1][0]]
-            for ax in ax_all:
-                ax.clear()
-                ax.set_aspect('equal')
-                #ax.plot([0,1,1,0,0],[0,0,1,1,0])
-            c1 = nar(['k']*points_1.shape[0])
-            c1[in_1_2<=0] = 'r'
-            for LOS in [0,1,2]:
-                x = [0,2,0][LOS]
-                y = [1,1,2][LOS]
-                xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
-                ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
-
-                ax_all[LOS].scatter(points_1[:,x], points_1[:,y],s=0.1,c=c1)
-
-            outname="plots_to_sort/overlap_test_%s_c%04d_c%04d.png"%(self.this_looper.out_prefix,core_1,core_2)
-            fig_many.savefig(outname)
-            print(outname)
-            plt.close(fig)
-        return fraction
+        return fraction, number
 
     def make_hulls(self,do_3d_plots=False,core_list=None,frames=[0]):
 
@@ -106,6 +93,7 @@ class hull_tool():
                 continue
             print("hull on %s n%04d c%04d"%(self.this_looper.sim_name, frames[0], core_id))
             self.cores_used.append(core_id)
+            self.nparticles.append( ms.nparticles)
             asort =  np.argsort(thtr.times)
             delta=0.1
 
@@ -342,7 +330,7 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
 
 
 def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
-            color_dict=None,axis_to_plot=[0]):
+            color_dict=None,axis_to_plot=[0], plot_square=True, external_axis=None):
 
 
     thtr = htool.this_looper.tr
@@ -353,12 +341,26 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
     if core_list is None:
         core_list = all_cores
 
-    if -1 in axis_to_plot:
-        fig_many, ax = plt.subplots(2,2,figsize=(8,8))
-        ax=ax.flatten()
+    if external_axis is None:
+        if -1 in axis_to_plot:
+            fig_many, ax = plt.subplots(2,2,figsize=(8,8))
+            ax=ax.flatten()
+        else:
+            fig_many, ax = plt.subplots(1,1)#,figsize=(4,4))
+            ax=[ax] #because we need to refer to the first one.
+            ax[0].set_aspect('equal')
     else:
-        fig_many, ax = plt.subplots(1,1,figsize=(8,8))
+        ax=external_axis
+    if -1 in axis_to_plot:
+        axistag='xyz'
+    else:
+        axistag='xyz'[axis_to_plot[0]]
+
+
     x_min, x_max, y_min, y_max = [1,0,1,0]
+    x_ext = extents()
+    y_ext = extents()
+    z_ext = extents()
     import colors
     if color_dict is  None:
         color_dict = colors.make_core_cmap( core_list)
@@ -369,13 +371,14 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
         ms.particle_pos(core_id)
         ms_dict[core_id]=ms
 
+        x_ext( ms_dict[core_id].particle_x)
+        y_ext( ms_dict[core_id].particle_y)
+        z_ext( ms_dict[core_id].particle_z)
+
     for it,frame in enumerate(frames):#asort):
         nt= np.where( nar(thtr.frames) == frame)[0][0]
-        if -1 in axis_to_plot:
-            for aaa in ax:
-                aaa.clear()
-        else:
-                ax.clear()
+        for aaa in ax:
+            aaa.clear()
         for ncore,core_id in enumerate(core_list):
             ms = ms_dict[core_id]
             if ms.r.shape[0] <= 4:
@@ -417,35 +420,45 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
             else:
                 axis_to_actually_plot=axis_to_plot
             for LOS in axis_to_actually_plot:
-                x = [1,0,0][LOS]
-                y = [2,2,1][LOS]
+                #x = [1,0,1][LOS] # Using [1,0,1] and [2,2,0] 
+                #y = [2,2,0][LOS] # unfolds nicely.
+                x = [0,1,0][LOS] # Using [0,1,0] and [2,2,1] 
+                y = [2,2,1][LOS] # puts Y on the vert in panel 3
                 xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
                 ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
 
 
-                if -1 in axis_to_plot:
+                if -1 in axis_to_plot or len(axis_to_plot)>1:
                     this_ax = ax[LOS]
                 else:
-                    this_ax = ax
+                    this_ax = ax[0]
                 n_particles = len(this_p[0])
-
-
-                #
-                # color games
-                #
-
-
-
-
-     
 
                 #
                 # the plot
                 #
-                this_ax.scatter(this_p[x], this_p[y],s=2, c=[color_dict[core_id]]*n_particles)
+                add_jitter=True
+                if add_jitter:
+                    dx =(np.random.random( n_particles)-0.5)*1./128
+                    dy =(np.random.random( n_particles)-0.5)*1./128
+                else:
+                    dx=0
+                    dy=0
+                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=2, c=[color_dict[core_id]]*n_particles)
 
                 #streaks.  Use with caution.
-                this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
+                #this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
+
+                if plot_square:
+                    x_min = min([x_min,this_p[x].min(), -delta])
+                    x_max = max([x_max,this_p[x].max(), 1+delta])
+                    y_min = min([y_min,this_p[y].min(), -delta])
+                    y_max = max([y_max,this_p[y].max(), 1+delta])
+
+                    this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
+                else:
+                    x_min, x_max = [x_ext,y_ext,z_ext][x].minmax
+                    y_min, y_max = [x_ext,y_ext,z_ext][y].minmax
 
 
                 if do_hull:
@@ -458,13 +471,21 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
 
                 if core_id in label_cores or -1 in label_cores:
-                    this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
-                x_min = min([x_min,this_p[x].min(), -delta])
-                x_max = max([x_max,this_p[x].max(), 1+delta])
-                y_min = min([y_min,this_p[y].min(), -delta])
-                y_max = max([y_max,this_p[y].max(), 1+delta])
+                    if LOS == 0:
+                        #this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
+                        #the_x=this_p[x].mean()
+                        #the_y=this_p[y].mean()
+                        the_x_tmp = this_p[x] - this_p[x].min()+ 0.1
+                        the_y_tmp = this_p[y] - this_p[y].min()+ 0.1
+                        the_x = 10**np.log10(the_x_tmp).mean() + this_p[x].min() - 0.1
+                        the_y = 10**np.log10(the_y_tmp).mean() + this_p[y].min() - 0.1
+                        text_height=0.02
+                        text_ymax = y_max-text_height
+                        text_y = text_ymax - ncore*text_height
+                        text_x = x_max - 2*text_height
+                        this_ax.text( text_x, text_y, r'$%s$'%core_id, color=color_dict[core_id])
+                        this_ax.plot([the_x,text_x],[the_y,text_y],c='k')
 
-                this_ax.plot([0,1,1,0,0], [0,0,1,1,0], c=[0.5]*3)
 
 
                 axbonk(this_ax,xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
@@ -472,12 +493,25 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
             cumltext=""
             if accumulate:
                 cumltext="%04d"%ncore
-            if all_plots:
+            if all_plots and external_axis is None:
                 outname = '%s/%s_hull_3d_t_%sc%04d_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,cumltext,core_id,frame)
                 fig_many.savefig(outname)
                 print("Wrote "+outname)
-        if accumulate:
-            outname = '%s/%s_hull_3d_t_%scXXXX_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,prefix,frame)
+        if 0:
+            title_text=''
+            if len(core_list) == 2:
+                c1=core_list[0]; c2=core_list[1]
+                n1=np.where(htool.cores_used==c1)[0][0]
+                n2=np.where(htool.cores_used==c2)[0][0]
+                o1 = htool.overlaps[c1][n2]
+                o2 = htool.overlaps[c2][n1]
+                ax[0].set_title('c %04d has %0.1e; c %04d has %0.1e'%(c1,o1, c2, o2))
+            elif len(core_list) == 1:
+                ax[0].set_title('c %04d is alone'%core_id)
+            else:
+                pass
+        if accumulate and external_axis is None:
+            outname = '%s/%s_hull_3d_t_%scXXXX_%s_n%04d.png'%(dl.output_directory,htool.this_looper.out_prefix,prefix,axistag,frame)
             fig_many.savefig(outname)
             print("Wrote "+outname)
 

@@ -26,7 +26,6 @@ def make_core_cmap(core_list, cmap='Spectral',seed=2653417):
         rands = np.round(rands)
     else:
         rands = np.linspace(0,ncolors, len(core_list)).astype('float')
-        print(rands)
 
     mymap = rainbow_map( ncolors, cmap = cmap)
     #mymap = rainbow_map( ncolors, cmap = 'tab20')
@@ -34,3 +33,5 @@ def make_core_cmap(core_list, cmap='Spectral',seed=2653417):
     dic = dict( zip( core_list,color))
     return dic
 
+G = 1620/(4*np.pi)
+tff = np.sqrt( 3*np.pi/(32*G*1))
