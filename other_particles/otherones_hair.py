@@ -17,6 +17,7 @@ import hair_dryer
 reload(hair_dryer)
 import colors
 
+import pcolormesh_helper as pch
 
 
 class images():
@@ -58,13 +59,15 @@ class images():
             frame_str = "_%04d"*Ncol%tuple(frames)
             nrows=len(frame_index)
             counter=-1
-            fig,axes=plt.subplots(2,nrows, figsize=(12,12))
+            fig,axes=plt.subplots(nrows,3, figsize=(12,8))
             for nt,frame in zip(frame_index, frames):
                 counter+=1
 
 
-                ax = axes[counter][0]
-                ax1 = axes[counter][1]
+                ax0= axes[counter][0]
+                ax0.set_aspect('equal')
+                ax = axes[counter][1]
+                ax1 = axes[counter][2]
                 ax.set_aspect('equal')
 
 
@@ -74,7 +77,11 @@ class images():
                 this_x,this_y,this_z=ms.this_x[mask,nt],ms.this_y[mask,nt], ms.this_z[mask,nt]
                 this_p = [this_x,this_y,this_z]
 
-                x=2;y=0
+                x=1;y=2
+                ax0.set_xlabel='xyz'[x]+' [code units]'
+                ax0.set_ylabel='xyz'[y]+' [code units]'
+                ax.set_xlabel='xyz'[x]+' [code units]'
+                ax.set_ylabel='xyz'[y]+' [code units]'
 
                 x_min, x_max, y_min, y_max = [1,0,1,0]
 
@@ -83,47 +90,78 @@ class images():
                 y_min = min([y_min,this_p[y].min(), -delta])
                 y_max = max([y_max,this_p[y].max(), 1+delta])
 
-                xx,yy=np.mgrid[0:1:1./128,0:1:1./128]+0.5*1./128
-                ii = np.floor((nar(this_p)*128)).astype('int')
-                imin = ii.min(axis=1)
-                ii[0]-=imin[0]
-                ii[1]-=imin[1]
-                ii[2]-=imin[2]
-                image = np.zeros([ii.max()+1]*3)
-                image[ii[0], ii[1], ii[2]]=1
-                #ax.scatter( this_p[x], this_p[y])
-                #ax.scatter( ii[x], ii[y])
-                #ax.scatter(ii[x].flatten(), ii[y].flatten())
                 if 1:
-                    TheZ = image.sum(axis=1)
-                    norm = mpl.colors.LogNorm(vmin=1,vmax=TheZ.max())
-                    cmap=copy.copy(mpl.cm.get_cmap("viridis"))
-                    cmap.set_under('w')
-                    #ax.pcolormesh(xx,yy,TheZ, norm=norm,cmap=cmap)
-                    ax.imshow(TheZ, cmap=cmap, norm=norm, origin='lower',interpolation='nearest')
+                    #projection by 2d histogram.
+                    x_ext=extents( )#this_p[x])
+                    y_ext=extents( )#this_p[y])
+                    x_ext(this_p[x])
+                    y_ext(this_p[y])
+                    #they're quantized at t=0
+                    dx = 1./128
+                    dx = [1./128, 1./256][counter]
+                    x_quantized = np.floor(nar(x_ext.minmax)/dx)*dx+0.5*dx
+                    y_quantized = np.floor(nar(y_ext.minmax)/dx)*dx+0.5*dx
 
-                box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
-                box_x, box_y = nar(box_x)*128-imin[x], nar(box_y)*128-imin[y]
-                ax.plot(box_x,box_y, c=[0.5]*3)
+                    xbins = np.mgrid[x_quantized[0]:x_quantized[1]:dx]+0.5*dx
+                    ybins = np.mgrid[y_quantized[0]:y_quantized[1]:dx]+0.5*dx
+                    #r_bins = np.geomspace( *r_ext.minmax)
+                    hist, xb, yb = np.histogram2d(this_p[x], this_p[y], bins=[xbins,ybins])
+                    pch.helper(hist,xb,yb,ax=ax, cmap_name='Blues')
+                    pch.helper(hist,xb,yb,ax=ax0, cmap_name='Blues')
 
-                ms2 = trackage.mini_scrubber(self.first_looper.tr, core_id, do_velocity=False)
 
-                first_p = np.stack([ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]])
 
-                ax.scatter( first_p[x]*128-imin[x], first_p[y]*128-imin[y], s=100, facecolors='none',edgecolors='k')
-                #ax.scatter( first_p[x], first_p[y], s=100)
+                    ms2 = trackage.mini_scrubber(self.first_looper.tr, core_id, do_velocity=False)
 
-                xticks = np.mgrid[-imin[x]:128-imin[x]:11j]
-                labs = ["%0.1f"%val for val in (xticks+imin[x])/128]
-                ax.set_xticks(xticks)
-                ax.set_xticklabels(labs)
+                    first_p = np.stack([ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]])
+                    ax.scatter( first_p[x], first_p[y], s=1, marker='+',c='r')
+                    ax0.scatter( first_p[x], first_p[y], s=1, marker='+',c='r')
+                    box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
+                    ax0.plot(box_x,box_y, c=[0.5]*3)
+                if 0:
+                    #projection by mapping the positions onto a cube and projecting.
+                    #May be inefficient, definitely cumbersome.
+                    ii = np.floor((nar(this_p)*128)).astype('int')
+                    imin = ii.min(axis=1)
+                    ii[0]-=imin[0]
+                    ii[1]-=imin[1]
+                    ii[2]-=imin[2]
+                    image = np.zeros([ii.max()+1]*3)
+                    image[ii[0], ii[1], ii[2]]=1
+                    #ax.scatter( this_p[x], this_p[y])
+                    #ax.scatter( ii[x], ii[y])
+                    #ax.scatter(ii[x].flatten(), ii[y].flatten())
+                    if 1:
+                        TheZ = image.sum(axis=1)
+                        norm = mpl.colors.LogNorm(vmin=1,vmax=TheZ.max())
+                        cmap=copy.copy(mpl.cm.get_cmap("Blues"))
+                        cmap.set_under('w')
+                        #ax.pcolormesh(xx,yy,TheZ, norm=norm,cmap=cmap)
+                        ax.imshow(TheZ, cmap=cmap, norm=norm, origin='lower',interpolation='nearest')
 
-                yticks = np.mgrid[-imin[y]:128-imin[y]:11j]
-                labs = ["%0.1f"%val for val in (yticks+imin[y])/128]
-                ax.set_yticks(yticks)
-                ax.set_yticklabels(labs)
-                ax.set_xlabel(r'$%s$'%('xyz'[x]))
-                ax.set_ylabel(r'$%s$'%('xyz'[y]))
+                    box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
+                    box_x, box_y = nar(box_x)*128-imin[x], nar(box_y)*128-imin[y]
+                    ax.plot(box_x,box_y, c=[0.5]*3)
+
+                    ms2 = trackage.mini_scrubber(self.first_looper.tr, core_id, do_velocity=False)
+
+                    first_p = np.stack([ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]])
+
+                    ax.scatter( first_p[x]*128-imin[x], first_p[y]*128-imin[y], s=1, marker='+',c='r')
+                    #ax.scatter( first_p[x]*128-imin[x], first_p[y]*128-imin[y], s=100, facecolors='none',edgecolors='k')
+                    #ax.scatter( first_p[x], first_p[y], s=100)
+
+                    xticks = np.mgrid[-imin[x]:128-imin[x]:11j]
+                    labs = ["%0.1f"%val for val in (xticks+imin[x])/128]
+                    ax.set_xticks(xticks)
+                    ax.set_xticklabels(labs)
+
+                    yticks = np.mgrid[-imin[y]:128-imin[y]:11j]
+                    labs = ["%0.1f"%val for val in (yticks+imin[y])/128]
+                    ax.set_yticks(yticks)
+                    ax.set_yticklabels(labs)
+                    ax.set_xlabel(r'$%s$'%('xyz'[x]))
+                    ax.set_ylabel(r'$%s$'%('xyz'[y]))
 
                 other_density = other_looper.tr.c([core_id],'density')[:,nt]
                 first_density = self.first_looper.tr.c([core_id],'density')[:,nt]
@@ -142,7 +180,6 @@ class images():
                 r_ext(other_r); d_ext(other_density)
                 r_ext(rrr); d_ext(first_density)
 
-                import pcolormesh_helper as pch
                 reload(pch)
                 rho_bins = np.geomspace( other_density.min(), other_density.max(), 64)
                 r_bins = np.geomspace( *r_ext.minmax)

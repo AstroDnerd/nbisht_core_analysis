@@ -18,10 +18,19 @@ class small_snapshot():
         self.frame=frames
         self.field_values=field_dict
         self.time = times
+
+class box_of_rain():
+    def __init__(self):
+        self.cores_used=[]
+        self.mass_total_hull=[]
+        self.mass_other_ones=[]
+
 def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
     this_loop=hull_tool.this_looper
-    other_loop = this_loop.big_loop
-    oms = other_loop.ms
+    big_loop = this_loop.big_loop
+    oms = big_loop.ms
+    big_density = big_loop.tr.c([0],'density')[:,frame]
+    big_cell_volume = big_loop.tr.c([0],'cell_volume')[:,frame]
 
     if core_list is None:
         core_list = this_loop.core_list
@@ -30,19 +39,21 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
                              sim_name = new_name,
                              out_prefix = new_name,
                              target_frame = this_loop.target_frame,
-                             frame_list = other_loop.frame_list,
+                             frame_list = big_loop.frame_list,
                              core_list =  core_list,
-                             fields_from_grid=other_loop.fields_from_grid,
+                             fields_from_grid=big_loop.fields_from_grid,
                              derived = None, #KLUDGE this is going to be a problem later I fear.
                              do_shift=False
                             )
 
+    box = box_of_rain()
     for core_id in core_list:
+        box.cores_used.append(core_id)
         print("Find Otherones c%04d"%core_id)
         ms = trackage.mini_scrubber(this_loop.tr, core_id, do_velocity=False)
         print('   ms done')
         this_hull_points = hull_tool.points_3d[core_id]
-        all_particles = other_loop.target_indices
+        all_particles = big_loop.target_indices
         all_points = np.column_stack( [oms.this_x[:,frame], oms.this_y[:,frame], oms.this_z[:,frame]])
 
         #cut out the region of interest.  Doesnt help that much.
@@ -67,6 +78,8 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
 
         found_particles = all_particles[mask]
 
+        box.mass_total_hull.append((big_density[mask]*big_cell_volume[mask]).sum())
+
         t1=time.time()
         print("   time ", t1-t0)
 
@@ -77,8 +90,8 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         #PA = all particles
         #P1 = PA[mask] = particles in hull
         #Pc = core particles and neighbors
-        #Po = Pi - Pc (Pc contains particles not in Pi, this is fine.)
-        #Pcc = Pi intersect Pc (all the core+neighbor particles in the hull)
+        #Po = P1 - Pc (Pc contains particles not in Pi, this is fine.)
+        #Pcc = P1 intersect Pc (all the core+neighbor particles in the hull)
         #PB = [Po] + [Pcc] Make one long array
         #BB = [T]  + [F]   A boolean array along side Pb
         #S1 = Sort(P1)
@@ -94,8 +107,8 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
             for other_core in superset.supersets[my_superset]:
                 this_particles = np.concatenate([this_particles,
                                                  this_loop.target_indices[other_core]])
-        if 1:
 
+        if 1:
             #Remove Core particles from Otherones
             this_set = set(this_particles)
             found_set = set(found_particles)
@@ -109,17 +122,21 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
             sort_back = np.argsort(sort1) 
             mask[ mask] *= otherones_mask[sort_both][sort_back]
 
+        box.mass_other_ones.append((big_density[mask]*big_cell_volume[mask]).sum())
         otherone_particle_ids = all_particles[mask]
         otherone_core_ids = np.ones_like(otherone_particle_ids,dtype='int')*core_id
         otherone_field_values={}
-        for field in other_loop.tr.track_dict:
-            otherone_field_values[field]=other_loop.tr.track_dict[field][mask,:]
+        for field in big_loop.tr.track_dict:
+            otherone_field_values[field]=big_loop.tr.track_dict[field][mask,:]
         snap = small_snapshot(particle_ids=otherone_particle_ids,
                               core_ids=otherone_core_ids,
-                              frames=other_loop.tr.frames,
-                              times = other_loop.tr.times,
+                              frames=big_loop.tr.frames,
+                              times = big_loop.tr.times,
                               field_dict=otherone_field_values)
         if new_looper.tr is None:
             new_looper.tr = trackage.track_manager(new_looper)
         new_looper.tr.ingest(snap)
+    box.mass_other_ones = nar(box.mass_other_ones)
+    box.mass_total_hull = nar(box.mass_total_hull)
+    new_looper.box = box
     return new_looper
