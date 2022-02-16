@@ -24,6 +24,18 @@ class box_of_rain():
         self.cores_used=[]
         self.mass_total_hull=[]
         self.mass_other_ones=[]
+    def write(self,fname):
+        fptr=h5py.File(fname,'w')
+        fptr['cores_used']=self.cores_used
+        fptr['mass_total_hull']=self.mass_total_hull
+        fptr['mass_other_ones']=self.mass_other_ones
+        fptr.close()
+    def read(self,fname):
+        fptr=h5py.File(fname,'r')
+        self.cores_used      =fptr['cores_used'][()]     
+        self.mass_total_hull =fptr['mass_total_hull'][()]
+        self.mass_other_ones =fptr['mass_other_ones'][()]
+        fptr.close()
 
 def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
     this_loop=hull_tool.this_looper
