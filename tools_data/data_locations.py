@@ -38,7 +38,7 @@ if machine == 'Nazare':
     sim_u102 = '/archive2/dcollins4096/Paper19/u10_r4_l4_128-Beta2/GravPotential'
     sim_u103 = '/archive2/dcollins4096/Paper19/u11_r4_l4_128-Beta20/GravPotential'
 
-    sim_u201 = '/archive2/dcollins4096/Paper19/u05-r4-l4-128-Beta0.2'
+    sim_u201 =  '/archive2/dcollins4096/Paper19/u05-r4-l4-128-Beta0.2'
     sim_u202 =  '/archive2/dcollins4096/Paper19/u202-Beta2/GravPotential'
     sim_u203 =  '/archive2/dcollins4096/Paper19/u203-Beta20/GravPotential'
 
@@ -104,8 +104,10 @@ elif machine == 'cloudbreak':
 
     #path for structure functions
     sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
+    coresets = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/"
 else:
-    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF"
+    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
+    coresets = "/scratch1/dcollins/Paper19/Datasets/"
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
@@ -171,6 +173,7 @@ target_frames.update({'u201':125,'u202':118,'u203':107})
 target_frames.update({'u301':125,'u302':118,'u303':107})
 target_frames.update({'u401':125,'u402':118,'u403':107})
 target_frames.update({'u501':125,'u502':118,'u503':107})
+target_frames.update({'u601':125,'u602':118,'u603':107})
 
 every_ten = {'u05':u05_every_ten,'u10':u10_every_ten,'u11':u11_every_ten, 'u101':u101_every_ten,'u102':u102_every_ten,'u103':u103_every_ten}
 every_ten.update({'u201':u201_every_ten,'u202':u202_every_ten,'u203':u203_every_ten})
