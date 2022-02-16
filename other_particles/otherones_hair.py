@@ -1,20 +1,8 @@
 
 from starter2 import *
-reload(trackage)
 import convex_hull_tools as CHT
 import matplotlib.colors as colors
 
-reload(CHT)
-import hair_dryer
-reload(hair_dryer)
-import stay_close
-import three_loopers_tenfour as TL4
-sim_list=['u401','u402','u403']
-#sim_list=['u402']
-import supersets
-reload(supersets)
-import hair_dryer
-reload(hair_dryer)
 import colors
 
 import pcolormesh_helper as pch
@@ -78,10 +66,10 @@ class images():
                 this_p = [this_x,this_y,this_z]
 
                 x=1;y=2
-                ax0.set_xlabel='xyz'[x]+' [code units]'
-                ax0.set_ylabel='xyz'[y]+' [code units]'
-                ax.set_xlabel='xyz'[x]+' [code units]'
-                ax.set_ylabel='xyz'[y]+' [code units]'
+                ax0.set_xlabel('xyz'[x]+' [code units]')
+                ax0.set_ylabel('xyz'[y]+' [code units]')
+                ax.set_xlabel('xyz'[x]+' [code units]')
+                ax.set_ylabel('xyz'[y]+' [code units]')
 
                 x_min, x_max, y_min, y_max = [1,0,1,0]
 
@@ -184,10 +172,12 @@ class images():
                 rho_bins = np.geomspace( other_density.min(), other_density.max(), 64)
                 r_bins = np.geomspace( *r_ext.minmax)
                 hist, xb, yb = np.histogram2d(other_r,other_density, bins=[r_bins,rho_bins])
-                pch.helper(hist,xb,yb,ax=ax1, cmap_name='Reds')
+                pch.helper(hist,xb,yb,ax=ax1, cmap_name='Greens')
 
-                ax1.scatter( rrr, first_density, s=100, facecolors='none',edgecolors='k')
+                #ax1.scatter( rrr, first_density, s=100, facecolors='none',edgecolors='k')
+                ax1.scatter( rrr, first_density, s=1, marker='+', c='r')
                 axbonk(ax1,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax, xlabel=r'$r$', ylabel=r'$\rho$')
+                #axbonk(ax,xlabel='xyz'[x]+' [code units]',ylabel='xyz'[x]+' [code units]')
 
 
 
@@ -198,12 +188,12 @@ class images():
 
 
 if 0:
+    import three_loopers_tenfour as TL4
     print('w1')
     if 'loopb' not in dir():
         savefile="otherones_b002_temp.h5"
         loopb = looper.core_looper(directory= TL4.loops['u402'].directory,savefile_only_trackage=savefile)
     print('w1')
-#hd = hair_dryer.hair_time(loopb)
 #color_dict={1:'r'}
 #fig,ax=plt.subplots(1,1)
 #hd.run(color_dict=color_dict,external_axis=ax)
