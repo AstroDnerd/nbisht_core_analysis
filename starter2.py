@@ -13,6 +13,7 @@ for directory in path_list:
         sys.path += [directory]
 
 import yt
+from yt_names import *
 
 import data_locations as dl
 
@@ -23,6 +24,8 @@ import particle_grid_mask as particle_grid_mask
 
 import looper
 reload(looper)
+import looper2
+reload(looper2)
 
 import trackage
 reload(trackage)
@@ -33,5 +36,4 @@ from davetools import *
 import loop_apps
 reload(loop_apps)
 
-from yt_names import *
 
