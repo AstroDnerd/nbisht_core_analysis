@@ -4,6 +4,7 @@
 from starter2 import *
 import xtra_energy
 import data_locations as dl
+import tracks_read_write
 reload(dl)
 reload(looper)
 import looper2
@@ -12,8 +13,8 @@ reload(looper2)
 
 LOOPER2 = True
 looper_main = looper2.core_looper2
-this_simname  = 'a002'
-other_simname = 'u302'
+this_simname  = 'a003'
+other_simname = 'u303'
 mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%other_simname
 outname = '%s_all_particles.h5'%this_simname
 bad_particle_fname_read='datasets_small/%s_bad_particles.h5'%'u501'
@@ -61,6 +62,7 @@ if target_frame not in frame_list:
     frame_list += [target_frame]
 
 if 1:
+    fields = [('gas',field) for field in fields]
     new_looper = looper_main(directory= dl.sims[other_simname],
                                      sim_name = this_simname,
                                      out_prefix = this_simname,
@@ -99,7 +101,6 @@ if 1:
 
 
 if 1:
-    import tracks_read_write
     tracks_read_write.save_loop_trackage_only( new_looper, outname)
 
 
