@@ -582,13 +582,28 @@ class mini_scrubber():
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
         shift_z = self.this_z - self.raw_z
-        self.particle_x = self.trk.c([core_id],'particle_pos_x') + shift_x
-        self.particle_y = self.trk.c([core_id],'particle_pos_y') + shift_y
-        self.particle_z = self.trk.c([core_id],'particle_pos_z') + shift_z
+        name_to_use_x= 'particle_pos_x'
+        name_to_use_y= 'particle_pos_y'
+        name_to_use_z= 'particle_pos_z'
+        if name_to_use_x not in self.trk.track_dict:
+            name_to_use_x= 'particle_position_x'
+            name_to_use_y= 'particle_position_y'
+            name_to_use_z= 'particle_position_z'
+
+        self.particle_x = self.trk.c([core_id],name_to_use_x) + shift_x
+        self.particle_y = self.trk.c([core_id],name_to_use_y) + shift_y
+        self.particle_z = self.trk.c([core_id],name_to_use_z) + shift_z
     def make_floats(self, core_id):
-        self.float_x = self.trk.c([core_id],'particle_pos_x')
-        self.float_y = self.trk.c([core_id],'particle_pos_y')
-        self.float_z = self.trk.c([core_id],'particle_pos_z')
+        name_to_use_x= 'particle_pos_x'
+        name_to_use_y= 'particle_pos_y'
+        name_to_use_z= 'particle_pos_z'
+        if name_to_use_x not in self.trk.track_dict:
+            name_to_use_x= 'particle_position_x'
+            name_to_use_y= 'particle_position_y'
+            name_to_use_z= 'particle_position_z'
+        self.float_x = self.trk.c([core_id],'name_to_use_x')
+        self.float_y = self.trk.c([core_id],'name_to_use_y')
+        self.float_z = self.trk.c([core_id],'name_to_use_z')
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
         shift_z = self.this_z - self.raw_z
