@@ -48,12 +48,12 @@ if 0:
     fields = ['x','y','z','density', 'cell_volume']
     derived=[]
 if 1:
-    fields = ['x','y','z','density', 'cell_volume']
-    fields += ['velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
-    fields += ['velocity_x','velocity_y','velocity_z']
-    fields += ['magnetic_field_%s'%s for s in 'xyz']
-    fields += ['PotentialField','grav_x','grav_y','grav_z' ]
-    fields += ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index']
+    fields = [YT_x,YT_y,YT_z,YT_density, YT_cell_volume]
+    fields += [YT_velocity_magnitude,YT_magnetic_field_strength, YT_velocity_divergence]
+    fields += [YT_velocity_x,YT_velocity_y,YT_velocity_z]
+    fields += [('gas','magnetic_field_%s'%s) for s in 'xyz']
+    fields += [YT_potential_field,YT_grav_x,YT_grav_y,YT_grav_z ]
+    fields += [YT_particle_pos_x, YT_particle_pos_y, YT_particle_pos_z, YT_particle_index]
     derived=[xtra_energy.add_force_terms]
 
 if target_frame not in frame_list:
@@ -116,9 +116,9 @@ if 0:
 #if 0:
 #    new_looper.save_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
 
-if 1:
+if 0:
     new_looper.read_bad_particles(bad_particle_fname_read)
-if 1:
+if 0:
     new_looper.remove_bad_particles()
 
 if 1:
