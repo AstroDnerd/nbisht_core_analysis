@@ -328,9 +328,12 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
             fig_many.savefig(outname)
             print("Wrote "+outname)
 
-
+import figure_sublabel
 def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
-            color_dict=None,axis_to_plot=[0], plot_square=True, external_axis=None):
+            color_dict=None,axis_to_plot=[0], plot_square=True, external_axis=None,
+                plotstyle='xyz',
+                add_jitter=True, center_image=True
+           ):
 
 
     thtr = htool.this_looper.tr
@@ -361,6 +364,9 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
     x_ext = extents()
     y_ext = extents()
     z_ext = extents()
+    if center_image:
+        plot_x_ext = extents()
+        plot_y_ext = extents()
     import colors
     if color_dict is  None:
         color_dict = colors.make_core_cmap( core_list)
@@ -420,10 +426,12 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
             else:
                 axis_to_actually_plot=axis_to_plot
             for LOS in axis_to_actually_plot:
-                #x = [1,0,1][LOS] # Using [1,0,1] and [2,2,0] 
-                #y = [2,2,0][LOS] # unfolds nicely.
-                x = [0,1,0][LOS] # Using [0,1,0] and [2,2,1] 
-                y = [2,2,1][LOS] # puts Y on the vert in panel 3
+                if plotstyle == 'xyz':
+                    x = [1,0,1][LOS] # Using [1,0,1] and [2,2,0] 
+                    y = [2,2,0][LOS] # unfolds nicely.
+                if plotstyle == "Figure8":
+                    x = [0,1,0][LOS] # Using [0,1,0] and [2,2,1] 
+                    y = [2,2,1][LOS] # puts Y on the vert in panel 3
                 xlab=r'$%s \rm(code\ length)$'%'xyz'[x]
                 ylab=r'$%s \rm(code\ length)$'%'xyz'[y]
 
@@ -437,14 +445,19 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 #
                 # the plot
                 #
-                add_jitter=True
                 if add_jitter:
                     dx =(np.random.random( n_particles)-0.5)*1./128
                     dy =(np.random.random( n_particles)-0.5)*1./128
                 else:
                     dx=0
                     dy=0
-                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=2, c=[color_dict[core_id]]*n_particles)
+                s=0.5
+                m='s'
+                if center_image:
+                    plot_x_ext( this_p[x]+dx)
+                    plot_y_ext( this_p[y]+dy)
+                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=7, c=[color_dict[core_id]]*n_particles,
+                                marker=m, edgecolor='None')
 
                 #streaks.  Use with caution.
                 #this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
@@ -471,7 +484,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
 
                 if core_id in label_cores or -1 in label_cores:
-                    if LOS == 0:
+                    if LOS == 0 and plotstyle == 'Figure8':
                         #this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
                         #the_x=this_p[x].mean()
                         #the_y=this_p[y].mean()
@@ -485,9 +498,25 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                         text_x = x_max - 2*text_height
                         this_ax.text( text_x, text_y, r'$%s$'%core_id, color=color_dict[core_id])
                         this_ax.plot([the_x,text_x],[the_y,text_y],c='k')
+                    else:
+                        text_x = this_p[x].mean()
+                        text_y = this_p[y].max()
+                        this_ax.text( text_x, text_y, r'$%s$'%core_id)
 
 
 
+                def image_bumper(x_ext,y_ext, factor=1.1):
+                    dx1 = max( [ np.abs(min([x_ext.minmax[0],0])), 
+                                 np.abs(max([x_ext.minmax[1]-1,0]))])*factor
+                    dy1 = max( [ np.abs(min([y_ext.minmax[0],0])), 
+                                 np.abs(max([y_ext.minmax[1]-1,0]))])*factor
+                    return max([dx1, dy1])
+                if center_image:
+                    ddd = image_bumper( plot_x_ext, plot_y_ext)
+                    x_min, x_max=-ddd,1+ddd
+                    y_min, y_max=-ddd,1+ddd
+                #add sub labels.  Exits if theres nothing to do.
+                figure_sublabel.add_sublabel(this_ax, htool.this_looper)
                 axbonk(this_ax,xlabel=xlab,ylabel=ylab,xlim=[x_min,x_max],ylim=[y_min,y_max])
                 #ax_many.set_title(title)
             cumltext=""
