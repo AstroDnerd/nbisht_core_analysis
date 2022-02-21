@@ -38,7 +38,7 @@ if 0:
     CHT.plot_2d(ht3,frames=[0], accumulate=True, label_cores=[])
 
 #paper versions
-if 0:
+if 1:
     CHT.plot_2d(ht1,frames=[0], accumulate=True, label_cores=[323])
 if 1:
     CHT.plot_2d(ht2,frames=[0], accumulate=True, label_cores=[])
