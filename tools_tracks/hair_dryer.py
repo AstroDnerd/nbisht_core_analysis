@@ -1,6 +1,10 @@
 from starter2 import *
 import colors
 
+#note to future self
+#saving hair plots as pdfs doesn't work.
+#it looks bad.
+
 class hair_time():
     def __init__(self,this_looper):
         self.this_looper=this_looper
@@ -148,6 +152,7 @@ class hair_tool():
         self.cores_used=[]
         self.name = self.this_looper.out_prefix
         self.slopes = []
+        self.sim_name = self.this_looper.out_prefix
 
     def run(self,core_list=None,do_plots=True, frame=0, colors=None, newplots=True, name=''):
         dx=1./2048
@@ -165,14 +170,13 @@ class hair_tool():
         tsorted = thtr.times
         self.core_list=core_list
         tmap = rainbow_map( len(thtr.frames))
-        ds = self.this_looper.load(frame)
 
         frame_ind = frame
         if frame > 0:
             print("Need to fix the frame index")
             return
 
-        fig,ax=plt.subplots(1,1, figsize=(12,8))
+        fig,ax=plt.subplots(1,1, dpi=200)#, figsize=(12,8))
         for core_id in core_list:
             ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             ms.particle_pos(core_id)
@@ -189,13 +193,14 @@ class hair_tool():
                     c = colors[core_id]
 
                 skip=1
-                if ms.nparticles > 1000:
+                keep_all_tracks=True
+                if ms.nparticles > 1000 and keep_all_tracks==False:
                     skip = 10
                 for ip in range(0,ms.nparticles,skip):
                     ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=c, linewidth=0.1)
                 ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c=[c]*ms.nparticles, s=0.3)
                 ax.scatter(ms.particle_y[:,-1], ms.particle_z[:,-1], c='r', s=0.3)
-                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.name, core_id))
+                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.sim_name, core_id))
                 outname = 'plots_to_sort/%s_blowing_hair_%sc%04d.png'%(self.name,name,core_id)
                 fig.savefig(outname)
                 print(outname)
@@ -261,7 +266,7 @@ class hair_tool():
                     ax[1][0].scatter( the_x[-1], the_y[-1], c='g', s=0.3, marker='*')
                 ax.scatter(dy2[:,0],  dz2[:,0],  c='k', s=0.3)
                 ax.scatter(dy2[:,-1], dz2[:,-1], c='r', s=0.3)
-                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.name, core_id))
+                ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.sim_name, core_id))
 
 
                 outname = 'plots_to_sort/%s_with_hair_c%04d.png'%(self.name,core_id)
@@ -287,7 +292,7 @@ class hair_tool():
             #    #ax.plot( dy3,dz3,  c=[0.5]*3, linewidth=0.1)
             #    #ax[0].plot(   dy3, dz3, c=[0.5]*3, linewidth=0.1)
             #    #ax[0].scatter(dy3[0], dz3[0], c='k', s=0.3)
-            #fig.savefig('plots_to_sort/%s_logradius_2_c%04d.pdf'%(self.name,core_id))
+            #fig.savefig('plots_to_sort/%s_logradius_2_c%04d.png'%(self.name,core_id))
 
             #fig,ax=plt.subplots(1,subplot_kw={'projection': 'polar'})
             #for ip in [31,32]:#range(dx.shape[0]):
@@ -302,5 +307,5 @@ class hair_tool():
             #ax.set_rscale('log')
             #ax.set_rlim(1e-2,0.1)
 
-            #fig.savefig('plots_to_sort/%s_logradius_c%04d.pdf'%(self.name,core_id))
+            #fig.savefig('plots_to_sort/%s_logradius_c%04d.png'%(self.name,core_id))
             #print('b2')
