@@ -20,10 +20,10 @@ class extents():
             array_min = array.min()
         array_max = array.max()
         if len(self.minmax):
-            self.minmax[0] = min([array_min,self.minmax[0]])
-            self.minmax[1] = max([array_max,self.minmax[1]])
+            self.minmax[0] =np.min([array_min,self.minmax[0]])
+            self.minmax[1] =np.max([array_max,self.minmax[1]])
         else:
-            self.minmax=[array_min,array_max]
+            self.minmax=np.array([array_min,array_max])
     def __getitem__(self,index):
         return self.minmax[index]
     def __str__(self):
@@ -442,11 +442,11 @@ def plave(array,filename,axis=None,ax=None,colorbar=True, zlim=None, label="Valu
     cmap = mpl.cm.gray
     if zlim is None:
         zlim = [array_2d.min(),array_2d.max()]
-    if scale is 'linear':
+    if scale == 'linear':
         norm=mpl.colors.Normalize(vmin=zlim[0], vmax=zlim[1])
-    elif scale is 'log':
+    elif scale == 'log':
         norm=mpl.colors.LogNorm(vmin=zlim[0], vmax=zlim[1])
-    elif scale is 'symlog':
+    elif scale == 'symlog':
         norm=mpl.colors.SymLogNorm(linthresh,vmin=zlim[0], vmax=zlim[1])
     plot = ax.imshow(array_2d, interpolation='nearest', origin='lower', norm=norm,cmap=cmap)
     if not ticks_off:
