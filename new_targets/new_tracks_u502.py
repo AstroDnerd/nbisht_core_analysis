@@ -16,8 +16,8 @@ this_simname  = 'u502'
 other_simname = 'u302'
 mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%other_simname
 outname = '%s_all_frame_all_prim.h5'%this_simname
-bad_particle_fname_read='datasets_small/%s_bad_particles.h5'%'u501'
-bad_particle_fname_save='datasets_small/%s_bad_particles.h5'%'u501'
+bad_particle_fname_read='datasets_small/%s_bad_particles.h5'%this_simname
+bad_particle_fname_save='datasets_small/%s_bad_particles.h5'%this_simname
 #bad_particle_fname_read="datasets_small/u601_bad_particles_srsly.h5"
 
 #bad_particle_fname_save='datasets_small/%s_bad_particles_take3.h5'%this_simname
@@ -98,7 +98,7 @@ if 1:
         new_looper.core_list = new_looper.core_list[ keep ]
 
 
-if 1:
+if 0:
     #verify and remove bad particles.
     #Don't need to do this every time, it takes a minute.
     #need to have the bad_particles file 
@@ -106,11 +106,11 @@ if 1:
         print('check particles, frame',frame)
         new_looper.verify_all_particles(frame)
 
-if 1:
-    if os.path.exists(bad_particle_fname):
-        print("File exists.  Overwrite? %s"%bad_particle_fname) 
+if 0:
+    if os.path.exists(bad_particle_fname_save):
+        print("File exists.  Overwrite? %s"%bad_particle_fname_save) 
         pdb.set_trace()
-        print("File exists.  Overwrite? %s"%bad_particle_fname) 
+        print("File exists.  Overwrite? %s"%bad_particle_fname_save) 
     new_looper.save_bad_particles(bad_particle_fname_save)
 
 #if 0:
@@ -118,9 +118,6 @@ if 1:
 
 if 1:
     new_looper.read_bad_particles(bad_particle_fname_read)
-    for bad_core, bad_part in zip(bad_core_id, bad_particle_id):
-        new_looper.bad_particles[bad_core]=np.append(
-                new_looper.bad_particles[bad_core], bad_part)
 if 1:
     new_looper.remove_bad_particles()
 

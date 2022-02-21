@@ -27,19 +27,31 @@ if 0:
     fig.savefig('plots_to_sort/%s_mass_test_read_test.png'%mt1.this_looper.out_prefix)
     plt.close(fig)
 
-if 1:
+if 0:
     import three_loopers_mountain_top as TLM
     reload(TLM)
-if 1:
+if 0:
     mt_dict={}
     for this_simname in ['u301','u302','u303']:
 
         mt_dict[this_simname] = mass_tools.mass_tool(TLM.loops[this_simname])
         mt_dict[this_simname].run()
-if 1:
+if 0:
     for this_simname in ['u301','u302','u303']:
         fig,ax = plt.subplots(1,1)
         mass_tools.plot_mass_tracks(mt_dict[this_simname], ax)
+
+        fig.savefig('plots_to_sort/%s_mass_time.png'%this_simname)
+        plt.close(fig)
+if 1:
+    import three_loopers_u500 as tl5
+    if 'mass_dict' not in dir():
+        mass_dict={}
+    for this_simname in ['u503']:# ['u501','u502']:#,'u303']:
+        mass_dict[this_simname]=mass_tools.mass_tool(tl5.loops[this_simname])
+        mass_dict[this_simname].run()
+        fig,ax = plt.subplots(1,1)
+        mass_tools.plot_mass_tracks(mass_dict[this_simname], ax)
         fig.savefig('plots_to_sort/%s_mass_time.png'%this_simname)
         plt.close(fig)
 if 0:
