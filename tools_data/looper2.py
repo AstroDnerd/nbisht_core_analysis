@@ -20,7 +20,7 @@ def load_looper(fname):
     else:
         looper_main = looper.core_looper
 
-    directory = h5ptr['directory'][()]
+    directory = h5ptr['directory'].asstr()[()]
     new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
 
     return new_looper
@@ -156,7 +156,7 @@ class core_looper2():
             return None
         if frame is None:
             frame = self.get_current_frame()
-        self.filename = self.data_template%(self.directory,frame,frame)
+        self.filename = str(self.data_template)%(self.directory,frame,frame)
         new_ds = True
         if frame in self.ds_list:
             if self.ds_list[frame] is not None:
