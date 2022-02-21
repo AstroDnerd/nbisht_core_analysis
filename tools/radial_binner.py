@@ -23,9 +23,12 @@ def rb2(kmag, power, nbins = 32,bins=None):
     dbin = (kmag.max()-kmag.min())/nbins
     if bins is None:
         bins = np.linspace(kmag.min()-0.5*dbin,kmag.max()+0.5*dbin,nbins+1)
+        bins = np.linspace(kmag.min(),kmag.max()+dbin,nbins+1)
     else:
         nbins = bins.size-1
     bin_center = 0.5*(bins[1:]+bins[:-1])
+    if bins.min()<0:
+        pdb.set_trace()
     dig=np.digitize(kmag,bins)
     
     power_1d = np.array([ power[ dig==this_bin].sum() for this_bin in range(1,nbins+1)])
