@@ -65,17 +65,17 @@ sims_to_use = ['u301', 'u302','u303']
 sims_to_use = ['u401', 'u402','u403']
 #sims_to_use = ['u05','u10','u11']
 #sims_to_use = ['u201', 'u202','u203']
-for this_simname in sims_to_use:
+for nsim,this_simname in enumerate(sims_to_use):
     #if this_simname != 'u11':# and skipper==True:
     #    continue
 
     this_looper = loop_dict[this_simname]
 
 
-    FIELD = 'density'
-    #FIELD = 'velocity_magnitude'
-    #FIELD = 'magnetic_field_strength'
-    #FIELD = 'PotentialField'
+    FIELD = 'density'; label = 'abc'[nsim]
+    #FIELD = 'velocity_magnitude'; labels='def'[nsim]
+    #FIELD = 'magnetic_field_strength'; labels='ghi'[nsim]
+    #FIELD = 'PotentialField'; labels='jkl'[nsim]
 
     #core_list = [10,32,84]
     core_list = this_looper.core_list
@@ -238,12 +238,21 @@ for this_simname in sims_to_use:
 
 
 
+    if 1:
+        #figure sublabel
+        lab = r'$3%s%'%label
+        xloc = ax.get_xlim[0]*0.8
+        yloc = ax.get_ylim[1]*0.2
+        ax.text(xloc,yloc,lab)
 
     if 1:
+
+
         #ax.plot( bcen2,vals2*vals1.max()/vals2.max(),'r:')
         outname = "plots_to_sort/%s_pdf_%s_preimage_fits.pdf"%(this_simname,FIELD)
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='log',yscale='log')
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='linear',yscale='linear')
+        
         axbonk(ax,xlabel=r'$%s$'%field_latex,ylabel=r'$V(%s)$'%field_latex,xscale=xscale.get(FIELD,'log'),yscale='log')
         ax.legend(loc=3)
         fig.savefig(outname)
