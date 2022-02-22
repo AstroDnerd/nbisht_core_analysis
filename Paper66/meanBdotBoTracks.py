@@ -16,9 +16,10 @@ class magfield_density_tool():  # was mass_tool()
         
         self.mean_rho=defaultdict(list)
         self.mean_field_comps=defaultdict(list)  
-        self.mean_angle = defaultdict(list)
+        self.mean_costhetas = defaultdict(list)
         self.mean_BdotBo = defaultdict(list) 
-
+        self.mean_fieldOverRho = defaultdict(list)
+        
         self.cores_used=[] 
 
 
@@ -64,14 +65,15 @@ class magfield_density_tool():  # was mass_tool()
                 bb_o = np.sqrt(bx_o*bx_o + by_o*by_o + bz_o*bz_o)
                 
                 BtdotBo = bx*bx_o + by*by_o + bz*bz_o 
-                costheta = BtdotBo/(bb*bb_o)     
+                costheta = BtdotBo/(bb*bb_o)    
+                BRho = bb/density
 
-                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum()) 
-                
+                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())  
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
+                self.mean_fieldOverRho[core_id].append((BRho * cell_volume).sum()/(cell_volume.sum()))
 
                 mean_costheta = (density*cell_volume*costheta).sum()/(density*cell_volume).sum()
-                self.mean_angle[core_id].append(mean_costheta) 
+                self.mean_costhetas[core_id].append(mean_costheta) 
 
                 # to mimic process of costheta, although the latter was made with the core loop
                 # also, would it still be mass weighted?
@@ -101,7 +103,7 @@ simnames = [simname1, simname2, simname3]
 #
 # Heat Map with Sample Tracks
 #
-if 0:
+if 1:
     fig,ax=plt.subplots(1,3, figsize=(12,4))
     axes=ax.flatten()
 
@@ -116,38 +118,46 @@ if 1:
 
         rhos = np.zeros([ntimes,ncores])
         fields = np.zeros([ntimes,ncores])
-        angles = np.zeros([ntimes,ncores])
-        outname='BoBang_pl_meanstdvar_%s'%simnames[nt]
+        fieldOvers = np.zeros([ntimes,ncores])
+        costhetas = np.zeros([ntimes,ncores])
+        thetas = np.zeros([ntimes,ncores])  
+        outname='BodotB_cosang_meanstd_%s'%simnames[nt]
+        outname='fieldOverRho_%s'%simnames[nt]
 
         if 1: # just the tracks 
             fig, ax1=plt.subplots(1,1)
-
-    
+ 
         all_angles = np.empty([0],dtype=float)
         all_stds = np.empty([0],dtype=float)
         all_vars = np.empty([0],dtype=float)
         all_means = np.empty([0],dtype=float)
+
         # MAKE THE FIELDS INTO A 2D ARRAY WE CAN PLOT
         for ncore,core_id in enumerate(tool.cores_used):
             this_rho = tool.mean_rho[core_id] 
             this_field = tool.mean_field_comps[core_id] 
-            this_ang = tool.mean_angle[core_id]
+            this_costheta = tool.mean_costhetas[core_id]
+            this_BRho = tool.mean_fieldOverRho[core_id]
  
             rhos[:,ncore]= np.log10(this_rho)
             fields[:,ncore]= np.log10(this_field)
-            #angles[:,ncore]= np.arccos(this_ang)*180/np.pi
-            angles[:,ncore]= this_ang  #to plot costheta
-            
-            this_ang=angles[:,ncore]
-            all_angles = np.append(all_angles,this_ang)
-         
+            fieldOvers[:,ncore]= np.log10(this_BRho)
+            thetas[:,ncore]= np.arccos(this_costheta)*180/np.pi
+            costhetas[:,ncore]= this_costheta  #to plot costheta
+             
             this_rho = rhos[:,ncore] 
             this_field = fields[:,ncore]
+            this_BRho = fieldOvers[:,ncore]
+            this_costheta=costhetas[:,ncore]
+            this_theta = thetas[:,ncore]
+
+            all_angles = np.append(all_angles,this_theta)
 
             if 1: # (just) all the tracks
-                ax1.plot(these_times,this_ang,c=[0.5]*4)  
+                #ax1.plot(these_times,this_BRho,c=[0.5]*4)  
+                axes[nt].plot(these_times,this_BRho,c=[0.5]*4)  
  
-        if 1: 
+        if 0: 
             numcores = len(all_angles)/len(tool.core_list) 
             coreint = int(numcores)
             for i in range(coreint): 
@@ -162,13 +172,13 @@ if 1:
             stdneg = all_means - all_stds
 
             #ax1.plot([0,1],[90,90],'--',c='k')  #make better extents  
-            ax1.plot(these_times,stdneg,'--',c='r') 
-            ax1.plot(these_times,stdpos,'--',c='r')
-            ax1.plot(these_times,all_means, '--',c='k')
-            ax1.plot(these_times,all_vars, '--',c='b') 
+            #ax1.plot(these_times,stdneg,'--',c='r') 
+            #ax1.plot(these_times,stdpos,'--',c='r')
+            #ax1.plot(these_times,all_means, '--',c='k') 
+            #ax1.plot(these_times,all_vars, '--',c='b') 
+        if 0:    
             fig.savefig(outname)
             print('saved')
-
 
         if 0:
             # PLOT A FEW OF THE TRACKS
@@ -178,20 +188,19 @@ if 1:
                 this_ang=angles[:,ncore]
                 axes[nt].plot(these_times,this_ang,c=[0.5]*4)  
 
-
+        if 1:
             # MAKE A 2D HISTOGRAM
-            #There are probably better ways to do this.
-            angle_bins_edge = np.linspace(0,180,32)
-            angle_bins_edge = np.linspace(0,180,32)
+            #There are probably better ways to do this. 
+            BRho_bins_edge = np.geomspace(-3,3)
             xbins = these_times
-            ybins = 0.5*(angle_bins_edge[1:]+angle_bins_edge[:-1])
+            ybins = 0.5*(BRho_bins_edge[1:]+BRho_bins_edge[:-1])
             nx = len(xbins) ; ny=len(ybins)
             TheX = np.r_[(ny)*[xbins]].transpose()
             TheY = np.r_[(nx)*[ybins]]
 
             hist = np.zeros([xbins.size,ybins.size])
             for ntime, time in enumerate(these_times):
-                thishist,bins = np.histogram(angles[ntime,:],bins=angle_bins_edge)
+                thishist,bins = np.histogram(this_BRho,bins=BRho_bins_edge)
                 hist[ntime,:]=thishist
 
             # PLOT THE MAP
@@ -203,9 +212,9 @@ if 1:
             # SET UP THE COLORBAR
             norm = mpl.colors.LogNorm(vmin=1,vmax=33)
             ploot=axes[nt].pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
-            axbonk(axes[nt],ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='linear', ylim=[0,180])
-    if 0:
-        axes[0].set_ylabel(r'$<\theta>$')
+            axbonk(axes[nt],ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='linear', ylim=None)
+    if 1:
+        axes[0].set_ylabel(r'$B/\rho$')
         fig.colorbar(ploot)
         fig.savefig(outname)
         print(outname)
