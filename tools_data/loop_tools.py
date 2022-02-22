@@ -12,10 +12,7 @@ import os
 import pdb
 import copy
 dbg = 0
-from yt.data_objects.level_sets.clump_handling import \
-            Clump, \
-            find_clumps, \
-            get_lowest_clumps
+from yt.data_objects.level_sets.api import *
 
 def check_particles(ds):
     bad_index=[]

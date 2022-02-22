@@ -148,11 +148,27 @@ class track_manager():
             """looper2"""
 
             if len(self.particle_ids) == 0:
-                self.particle_ids = particle_ids
-                self.core_ids = snapshot.core_ids
-            particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
-            particle_end=particle_start+particle_ids.size
-
+                self.particle_ids = copy.copy(particle_ids)
+                self.core_ids = copy.copy(snapshot.core_ids)
+            if snapshot.core_ids[0] not in self.core_ids:
+                self.particle_ids = np.concatenate([self.particle_ids, particle_ids])
+                self.core_ids = np.concatenate([self.core_ids,snapshot.core_ids])
+            #particle_start = np.where(self.particle_ids==particle_ids[0])[0][0]
+            #particle_end=particle_start+particle_ids.size
+            particle_start = np.where(self.core_ids == snapshot.core_ids[0])[0][0]
+            particle_end = particle_start + particle_ids.size
+            
+            
+            self_cores_set=set(self.core_ids)
+            snap_cores_set=set(snapshot.core_ids)
+            if not self_cores_set.issuperset(snap_cores_set):
+                if not self_cores_set.isdisjoint(snap_cores_set):
+                    print(" Don't know what to do with only some of the cores being present.")
+                    pdb.set_trace()
+                self.core_ids = np.concatenate([self.core_ids, snapshot.core_ids])
+                self.particle_ids = np.concatenate([self.particle_ids, particle_ids])
+                particle_start = np.where( self.core_ids ==  snapshot.core_ids[0])[0][0]
+                particle_end = particle_start + particle_ids.size
 
 
         #check that the particles we're inserting
@@ -163,14 +179,32 @@ class track_manager():
             print("Fatal Error: particle order.  Email collins.")
             pdb.set_trace()
 
-        if snapshot.frame not in self.frames:
-            self.frames=np.append(self.frames,snapshot.frame)
-            self.times=np.append(self.times,snapshot.time) #ds['InitialTime'])
+        #check if we were handed a list or an int
+        frames = snapshot.frame
+        try:
+            test = iter(frames)
+        except:
+            frames = [frames]
+        times = snapshot.time
+        try:
+            test = iter(snapshot.time)
+        except:
+            times = [snapshot.time]
 
-        frame_id = np.where(self.frames == snapshot.frame)[0][0]
+        for nf,frame in enumerate(frames):
+            if frame not in self.frames:
+                self.frames=np.append(self.frames,frame)
+
+                self.times=np.append(self.times,times[nf]) #ds['InitialTime'])
+
+        frame_id = np.where(self.frames == frames[0])[0][0]
 
 
-        for field in snapshot.field_values:
+        for yt_field_name in snapshot.field_values:
+            if type(yt_field_name) is tuple:
+                field = yt_field_name[1]
+            else:
+                field=yt_field_name
             current_shape = self[field].shape
             new_shape = [self.particle_ids.size,
                          self.frames.size]
@@ -179,9 +213,9 @@ class track_manager():
                          slice(None,current_shape[1]))
             temp_frame[old_slice]= self[field]
             new_slice = (slice(particle_start,particle_end),
-                         slice(frame_id,frame_id+1))
-            nuggle=np.array(snapshot.field_values[field])
-            nuggle.shape=(particle_ids.size,1)
+                         slice(frame_id,frame_id+len(frames)))
+            nuggle=np.array(snapshot.field_values[yt_field_name])
+            nuggle.shape=(particle_ids.size,len(frames)) #does this break something?
             temp_frame[new_slice]=nuggle
             self[field]=temp_frame
     
@@ -289,14 +323,16 @@ def shift_4(arr):
     out = np.zeros_like(arr)
     for n,p in enumerate(arr):
         out[n,:]=shift_6(arr[n,:])
-    #the shift entire tracks that are on the wrong side
-    centroid = out[:,-1].mean()
-    delta = out[:,-1]-centroid
-    if ( delta > 0.5).any():
-        more_shift = np.where( delta>0.5)[0]
-        shift = np.sign(delta[more_shift])
-        shift.shape = shift.size,1
-        out[more_shift,:] -= shift
+    #edit: this code is obsolote if we enforce 
+    #      having the last point and enforce the last point is in [0,1]
+    #then shift entire tracks that are on the wrong side
+    #centroid = out[:,-1].mean()
+    #delta = out[:,-1]-centroid
+    #if ( delta > 0.5).any():
+    #    more_shift = np.where( delta>0.5)[0]
+    #    shift = np.sign(delta[more_shift])
+    #    shift.shape = shift.size,1
+    #    out[more_shift,:] -= shift
     return out  
 
 
@@ -338,6 +374,7 @@ class mini_scrubber():
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
         self.density_tot = self.density.sum(axis=0)
+        self.particle_ids = self.trk.c([core_id],'particle_id')
 
         if 1:
             #do the shift
@@ -349,6 +386,24 @@ class mini_scrubber():
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
+
+        if 0: 
+            #Temp debugging code.  Kill later.
+            if 'shift_x' not in self.trk.track_dict or True:
+                self.trk.track_dict['shift_x']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['shift_y']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['shift_z']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['test_rho']=np.zeros_like( self.trk.track_dict['density'])
+                self.trk.track_dict['test_z']=np.zeros_like( self.trk.track_dict['density'])
+            core_mask = self.trk.core_ids == core_id
+            self.shift_x = self.this_x - self.raw_x
+            self.shift_y = self.this_y - self.raw_y
+            self.shift_z = self.this_z - self.raw_z
+            self.trk.track_dict['shift_x'][core_mask,:]= self.shift_x
+            self.trk.track_dict['shift_y'][core_mask,:]= self.shift_y
+            self.trk.track_dict['shift_z'][core_mask,:]= self.shift_z
+            self.trk.track_dict['test_rho'][core_mask,:]= self.raw_z
+            self.trk.track_dict['test_z'][core_mask,:]= self.this_z
         #print("kludge: raw mean")
         self.mean_x = np.mean(self.this_x,axis=0)
         self.mean_y = np.mean(self.this_y,axis=0)
@@ -527,13 +582,28 @@ class mini_scrubber():
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
         shift_z = self.this_z - self.raw_z
-        self.particle_x = self.trk.c([core_id],'particle_pos_x') + shift_x
-        self.particle_y = self.trk.c([core_id],'particle_pos_y') + shift_y
-        self.particle_z = self.trk.c([core_id],'particle_pos_z') + shift_z
+        name_to_use_x= 'particle_pos_x'
+        name_to_use_y= 'particle_pos_y'
+        name_to_use_z= 'particle_pos_z'
+        if name_to_use_x not in self.trk.track_dict:
+            name_to_use_x= 'particle_position_x'
+            name_to_use_y= 'particle_position_y'
+            name_to_use_z= 'particle_position_z'
+
+        self.particle_x = self.trk.c([core_id],name_to_use_x) + shift_x
+        self.particle_y = self.trk.c([core_id],name_to_use_y) + shift_y
+        self.particle_z = self.trk.c([core_id],name_to_use_z) + shift_z
     def make_floats(self, core_id):
-        self.float_x = self.trk.c([core_id],'particle_pos_x')
-        self.float_y = self.trk.c([core_id],'particle_pos_y')
-        self.float_z = self.trk.c([core_id],'particle_pos_z')
+        name_to_use_x= 'particle_pos_x'
+        name_to_use_y= 'particle_pos_y'
+        name_to_use_z= 'particle_pos_z'
+        if name_to_use_x not in self.trk.track_dict:
+            name_to_use_x= 'particle_position_x'
+            name_to_use_y= 'particle_position_y'
+            name_to_use_z= 'particle_position_z'
+        self.float_x = self.trk.c([core_id],'name_to_use_x')
+        self.float_y = self.trk.c([core_id],'name_to_use_y')
+        self.float_z = self.trk.c([core_id],'name_to_use_z')
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
         shift_z = self.this_z - self.raw_z

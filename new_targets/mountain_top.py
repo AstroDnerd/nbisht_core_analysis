@@ -1,9 +1,6 @@
 from starter2 import *
 from scipy.spatial import ConvexHull
-from yt.data_objects.level_sets.clump_handling import \
-            Clump, \
-            find_clumps, \
-            get_lowest_clumps
+from yt.data_objects.level_sets.api import *
 from collections import defaultdict
 import convex_hull_tools as CHT
 

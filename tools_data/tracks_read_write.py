@@ -119,6 +119,7 @@ def load_loop(self,fname):
                             self.__dict__[value].append(iii)
                 else:
                     self.__dict__[value] = the_value
+                print("wut", value, the_value)
         if self.directory is None:
             self.directory = fptr['directory'][()]
         #ti_grp=fptr.create_group('target_indices')
@@ -230,25 +231,25 @@ def load_trackage_only(self,fname):
         for value in [ "current_frame",
                        "data_template",
                        "sim_name",     
-                       "frame_list",   
-                       "core_list",    
                        "target_frame", 
                        "out_prefix",   
                        "fields_from_grid"
                        "plot_directory",
                       ]:
             if value in fptr:
-                the_value = fptr[value][()]
-                if value in ['frame_list','core_list']:
-                    if value not in self.__dict__:
-                        self.__dict__[value]=[]
-                    for iii in the_value:
-                        if iii not in self.__dict__[value]:
-                            self.__dict__[value].append(iii)
-                else:
-                    self.__dict__[value] = the_value
+                try:
+                    the_value = fptr[value].asstr()[()]
+                except:
+                    the_value = fptr[value][()]
+                self.__dict__[value] = the_value
+        for value in ['frame_list','core_list']:
+            if value not in self.__dict__:
+                self.__dict__[value]=[]
+            for iii in the_value:
+                if iii not in self.__dict__[value]:
+                    self.__dict__[value].append(iii)
         if self.directory is None:
-            self.directory = fptr['directory'][()]
+            self.directory = fptr['directory'].asstr()[()]
         if 'looper_version' in fptr:
             self.looper_version = fptr['looper_version'][()]
         else:

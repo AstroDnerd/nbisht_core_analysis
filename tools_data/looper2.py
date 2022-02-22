@@ -20,7 +20,7 @@ def load_looper(fname):
     else:
         looper_main = looper.core_looper
 
-    directory = h5ptr['directory'][()]
+    directory = h5ptr['directory'].asstr()[()]
     new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
 
     return new_looper
@@ -105,7 +105,7 @@ class core_looper2():
         self.plot_directory = plot_directory
         if fields_from_grid is None:
             fields_from_grid = []
-        self.fields_from_grid = ['density', 'cell_volume'] + fields_from_grid
+        self.fields_from_grid = [YT_density, YT_cell_volume] + fields_from_grid
 
         #the track manager.
         self.tr = None
@@ -156,7 +156,7 @@ class core_looper2():
             return None
         if frame is None:
             frame = self.get_current_frame()
-        self.filename = self.data_template%(self.directory,frame,frame)
+        self.filename = str(self.data_template)%(self.directory,frame,frame)
         new_ds = True
         if frame in self.ds_list:
             if self.ds_list[frame] is not None:
@@ -170,13 +170,13 @@ class core_looper2():
                 add_derived_field(self.ds)
             self.ds_list[frame] = self.ds
         if True:
-            self.ds.periodicity = (True,True,True)
+            self.ds.force_periodicity(True)
         return self.ds
     def get_all_particles(self,frame):
         region = self.get_region(frame)
-        self.all_particle_index = region['particle_index'].astype('int64')
-        self.all_particle_position = region['particle_position']
-        self.all_particle_velocity = region['particle_velocity']
+        self.all_particle_index =    region[YT_particle_index].astype('int64')
+        self.all_particle_position = region[YT_particle_position]
+        self.all_particle_velocity = region[YT_particle_velocity]
 
     def get_target_indices(self,target_frame=None,core_list=None,h5_name=None, peak_radius=1.5,
                           bad_particle_list=None):
@@ -319,7 +319,7 @@ class core_looper2():
         for core_id in self.bad_particles:
             h5ptr[str(core_id)] = nar(self.bad_particles[core_id])
         h5ptr.close()
-    def read_bad_particles(self,fname):
+    def read_bad_particles(self,fname,core_hijack=None):
         h5ptr = h5py.File(fname,'r')
         if self.bad_particles is None:
             self.bad_particles = defaultdict(list)
@@ -328,7 +328,12 @@ class core_looper2():
             core_ids.append(group)
         core_ids = np.sort(core_ids).astype('int')
         for core_id in core_ids:
-            self.bad_particles[int(core_id)] = h5ptr[str(core_id)][()]
+            this_core_id = int(core_id)
+            if core_hijack is not None:
+                #this is a dirty kludge to get all particles to work.
+                #
+                this_core_id = core_hijack
+            self.bad_particles[this_core_id] = h5ptr[str(core_id)][()]
         h5ptr.close()
 
 
@@ -521,7 +526,8 @@ class snapshot():
 
         if self.field_values is None:
             self.field_values={}
-        fields_to_get = np.unique(list(self.loop.fields_from_grid) + list(field_list))
+        import string_unique
+        fields_to_get = string_unique.unique(list(self.loop.fields_from_grid) + list(field_list))
         number_of_new_fields=0
 
         for field in fields_to_get:
@@ -536,7 +542,7 @@ class snapshot():
         verbose=False
         good_index_sort_np = np.array(copy.copy(self.ind)).astype('int64')
         gridlist = self.ds.index.grids[-1::-1]
-        particle_fields = ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index', 'test_field']
+        particle_fields = ['particle_position_x', 'particle_position_y', 'particle_position_z', 'particle_index', 'test_field']
         gotten = np.zeros(good_index_sort_np.size,dtype='int32') 
         for ngrid, grid in enumerate(gridlist):
             if verbose:
@@ -571,7 +577,7 @@ class snapshot():
                 get_these_indices = grid_to_particle_index[particle_sort_by_index]
                 particle_selector = particle_selector.astype('bool')
                 for field in self.field_values:
-                    if field in particle_fields:
+                    if field[1] in particle_fields:
                         continue
                     #NOTE this mask can be move outside of the field loop.
                     if verbose:
@@ -584,14 +590,14 @@ class snapshot():
                     self.field_values[field][particle_selector] = values
                 if verbose:
                     print("   work2")
-                self.field_values['particle_pos_x']=self.pos[:,0]
-                self.field_values['particle_pos_y']=self.pos[:,1]
-                self.field_values['particle_pos_z']=self.pos[:,2]
-                self.field_values['particle_index']=self.ind
+                self.field_values[YT_particle_pos_x]=self.pos[:,0]
+                self.field_values[YT_particle_pos_y]=self.pos[:,1]
+                self.field_values[YT_particle_pos_z]=self.pos[:,2]
+                self.field_values[YT_particle_index]=self.ind
                           
         #error check.
-        if  (self.field_values['cell_volume'] < 0).any():
-            NM= (self.field_values['cell_volume'] < 0).sum()
+        if  (self.field_values[YT_cell_volume] < 0).any():
+            NM= (self.field_values[YT_cell_volume] < 0).sum()
             print("ERROR: some particles (%d of them) not found.  This is problematic."%NM)
             pdb.set_trace()
         if verbose:

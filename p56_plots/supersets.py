@@ -1,7 +1,7 @@
 
 from starter2 import *
 
-import three_loopers_mountain_top as TLM
+#import three_loopers_mountain_top as TLM
 import convex_hull_tools as CHT
 
 if 'clobber' not in dir():

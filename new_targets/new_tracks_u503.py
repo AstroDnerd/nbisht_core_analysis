@@ -16,8 +16,8 @@ this_simname  = 'u503'
 other_simname = 'u303'
 mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%other_simname
 outname = '%s_all_frame_all_prim.h5'%this_simname
-bad_particle_fname_read='datasets_small/%s_bad_particles.h5'%'u501'
-bad_particle_fname_save='datasets_small/%s_bad_particles.h5'%'u501'
+bad_particle_fname_read='datasets_small/%s_bad_particles.h5'%this_simname
+bad_particle_fname_save='datasets_small/%s_bad_particles.h5'%this_simname
 #bad_particle_fname_read="datasets_small/u601_bad_particles_srsly.h5"
 
 #bad_particle_fname_save='datasets_small/%s_bad_particles_take3.h5'%this_simname
@@ -48,12 +48,12 @@ if 0:
     fields = ['x','y','z','density', 'cell_volume']
     derived=[]
 if 1:
-    fields = ['x','y','z','density', 'cell_volume']
-    fields += ['velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
-    fields += ['velocity_x','velocity_y','velocity_z']
-    fields += ['magnetic_field_%s'%s for s in 'xyz']
-    fields += ['PotentialField','grav_x','grav_y','grav_z' ]
-    fields += ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index']
+    fields = [YT_x,YT_y,YT_z,YT_density, YT_cell_volume]
+    fields += [YT_velocity_magnitude,YT_magnetic_field_strength, YT_velocity_divergence]
+    fields += [YT_velocity_x,YT_velocity_y,YT_velocity_z]
+    fields += [('gas','magnetic_field_%s'%s) for s in 'xyz']
+    fields += [YT_potential_field,YT_grav_x,YT_grav_y,YT_grav_z ]
+    fields += [YT_particle_pos_x, YT_particle_pos_y, YT_particle_pos_z, YT_particle_index]
     derived=[xtra_energy.add_force_terms]
 
 if target_frame not in frame_list:
@@ -98,7 +98,7 @@ if 1:
         new_looper.core_list = new_looper.core_list[ keep ]
 
 
-if 1:
+if 0:
     #verify and remove bad particles.
     #Don't need to do this every time, it takes a minute.
     #need to have the bad_particles file 
@@ -106,22 +106,19 @@ if 1:
         print('check particles, frame',frame)
         new_looper.verify_all_particles(frame)
 
-if 1:
-    if os.path.exists(bad_particle_fname):
-        print("File exists.  Overwrite? %s"%bad_particle_fname) 
+if 0:
+    if os.path.exists(bad_particle_fname_save):
+        print("File exists.  Overwrite? %s"%bad_particle_fname_save) 
         pdb.set_trace()
-        print("File exists.  Overwrite? %s"%bad_particle_fname) 
+        print("File exists.  Overwrite? %s"%bad_particle_fname_save) 
     new_looper.save_bad_particles(bad_particle_fname_save)
 
 #if 0:
 #    new_looper.save_bad_particles('datasets_small/%s_bad_particles_full.h5'%this_simname)
 
-if 1:
+if 0:
     new_looper.read_bad_particles(bad_particle_fname_read)
-    for bad_core, bad_part in zip(bad_core_id, bad_particle_id):
-        new_looper.bad_particles[bad_core]=np.append(
-                new_looper.bad_particles[bad_core], bad_part)
-if 1:
+if 0:
     new_looper.remove_bad_particles()
 
 if 1:

@@ -84,7 +84,7 @@ class core_looper():
         self.plot_directory = plot_directory
         if fields_from_grid is None:
             fields_from_grid = []
-        self.fields_from_grid = ['density', 'cell_volume'] + fields_from_grid
+        self.fields_from_grid = [YT_density, YT_cell_volume] + fields_from_grid
 
         #this is not used.
         self.individual_particle_tracks=individual_particle_tracks
@@ -162,7 +162,7 @@ class core_looper():
                 add_derived_field(self.ds)
             self.ds_list[frame] = self.ds
         if True:
-            self.ds.periodicity = (True,True,True)
+            self.ds.force_periodicity(True)
         return self.ds
     def get_all_particles(self,frame):
         region = self.get_region(frame)
