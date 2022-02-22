@@ -1,0 +1,22 @@
+
+# latest revision: 02-22-2022 ...200 years till 02-22-2222 
+
+- - - - - - - -
+If you encounter a number at the end of a .py file, and there is no other .py file by the same name,
+it means there is a better version somewhere else.
+Use the largest number of the .py files that have 0#.
+
+Pipeline for extracting data from new data sets:
+(check in with directory 'examples' to see if there are any updates)
+/get_peaks.py
+/count_particles.py
+/data_puller.py
+
+
+- - - - - - - -
+NOTES
+/Brho_particles_1.py is the original of alphaFieldDensity.py
+
+The .py files for all plots on Paper 66:
+/alphaFieldDensity.py and /meanFieldDensityTracks.py
+

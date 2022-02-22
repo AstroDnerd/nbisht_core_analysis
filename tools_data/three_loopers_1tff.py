@@ -1,8 +1,9 @@
 from starter2 import *
 reload(looper)
+
 if 'looper1' not in dir():
-    file_list=glob.glob(dl.every_ten['u201'])
     looper1=looper.core_looper(directory=dl.sims['u201'])
+    file_list=glob.glob(dl.every_ten['u201'])
     for nfile,fname in enumerate(file_list):
         looper1.load_loop(fname)
         print( "File %d of %d"%(nfile,len(file_list)))
@@ -26,3 +27,4 @@ if 'looper3' not in dir():
         print( "File %d of %d"%(nfile,len(file_list)))
     looper3.out_prefix='u203'
     looper3.tr.sort_time()
+

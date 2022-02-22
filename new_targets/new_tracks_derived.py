@@ -41,6 +41,8 @@ def add_energies(obj):
     obj.add_field('therm_energy',therm_energy,
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
+
+
 if 1:
     """this set of parameters extracts all primitive quantities"""
     target_frame = dl.target_frames[this_simname]
