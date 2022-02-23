@@ -17,7 +17,7 @@ def powerlaw(r,rho0, r0, alpha):
     return alpha*np.log10(r/r0) + np.log10(rho0)
 
 
-def toplot(prof,quan = 'cell_volume'):
+def toplot(prof,quan = YT_cell_volume):
     xbins = prof.x_bins
     bin_center = 0.5*(xbins[1:]+xbins[:-1])
     bin_widths = xbins[1:]-xbins[:-1]
@@ -50,9 +50,13 @@ if 'loop_dict' not in dir():
         import three_loopers_mountain_top as TLM
         reload(TLM)
         loop_dict = TLM.loops
-    else:
+    elif 0:
         import three_loopers_tenfour as TL4
         loop_dict = TL4.loops
+    else:
+        import three_loopers_six as TL6
+        loop_dict = TL6.loops
+
 
 
 
@@ -60,9 +64,11 @@ if 'loop_dict' not in dir():
 vrms = {'u201':5.2, 'u202':5.1, 'u203':5.4}
 vrms.update( {'u301':5.2, 'u302':5.1, 'u303':5.4} )
 vrms.update( {'u401':5.2, 'u402':5.1, 'u403':5.4} )
+vrms.update( {'u601':5.2, 'u602':5.1, 'u603':5.4} )
 vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 sims_to_use = ['u301', 'u302','u303']
 sims_to_use = ['u401', 'u402','u403']
+sims_to_use = ['u601', 'u602','u603']
 #sims_to_use = ['u05','u10','u11']
 #sims_to_use = ['u201', 'u202','u203']
 for nsim,this_simname in enumerate(sims_to_use):
@@ -72,14 +78,20 @@ for nsim,this_simname in enumerate(sims_to_use):
     this_looper = loop_dict[this_simname]
 
 
-    FIELD = 'density'; label = 'abc'[nsim]
-    #FIELD = 'velocity_magnitude'; labels='def'[nsim]
-    #FIELD = 'magnetic_field_strength'; labels='ghi'[nsim]
-    #FIELD = 'PotentialField'; labels='jkl'[nsim]
+    #FIELD = YT_density; label = 'abc'[nsim]
+    #FIELD = YT_velocity_magnitude; label='def'[nsim]
+    #FIELD = YT_magnetic_field_strength; label='ghi'[nsim]
+    FIELD = YT_potential_field; label='jkl'[nsim]
 
     #core_list = [10,32,84]
-    core_list = this_looper.core_list
-    all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list])
+    core_list = np.unique(this_looper.tr.core_ids)
+    if 0:
+        #looper 1 version
+        #if the next line fails, use this one.
+        all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list])
+    if 1:
+        #the looper 2 version.  If this fails, you have looper 1.
+        all_target_indices = this_looper.target_indices
     all_target_indices = all_target_indices.astype('int64')
     eta1 = len(all_target_indices)/128**3
     print("ETA 1 %s %0.4f"%(this_simname, eta1))
@@ -93,8 +105,8 @@ for nsim,this_simname in enumerate(sims_to_use):
     prof_dir = "."
     version = 't2_'
     version = ''
-    prof_full_fname = "%s/%spreimage_pdf_full_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD, frame)
-    prof_part_fname = "%s/%spreimage_pdf_part_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD, frame)
+    prof_full_fname = "%s/%spreimage_pdf_full_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD[1], frame)
+    prof_part_fname = "%s/%spreimage_pdf_part_%s_%s_n%04d.h5"%(prof_dir, version,this_simname, FIELD[1], frame)
     print(prof_full_fname)
 
     if os.path.exists(prof_full_fname) and False:
@@ -120,25 +132,25 @@ for nsim,this_simname in enumerate(sims_to_use):
                 'velocity_magnitude':np.logspace(np.log10(0.03356773506543828), 
                                                  np.log10(30.661519625727557),65)}
         if 0:
-            prof_all_density  = yt.create_profile(ad,bin_fields=[FIELD],fields=['cell_volume'],weight_field=None, override_bins=bins)
+            prof_all_density  = yt.create_profile(ad,bin_fields=[FIELD[1]],fields=[YT_cell_volume],weight_field=None, override_bins=bins)
             bbb1, bcen1, vals1, db1= toplot(prof_all_density)
         else:
-            density1 = ad[FIELD]
-            bbb1 = bins[FIELD]
-            cell_volume1 = ad['cell_volume']
+            density1 = ad[FIELD[1]]
+            bbb1 = bins[FIELD[1]]
+            cell_volume1 = ad[YT_cell_volume]
             vals1, bbb1 = np.histogram(density1, weights=cell_volume1, bins=bbb1)
             bcen1=0.5*(bbb1[1:]+bbb1[:-1])
             db1 = bbb1[1:]-bbb1[:-1]
             vals1/=db1
 
         if 0:
-            prof_mask_density = yt.create_profile(ad,bin_fields=[FIELD],fields=[deposit_tuple],weight_field=None, override_bins=bins)
+            prof_mask_density = yt.create_profile(ad,bin_fields=[FIELD[1]],fields=[deposit_tuple],weight_field=None, override_bins=bins)
             bbb2, bcen2, vals2, db2 = toplot(prof_mask_density,quan=deposit_tuple[1])
         else:
             frame_ind = np.where(this_looper.tr.frames == frame)[0][0]
-            #density2 = this_looper.tr.track_dict[FIELD][:,frame_ind]
-            #cell_volume2 = this_looper.tr.track_dict['cell_volume'][:,frame_ind]
-            density2     = this_looper.tr.c(core_list, FIELD)[:,frame_ind]
+            #density2 = this_looper.tr.track_dict[FIELD[1]][:,frame_ind]
+            #cell_volume2 = this_looper.tr.track_dict[YT_cell_volume][:,frame_ind]
+            density2     = this_looper.tr.c(core_list, FIELD[1])[:,frame_ind]
             cell_volume2 = this_looper.tr.c(core_list, 'cell_volume')[:,frame_ind]
             vals2, bbb2 = np.histogram(density2, weights=cell_volume2, bins=bbb1)
             bcen2=0.5*(bbb2[1:]+bbb2[:-1])
@@ -175,7 +187,7 @@ for nsim,this_simname in enumerate(sims_to_use):
     ok2 = vals2 > 0
     ok_both=ok1*ok2
 
-    field_latex = {'density':r"\rho", 'velocity_magnitude':'v','magnetic_field_strength':'B','PotentialField':r'\Phi'}[FIELD]
+    field_latex = {'density':r"\rho", 'velocity_magnitude':'v','magnetic_field_strength':'B','PotentialField':r'\Phi'}[FIELD[1]]
     PDF_LABEL = r'$V(%s)$'%(field_latex)
     PDF_LABEL_C = r'$V(%s|*)$'%(field_latex)
     PDF_LABEL_R = r'$V(*|%s)$'%(field_latex)
@@ -200,7 +212,7 @@ for nsim,this_simname in enumerate(sims_to_use):
         ks_string = r'$D=%0.2f (D_c=%0.2f, p=%0.2f)$'%(KS_output.statistic,crit_stat, KS_output.pvalue) 
         return ks_string
 
-    if FIELD == 'density':
+    if FIELD[1]== 'density':
         popt, pcov = curve_fit(powerlaw, bcen1[ok], np.log10(ratio[ok]), p0=[1,1,-2])
 
         p_star_given_rho = vals1*bcen1**popt[2]
@@ -210,7 +222,7 @@ for nsim,this_simname in enumerate(sims_to_use):
         lab = r'$\eta_1\rho^{%0.2f}V(\rho)$: %s'%(popt[2], ks_string)
         ax.plot( bcen1,p_star_given_rho,linewidth=2, label=lab, linestyle='--',c=[0.5]*4)
 
-    if FIELD == 'velocity_magnitude':
+    if FIELD[1] == 'velocity_magnitude':
         #maxwellian
         v = bcen1
         sigmav = vrms[this_simname]
@@ -228,7 +240,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
 
 
-    if FIELD == 'magnetic_field_strength':
+    if FIELD[1] == 'magnetic_field_strength':
         p_star_given_rho = vals1#*bcen1**0.5
         p_star_given_rho *= eta1
 
@@ -238,22 +250,23 @@ for nsim,this_simname in enumerate(sims_to_use):
 
 
 
-    if 1:
-        #figure sublabel
-        lab = r'$3%s%'%label
-        xloc = ax.get_xlim[0]*0.8
-        yloc = ax.get_ylim[1]*0.2
-        ax.text(xloc,yloc,lab)
 
     if 1:
 
 
         #ax.plot( bcen2,vals2*vals1.max()/vals2.max(),'r:')
-        outname = "plots_to_sort/%s_pdf_%s_preimage_fits.pdf"%(this_simname,FIELD)
+        outname = "plots_to_sort/%s_pdf_%s_preimage_fits.pdf"%(this_simname,FIELD[1])
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='log',yscale='log')
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='linear',yscale='linear')
         
-        axbonk(ax,xlabel=r'$%s$'%field_latex,ylabel=r'$V(%s)$'%field_latex,xscale=xscale.get(FIELD,'log'),yscale='log')
+        axbonk(ax,xlabel=r'$%s$'%field_latex,ylabel=r'$V(%s)$'%field_latex,xscale=xscale.get(FIELD[1],'log'),yscale='log')
+
+        if 1:
+            #figure sublabel
+            lab = r'$3%s$'%label
+            xloc = ax.get_xlim()[1]*0.5
+            yloc = ax.get_ylim()[0]*1.2
+            ax.text(xloc,yloc,lab)
         ax.legend(loc=3)
         fig.savefig(outname)
         print(outname)
@@ -274,6 +287,6 @@ for nsim,this_simname in enumerate(sims_to_use):
         #ax2.plot( bcen1,vals1,c='k')
         #ax2.plot( bcen2,vals2,'k--')
         axbonk(ax2,xlabel=r'$\rho$',ylabel=r'$\int V(rho)$',xscale='log',yscale='log')
-        outname = 'plots_to_sort/%s_cuml_%s_n%04d.pdf'%(this_simname,FIELD,frame)
+        outname = 'plots_to_sort/%s_cuml_%s_n%04d.pdf'%(this_simname,FIELD[1],frame)
         fig2.savefig(outname)
         print(outname)
