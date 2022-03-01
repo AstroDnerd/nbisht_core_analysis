@@ -15,20 +15,20 @@ sim_list=['u601','u602','u603']
 
 import three_loopers_u500 as TL5
 MOD = TL5
-sim_list=['u501','u502']#,'u503']
+sim_list=['u501','u502','u503']
 
 hair_tools={}
 for ns,this_simname in enumerate(sim_list):
     hair_tools[ns+1]= hair_dryer.hair_tool( MOD.loops[this_simname])
 hair_tools[1].sim_name = 'sim 1'
 hair_tools[2].sim_name = 'sim 2'
-#hair_tools[3].sim_name = 'sim 3'
-
-if 0:
-    for this_simname in  sim_list:
-        hair_tools[this_simname].run( )#core_list=[10,11])#core_list=[10])
+hair_tools[3].sim_name = 'sim 3'
 
 if 1:
+    for ns,this_simname in  enumerate(sim_list):
+        hair_tools[ns+1].run( )#core_list=[10,11])#core_list=[10])
+
+if 0:
     hair_tools[2].run( core_list = [3,32])
     hair_tools[2].run( core_list = [378])
 if 0:
