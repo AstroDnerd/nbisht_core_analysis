@@ -1,6 +1,21 @@
 from starter2 import *
-import annotate_particles_3
-reload(annotate_particles_3)
+import annotate_particles_4
+reload(annotate_particles_4)
+class MonotoneColorbar():
+    def __init__(self):
+        self.prev=None
+    def __call__(self,val, verbose=False):
+        new_val = val+0
+        if self.prev is not None:
+            new_val[0] = min( [self.prev[0], min(new_val)])
+            new_val[1] = max( [self.prev[1], max(new_val)])
+            print(val, new_val)
+        self.prev = new_val
+        return new_val
+
+            
+
+
 class MonotoneEnforcer():
     def __init__(self):
         self.prev=[]
@@ -86,7 +101,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     all_png = glob.glob("*png")
     tr = looper.tr
     if monotonic is True:
-        monotonic  ={'zlim':MonotoneEnforcer(), 'left':MonotoneEnforcer2(nvalues=6),'right':MonotoneEnforcer2(nvalues=6)}
+        #monotonic  ={'zlim':MonotoneEnforcer()}#, 'left':MonotoneEnforcer2(nvalues=6),'right':MonotoneEnforcer2(nvalues=6)}
+        monotonic  ={'zlim':MonotoneColorbar()}#, 'left':MonotoneEnforcer2(nvalues=6),'right':MonotoneEnforcer2(nvalues=6)}
         #monotonic  ={'zlim':MonotoneEnforcer(), 'left':MonotoneEnforcer(),'right':MonotoneEnforcer()}
     tracker_index =  [np.where(looper.tr.frames == frame)[0][0] for frame in frame_list]
     times=nar(looper.tr.times[ tracker_index] )
@@ -212,12 +228,13 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
 
 
         if monotonic:
-            left = monotonic['left'](left)
-            right  = monotonic['right'](right)
-            center = 0.5*(left+right)
-            if ( left >= right).any():
-                print('wtf')
-                pdb.set_trace()
+            if 'left' in monotonic:
+                left = monotonic['left'](left)
+                right  = monotonic['right'](right)
+                center = 0.5*(left+right)
+                if ( left >= right).any():
+                    print('wtf')
+                    pdb.set_trace()
 
 
         all_left[frame] = ds.arr(left,'code_length')
@@ -310,15 +327,16 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                         this_ax.plot(all_times,quan[ny,:],linewidth=0.1, c=color)
 
                 if LOS < 3 and monotonic:
-                    this_ax.plot(times,center_to_plot[LOS,:],c='k')
-                    RRR=np.column_stack(monotonic['right'].values)
-                    LLL=np.column_stack(monotonic['left'].values)
-                    this_ax.plot(times,RRR[LOS,:],'r--')
-                    this_ax.plot(times,LLL[LOS,:],'k--')
-                    RRR=np.column_stack(monotonic['right'].extrema)
-                    LLL=np.column_stack(monotonic['left'].extrema)
-                    this_ax.plot(times,RRR[LOS,:],c='r')
-                    this_ax.plot(times,LLL[LOS,:],c='k')
+                    if 'left' in monotonic:
+                        this_ax.plot(times,center_to_plot[LOS,:],c='k')
+                        RRR=np.column_stack(monotonic['right'].values)
+                        LLL=np.column_stack(monotonic['left'].values)
+                        this_ax.plot(times,RRR[LOS,:],'r--')
+                        this_ax.plot(times,LLL[LOS,:],'k--')
+                        RRR=np.column_stack(monotonic['right'].extrema)
+                        LLL=np.column_stack(monotonic['left'].extrema)
+                        this_ax.plot(times,RRR[LOS,:],c='r')
+                        this_ax.plot(times,LLL[LOS,:],c='k')
 
         if verbose:
             print('save')
@@ -397,7 +415,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                                      inset_box_args={'visible':False},
                                      coord_system='data')
                 if plot_particles:
-                    pw.annotate_these_particles2(1.0, col=[color]*positions.shape[0], positions=positions, 
+                    pw.annotate_these_particles4(1.0, col=[color]*positions.shape[0], positions=positions, 
                                                  p_size=marker_size)
         pw.save('plots_to_sort/P3')
         if lic:
