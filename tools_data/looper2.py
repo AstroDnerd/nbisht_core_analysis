@@ -8,7 +8,7 @@ import tracks_read_write
 reload(tracks_read_write)
 verbose=True
 
-def load_looper(fname):
+def load_looper(fname, directory=None):
     import looper
     h5ptr=h5py.File(fname,'r')
     looper_version=1
@@ -20,7 +20,9 @@ def load_looper(fname):
     else:
         looper_main = looper.core_looper
 
-    directory = h5ptr['directory'].asstr()[()]
+    if directory is None:
+        #It's actually not great to store this if you move machines.
+        directory = h5ptr['directory'].asstr()[()]
     new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
 
     return new_looper
