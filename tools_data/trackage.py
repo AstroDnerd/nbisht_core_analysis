@@ -601,9 +601,9 @@ class mini_scrubber():
             name_to_use_x= 'particle_position_x'
             name_to_use_y= 'particle_position_y'
             name_to_use_z= 'particle_position_z'
-        self.float_x = self.trk.c([core_id],'name_to_use_x')
-        self.float_y = self.trk.c([core_id],'name_to_use_y')
-        self.float_z = self.trk.c([core_id],'name_to_use_z')
+        self.float_x = self.trk.c([core_id],name_to_use_x)
+        self.float_y = self.trk.c([core_id],name_to_use_y)
+        self.float_z = self.trk.c([core_id],name_to_use_z)
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
         shift_z = self.this_z - self.raw_z
