@@ -11,6 +11,7 @@ import close_tool
 import three_loopers_six as TL6
 MOD = TL6
 sim_list=['u601','u602','u603']
+sim_list=['u603']
 #sim_list=['u402']
 import supersets
 reload(supersets)
@@ -33,7 +34,6 @@ if 'st' not in dir():
     for this_simname in sim_list:
         st[this_simname] = supersets.superset( MOD.loops[this_simname], ht[this_simname])
         st[this_simname].find()
-sim_list=['u603']
 import colors
 if 1:
     for sim in sim_list:
@@ -59,6 +59,7 @@ if 1:
                                 axis_to_plot=[0,1,2],
                                 plot_square=False,
                                 plotstyle = "Figure8",
+                                center_image=False,
                                 external_axis=ax.flatten()
                                )
             reload(hair_dryer)
