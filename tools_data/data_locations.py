@@ -152,6 +152,7 @@ sims={'u05':sim_u05,'u10':sim_u10,'u11':sim_u11,'u101':sim_u101,'u102':sim_u102,
 sims.update({'u201':sim_u201,'u202':sim_u202,'u203':sim_u203})
 sims.update({'u301':sim_u201,'u302':sim_u202,'u303':sim_u203})
 sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
+sims.update({'u601':sim_u501,'u602':sim_u502,'u603':sim_u503})
 sims['u14']=sim_u14
 
 
