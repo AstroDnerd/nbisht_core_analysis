@@ -63,6 +63,8 @@ if machine == 'Nazare':
     u500 = {'u501':"/scratch1/dcollins/Paper19/Datasets/u500/u501_all_frame_all_prim.h5",
             "u502":"/scratch1/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
             "u503":"/scratch1/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
+    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
+    coresets = "/scratch1/dcollins/Paper19/Datasets/"
 elif machine == 'cloudbreak':
     sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
