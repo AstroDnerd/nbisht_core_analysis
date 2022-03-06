@@ -23,10 +23,12 @@ class TheseParticles(PlotCallback):
     default the plot's data source will be queried.
     """
     _type_name = "these_particles2"
+
     region = None
     _descriptor = None
     _supported_geometries = ("cartesian", "spectral_cube", "cylindrical-2d")
-    def __init__(self, width,positions, p_size=1.0, col='k', marker='o', stride=1,
+
+    def __init__(self, width, positions, p_size=1.0, col='k', marker='o', stride=1,
                  ptype='all', minimum_mass=None, alpha=1.0, data_source=None):
         PlotCallback.__init__(self)
         self.width = width

@@ -40,12 +40,19 @@ class trial():
         self.core_list=core_list
         if do_plot:
             fig,ax=plt.subplots(1,1)
-        rmin, rmax = 1./2048, 0.4
-        vmin, vmax = 0.1, 100
+        self.rmin, self.rmax = 1./2048, 0.4
+        self.vmin, self.vmax = 0.1, 100
         nx=67; ny=64
-        self.rbins = np.logspace(np.log10(rmin), np.log10(vmax),nx+1)
-        #self.vbins = np.linspace(vmin, vmax, ny+1)
-        self.vbins = np.logspace(np.log10(vmin), np.log10(vmax), ny+1)
+        if 0:
+            self.xscale='linear'
+            self.yscale='linear'
+            self.rbins = np.linspace(self.rmin, self.rmax,nx+1)
+            self.vbins = np.linspace(0, self.vmax, ny+1)
+        if 1:
+            self.xscale='log'
+            self.yscale='log'
+            self.rbins = np.logspace(np.log10(self.rmin), np.log10(self.rmax),nx+1)
+            self.vbins = np.logspace(np.log10(self.vmin), np.log10(self.vmax), ny+1)
         self.hist = np.zeros([nx,ny])
         def cen(arr):
             return 0.5*(arr[1:]+arr[:-1])
@@ -64,16 +71,18 @@ class trial():
             print('go ', core_id)
             self.cores_used.append(core_id)
             n0=0
-            rmin = 1./2048
+            #self.rmin = 1./2048
             nt = np.where(thtr.frames == frame)[0][0]
 
             density = thtr.c([core_id],'density')[:,nt]
             cell_volume = thtr.c([core_id],'cell_volume')[:,nt]
             this_r = ms.r[:,nt]
-            this_r[ this_r < rmin] = rmin
+            this_r[ this_r < self.rmin] = self.rmin
             asort = np.argsort(this_r)
             unsort = np.argsort(asort)
             rsort = this_r[asort]
+            if 1:
+                rsort = rsort[1:]
             self.r.append(rsort)
             dv = cell_volume[asort]
 
@@ -92,6 +101,9 @@ class trial():
                 vr = ms.rc_vmag[:,nt]  #testing
             vrs = vr[asort]
             sigma_vr2 = np.cumsum(vrs**2*dv)/np.cumsum(dv)
+            if 1:
+                sigma_vr2=sigma_vr2[1:]
+                print('wut wut')
             self.vr.append(sigma_vr2)
 
             v2_sorted=self.vr[-1]
@@ -109,16 +121,18 @@ if 'do_all_plots' not in dir():
 
 #import three_loopers as TL
 #import three_loopers_1tff as TL
-import three_loopers_mountain_top as TLM
+#import three_loopers_mountain_top as TLM
+import three_loopers_six as TL6
+MOD = TL6
 import sf2
 frame=0
 if 'run1' not in dir():
-    run1 = trial(TLM.loops['u301'])
+    run1 = trial(MOD.loops['u601'])
     run1.by_frame(frame)
-    run2 = trial(TLM.loops['u302']) 
-    run2.by_frame(frame)
-    run3 = trial(TLM.loops['u303'])
-    run3.by_frame(frame)
+#    run2 = trial(MOD.loops['u602']) 
+#    run2.by_frame(frame)
+#    run3 = trial(MOD.loops['u603'])
+#    run3.by_frame(frame)
 #for frame in [0]: #range(0,110,10):
 #    run1.plot(frame)
 
@@ -140,7 +154,7 @@ def plot(self,frame, my_sf2=None,longorno=''):
         #sf_r01 = np.argmin( np.abs(my_sf2[0] -0.1))
         #scale = my_sf2[1][sf_r01]/v[i_r01] 
         #ax.plot(r,v*scale,c=[0.5,0.5,0.5,0.6],lw=0.1)
-        ax.plot(r,v,c=[0.5,0.5,0.5,0.1],lw=0.1)
+        ax.plot(r,v,c=[0.5,0.5,0.5,0.1],lw=0.3)
     fig2,ax2=plt.subplots(1,1)
     mean_of_sigma = (self.TheY*pdf).sum(axis=1)/pdf.sum(axis=1)
     ax.plot(self.TheX[:,0], mean_of_sigma)
@@ -153,17 +167,22 @@ def plot(self,frame, my_sf2=None,longorno=''):
         #ax.text(r[0],v[0],"%d"%core_id)
     #ax.plot( self.rbins, [1.0]*self.rbins.size,c=[0.5]*3)
     #ax.scatter(nar([1,2,3,4])/128,[10]*4)
-    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2)
-    axbonk(ax,yscale='log',xscale='log', xlim=[1./128,0.4], ylim=[vr_min,vr_max], ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
-    ax.set_yscale('symlog',linthresh=1)
+    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2, shading='nearest')
+    #xlim=[1./128,0.4]
+    #ylim=[vr_min,vr_max]
+    xlim=self.rmin,self.rmax
+    xlim=1./128,self.rmax
+    ylim=self.vmin,self.vmax
+    axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
+    #ax.set_yscale('symlog',linthresh=1)
     from matplotlib.ticker import MultipleLocator
     ml = MultipleLocator(10)
     #ax.tick_params(axis='y',which='minor')
     #ax.yaxis.set_minor_locator(ml)
-    ax.set_yticks( np.concatenate([ np.arange(0,1,0.1), np.arange(1,10), np.arange(10,100,10)]))
+    #ax.set_yticks( np.concatenate([ np.arange(0,1,0.1), np.arange(1,10), np.arange(10,100,10)]))
     fig.colorbar(ploot,ax=ax)
     if my_sf2 is not None:
-        ax.plot(my_sf2[0],my_sf2[1],c='k')
+        ax.plot(my_sf2[0][1:],my_sf2[1][1:],c='k')
     outname = "%s/%svelocity_sf_%s_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory,longorno,self.lab, self.this_looper.out_prefix, frame)
     fig.savefig(outname)
     print(outname)
@@ -198,9 +217,9 @@ SCALE = 1/128**3
 if 1:
     import sf2
     reload( sf2)
-    for nrun,this_run in enumerate( [run1, run2, run3]):
-        if 'msf' not in dir() or True:
-            msf = sf2.make_sf(this_run.this_looper,0)
-            rbins,SS = msf.bin_sf2(); SS/=2*np.pi
+    for nrun,this_run in enumerate( [run1]):#, run2, run3]):
+        #if 'msf' not in dir() or True:
+        #    msf = sf2.make_sf(this_run.this_looper,0)
+        #    rbins,SS = msf.bin_sf2(); SS/=2*np.pi
         #plot(this_run,0, my_sf2=[rbins,SS])
         plot(this_run,0, my_sf2=[Things[n][0],Things[n][1]*SCALE],longorno='long')

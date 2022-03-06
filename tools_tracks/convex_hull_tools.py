@@ -328,6 +328,8 @@ def plot_watershed(htool,core_list=None,accumulate=False,frames=[0],all_plots=Fa
             fig_many.savefig(outname)
             print("Wrote "+outname)
 
+
+
 import figure_sublabel
 def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
             color_dict=None,axis_to_plot=[0], plot_square=True, external_axis=None,
@@ -451,13 +453,18 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 else:
                     dx=0
                     dy=0
-                s=0.5
-                m='s'
+                if plotstyle=='Figure8':
+                    size=2
+                    marker=None
+                else:
+                    size=0.5
+                    marker=None
                 if center_image:
                     plot_x_ext( this_p[x]+dx)
                     plot_y_ext( this_p[y]+dy)
-                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=7, c=[color_dict[core_id]]*n_particles,
-                                marker=m, edgecolor='None')
+                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=size, c=[color_dict[core_id]]*n_particles,
+                                marker=marker, edgecolor='None')
+                    
 
                 #streaks.  Use with caution.
                 #this_ax.plot(all_p[x].transpose(), all_p[y].transpose(), c=color_dict[core_id], linewidth=.1)
@@ -484,20 +491,21 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     this_ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
 
                 if core_id in label_cores or -1 in label_cores:
-                    if LOS == 0 and plotstyle == 'Figure8':
-                        #this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
-                        #the_x=this_p[x].mean()
-                        #the_y=this_p[y].mean()
-                        the_x_tmp = this_p[x] - this_p[x].min()+ 0.1
-                        the_y_tmp = this_p[y] - this_p[y].min()+ 0.1
-                        the_x = 10**np.log10(the_x_tmp).mean() + this_p[x].min() - 0.1
-                        the_y = 10**np.log10(the_y_tmp).mean() + this_p[y].min() - 0.1
-                        text_height=0.02
-                        text_ymax = y_max-text_height
-                        text_y = text_ymax - ncore*text_height
-                        text_x = x_max - 2*text_height
-                        this_ax.text( text_x, text_y, r'$%s$'%core_id, color=color_dict[core_id])
-                        this_ax.plot([the_x,text_x],[the_y,text_y],c='k')
+                    if plotstyle == 'Figure8':
+                        if  LOS == 0:
+                            #this_ax.text( this_p[x].max(), this_p[y].max(), r'$%s$'%core_id)
+                            #the_x=this_p[x].mean()
+                            #the_y=this_p[y].mean()
+                            the_x_tmp = this_p[x] - this_p[x].min()+ 0.1
+                            the_y_tmp = this_p[y] - this_p[y].min()+ 0.1
+                            the_x = 10**np.log10(the_x_tmp).mean() + this_p[x].min() - 0.1
+                            the_y = 10**np.log10(the_y_tmp).mean() + this_p[y].min() - 0.1
+                            text_height=0.02
+                            text_ymax = y_max-text_height
+                            text_y = text_ymax - ncore*text_height
+                            text_x = x_max - 2*text_height
+                            this_ax.text( text_x, text_y, r'$%s$'%core_id, color=color_dict[core_id])
+                            this_ax.plot([the_x,text_x],[the_y,text_y],c='k')
                     else:
                         text_x = this_p[x].mean()
                         text_y = this_p[y].max()

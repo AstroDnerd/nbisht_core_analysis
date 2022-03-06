@@ -28,7 +28,7 @@ def return_core_count(self,n_min=1):
 class means_etc():
     def __init__(self,this_looper,n_min=3):
         thtr=this_looper.tr
-        self.core_list = return_core_count(this_looper,n_min)
+        self.core_list = np.unique(this_looper.tr.core_ids)
         core_list=self.core_list
         self.dmeans = np.zeros_like(core_list,dtype='float')
         self.dstds = np.zeros_like(core_list,dtype='float')

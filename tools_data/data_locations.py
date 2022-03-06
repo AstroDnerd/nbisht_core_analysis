@@ -64,7 +64,9 @@ if machine == 'Nazare':
             "u502":"/scratch1/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
             "u503":"/scratch1/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
     sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
-    coresets = "/scratch1/dcollins/Paper19/Datasets/"
+
+    coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}  #ADDED here even though it should work in the place of the last 'else'
+
 elif machine == 'cloudbreak':
     sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
     sim_u10 = '/data/cb1/Projects/P19_CoreSimulations/u10_r4_l4_128-Beta2/GravPotential'
@@ -106,10 +108,12 @@ elif machine == 'cloudbreak':
 
     #path for structure functions
     sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
-    coresets = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/"
+    coresets = {'ourset':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/'}
+    #coresets = '/data/cb1/Projects/P19_CoreSimulations/CoreSets/'
 else:
     sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
-    coresets = "/scratch1/dcollins/Paper19/Datasets/"
+    coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}
+    #coresets = '/scratch1/dcollins/Paper19/Datasets/'
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
@@ -149,6 +153,7 @@ sims={'u05':sim_u05,'u10':sim_u10,'u11':sim_u11,'u101':sim_u101,'u102':sim_u102,
 sims.update({'u201':sim_u201,'u202':sim_u202,'u203':sim_u203})
 sims.update({'u301':sim_u201,'u302':sim_u202,'u303':sim_u203})
 sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
+sims.update({'u601':sim_u501,'u602':sim_u502,'u603':sim_u503})
 sims['u14']=sim_u14
 
 
