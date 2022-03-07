@@ -115,7 +115,7 @@ class trial():
             #self.hist[rquan,vquan] += 1
 
 
-def plot(self,frame, my_sf2=None,longorno='', external_ax=None):
+def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=None):
     pdf = self.hist/(self.dv)
     pdf /= (pdf*self.dv).sum()
     if external_ax is None:
@@ -127,7 +127,12 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None):
     minmin = pdf[pdf>0].min()
     vr_max = max([v.max() for v in self.vr])
     vr_min = min([ 0.1, my_sf2[1].min()])
-    norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
+    print("MIN MIN", minmin, pdf.max())
+    print("MIN MIN", self.hist[ self.hist>0].min(), self.hist.max())
+    if external_norm is None:
+        norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
+    else:
+        norm = external_norm
 
     #plot individuals
     for r,v in zip(self.r,self.vr):
@@ -140,12 +145,10 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None):
         ax.plot(r,v,c=[0.5,0.5,0.5,0.1],lw=0.3)
 
 
-    ploot=ax.pcolormesh(self.TheX, self.TheY, pdf,cmap=cmap,norm=norm,alpha=0.2, shading='nearest')
-    MEEEX=self.TheX.mean(axis=1)
-    print(self.TheY.shape)
-    MEEEY=(self.TheY*pdf*self.dv).mean(axis=1)/(pdf*self.dv).sum(axis=1)
-    ax.plot( MEEEX, MEEEY, c='r')
-    pdb.set_trace()
+    mean_of_sigma = (self.TheY*pdf).sum(axis=1)/pdf.sum(axis=1)
+    mean_of_sigma = (self.TheY*pdf*self.x_del).sum(axis=1)/(pdf*self.x_del).sum(axis=1)
+    ax.plot(self.TheX[:,0], mean_of_sigma, 'k--')
+    ploot=ax.pcolormesh(self.TheX, self.TheY, self.hist,cmap=cmap,norm=norm,alpha=0.2, shading='nearest')
 
     xlim=self.rmin,self.rmax
     xlim=1./128,self.rmax
@@ -160,6 +163,7 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None):
         fig.savefig(outname)
         print(outname)
         plt.close(fig)
+    return ploot
 
 
 if 'do_all_plots' not in dir():
@@ -212,11 +216,21 @@ if 1:
     import sf2
     reload( sf2)
     fig,ax=plt.subplots(1,3,figsize=(12,4))
+    delta=0.07
+    fig.subplots_adjust(hspace=0, wspace=0, right=1-delta/2, left=delta)
+
+    norm = mpl.colors.LogNorm(vmin=2.4e-11,vmax=0.004)
+    norm = mpl.colors.LogNorm(vmin=1,vmax=4000)
     for nrun,this_run in enumerate( [run1, run2, run3]):
         #if 'msf' not in dir() or True:
         #    msf = sf2.make_sf(this_run.this_looper,0)
         #    rbins,SS = msf.bin_sf2(); SS/=2*np.pi
         #plot(this_run,0, my_sf2=[rbins,SS])
-        plot(this_run,0, my_sf2=[Things[n][0],Things[n][1]*SCALE],longorno='long',external_ax=None)#ax[nrun])
-        break
+        plot_obj=plot(this_run,0, my_sf2=[Things[n][0],Things[n][1]*SCALE],longorno='long',
+             external_ax=ax[nrun], 
+             external_norm = norm)
+        if nrun > 0:
+            ax[nrun].set_ylabel('')
+            ax[nrun].set_yticks([])
+    fig.colorbar(plot_obj)
     fig.savefig('plots_to_sort/SF2.pdf')
