@@ -6,7 +6,8 @@ If you encounter a number at the end of a .py file, and there is no other .py fi
 it means there is a better version somewhere else.
 Use the largest number of the .py files that have 0#.
 
-Pipeline for extracting data from new data sets:
+Rough pipeline for extracting data from new data sets:
+SEE DCCOLLINS DOCS FOR MOST UP TO DATE
 (check in with directory 'examples' to see if there are any updates)
 /get_peaks.py
 /count_particles.py

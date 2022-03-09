@@ -17,7 +17,7 @@ import three_loopers_six as TL6
 #if 'laser_nif01' not in dir():
 #    laser_nif01 = laser_nif(TL6.loops['u601'])
 
-frame = [60]
+frame = 60
 #ds = laser_nif01.load(frame)
 # NOTE: even shorter:
 ds = TL6.loops['u601'].load(frame)

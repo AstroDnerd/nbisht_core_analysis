@@ -108,11 +108,9 @@ elif machine == 'cloudbreak':
     #path for structure functions
     sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
     coresets = {'ourset':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/'}
-    #coresets = '/data/cb1/Projects/P19_CoreSimulations/CoreSets/'
 else:
     sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
     coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}
-    #coresets = '/scratch1/dcollins/Paper19/Datasets/'
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
