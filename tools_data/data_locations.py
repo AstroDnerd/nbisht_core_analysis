@@ -63,6 +63,7 @@ if machine == 'Nazare':
     u500 = {'u501':"/scratch1/dcollins/Paper19/Datasets/u500/u501_all_frame_all_prim.h5",
             "u502":"/scratch1/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
             "u503":"/scratch1/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
+    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
 
     coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}  #ADDED here even though it should work in the place of the last 'else'
 

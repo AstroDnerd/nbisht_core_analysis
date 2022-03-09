@@ -457,8 +457,8 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                     size=2
                     marker=None
                 else:
-                    size=7
-                    marker='s'
+                    size=0.5
+                    marker=None
                 if center_image:
                     plot_x_ext( this_p[x]+dx)
                     plot_y_ext( this_p[y]+dy)
