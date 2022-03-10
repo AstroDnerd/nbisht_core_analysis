@@ -22,7 +22,7 @@ git remote add origin URL_OF_FORK
 
 7. if doing this for the first time, be mindful of core .py documentation you
 may have changed for your purpose of running things as the following will make
-changes for everyone in your group! this is why maybe it's best to do step 11
+changes for everyone in your group! this is why maybe it's best to do step 16
 first if multiple people are contributing...
 
 8. make a directory with all of your .py files/work so as to separate your
