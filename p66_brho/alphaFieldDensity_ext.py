@@ -96,9 +96,14 @@ class BRho_tool():
         self.pears = [] 
         self.bears = []
         self.dears = []
-   
-        self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
-                      self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]
+
+        print('before')
+        times = this_looper.tr.times
+        self.bears = [np.empty([0],dtype=float) for x in range(len(times[:-1]))]
+        print('after')
+        
+        #self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
+        #              self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]
         self.pears = [self.pear0,self.pear1,self.pear2,self.pear3,self.pear4,self.pear5,self.pear6,\
                       self.pear7,self.pear8,self.pear9,self.pear10,self.pear11,self.pear12,self.pear13]
         self.dears = [self.dear0,self.dear1,self.dear2,self.dear3,self.dear4,self.dear5,self.dear6,\
@@ -179,17 +184,17 @@ class BRho_tool():
                     tmap2 = rainbow_map(len(self.betarr)) 
                     c2 = [tmap2(n) for n in range(len(self.betarr[:-1]))] 
 
-                    if name == 'u401': 
+                    if name == 'u501': 
                         the_range = np.arange(0,1,0.075) 
                         ax3.scatter(the_range[:-1],self.betarr[:-1],c=c2)   #[2:],
                         ax3.plot(the_range[:-1],self.betarr[:-1],c='k',linewidth=1.0)  
                         ax3.set_title(r"$\beta = 0.2, \alpha_{B\rho}$")
-                    if name == 'u402':
+                    if name == 'u502':
                         the_range = np.arange(0.075,1,0.075) 
                         ax3.scatter(the_range[:-1],self.betarr[:-1],c=c2)  
                         ax3.plot(the_range[:-1],self.betarr[:-1],c='k',linewidth=1.0)  
                         ax3.set_title(r"$\beta = 2.0, \alpha_{B\rho}$")
-                    if name == 'u403':
+                    if name == 'u503':
                         the_range = np.arange(0.075,0.9,0.075) 
                         ax3.scatter(the_range[:-1],self.betarr[:-1],c=c2)  
                         ax3.plot(the_range[:-1],self.betarr[:-1],c='k',linewidth=1.0)   
@@ -214,35 +219,39 @@ class BRho_tool():
 
 
             if typeplot == 'box_plot' and n_time == asort[-1]:   
-                self.bear0 = np.append(self.bear0,self.betarr[0])
-                self.bear1 = np.append(self.bear1,self.betarr[1])
-                self.bear2 = np.append(self.bear2,self.betarr[2]) 
-                self.bear3 = np.append(self.bear3,self.betarr[3]) 
-                self.bear4 = np.append(self.bear4,self.betarr[4]) 
-                self.bear5 = np.append(self.bear5,self.betarr[5]) 
-                self.bear6 = np.append(self.bear6,self.betarr[6])  
-                self.bear7 = np.append(self.bear7,self.betarr[7]) 
-                self.bear8 = np.append(self.bear8,self.betarr[8]) 
-                self.bear9 = np.append(self.bear9,self.betarr[9])
-                self.bear10 = np.append(self.bear10,self.betarr[10]) 
-                self.bear11 = np.append(self.bear11,self.betarr[11])
-                if name == 'u401':
-                    self.bear12 = np.append(self.bear12,self.betarr[12])    
-                    self.bear13 = np.append(self.bear13,self.betarr[13]) 
 
-                if 1:
+                for i,tff in enumerate(tfflabs):
+                    self.bears[i] = np.append(self.bears[i],self.betarr[i])
+
+                #self.bear0 = np.append(self.bear0,self.betarr[0])
+                #self.bear1 = np.append(self.bear1,self.betarr[1])
+                #self.bear2 = np.append(self.bear2,self.betarr[2]) 
+                #self.bear3 = np.append(self.bear3,self.betarr[3]) 
+                #self.bear4 = np.append(self.bear4,self.betarr[4]) 
+                #self.bear5 = np.append(self.bear5,self.betarr[5]) 
+                #self.bear6 = np.append(self.bear6,self.betarr[6])  
+                #self.bear7 = np.append(self.bear7,self.betarr[7]) 
+                #self.bear8 = np.append(self.bear8,self.betarr[8]) 
+                #self.bear9 = np.append(self.bear9,self.betarr[9])
+                #self.bear10 = np.append(self.bear10,self.betarr[10]) 
+                #self.bear11 = np.append(self.bear11,self.betarr[11])
+                #if name == 'u501':
+                #    self.bear12 = np.append(self.bear12,self.betarr[12])    
+                #    self.bear13 = np.append(self.bear13,self.betarr[13]) 
+
+                if 0:
                     if core_id == core_list[-1]:
-                        if name == 'u401':
+                        if name == 'u501':
                             meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
                             fitbear = [0.037122767966842135,0.06130065264472109,0.10876453322815462,0.12037348290995548,0.1256151386016793,0.12584476500389483,\
                                        0.12960541113191903,0.14452750478517815,0.16035081563879608,0.17350352881649694,0.20320963091004954,0.22354626336366118,\
                                        0.27401985393584366,0.3323051356106275]
-                        if name == 'u402':
+                        if name == 'u502':
                             meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
                             fitbear = [0.15059829575793074,0.19999384737531586,0.24022574462120863,0.27614753632431754,0.27614753632431754,0.29332289603778755,\
                                        0.3097313041491559,0.30801461152950443,0.31782695369769487,0.3358170167076137,0.3148400500596815,0.28845754861915246,\
                                        0.41477394063271383]
-                        if name == 'u403': 
+                        if name == 'u503': 
                             meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
                             fitbear = [0.22829863399090444,0.3185318136356117,0.37526692580639975,0.40111503807258014,0.40640704584839654,0.38681096100128876,\
                                        0.38332517520463627,0.39490446738439916,0.371243675696434,0.3321847915857663,0.32833900753678574,0.3893047090450924]
@@ -258,12 +267,12 @@ class BRho_tool():
                         self.bear9 = np.append(self.bear9,(meanbear[9],fitbear[9]))
                         self.bear10 = np.append(self.bear10,(meanbear[10],fitbear[10])) 
                         self.bear11 = np.append(self.bear11,(meanbear[11],fitbear[11]))
-                        if name == 'u401':
+                        if name == 'u501':
                             self.bear12 = np.append(self.bear12,(meanbear[12],fitbear[12]))    
                             self.bear13 = np.append(self.bear13,(meanbear[13],fitbear[13])) 
 
-                self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
-                              self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]
+                #self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
+                #              self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]
 
                 self.betarr = np.empty([0],dtype=float)  
 
@@ -280,20 +289,20 @@ class BRho_tool():
                 self.pear8 = np.append(self.pear8,self.pearsonr[8]) 
                 self.pear9 = np.append(self.pear9,self.pearsonr[9]) 
                 self.pear10 = np.append(self.pear10,self.pearsonr[10]) 
-                self.pear11 = np.append(self.pear11,self.pearsonr[11])  #final u403 pear contains nans 
-                if name == 'u401':
-                    self.pear12 = np.append(self.pear12,self.pearsonr[12])  #final u402 pear, but want to discard final frame   
+                self.pear11 = np.append(self.pear11,self.pearsonr[11])  #final u503 pear contains nans 
+                if name == 'u501':
+                    self.pear12 = np.append(self.pear12,self.pearsonr[12])  #final u502 pear, but want to discard final frame   
                     self.pear13 = np.append(self.pear13,self.pearsonr[13])  
 
                 if 0:
                     if core_id == core_list[-1]:
-                        if name == 'u401':
+                        if name == 'u501':
                             meanpear = [0.46115629,0.386104,0.5580705,0.53245971,0.40396877,0.2024436,0.28630761,0.24313097,0.09931512,\
                                         0.17075329, 0.38030015, 0.57047563,0.78074059, 0.77001102]
-                        if name == 'u402':
+                        if name == 'u502':
                             meanpear = [0.63225779, 0.59682206, 0.72420179, 0.80303703, 0.74460867, 0.68859256, 0.558599,0.56255131,0.61822723,\
                                         0.58297106, 0.67802997, 0.56411052,0.70597755]
-                        if name == 'u403': 
+                        if name == 'u503': 
                             meanpear = [0.60075925, 0.62926192, 0.7419749,0.69909184, 0.63475069, 0.52538688,0.61374631, 0.61529876, 0.53526537,\
                                         0.61416945, 0.515072,0.74873393]
                         self.pear0 = np.append(self.pear0,meanpear[0])
@@ -307,9 +316,9 @@ class BRho_tool():
                         self.pear8 = np.append(self.pear8,meanpear[8]) 
                         self.pear9 = np.append(self.pear9,meanpear[9]) 
                         self.pear10 = np.append(self.pear10,meanpear[10]) 
-                        self.pear11 = np.append(self.pear11,meanpear[11])  #final u403 pear contains nans 
-                        if name == 'u401':
-                            self.pear12 = np.append(self.pear12,meanpear[12])  #final u402 pear, but want to discard final frame   
+                        self.pear11 = np.append(self.pear11,meanpear[11])  #final u503 pear contains nans 
+                        if name == 'u501':
+                            self.pear12 = np.append(self.pear12,meanpear[12])  #final u502 pear, but want to discard final frame   
                             self.pear13 = np.append(self.pear13,meanpear[13])  
 
                 self.pears = [self.pear0,self.pear1,self.pear2,self.pear3,self.pear4,self.pear5,self.pear6,\
@@ -339,7 +348,7 @@ class BRho_tool():
             magden = magfield/density
             cv = thtr.c([core_id],'cell_volume')  
  
-            if name != 'u401': 
+            if name != 'u501': 
                 #print("name",name)
                 B_x = thtr.c([core_id],'magnetic_field_x')  
                 B_y = thtr.c([core_id],'magnetic_field_y')
@@ -396,7 +405,7 @@ class BRho_tool():
                     densityflat = np.log10(density[mask,n_time]).flatten()
                     magfieldflat = np.log10(magfield[mask,n_time]).flatten()
                 
-                if 1:  #FOR ALL TIME ALPHA
+                if 0:  #FOR ALL TIME ALPHA
                     densitymasked = np.append(densitymasked,densityflat)
                     magfieldmasked = np.append(magfieldmasked, magfieldflat)
 
@@ -444,11 +453,11 @@ class BRho_tool():
  
                     # plot the alpha of the mean; 
                     # these have mask & not the last frame incorporated
-                    if name == 'u401':
+                    if name == 'u501':
                         YY_mean = 10 ** ((0.196)*X2 + pfit[1])
-                    if name == 'u402':
+                    if name == 'u502':
                         YY_mean = 10 ** ((0.314)*X2 + pfit[1])
-                    if name == 'u403':
+                    if name == 'u503':
                         YY_mean = 10 ** ((0.383)*X2 + pfit[1])
 
  
@@ -476,7 +485,7 @@ class BRho_tool():
 
                 # RMS EXPERIMENTS
                 if typeplot == 'rms_plot':  
-                    if name != 'u401':  
+                    if name != 'u501':  
                         B_avg = (magfield[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum()  
 
                         Bx_avg = (B_x[mask,n_time] * cv[mask,n_time]).sum()/cv[mask,n_time].sum() 
@@ -515,7 +524,7 @@ class BRho_tool():
                             tmap2 = rainbow_map(len(self.brms)) 
                             c2 = [tmap2(n) for n in range(len(self.brms))]  
 
-                            if name == 'u402':
+                            if name == 'u502':
                                 the_range = np.arange(0.075,1,0.075)  
                                 #ax1.scatter(the_range,self.brms,c='b')  
                                 #ax1.scatter(the_range,self.vrms,c='g')  
@@ -531,7 +540,7 @@ class BRho_tool():
                                 print("saved "+outname)
                                 #plt.close(fig)  #CAREFUL, this doesn't allow to do another desired core :(   
                                 
-                            if name == 'u403':
+                            if name == 'u503':
                                 the_range = np.arange(0.075,0.9,0.075) 
                                 #ax1.scatter(the_range,self.brms,c='b')  
                                 #ax1.scatter(the_range,self.vrms,c='g')  
@@ -693,19 +702,20 @@ class BRho_tool():
         # showmeans = triangle green, meanline = solid orange line, by default, set meanline=True for dotted green of mean...
         #bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  # bparts is now a dictionary; the originial box     
         bparts = ax1.boxplot(data,meanprops=meanpointprops,showmeans=True,meanline=False,showfliers=False)
-        for i,val in enumerate(tff_lab):
-            y = data[i] 
-            x = np.random.normal(1+i, 0.04, size=len(y))
-            ax1.plot(x, y, 'b.', alpha=0.2)
-            if 1:
-                y2 = data[i][-2]
-                x2 = x[-2] 
-                ax1.plot(x2,y2,'r.',alpha=1)  #alpha changes the opacity  
-                #y3 = data[i][-1]
-                #x3 = x[-1] 
-                #ax1.plot(x3,y3,'k.',alpha=1)
-                                          #CAREFUL because now I have changed the mean, see if it makes a huge difference :(,\
-                                          #compare relative spacings with excel values
+        if 0:
+            for i,val in enumerate(tff_lab):
+                y = data[i] 
+                x = np.random.normal(1+i, 0.04, size=len(y))
+                ax1.plot(x, y, 'b.', alpha=0.2)
+                if 0:
+                    y2 = data[i][-2]
+                    x2 = x[-2] 
+                    ax1.plot(x2,y2,'r.',alpha=1)  #alpha changes the opacity  
+                    #y3 = data[i][-1]
+                    #x3 = x[-1] 
+                    #ax1.plot(x3,y3,'k.',alpha=1)
+                                              #CAREFUL because now I have changed the mean, see if it makes a huge difference :(,\
+                                              #compare relative spacings with excel values
         #ax = df.boxplot()
         #ax.scatter(np.arange(df.shape[1])+1, df.loc[2000], color='r')
         #ax1.scatter(np.arange(ax1.shape[1])+1, bparts.loc[data[-1][-1]], color='r')  #EDIT
@@ -727,49 +737,51 @@ class BRho_tool():
                 alphaFile.close()
         
         if 0:
-            breakpoint()  #to try the dictionary
+            print('before breakpoint')
+            breakpoint()  #to try the dictionary before proceeding
  
         #To compare boxplot with a zero, affects the position of the plots
+        fr = len(data)
         if num == 0: 
-            ax1.plot([1,13],[0,0],c=[0.5]*4) 
-            ax1.plot([1,13],[0.667,0.667],'m--',c=[0.5]*4)
-            ax1.plot([1,13],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,13],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0,0],c=[0.5]*4) 
+            ax1.plot([1,fr],[0.667,0.667],'m--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.5,0.5],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.4,0.4],'--',c=[0.5]*4)
             tff_mod = [0.0,0.0,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95] 
-            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            #ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
             title = r'$\beta = 0.2$'
  
             therange = np.arange(0,1,0.075)
             #means = np.append(means,[np.nan]*1) 
             #ax.plot(therange,means,c='g',linestyle='dotted')
         if num == 1: 
-            ax1.plot([1,12],[0,0],c=[0.5]*4) 
-            ax1.plot([1,12],[0.667,0.667],'--',c=[0.5]*4)
-            ax1.plot([1,12],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,12],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0,0],c=[0.5]*4) 
+            ax1.plot([1,fr],[0.667,0.667],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.5,0.5],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.4,0.4],'--',c=[0.5]*4)
             tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97] 
-            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            #ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
             title = r'$\beta = 2.0$'
 
             therange = np.arange(0,1,0.075)
             #means = np.append(means,[np.nan]*2) 
             #ax.plot(therange,means,c='b',linestyle='dotted')
         if num == 2: 
-            ax1.plot([1,11],[0,0],c=[0.5]*4) 
-            ax1.plot([1,11],[0.667,0.667],'--',c=[0.5]*4)
-            ax1.plot([1,11],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,11],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0,0],c=[0.5]*4) 
+            ax1.plot([1,fr],[0.667,0.667],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.5,0.5],'--',c=[0.5]*4)
+            ax1.plot([1,fr],[0.4,0.4],'--',c=[0.5]*4)
             tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91] 
-            ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
+            #ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
             title = r'$\beta = 20$'
 
             therange = np.arange(0,1,0.075)
             #means = np.append(means,[np.nan]*3) 
             #ax.plot(therange,means,c='m',linestyle='dotted')
-
+        tff_mod = []
         ax1.set_xticklabels(tff_mod)       
-        ylim = -0.5,1.0
-        BRho_tool.labelled(ax1,xlabel=r'$t_{\rm{ff}}$',ylabel=r'$\alpha_B$',ylim=ylim,title=title) 
+        ylim = -0.5,0.75
+        BRho_tool.labelled(ax1,xlabel=r'$\frac{t}{t_{\rm{ff}}}$',ylabel=r'$\alpha$',ylim=ylim,title=title) 
                
         fig.savefig('BearsBoxplot_%s'%name)
         print("BOX SAVED")
@@ -864,21 +876,22 @@ class BRho_tool():
 # THREE SIMS AT ONCE
 
 #import three_loopers_mountain_top as TLM
-import three_loopers_tenfour as TLTF
+#import three_loopers_tenfour as TLTF
+import three_loopers_u500 as TL500
 if 'clobber' not in dir():
     clobber=True
 
 if 'BRho_tool1' not in dir() or clobber: 
-    BRho_tool1=BRho_tool(TLTF.loops['u401'])
-    simname1 = 'u401' 
+    BRho_tool1=BRho_tool(TL500.loops['u501'])
+    simname1 = 'u501' 
 
 if 'BRho_tool2' not in dir() or clobber: 
-    BRho_tool2=BRho_tool(TLTF.loops['u402']) 
-    simname2 = 'u402'
+    BRho_tool2=BRho_tool(TL500.loops['u502']) 
+    simname2 = 'u502'
   
 if 'BRho_tool3' not in dir() or clobber: 
-    BRho_tool3=BRho_tool(TLTF.loops['u403'])  
-    simname3 = 'u403'
+    BRho_tool3=BRho_tool(TL500.loops['u503'])  
+    simname3 = 'u503'
 
 simnames = [simname1,simname2,simname3]
 print("GREETINGS")
@@ -891,9 +904,9 @@ def axisforbox(theAx=None):
 
         # TYPE OF PLOT: 'scatter_plot' OR 'frame_scatters' 
         # OR 'box_plot' OR 'vio_plot'? OR 'rms_plot' OR 'histogram'
-        which_plot = 'scatter_plot'  #CALL CURRENTLY TURNED OFF
+        which_plot = 'box_plot'  #CALL CURRENTLY TURNED OFF
         # ALL TIME: 'all_time', OR PER FRAME: 'per_frame'?
-        which_time = 'all_time'
+        which_time = 'per_frame'
 
         # GLOBAL TFF 
         G = 1620/(4*np.pi)
@@ -924,6 +937,7 @@ def axisforbox(theAx=None):
         
         simframes = set(frames) 
         tff_labels = ['%.2f'%s for s in tff_p]
+        print('this many frames ',len(tff_labels))
         
         if which_plot == 'frame_scatters': 
             fig = plt.figure() 
@@ -962,13 +976,13 @@ def axisforbox(theAx=None):
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME or as in box-vios
             fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-        if 0: 
+        if 1: 
             # CALL BOXPLOTS  
             tool.boxes(nt,simnames[nt],tff_labels,theAx)
         if 0: 
             # CALL VIOLINPLOTS              
             tool.violins(nt,simnames[nt],tff_labels,theAx)
-        if 1: 
+        if 0: 
             # TWO PANEL SCATTER PLOTS!
             tool.twopanels(nt, simnames[nt],axnum,figu,corenum) # EDIT
 

@@ -106,3 +106,7 @@ Sim u402 meanAlpha 0.308959
 Sim u402 meanPear 0.727254 
 Sim u403 meanAlpha 0.344078 
 Sim u403 meanPear 0.751293 
+
+
+ALL FRAMES meanAlPHA
+
