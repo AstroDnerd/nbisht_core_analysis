@@ -9,7 +9,6 @@ corner
 ON YOUR TERMINAL
 3. git clone URL_OF_FORK  # clone the fork
 4. cd forkedRepo
-
 5. git remote -v          # check current remotes, should see
 "origin" and url of the fork if not do:
 git remote add origin URL_OF_FORK
@@ -19,7 +18,7 @@ git remote add origin URL_OF_FORK
 
 # YOU ARE DONE SETTING UP!  ...now
 # TO CONTRIBUTE, IFFFFF your group is small enough/advisor is nice enough
-# 7-9 are best practices I've found without using a BRANCH, step 12
+# 7-9 are best practices I've found without using a BRANCH, step 16
 
 7. if doing this for the first time, be mindful of core .py documentation you
 may have changed for your purpose of running things as the following will make
@@ -35,10 +34,11 @@ these back when you're done updating the repos
 11. git add .             # if you want to add all the changes, otherwise follow
 respecive prompts
 12 git commit             # then it will prompt you to write a message
-9. git pull upstream      # to synch with the project 
-10. git push origin       # to sync your fork of the project
+13. git pull upstream     # to sync with the project 
+14. git push upstream     # to sync your contributions to the project
+15. git push origin       # to sync your fork of the project
 
 # OTHERWISE DO...
-11. Go to:  https://www.dataschool.io/how-to-contribute-on-github/ 
+16. Go to:  https://www.dataschool.io/how-to-contribute-on-github/ 
     AND DO STEPS 8-18 to learn how to BRANCH
 
