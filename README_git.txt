@@ -18,7 +18,7 @@ git remote add origin URL_OF_FORK
 
 # YOU ARE DONE SETTING UP!  ...now
 # TO CONTRIBUTE, IFFFFF your group is small enough/advisor is nice enough
-# 7-9 are best practices I've found without using a BRANCH, step 16
+# 7-9 are best practices I've found without using a BRANCH
 
 7. if doing this for the first time, be mindful of core .py documentation you
 may have changed for your purpose of running things as the following will make
