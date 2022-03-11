@@ -1,4 +1,5 @@
 from starter2 import *
+import colors
 
 def heat_map(quantity, these_times, ax=None,bins=None):
     if bins is None:
@@ -23,9 +24,37 @@ def heat_map(quantity, these_times, ax=None,bins=None):
     ploot=ax.pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
     return TheX, TheY, hist, dv
 
-def plot_heat(times, cores_used, quan_dict=None, ax=None, bins=None, norm=False, positive=True, fixer=None, cut_last=False):
+def heat_for_quantity(this_looper, field='density',core_list=None, bins=None, external_ax=None):
+    if core_list is None:
+        core_list = np.unique( this_looper.tr.core_ids)
+
+    times = this_looper.tr.times/colors.tff
+    for core_id in core_list:
+        Q = this_looper.tr.c([core_id],field)
+
+        if bins is None:
+            bins = np.linspace( Q.min(), Q.max(), 64)
+        elif bins == 'plog':
+            bins = np.geomspace( Q[Q>0].min(), Q.max(), 64)
+
+        if external_ax is None:
+            fig, ax = plt.subplots(1,1)
+        else:
+            ax = external_ax
+            ax.clear()
+        heat_map( Q, times, bins=bins, ax=ax)
+        if external_ax is None:
+            fig.savefig('plots_to_sort/heat_%s_%s_c%04d.png'%(field,this_looper.sim_name,core_id))
+
+
+
+def plot_heat(times=None, cores_used=None, quan_dict=None, ax=None, bins=None, norm=False, positive=True, fixer=None, cut_last=False, tool=None):
     G=1620./(4*np.pi)
     tff_global = np.sqrt(3*np.pi/(32*G*1))
+    if tool is not None:
+        times = tool.this_looper.tr.times
+        if cores_used is None:
+            cores_used = np.unique(tool.this_looper.tr.core_ids)
     ntimes = len(times)
     ncores = len(cores_used)
     quantity = np.zeros([ncores,ntimes])
@@ -50,7 +79,7 @@ def plot_heat(times, cores_used, quan_dict=None, ax=None, bins=None, norm=False,
     if 0:
         for ncore in a_few:
             ax.plot(these_times, quantity[ncore,:],c=[0.5]*4)
-    TheX, TheY, hist, dv=heatmap(quantity,  these_times,bins=bins,ax=ax)
+    TheX, TheY, hist, dv=heat_map(quantity,  these_times,bins=bins,ax=ax)
     #axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
     #axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
     #axbonk(ax,ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='log')
