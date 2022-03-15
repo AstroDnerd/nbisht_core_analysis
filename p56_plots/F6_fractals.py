@@ -6,6 +6,7 @@ import matplotlib.image as mpimg
 from scipy.spatial import ConvexHull
 import matplotlib.patches as patches
 import data_locations as dl
+import colors
 reload(dl)
 plt.close('all')
 
@@ -63,9 +64,9 @@ def fractal_dimension(Z, threshold=0.9, do_plots=False, plotname='plot'):
         counts.append( (boxes[-1]>0).sum() )
 
     if do_plots:
-        fig, axes = plt.subplots(2,int(len(boxes)/2), figsize=(12,8))#, figsize=(4*len(sizes),4))
+        fig, axes = plt.subplots(2,int(len(boxes)/2))#, figsize=(12,8))#, figsize=(4*len(sizes),4))
         ax=axes.flatten()
-        fig.subplots_adjust(wspace=0, hspace=0)
+        fig.subplots_adjust(wspace=0, hspace=0, left=0.07, right=1-0.07)
         for ns,box in enumerate(boxes[1:]):
             img = box.sum(axis=0)
             img = img[:int(img.shape[0]//2),:int(img.shape[1]//2)]
@@ -156,21 +157,23 @@ class fractal_tool():
 
 #import three_loopers_1tff as tl
 #import three_loopers_mountain_top as TLM
-import three_loopers_tenfour as TL4
+#import three_loopers_tenfour as TL4
+import three_loopers_six as TL
+sim_list=['u601','u602','u603']
 if 'toolshed' not in dir():
     toolshed = {}
 
 framelist=[0]#,1,2,3,4,5,6,7,8]
 
 if 1:
-    for simname in ['u401']: #['u401','u402','u403']:
-        tool = fractal_tool( TL4.loops[simname])
+    for simname in ['u601']:
+        tool = fractal_tool( TL.loops[simname])
         core_list = None #np.unique(TL4.loops[simname].tr.core_ids)[:5]
         core_list=[323]
         tool.run(core_list=core_list, do_plots=True, plot_prefix=simname)
 
 if 1:
-    looper_list = TL4.loops
+    looper_list = TL.loops
     
     for simname in looper_list:
         looper=looper_list[simname]
@@ -192,7 +195,8 @@ if 1:
     fig,ax=plt.subplots(1,1)
     for nsim,simname in enumerate(toolshed):
         print(nsim,simname)
-        ax.hist(toolshed[simname][0].fractal_dim, histtype='step',color=colors.color[simname], label=simname)
+        label=[r'$sim1$',r'$sim2$',r'$sim3$'][nsim]
+        ax.hist(toolshed[simname][0].fractal_dim, histtype='step',color=colors.color[simname], label=label)
     axbonk(ax,xlabel='D', ylabel='N')
     ax.legend(loc=0)
 
