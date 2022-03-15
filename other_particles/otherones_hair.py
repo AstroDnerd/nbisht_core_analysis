@@ -16,7 +16,7 @@ class images():
         self.name = self.other_looper.sim_name
 
     def run(self, output_prefix='NAME',core_list=None, frames=None,
-            verbose=False, los_list=[-1], external_axis=None):
+            verbose=False, los_list=[-1], external_ax=None):
         print('w3',core_list)
         dx=1./2048
         nx = 1./dx
@@ -47,16 +47,20 @@ class images():
             frame_str = "_%04d"*Ncol%tuple(frames)
             nrows=len(frame_index)
             counter=-1
-            fig,axes=plt.subplots(nrows,3, figsize=(12,8))
+            if external_ax is not None:
+                axes=external_ax
+            else:
+                fig,axes=plt.subplots(nrows,3, figsize=(12,8))
             for nt,frame in zip(frame_index, frames):
                 counter+=1
 
 
                 ax0= axes[counter][0]
-                ax0.set_aspect('equal')
-                ax = axes[counter][1]
-                ax1 = axes[counter][2]
-                ax.set_aspect('equal')
+                #ax0.set_aspect('equal')
+                ax1 = axes[counter][1]
+
+                #ax = axes[counter][1]
+                #ax.set_aspect('equal')
 
 
                 delta = 0.1
@@ -68,8 +72,8 @@ class images():
                 x=1;y=2
                 ax0.set_xlabel('xyz'[x]+' [code units]')
                 ax0.set_ylabel('xyz'[y]+' [code units]')
-                ax.set_xlabel('xyz'[x]+' [code units]')
-                ax.set_ylabel('xyz'[y]+' [code units]')
+                #ax.set_xlabel('xyz'[x]+' [code units]')
+                #ax.set_ylabel('xyz'[y]+' [code units]')
 
                 x_min, x_max, y_min, y_max = [1,0,1,0]
 
@@ -94,7 +98,7 @@ class images():
                     ybins = np.mgrid[y_quantized[0]:y_quantized[1]:dx]+0.5*dx
                     #r_bins = np.geomspace( *r_ext.minmax)
                     hist, xb, yb = np.histogram2d(this_p[x], this_p[y], bins=[xbins,ybins])
-                    pch.helper(hist,xb,yb,ax=ax, cmap_name='Blues')
+                    #pch.helper(hist,xb,yb,ax=ax, cmap_name='Blues')
                     pch.helper(hist,xb,yb,ax=ax0, cmap_name='Blues')
 
 
@@ -102,8 +106,8 @@ class images():
                     ms2 = trackage.mini_scrubber(self.first_looper.tr, core_id, do_velocity=False)
 
                     first_p = np.stack([ms2.this_x[:,nt],ms2.this_y[:,nt], ms2.this_z[:,nt]])
-                    ax.scatter( first_p[x], first_p[y], s=1, marker='+',c='r')
-                    ax0.scatter( first_p[x], first_p[y], s=1, marker='+',c='r')
+                    #ax.scatter( first_p[x], first_p[y], s=1, marker='+',c='r')
+                    ax0.scatter( first_p[x], first_p[y],c='r', marker='.', s=1)
                     box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
                     ax0.plot(box_x,box_y, c=[0.5]*3)
                 if 0:
@@ -125,7 +129,7 @@ class images():
                         cmap=copy.copy(mpl.cm.get_cmap("Blues"))
                         cmap.set_under('w')
                         #ax.pcolormesh(xx,yy,TheZ, norm=norm,cmap=cmap)
-                        ax.imshow(TheZ, cmap=cmap, norm=norm, origin='lower',interpolation='nearest')
+                        #ax.imshow(TheZ, cmap=cmap, norm=norm, origin='lower',interpolation='nearest')
 
                     box_x, box_y = [0,1,1,0,0], [0,0,1,1,0]
                     box_x, box_y = nar(box_x)*128-imin[x], nar(box_y)*128-imin[y]
@@ -176,15 +180,16 @@ class images():
 
                 #ax1.scatter( rrr, first_density, s=100, facecolors='none',edgecolors='k')
                 ax1.scatter( rrr, first_density, s=1, marker='+', c='r')
-                axbonk(ax1,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax, xlabel=r'$r$', ylabel=r'$\rho$')
+                axbonk(ax1,xscale='log',yscale='log', xlim=r_ext.minmax,ylim=d_ext.minmax, xlabel=r'$r [code\ units]$', ylabel=r'$density\ [code\ units]$')
                 #axbonk(ax,xlabel='xyz'[x]+' [code units]',ylabel='xyz'[x]+' [code units]')
 
 
 
-            outname='plots_to_sort/otherones_%s_c%04d_%s.png'%(output_prefix,core_id,frame_str)
-            fig.savefig(outname)
-            plt.close(fig)
-            print(outname)
+            if external_ax is None:
+                outname='plots_to_sort/otherones_%s_c%04d_%s.png'%(output_prefix,core_id,frame_str)
+                fig.savefig(outname)
+                plt.close(fig)
+                print(outname)
 
 
 if 0:
