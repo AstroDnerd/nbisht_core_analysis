@@ -11,20 +11,49 @@ class laser_nif():
     def __init__(self,this_looper):
         self.this_looper = this_looper
 
+    def laserRun(self):
+        thtr = self.this_looper.tr
+        theframes = thtr.frames
+
+        #for later
+        #for nf,frame in enumerate(theframes):
+        #    ds = self.this_looper.load(frame)
+
+        #for now; ProjectionPlot
+        ds = self.this_looper.load(theframes[7])
+        if 0:
+            proj = yt.ProjectionPlot(ds,'z',('gas','density'))
+            proj.save()
+        #for now; ds.proj()
+        if 1:
+            midpt = ds.find_max('density')[1]  #OR _,c = ds.find_max('gas','density')
+            width = 1
+            rez = [256,256]
+
+            proj = ds.proj(('gas','density'),2)  #there's proj.profile(), and "most obv" proj.to_frb() that may work
+            frb = proj.to_frb(width,rez,center=midpt)
+            plt.imshow(np.log10(np.array(frb['gas','density']),interpolation='nearest',origin='lower')
+            plt.savefig('test_forpdf.png')
+
+        #to explore/debug:
+        if 0:
+            #/home/luzlourdes/scripts/miscpys/FallSpring1617/simplifiedPDF.py 
+            breakpoint()  #to do dir(proj)
 
 
 # MAIN
 import three_loopers_six as TL6
+if 'clobber' not in dir():
+    clobber=True
+    
 if 'laser_nif01' not in dir():
     laser_nif01 = laser_nif(TL6.loops['u601'])
 
-frame = [60]
-ds = laser_nif01.load(frame)
-# NOTE: even shorter:
-# ds = TL6.loops[‘u601’].load( frame )
 
-proj = ds.ProjectionPlot(ds,'z',('gas','density'))
-#proj.save()
+for nt,tool in enumerate([laser_nif01]):
+    tool.laserRun()
+
+
 
 
 
