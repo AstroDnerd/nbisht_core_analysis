@@ -4,6 +4,8 @@ color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
 color.update({'u301':'r','u302':'g','u303':'b'})
 color.update({'u401':'r','u402':'g','u403':'b'})
+color.update({'u501':'r','u502':'g','u503':'b'})
+color.update({'u601':'r','u602':'g','u603':'b'})
 
 #temporary definition, should be redudnant to davetools.
 class rainbow_map():
