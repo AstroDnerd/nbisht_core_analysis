@@ -19,8 +19,9 @@ class laser_nif():
         #for nf,frame in enumerate(theframes):
         #    ds = self.this_looper.load(frame)
 
-        #for now; ProjectionPlot
+        #for now; 
         ds = self.this_looper.load(theframes[7])
+        #for now; ProjectionPlot
         if 0:
             proj = yt.ProjectionPlot(ds,'z',('gas','density'))
             proj.save()
@@ -32,12 +33,19 @@ class laser_nif():
 
             proj = ds.proj(('gas','density'),2)  #there's proj.profile(), and "most obv" proj.to_frb() that may work
             frb = proj.to_frb(width,rez,center=midpt)
-            plt.imshow(np.log10(np.array(frb['gas','density']),interpolation='nearest',origin='lower')
-            plt.savefig('test_forpdf.png')
+
+            if 0:
+                # Explorations with dir(frb)
+                #plt.plot(frb['gas','density'],frb['gas','cell_volume'],c='k')  # um, yeah NO
+                frb.save_as_dataset()  # saves a .h5 file that could be used for profile
+                # NOTE: re explore dir(proj.profile) 
+
+            if 0:
+                plt.imshow(np.log10(np.array(frb['gas','density'])),interpolation='nearest',origin='lower')
+                plt.savefig('test_forpdf_B.png')
 
         #to explore/debug:
-        if 0:
-            #/home/luzlourdes/scripts/miscpys/FallSpring1617/simplifiedPDF.py 
+        if 1:
             breakpoint()  #to do dir(proj)
 
 
@@ -52,8 +60,4 @@ if 'laser_nif01' not in dir():
 
 for nt,tool in enumerate([laser_nif01]):
     tool.laserRun()
-
-
-
-
 

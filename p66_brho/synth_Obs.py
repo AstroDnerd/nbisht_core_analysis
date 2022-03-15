@@ -1,4 +1,9 @@
 
+'''
+the fixed resolution buffer may help for these purposes...
+://yt-project.org/doc/visualizing/manual_plotting.html 
+'''
+
 from starter2 import *
 import data_locations as dl
 import davetools
