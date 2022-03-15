@@ -7,24 +7,23 @@ import matplotlib.colors as colors
 reload(CHT)
 import hair_dryer
 reload(hair_dryer)
-import stay_close
-import three_loopers_tenfour as TL4
-sim_list=['u401','u402','u403']
+#import stay_close
+#import three_loopers_tenfour as TL4
+import three_loopers_six as TL
 
-import three_loopers_tenfour as TL4
 import convex_hull_tools as CHT
 reload(CHT)
-sim_list=['u401','u402','u403']
+sim_list=['u601','u602','u603']
 if 'ht' not in dir() :
     ht = {}
     for this_simname in sim_list:
-        ht[this_simname] = CHT.hull_tool(TL4.loops[this_simname])
+        ht[this_simname] = CHT.hull_tool(TL.loops[this_simname])
         ht[this_simname].make_hulls()
         ht[this_simname].make_overlaps()
 if 'ct' not in dir():
     ct = {}
     for this_simname in sim_list:
-        ct[this_simname] = close_tool( TL4.loops[this_simname])
+        ct[this_simname] = close_tool( TL.loops[this_simname])
         ct[this_simname].make_distance()
 
 import supersets
@@ -32,69 +31,9 @@ reload(supersets)
 if 'st' not in dir():
     st={}
     for this_simname in sim_list:
-        st[this_simname] = supersets.superset( TL4.loops[this_simname], ht[this_simname])
+        st[this_simname] = supersets.superset( TL.loops[this_simname], ht[this_simname])
         st[this_simname].find()
 plt.close('all')
-if 0:
-    #messing around.
-    import means_etc
-    fig,ax=plt.subplots(1,3,figsize=(12,8))
-    #for aaa in ax:
-    #    aaa.set_aspect('equal')
-    fig2,ax2=plt.subplots(3,1)
-    for ns,this_simname in enumerate(sim_list):
-        htool = ht[this_simname]
-        ctool = ct[this_simname]
-        stool = st[this_simname]
-        ooo = np.zeros( [len(htool.cores_used)]*2) -1
-        nnn = np.zeros( [len(htool.cores_used)]*2) -1
-        ppp = np.zeros( [len(htool.cores_used)]*2) -1
-        color_matrix = np.zeros_like(distance_matrix)
-        for nc1,core_id_1 in enumerate(htool.cores_used):
-            for nc2,core_id_2 in enumerate(htool.cores_used):
-                ooo[nc1,nc2] = htool.overlaps[core_id_1][nc2]
-                nnn[nc1,nc2] = htool.overlap_number[core_id_1][nc2]
-                ppp[nc1,nc2] = htool.nparticles[nc1]
-                a,b=htool.overlaps[core_id_1][nc2], htool.overlaps[core_id_2][nc1] 
-                ratio = max([a,b])
-                rat= sorted( [a,b])
-                if rat[1] == 0:
-                    ratio = max([a,b])
-                else:
-                    ratio=rat[0]/rat[1]
-
-                color_matrix[nc1,nc2]=ratio
-        #both = np.concatenate([[ooo],[ooo.transpose()]])
-        both = np.concatenate([[nnn],[nnn.transpose()]])
-        mmmin = both.min(axis=0)
-        mmmax = both.max(axis=0)
-        szz = np.concatenate([[ppp],[ppp.transpose()]])
-        n_smal = szz.min(axis=0)
-        n_big  = szz.max(axis=0)
-        top = np.triu(mmmin)
-        bot = np.triu(mmmax)
-        ok1 = (bot > 0)*(top > -0.25)
-
-        dist = np.triu(ctool.distance_matrix)[ok1]
-        ratio1 =  top[ok1]/bot[ok1]
-        #the_y = ratio
-        #the_y=bot[ok1] #ratio
-        #the_y = top[ok1]
-        #the_y = np.triu(nnn/ppp.transpose())[ok1]
-
-        ax[ns].scatter(top[ ok1],ratio1)
-        axbonk(ax[ns],xlabel='overlap',ylabel='ratio')#,xscale='log')
-        #ax[ns].set_yscale('symlog',linthresh=1)
-        #ax[ns].set_ylim([0,the_y.max()])
-
-        #derp = nnn>0
-        #X = (nnn/ppp)[derp]
-        #Y = (nnn.transpose()/ppp)[ derp.transpose()]
-        #ax2[ns].scatter(X, Y)
-        #ax2[ns].set_yscale('symlog',linthresh=1)
-
-    fig.savefig('plots_to_sort/ug.png')
-    #fig2.savefig('plots_to_sort/ug2.png')
 
 
 
@@ -222,3 +161,63 @@ if 0:
 
 
 
+if 0:
+    #messing around.
+    import means_etc
+    fig,ax=plt.subplots(1,3,figsize=(12,8))
+    #for aaa in ax:
+    #    aaa.set_aspect('equal')
+    fig2,ax2=plt.subplots(3,1)
+    for ns,this_simname in enumerate(sim_list):
+        htool = ht[this_simname]
+        ctool = ct[this_simname]
+        stool = st[this_simname]
+        ooo = np.zeros( [len(htool.cores_used)]*2) -1
+        nnn = np.zeros( [len(htool.cores_used)]*2) -1
+        ppp = np.zeros( [len(htool.cores_used)]*2) -1
+        color_matrix = np.zeros_like(distance_matrix)
+        for nc1,core_id_1 in enumerate(htool.cores_used):
+            for nc2,core_id_2 in enumerate(htool.cores_used):
+                ooo[nc1,nc2] = htool.overlaps[core_id_1][nc2]
+                nnn[nc1,nc2] = htool.overlap_number[core_id_1][nc2]
+                ppp[nc1,nc2] = htool.nparticles[nc1]
+                a,b=htool.overlaps[core_id_1][nc2], htool.overlaps[core_id_2][nc1] 
+                ratio = max([a,b])
+                rat= sorted( [a,b])
+                if rat[1] == 0:
+                    ratio = max([a,b])
+                else:
+                    ratio=rat[0]/rat[1]
+
+                color_matrix[nc1,nc2]=ratio
+        #both = np.concatenate([[ooo],[ooo.transpose()]])
+        both = np.concatenate([[nnn],[nnn.transpose()]])
+        mmmin = both.min(axis=0)
+        mmmax = both.max(axis=0)
+        szz = np.concatenate([[ppp],[ppp.transpose()]])
+        n_smal = szz.min(axis=0)
+        n_big  = szz.max(axis=0)
+        top = np.triu(mmmin)
+        bot = np.triu(mmmax)
+        ok1 = (bot > 0)*(top > -0.25)
+
+        dist = np.triu(ctool.distance_matrix)[ok1]
+        ratio1 =  top[ok1]/bot[ok1]
+        #the_y = ratio
+        #the_y=bot[ok1] #ratio
+        #the_y = top[ok1]
+        #the_y = np.triu(nnn/ppp.transpose())[ok1]
+
+        ax[ns].scatter(top[ ok1],ratio1)
+        axbonk(ax[ns],xlabel='overlap',ylabel='ratio')#,xscale='log')
+        #ax[ns].set_yscale('symlog',linthresh=1)
+        #ax[ns].set_ylim([0,the_y.max()])
+
+        #derp = nnn>0
+        #X = (nnn/ppp)[derp]
+        #Y = (nnn.transpose()/ppp)[ derp.transpose()]
+        #ax2[ns].scatter(X, Y)
+        #ax2[ns].set_yscale('symlog',linthresh=1)
+
+    fig.savefig('plots_to_sort/ug.png')
+    #fig2.savefig('plots_to_sort/ug2.png')

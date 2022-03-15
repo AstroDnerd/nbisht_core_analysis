@@ -6,21 +6,23 @@ import matplotlib.colors as colors
 reload(CHT)
 import hair_dryer
 reload(hair_dryer)
-import stay_close
-import three_loopers_tenfour as TL4
-sim_list=['u401','u402','u403']
+import close_tool
+#import three_loopers_tenfour as TL4
+import three_loopers_six as TL
+sim_list=['u601','u602','u603']
+#sim_list=['u401','u402','u403']
 #sim_list=['u402']
 if 'ht' not in dir() :
     ht = {}
     for this_simname in sim_list:
-        ht[this_simname] = CHT.hull_tool(TL4.loops[this_simname])
+        ht[this_simname] = CHT.hull_tool(TL.loops[this_simname])
         ht[this_simname].make_hulls()
         ht[this_simname].make_overlaps()
 
 if 'ct' not in dir():
     ct = {}
     for this_simname in sim_list:
-        ct[this_simname] = stay_close.close_tool( TL4.loops[this_simname])
+        ct[this_simname] = close_tool.close_tool( TL.loops[this_simname])
         ct[this_simname].make_distance()
 
 import supersets
@@ -28,7 +30,7 @@ reload(supersets)
 if 'st' not in dir():
     st={}
     for this_simname in sim_list:
-        st[this_simname] = supersets.superset( TL4.loops[this_simname], ht[this_simname])
+        st[this_simname] = supersets.superset( TL.loops[this_simname], ht[this_simname])
         st[this_simname].find()
 
 if 'overlap_dict' not in dir():
@@ -65,6 +67,34 @@ if 'overlap_dict' not in dir():
                     ratio=rat[0]/rat[1]
                 ratio_matrix[this_simname][nc1,nc2]=ratio
                 particle_matrix[this_simname][nc1,nc2] = np.sqrt( particles[this_simname][nc1]*particles[this_simname][nc2])
+
+if 0:
+    core_list= sorted(list(st["u603"].supersets[1]))
+    
+    htool = ht['u603']
+    mmap = [np.where( htool.cores_used == core_id)[0][0] for core_id in core_list]
+    od= overlap_dict['u603']
+    subset = np.zeros([len(mmap), len(mmap)])
+    for nx,c1 in enumerate(mmap):
+        #print(od[c1,mmap])
+        subset[nx,:]=od[c1,mmap] #cannot figure out a better way.
+    print(subset)
+    plt.clf()
+    cmap = copy.copy(mpl.cm.get_cmap("viridis"))
+    cmap.set_under('w')
+    norm = mpl.colors.LogNorm( subset[subset>0].min(), subset.max())
+    ploot=plt.imshow(subset,norm=norm,cmap=cmap, origin='lower')
+    plt.colorbar(ploot, label=r'$N_{i,j}/n_i$')
+    plt.tight_layout()
+    plt.text(7-0.35,6,r'$%0.2f$'%(od[6,7]))
+    plt.text(6-0.35,7,r'$%0.2f$'%(od[7,6])) #yes transpose, imshow quirk
+
+
+    plt.xticks( np.arange(len(core_list)),core_list)
+    plt.yticks( np.arange(len(core_list)),core_list)
+    plt.savefig('plots_to_sort/derp.png')
+
+
 
 
 
@@ -113,7 +143,7 @@ if 1:
         axright.hist( Max, bins=bins_f, histtype='step',color='r',orientation='horizontal')
 
         if 1:
-            axbonk(axa,xlabel=r'$N_{\rm{overlap}}$', ylabel='Overlap Fraction')
+            axbonk(axa,xlabel=r'$N_{\rm{overlap}}$', ylabel=r'$\langle O_{i,j}\rangle, \max( O_{i,j})$')
             axa.set_xlim([-0.1,nmax+0.1])
             axbonk(axtop,xlabel='',ylabel=r'$N$')
             axbonk(axright,xlabel=r'$N$',ylabel='')

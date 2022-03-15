@@ -154,7 +154,7 @@ class hair_tool():
         self.slopes = []
         self.sim_name = self.this_looper.out_prefix
 
-    def run(self,core_list=None,do_plots=True, frame=0, colors=None, newplots=True, name=''):
+    def run(self,core_list=None,do_plots=True, frame=0, colors=None, newplots=True, name='', external_ax=None):
         dx=1./2048
         nx = 1./dx
         thtr = self.this_looper.tr
@@ -176,7 +176,10 @@ class hair_tool():
             print("Need to fix the frame index")
             return
 
-        fig,ax=plt.subplots(1,1, dpi=200)#, figsize=(12,8))
+        if external_ax is None:
+            fig,ax=plt.subplots(1,1, dpi=200)#, figsize=(12,8))
+        else:
+            ax = external_ax
         for core_id in core_list:
             ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             ms.particle_pos(core_id)
@@ -201,27 +204,14 @@ class hair_tool():
                 ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c=[c]*ms.nparticles, s=0.3)
                 ax.scatter(ms.particle_y[:,-1], ms.particle_z[:,-1], c='r', s=0.3)
                 ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.sim_name, core_id))
-                outname = 'plots_to_sort/%s_blowing_hair_%sc%04d.png'%(self.name,name,core_id)
-                fig.savefig(outname)
-                print(outname)
+                if external_ax is None:
+                    outname = 'plots_to_sort/%s_blowing_hair_%sc%04d.png'%(self.name,name,core_id)
+                    fig.savefig(outname)
+                    print(outname)
+
+
+
             if 0:
-                cy = np.tile( ms.particle_y.mean(axis=0), (ms.nparticles,1))
-                cz = np.tile( ms.particle_z.mean(axis=0), (ms.nparticles,1))
-                dy2 = ms.particle_y - cy
-                dz2 = ms.particle_z - cz
-
-                if 0:
-                    theta = np.arctan2(dz2,dy2)
-                    r = np.sqrt(dy2**2+dz2**2)
-
-                    the_x = r**0.5*np.cos(theta)
-                    the_y = r**0.5*np.sin(theta)
-
-                    dy2 = the_x
-                    dz2 = the_y
-
-
-
                 fig,ax=plt.subplots(1,1, figsize=(12,8))
                 for ip in range(ms.nparticles):
                     ax.plot(   dy2[ip,:], dz2[ip,:], c=[0.5]*3, linewidth=0.1)

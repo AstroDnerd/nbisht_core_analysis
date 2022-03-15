@@ -4,7 +4,10 @@ import figure_sublabel
 reload(figure_sublabel)
 from mpl_toolkits.axes_grid1 import AxesGrid
 import convex_hull_tools as CHT
+import convex_hull_plot2d as CHP
+reload(CHP)
 reload(CHT)
+import colors
 
 
 
@@ -22,7 +25,7 @@ for aaa in grid:
     aaa.set_aspect('equal')
 
 sim_list=['u601','u602','u603']
-#sim_list=['u601']
+sim_list=['u603']
 if 1:
 #import three_loopers_mountain_top as TLM
 
@@ -36,15 +39,18 @@ if 1:
     TL6.loops['u603'].sublabel = figure_sublabel.labs(1.15, -0.2, r'$1g$')
     for ns,sim in enumerate(sim_list):
         #print('KLUDGE core list')
-        #core_list =np.unique( ht[sim].this_looper.tr.core_ids)[:1]
+        full_core_list =np.unique( ht[sim].this_looper.tr.core_ids)
         #core_list = np.concatenate([core_list,[323]])
         core_list=None
-        CHT.plot_2d(ht[sim],frames=[0], accumulate=True, label_cores=cores_to_label[sim],
+        color_dict = colors.make_core_cmap(full_core_list)#, cmap = 'tab20', seed = -1)
+        CHP.plot_2d(ht[sim],frames=[0], accumulate=True, label_cores=cores_to_label[sim],
                     external_axis=[grid[ns]], core_list=core_list,
+                    color_dict=color_dict,
+                    axis_to_plot=[0],
                     add_jitter=False,  center_image=True)
 
 
-if 1:
+if 0:
     import image_centroid
     reload(image_centroid)
     #This is annoyingly manual; subfigure labels
@@ -57,7 +63,7 @@ if 1:
             centool[sim] = image_centroid.image_track(TL6.loops[sim])
             centool[sim].run(external_ax=grid[ns+3])
 
-if 1:
+if 0:
     #plot projections
     #TO DO make the xticks not suck
     if 'pt' not in dir():
@@ -91,8 +97,8 @@ for ggg in grid:
     ggg.set_ylabel('')
     ggg.set_xlabel('')
 for ng in [0,1,2]:
-    ax[ng][0].set_ylabel(r'$y [code\ units]$')
-    ax[2][ng].set_xlabel(r'$z [code\ units]$')
+    ax[2][ng].set_xlabel(r'$y [code\ units]$')
+    ax[ng][0].set_ylabel(r'$z [code\ units]$')
 
 
 #for ng, aaa in enumerate(grid):
