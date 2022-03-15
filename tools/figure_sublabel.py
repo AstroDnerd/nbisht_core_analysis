@@ -1,9 +1,14 @@
 from starter1 import *
 
-def add_sublabel(ax,looper):
-    if hasattr(looper,'sublabel'):
-        if looper.sublabel is not None:
-            looper.sublabel(ax)
+def add_sublabel(ax,input_tool):
+    """Apply the sublable.  
+    Might be hung onto a tool, might be free standing."""
+    if hasattr(input_tool,'sublabel'):
+        if input_tool.sublabel is not None:
+            input_tool.sublabel(ax)
+    elif type(input_tool) == labs:
+        input_tool(ax)
+
     
 
 class labs():
