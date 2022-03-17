@@ -21,6 +21,7 @@ class laser_nif():
 
         #for now; 
         ds = self.this_looper.load(theframes[7])
+        ad = ds.all_data()
         #for now; ProjectionPlot
         if 0:
             proj = yt.ProjectionPlot(ds,'z',('gas','density'))
@@ -31,8 +32,10 @@ class laser_nif():
             width = 1
             rez = [256,256]
 
-            proj = ds.proj(('gas','density'),2)  #there's proj.profile(), and "most obv" proj.to_frb() that may work
-            frb = proj.to_frb(width,rez,center=midpt)
+            proj_d = ds.proj(('gas','density'),2)  #there's proj.profile(), and "most obv" proj.to_frb() that may work
+            proj_cv = ds.proj(('gas','cell_volume'),2)
+            frb_d = proj_d.to_frb(width,rez,center=midpt)
+            frb_cv = proj_cv.to_frb(width,rez,center=midpt)  #there's no apparent difference in doing this!
 
             if 0:
                 # Explorations with dir(frb)
@@ -43,6 +46,20 @@ class laser_nif():
             if 0:
                 plt.imshow(np.log10(np.array(frb['gas','density'])),interpolation='nearest',origin='lower')
                 plt.savefig('test_forpdf_B.png')
+            if 1: #idea
+                the_x = np.log10(np.array(frb_d['gas','density']))
+                #the_bins = # will find out 
+                the_weight = np.log10(np.array(frb_cv['gas','cell_volume']))  #or do another frb for cell_volume?
+            
+                the_array, xbins = np.histogram(the_x, weights = the_weight, density=True) 
+                bin_centers = 0.5*(xbins[1:]+xbins[:-1])
+                plot_x = bin_centers
+                plot_y = the_array
+                plt.plot(plot_x,plot_y, c='k')     
+                plt.savefig('test_forpdf_10_diffFRBS.png')
+
+
+
 
         #to explore/debug:
         if 1:
