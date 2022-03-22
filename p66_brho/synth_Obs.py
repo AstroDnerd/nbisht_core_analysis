@@ -82,6 +82,6 @@ simnames = ['u601','u602', 'u603']
 
 for nt,tool in enumerate([scope1,scope2,scope3]):
     tool.qtyRun()
-# have qtyRun return things and then call the next definitions or embed definitions within qtyRun..
+# have qtyRun return things and then call the next definitions OR embed definitions within qtyRun..
 
 

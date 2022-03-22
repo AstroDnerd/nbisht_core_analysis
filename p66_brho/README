@@ -1,11 +1,17 @@
 
-# latest revision: 02-22-2022 ...200 years till 02-22-2222 
-# by LJV
+# latest revision of this README 03-22: 
+# LJV
 - - - - - - - -
-If you encounter a number at the end of a .py file, and there is no other .py file by the same name,
-it means there is a better version somewhere else.
-Use the largest number of the .py files that have 0#.
+NOTES: 
+/Brho_particles_1.py is the original of alphaFieldDensity.py
 
+The .py files for all plots on Paper 66:
+/alphaFieldDensity.py and /meanFieldDensityTracks.py
+
+There are slight variations to these to play around with...such as:
+_500 and _threeway
+
+- - - - - - - -
 Rough pipeline for extracting data from new data sets:
 SEE DCCOLLINS DOCS FOR MOST UP TO DATE
 (check in with directory 'examples' to see if there are any updates)
@@ -14,10 +20,4 @@ SEE DCCOLLINS DOCS FOR MOST UP TO DATE
 /data_puller.py
 
 
-- - - - - - - -
-NOTES: the only thing that really matters
-/Brho_particles_1.py is the original of alphaFieldDensity.py
-
-The .py files for all plots on Paper 66:
-/alphaFieldDensity.py and /meanFieldDensityTracks.py
 

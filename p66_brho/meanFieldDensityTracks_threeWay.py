@@ -12,7 +12,7 @@ reload(em)  #testing old method
 import scipy
 plt.close('all')
 
-import means_etc #as met
+import means_etc as met
 
 
 class magfield_density_tool(): 
@@ -379,30 +379,40 @@ if 1:
 
 
         if 1:  # IF DOING <B> vs <n> BY FRAME, SINGLE PANEL
-            fig2,ax2 = plt.subplots(1,1) 
-            fig3,ax3 = plt.subplots(1,1) 
-            fig4,ax4 = plt.subplots(1,1) 
-            fig5,ax5 = plt.subplots(1,1) 
-            fig6,ax6 = plt.subplots(1,1) 
-            fig7,ax7 = plt.subplots(1,1) 
-            fig8,ax8 = plt.subplots(1,1) 
-            fig9,ax9 = plt.subplots(1,1) 
-            fig10,ax10 = plt.subplots(1,1) 
-            fig11,ax11 = plt.subplots(1,1) 
-            fig12,ax12 = plt.subplots(1,1) 
-            fig13,ax13 = plt.subplots(1,1)
-            fig14,ax14 = plt.subplots(1,1)
-            fig15,ax15 = plt.subplots(1,1)
+            figs = [np.empty([0],dtype=float) for x in range(len(these_times))]
+            axplts = [np.empty([0],dtype=float) for x in range(len(these_times))]
+            axtop = [np.empty([0],dtype=float) for x in range(len(these_times))]
+            axright = [np.empty([0],dtype=float) for x in range(len(these_times))]
+            #fig2,ax2 = plt.subplots(1,1) 
+            #fig3,ax3 = plt.subplots(1,1) 
+            #fig4,ax4 = plt.subplots(1,1) 
+            #fig5,ax5 = plt.subplots(1,1) 
+            #fig6,ax6 = plt.subplots(1,1) 
+            #fig7,ax7 = plt.subplots(1,1) 
+            #fig8,ax8 = plt.subplots(1,1) 
+            #fig9,ax9 = plt.subplots(1,1) 
+            #fig10,ax10 = plt.subplots(1,1) 
+            #fig11,ax11 = plt.subplots(1,1) 
+            #fig12,ax12 = plt.subplots(1,1) 
+            #fig13,ax13 = plt.subplots(1,1)
+            #fig14,ax14 = plt.subplots(1,1)
+            #fig15,ax15 = plt.subplots(1,1)
             
-            if nt == 0:
-                axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13,ax14,ax15]
-                figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13,fig14,fig15]
-            if nt == 1: 
-                axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13,ax14]
-                figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13,fig14]
-            if nt == 2: 
-                axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13]
-                figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13]
+            #if nt == 0:
+            #    axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13,ax14,ax15]
+            #    figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13,fig14,fig15]
+            #    axtop = [axt2,axt3,axt4,axt5,axt6,axt7,axt8,axt9,axt10,axt11,axt12,axt13,axt14,axt15]
+            #    axright = [axr2,axr3,axr4,axr5,axr6,axr7,axr8,axr9,axr10,axr11,axr12,axr13,axr14,axr15]
+            #if nt == 1: 
+            #    axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13,ax14]
+            #    figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13,fig14]
+            #    axtop = [axt2,axt3,axt4,axt5,axt6,axt7,axt8,axt9,axt10,axt11,axt12,axt13,axt14]
+            #    axright = [axr2,axr3,axr4,axr5,axr6,axr7,axr8,axr9,axr10,axr11,axr12,axr13,axr14]
+            #if nt == 2: 
+            #    axplts = [ax2,ax3,ax4,ax5,ax6,ax7,ax8,ax9,ax10,ax11,ax12,ax13]
+            #    figs = [fig2,fig3,fig4,fig5,fig6,fig7,fig8,fig9,fig10,fig11,fig12,fig13]
+            #    axtop = [axt2,axt3,axt4,axt5,axt6,axt7,axt8,axt9,axt10,axt11,axt12,axt13]
+            #    axright = [axr2,axr3,axr4,axr5,axr6,axr7,axr8,axr9,axr10,axr11,axr12,axr13]
        
 
         the_v = np.empty([0],dtype=float)
@@ -499,15 +509,16 @@ if 1:
                             color = 'g'
 
                         the_bins = np.linspace(-10,10)
-                        figa,axa,axtop,axright = means_etc.three_way_bean()
-                        axa.scatter(this_alphaS[7],this_alphaP[7],c=color)
-                        axtop.hist(this_alphaS[7], bins=the_bins, histtype='step',color='k')
-                        axtop.hist(this_alphaP[7], bins=the_bins, histtype='step',color='k',orientation='horizontal')
+                        if ncore == 0:
+                            figs[i],axplts[i],axtop[i],axright[i] = met.three_way_bean()
+                        axplts[i].scatter(this_alphaS[i],this_alphaP[i],c=color)
+                        axtop[i].hist(this_alphaS[i], bins=the_bins, histtype='step',color='k')
+                        axright[i].hist(this_alphaP[i], bins=the_bins, histtype='step',color='k',orientation='horizontal')
 
                         outname_frame='AlphaSP_%s_%d'%(simnames[nt],i)
                         #axplts[i].scatter(this_alphaS[i],this_alphaP[i],c=color,marker='*')
-                        magfield_density_tool.labelled(axa,xscale=None,yscale=None,xlabel='Sum',ylabel='Product',\
-                                                       title=None, xlim=xlims,ylim=ylims)
+                        magfield_density_tool.labelled(axplts[i],xscale=None,yscale=None,xlabel='Sum',ylabel='Product',\
+                                                       title=None, xlim=None, ylim=None) #xlims,ylim=ylims)
 
                     if 0:
                         axplts[i].scatter(this_rho[i],this_field[i],c='g',marker='*')
@@ -515,9 +526,9 @@ if 1:
                         magfield_density_tool.labelled(axplts[i],xscale=None,yscale=None,xlabel=r'$\rho$',ylabel=r'$log(B/ \rho)$',\
                                                        title=None, xlim=None,ylim=None)
                         outname_frame='Scatter_LogBRhovsRho_%s_%d'%(simnames[nt],i)
+
                     figs[i].savefig(outname_frame)
-                    break
-                    #print("saved")
+                   
                     
             if 0: # FOR ONE FRAME PER TIME; MULTIPLE PANEL ..in progress: I think it will be best if I end up moving this to the next if statement.
                 tmap2 = rainbow_map(len(this_rho))
