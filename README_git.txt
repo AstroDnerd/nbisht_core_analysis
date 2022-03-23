@@ -33,9 +33,11 @@ these back when you're done updating the repos
 11. git status            # it's nice to see what's going on
 12. git add .             # if you want to add all the changes, otherwise follow
 respecive prompts
+
 13 git commit             # then it will prompt you to write a message
 14. git pull upstream     # to sync with the project; this step can be done
 after 7.   
+
 15. git push upstream     # to sync your contributions to the project
 16. git push origin       # to sync your fork of the project
 
