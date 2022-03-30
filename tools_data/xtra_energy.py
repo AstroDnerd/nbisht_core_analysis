@@ -32,11 +32,11 @@ def add_energies(obj):
             alpha = 1./data.ds['GravitationalConstant'] #=1/4 pi G
             alpha = data.ds.quan(alpha, '1/(code_length**3/code_time**2/code_mass)')
             return ( -(gx**2+gy**2+gz**2)*alpha )
-        obj.add_field('grav_energy',grav_energy,validators=[yt.ValidateGridType()],
+        obj.add_field(YT_grav_energy,grav_energy,validators=[yt.ValidateGridType()],
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
         def abs_grav_energy(field,data):
             return np.abs( data['grav_energy'] )
-        obj.add_field('abs_grav_energy',abs_grav_energy,validators=[yt.ValidateSpatial(1,'PotentialField')],
+        obj.add_field(YT_abs_grav_energy,abs_grav_energy,validators=[yt.ValidateSpatial(1,'PotentialField')],
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
     def therm_energy(field,data):
@@ -45,7 +45,7 @@ def add_energies(obj):
         e = sound_speed**2*np.log( data['density']/rho_0)
         therme = data['density']*e
         return therme
-    obj.add_field('therm_energy',therm_energy,
+    obj.add_field(YT_therm_energy,therm_energy,
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
 def add_force_terms(obj):

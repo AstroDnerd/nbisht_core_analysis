@@ -34,4 +34,7 @@ YT_x = ('gas','x')
 YT_y = ('gas','y')
 YT_z = ('gas','z')
 YT_potential=('enzo','GravPotential')
+YT_grav_energy = 'gas', 'grav_energy'
+YT_abs_grav_energy = 'gas', 'abs_grav_energy'
+YT_therm_energy = 'gas','therm_energy'
 
