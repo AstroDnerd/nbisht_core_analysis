@@ -67,7 +67,7 @@ class laser_nif():
 
         #to explore/debug:
         if 0:
-            breakpoint()  #to do dir(proj)
+            breakpoint()  #do dir(proj) ..etc
 
 
 # MAIN

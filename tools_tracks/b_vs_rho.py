@@ -4,14 +4,18 @@ import heat_map
 from scipy.optimize import curve_fit
 import colors
 reload(heat_map)
+
 def b_from_rho(lnrho,slope,offset):
     return slope*lnrho+offset
+
 class brho():
     def __init__(self, loop):
         self.this_looper=loop
         self.cores_used=[]
+
         self.mean_b=defaultdict(list)
         self.mean_rho=defaultdict(list)
+
         self.fit1=defaultdict(list)
         self.alpha_FTA=defaultdict(list)
         self.alpha_ATF=[]
@@ -48,10 +52,12 @@ class brho():
             density = thtr.c([core_id],'density')
             cell_volume = thtr.c([core_id],'cell_volume')
             Vtotal=cell_volume.sum(axis=0)
+
             self.mean_b[core_id] =  (B*cell_volume).sum(axis=0)/Vtotal
             self.b_array[nc,:]=self.mean_b[core_id]
             self.mean_rho[core_id]= (density*cell_volume).sum(axis=0)/Vtotal
             self.d_array[nc,:]=self.mean_rho[core_id]
+
             rm=rainbow_map(tsorted.size)
             if plot:
                 fig,ax=plt.subplots(1,1)
@@ -63,7 +69,6 @@ class brho():
                 self.alpha_FTA[core_id].append(popt[0])
 
                 if plot:
-
                     ax.scatter(DDD , BBB, c=[rm(nframe)]*density.shape[0])
                     #ax.plot(DDD, DDD*pfit[1]+pfit[0])
                     ax.plot( DDD, b_from_rho(DDD,*popt),c='k')

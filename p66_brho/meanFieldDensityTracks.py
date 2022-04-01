@@ -129,6 +129,7 @@ class magfield_density_tool():
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
                 #self.mean_rho_py[core_id].append(density.mean())  
                 self.mean_cv[core_id].append((cell_volume * cell_volume).sum()/(cell_volume.sum()))  #DOES THIS MAKE SENSE TO DO...   
+
                 self.mean_fieldOverRho[core_id].append((BRho * cell_volume).sum()/(cell_volume.sum()))
                 self.mean_fieldOverRhoCheck[core_id].append((BRho_log * cell_volume).sum()/(cell_volume.sum()))
                 self.mean_fieldOverRhoLogged[core_id].append((BovRho * cell_volume).sum()/(cell_volume.sum()))

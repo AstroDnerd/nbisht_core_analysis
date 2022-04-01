@@ -30,6 +30,7 @@ def is_sorted(array):
         pdb.set_trace()
         return
     print("True")
+
 class track_manager():
     """Manages tracks.
     track_manager[field] returns a list of [particle, time]
@@ -39,6 +40,7 @@ class track_manager():
     plots the field vs. time.
     self.ingest(snapshot) populates the master list
     """
+
     def __init__(self,my_loop=None, h5ptr=None):
         #self.my_loop = None
         #if my_loop is not None:
@@ -54,6 +56,7 @@ class track_manager():
             self.shape=(0,0) #particles, frames
         else:
             self.read(fptr=h5ptr)
+
     def sort_time(self):
         """fix up the time ordering of the members"""
         #pdb.set_trace()
@@ -81,6 +84,7 @@ class track_manager():
         finally:
             if create_file_here:
                 fptr.close()
+
     def read(self,fname = None, fptr=None):
         create_file_here = False
         if fptr is None:
@@ -97,6 +101,7 @@ class track_manager():
         finally:
             if create_file_here:
                 fptr.close()
+
     def merge(self,fname):
         fptr = h5py.File(fname,'r')
         temp_dict = {}
@@ -219,8 +224,6 @@ class track_manager():
             temp_frame[new_slice]=nuggle
             self[field]=temp_frame
     
-
-
     def p(self,particle_list,field):
         output = None
         for particle in particle_list:
@@ -231,6 +234,7 @@ class track_manager():
             else:
                 output= np.append(output, parts,axis=0)
         return output
+
     def c(self,core_list,field):
         if field in ['particle_id']:
             for ncore, core_id in enumerate(core_list):
@@ -252,6 +256,7 @@ class track_manager():
                 else:
                     output = np.append(output,core_values,axis=0)
         return output
+
     def __getitem__(self,item):
         output = None
         if item in ['particles', 'particle_ids']:
@@ -261,6 +266,7 @@ class track_manager():
         if item not in self.track_dict:
             self.track_dict[item]=np.zeros(self.shape,dtype='float64')
         return self.track_dict[item]
+
     def __setitem__(self,item,value):
         self.track_dict[item]=value
     #can I remove this?
@@ -343,7 +349,6 @@ class mini_scrubber():
         self.scrub(core_id,do_velocity=do_velocity)
         self.axis=0
                 
-
     def compute_unique_mask(self,core_id, dx,frame):
         """Computes the unique particle mask.
         Code note: we should get this tool to figure out dx by itself."""
@@ -359,8 +364,8 @@ class mini_scrubber():
         mask[1:] = isorted[1:]-isorted[:-1] != 0
         mask2 = mask[ rs]
         return mask2
-    def scrub(self,core_id, axis=0, do_velocity=True):
 
+    def scrub(self,core_id, axis=0, do_velocity=True):
         if core_id not in self.trk.core_ids:
             print("Core %d not found in looper"%core_id)
             print("  (also please write a better error handler)")
@@ -382,7 +387,7 @@ class mini_scrubber():
             self.this_y = shift_4(self.raw_y)
             self.this_z = shift_4(self.raw_z)
         else:
-            #don't actuall shift
+            #don't actually shift
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
@@ -404,6 +409,7 @@ class mini_scrubber():
             self.trk.track_dict['shift_z'][core_mask,:]= self.shift_z
             self.trk.track_dict['test_rho'][core_mask,:]= self.raw_z
             self.trk.track_dict['test_z'][core_mask,:]= self.this_z
+
         #print("kludge: raw mean")
         self.mean_x = np.mean(self.this_x,axis=0)
         self.mean_y = np.mean(self.this_y,axis=0)
@@ -422,13 +428,16 @@ class mini_scrubber():
         self.meanx2 = np.tile(self.mean_x,(self.raw_x.shape[0],1))
         self.meany2 = np.tile(self.mean_y,(self.raw_x.shape[0],1))
         self.meanz2 = np.tile(self.mean_z,(self.raw_z.shape[0],1))
+
         self.meanx2c = np.tile(self.mean_xc,(self.raw_x.shape[0],1))
         self.meany2c = np.tile(self.mean_yc,(self.raw_x.shape[0],1))
         self.meanz2c = np.tile(self.mean_zc,(self.raw_z.shape[0],1))
 
+
         self.rx_rel=self.this_x-self.meanx2
         self.ry_rel=self.this_y-self.meany2
         self.rz_rel=self.this_z-self.meanz2
+
         self.rx_relc=self.this_x-self.meanx2c
         self.ry_relc=self.this_y-self.meany2c
         self.rz_relc=self.this_z-self.meanz2c
@@ -442,22 +451,25 @@ class mini_scrubber():
 
         self.rms = np.sqrt( np.mean(self.r2,axis=0))
 
-
         if do_velocity:
             self.raw_vx = self.trk.c([core_id],'velocity_x')
             self.raw_vy = self.trk.c([core_id],'velocity_y')
             self.raw_vz = self.trk.c([core_id],'velocity_z')
+
             self.sqr_vx = np.sum(self.raw_vx**2,axis=0)
             self.sqr_vy = np.sum(self.raw_vy**2,axis=0)
             self.sqr_vz = np.sum(self.raw_vz**2,axis=0)
+
             self.raw_v2 = self.raw_vx**2+self.raw_vy**2+self.raw_vz**2
             #print("KLUDGE: using raw mean for velocity")
             self.mean_vx = np.mean(self.raw_vx,axis=0)
             self.mean_vy = np.mean(self.raw_vy,axis=0)
             self.mean_vz = np.mean(self.raw_vz,axis=0)
+
             self.mass_mean_vx = np.sum(self.raw_vx*self.mass,axis=0)/self.mass_total
             self.mass_mean_vy = np.sum(self.raw_vy*self.mass,axis=0)/self.mass_total
             self.mass_mean_vz = np.sum(self.raw_vz*self.mass,axis=0)/self.mass_total
+
             self.rel_vx = self.raw_vx-self.mean_vx
             self.rel_vy = self.raw_vy-self.mean_vy
             self.rel_vz = self.raw_vz-self.mean_vz
@@ -468,6 +480,7 @@ class mini_scrubber():
             self.rz_hat = self.rz_rel/self.r
 
             self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
+
             self.vr_raw = self.rx_hat*self.raw_vx+\
                       self.ry_hat*self.raw_vy+\
                       self.rz_hat*self.raw_vz
@@ -504,6 +517,7 @@ class mini_scrubber():
             self.h_label='x'
             self.this_v = self.this_y
             self.v_label='y'
+
     def get_central_velocity(self,core_id,nt):
 
         this_r = self.r[:,nt]
@@ -526,6 +540,7 @@ class mini_scrubber():
         self.rc_vmag = self.rx_hat*self.cen_vx+\
                        self.ry_hat*self.cen_vy+\
                        self.rz_hat*self.cen_vz
+
     def get_central_velocity2(self,core_id,nt):
 
         #relative to the density weighted center.
@@ -549,6 +564,7 @@ class mini_scrubber():
         self.rcd_vmag = self.rx_hat*self.d_cen_vx+\
                        self.ry_hat*self.d_cen_vy+\
                        self.rz_hat*self.d_cen_vz
+
     def Moment(self):
         self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
         self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
@@ -564,6 +580,7 @@ class mini_scrubber():
         self.moment_of_inertia_xzii = self.moment_of_inertia_zxii = - (self.mass*(self.rx_rel*self.rz_rel)).sum() 
 
         self.I_ii = self.mass*(self.r**2)
+
     def momenta(self):
         self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
         self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
@@ -578,6 +595,7 @@ class mini_scrubber():
         self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
         self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
         self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
+
     def particle_pos(self,core_id):
         shift_x = self.this_x - self.raw_x
         shift_y = self.this_y - self.raw_y
@@ -593,6 +611,7 @@ class mini_scrubber():
         self.particle_x = self.trk.c([core_id],name_to_use_x) + shift_x
         self.particle_y = self.trk.c([core_id],name_to_use_y) + shift_y
         self.particle_z = self.trk.c([core_id],name_to_use_z) + shift_z
+
     def make_floats(self, core_id):
         name_to_use_x= 'particle_pos_x'
         name_to_use_y= 'particle_pos_y'

@@ -604,7 +604,7 @@ class BRho_tool():
             if 1:
                 # HISTOS PER FRAME: EDITTTTTT 
                 the_bins = np.linspace(-10,10)      #need to find min and max of bears and pearsi, or same as mean
-                the_weight = self.dears[i]            #need to make self.dears[i];MADE, TRY; try weights and no weights,correct y axis accordingly
+                the_weight = self.dears[i]          #need to make self.dears[i];MADE, TRY; try weights and no weights,correct y axis accordingly
 
                 # THE LN(Y/X)
                 the_lnArray, xbins = np.histogram(self.bears[i],bins=the_bins,weights=the_weight,density=True)
