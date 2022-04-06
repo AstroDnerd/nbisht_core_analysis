@@ -864,7 +864,8 @@ class BRho_tool():
 # THREE SIMS AT ONCE
 
 #import three_loopers_mountain_top as TLM
-import three_loopers_tenfour as TLTF
+#import three_loopers_tenfour as TLTF
+import three_loopers_six as TL6
 if 'clobber' not in dir():
     clobber=True
 
