@@ -466,6 +466,9 @@ class mini_scrubber():
             self.rx_hat = self.rx_rel/self.r
             self.ry_hat = self.ry_rel/self.r
             self.rz_hat = self.rz_rel/self.r
+            self.rx_hat[self.r==0]=0
+            self.ry_hat[self.r==0]=0
+            self.rz_hat[self.r==0]=0
 
             self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
             self.vr_raw = self.rx_hat*self.raw_vx+\
@@ -549,6 +552,29 @@ class mini_scrubber():
         self.rcd_vmag = self.rx_hat*self.d_cen_vx+\
                        self.ry_hat*self.d_cen_vy+\
                        self.rz_hat*self.d_cen_vz
+    def get_central_at_once(self,core_id):
+
+        this_r = self.r
+        vx = self.trk.c([core_id],'velocity_x')
+        vy = self.trk.c([core_id],'velocity_y')
+        vz = self.trk.c([core_id],'velocity_z')
+
+        argmin = np.argmin(this_r,axis=0)
+        ind = np.arange(this_r.shape[1])
+        take = np.ravel_multi_index( nar([argmin,ind]), this_r.shape)
+
+        vxc = vx.flatten()[take]
+        vyc = vy.flatten()[take]
+        vzc = vz.flatten()[take]
+
+        self.cen_vx = self.raw_vx-vxc
+        self.cen_vy = self.raw_vy-vyc
+        self.cen_vz = self.raw_vz-vzc
+        self.cen_vmag = (self.cen_vx**2+self.cen_vy**2+self.cen_vz**2)**(0.5)
+
+        self.rc_vmag = self.rx_hat*self.cen_vx+\
+                       self.ry_hat*self.cen_vy+\
+                       self.rz_hat*self.cen_vz
     def Moment(self):
         self.moment_of_inertia_z = (self.mass*(self.rx_rel**2+self.ry_rel**2)).sum(axis=0)
         self.moment_of_inertia_x = (self.mass*(self.rz_rel**2+self.ry_rel**2)).sum(axis=0)
