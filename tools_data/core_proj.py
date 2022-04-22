@@ -1,6 +1,8 @@
 from starter2 import *
 import annotate_particles_4
 reload(annotate_particles_4)
+
+
 class MonotoneColorbar():
     def __init__(self):
         self.prev=None
@@ -12,9 +14,6 @@ class MonotoneColorbar():
             print(val, new_val)
         self.prev = new_val
         return new_val
-
-            
-
 
 class MonotoneEnforcer():
     def __init__(self):
@@ -46,6 +45,7 @@ class MonotoneEnforcer():
                 print( "MONO deli", delta_i)
         self.prev.append(new_val)
         return new_val
+
 class MonotoneEnforcer2():
     def __init__(self, nvalues=4):
         self.values=[]
@@ -225,8 +225,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 print('wtf')
                 pdb.set_trace()
 
-
-
         if monotonic:
             if 'left' in monotonic:
                 left = monotonic['left'](left)
@@ -235,7 +233,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 if ( left >= right).any():
                     print('wtf')
                     pdb.set_trace()
-
 
         all_left[frame] = ds.arr(left,'code_length')
         all_right[frame]= ds.arr(right,'code_length')
