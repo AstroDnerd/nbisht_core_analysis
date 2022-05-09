@@ -2,7 +2,6 @@
 from starter2 import *
 
 import convex_hull_tools as CHT
-import matplotlib.colors as colors
 
 reload(CHT)
 import hair_dryer
