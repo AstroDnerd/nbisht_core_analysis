@@ -1,7 +1,7 @@
 from starter2 import *
 import colors
 
-def heat_map(quantity, these_times, ax=None,bins=None):
+def heat_map(quantity, these_times, ax=None,bins=None, hist_density=False,hist_norm=False, zlim=None):
     if bins is None:
         bins = np.linspace( quantity.min(), quantity.max(), 64)
     xbins = these_times
@@ -12,17 +12,22 @@ def heat_map(quantity, these_times, ax=None,bins=None):
     TheY = np.r_[(nx)*[ybins]]
     hist = np.zeros( [xbins.size,ybins.size])
     for ntime, time in enumerate(these_times):
-        thishist,bins = np.histogram(quantity[:,ntime],bins=bins,density=False)
+        thishist,bins = np.histogram(quantity[:,ntime],bins=bins,density=hist_density)
+        if hist_norm:
+            thishist= thishist/thishist.sum()
         hist[ntime,:]=thishist
 
 
     cmap = copy.copy(mpl.cm.get_cmap("viridis"))
     cmap.set_under('w')
     minmin = hist[hist>0].min()
-    norm = mpl.colors.LogNorm( vmin =minmin, vmax=hist.max())
+    if zlim is None:
+        norm = mpl.colors.LogNorm( vmin =minmin, vmax=hist.max())
+    else:
+        norm = mpl.colors.LogNorm( vmin=zlim[0], vmax=zlim[1])
     #norm = mpl.colors.LogNorm(vmin=1,vmax=33)
     ploot=ax.pcolormesh(TheX, TheY, hist, cmap=cmap,norm=norm,shading='nearest')
-    return TheX, TheY, hist, dv
+    return TheX, TheY, hist, dv, ploot
 
 def heat_for_quantity(this_looper, field='density',core_list=None, bins=None, external_ax=None):
     if core_list is None:

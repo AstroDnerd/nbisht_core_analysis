@@ -19,10 +19,11 @@ if 'do_all_plots' not in dir():
 #import three_loopers as TL
 #import three_loopers_1tff as TL
 #import three_loopers_mountain_top as TLM
-import three_loopers_tenfour as TL4
+#import three_loopers_tenfour as TL4
+import three_loopers_six as TL
 import sf2
 frame=0
-sim_list = ['u401']
+sim_list = ['u601']
 
 method = "vtc"
 #total or radial (tr)
@@ -33,7 +34,7 @@ method = "vtc"
 if 'Lsubtool' not in dir():
     Lsubtool={}
     for this_simname in sim_list:
-        Lsubtool[this_simname] = alpha_tools.sub_trial( TL4.loops[this_simname])
+        Lsubtool[this_simname] = alpha_tools.sub_trial( TL.loops[this_simname])
         Lsubtool[this_simname].run(do_plots=['virial_radius'], velocity_method=method)
         #Lsubtool[this_simname].v_hist(frame, core_list = [13,14,15,16,17,18,19,21])
 #   run2 = sub_trial(TLM.loops['u302'])

@@ -79,21 +79,14 @@ class more_hair():
             dv = ms.cell_volume[sl].transpose()
             vrad = ms.vr_rel[sl].transpose()
 
-            vrad_cell_avg = (vrad*dv).sum(axis=1)/dv.sum(axis=1)
-            vrad_cell_avg.shape = (vrad_cell_avg.size,1)
-            vrad_cell_var = np.sqrt(((vrad-vrad_cell_avg)**2*dv).sum(axis=1)/dv.sum(axis=1))
-            vrad_cell_avg.shape=vrad_cell_avg.size
-            vrad_mass_avg = (den*vrad*dv).sum(axis=1)/(den*dv).sum(axis=1)
-            print('ffff',vrad_mass_avg.shape)
-            print('www',vrad.shape)
-
             name = self.this_looper.sim_name
             
             import colors
-            fig,ax=plt.subplots(2,3,figsize=(12,12))
-            ax0=ax[0][0];ax1=ax[0][1]; ax2=ax[0][2]
-            ax3=ax[1][0]; ax4=ax[1][1];ax5=ax[1][2]
-            ax1b = ax1.twinx()
+            fig,ax=plt.subplots(1,1,figsize=(12,12))
+            ax0=ax
+            #ax0=ax[0][0];ax1=ax[0][1]; ax2=ax[0][2]
+            #ax3=ax[1][0]; ax4=ax[1][1];ax5=ax[1][2]
+            #ax1b = ax1.twinx()
             t = thtr.times/colors.tff
             xmin = 1/2048
             xmax = 3.5e-1
@@ -101,71 +94,29 @@ class more_hair():
             ymax = 1e6
             for iframe,frame in enumerate(frames):
                 nframe = np.where( thtr.frames == frame)[0][0]
-                print("nframe",nframe,thtr.frames.size)
                 ax0.clear()
-                ax1.clear()
-                ax1b.clear()
-                ax2.clear()
-                ax3.clear()
-                ax4.clear()
-                ax5.clear()
+                #ax1.clear()
+                #ax1b.clear()
+                #ax2.clear()
+                #ax3.clear()
+                #ax4.clear()
+                #ax5.clear()
                 c  = [0.5,0.5,0.5,0.5]
                 print(pos[0].shape)
-
-                ax0.plot( pos[0][:nframe+1,:], pos[1][:nframe+1,:], c=c, linewidth=0.2)
-                ax0.scatter( pos[0][nframe,:], pos[1][nframe,:], c='k', s=0.2)
-
-                #xbins = np.linspace( pos[0].min(),pos[0].max(),129)
-                #ybins = np.linspace( pos[1].min(),pos[1].max(),129)
-                #hist, xb, yb = np.histogram2d( pos[0].flatten(), pos[1].flatten(), bins=[xbins,ybins],weights=dv.flatten())
-                ##pch.helper(hist.transpose(), yb.transpose(), xb.transpose(), ax=ax0)
-                #pch.helper(hist, xb, yb, ax=ax0, transpose=False)
-                axbonk(ax0,xlabel='x',ylabel='y', xlim=[pos[0].min(),pos[0].max()], ylim=[ pos[1].min(), pos[1].max()])
-
-                #dbins = np.geomspace( den[d>0].min(), den.max(),64)
-                #bbins = np.geomspace( b[b>0].min(), b.max(),64)
-
-                if 1:
-                    ax1.plot( t[:nframe+1], den[:nframe+1,:], c=c, linewidth=0.2)
-                    ax1.scatter( [t[nframe]]*nparticles, den[nframe,:], c='k',s=0.2)
-                    ax1b.violinplot( np.log10(den[nframe,:]), positions=[t[nframe]])
-                    axbonk(ax1,xlabel='t',ylabel='rho',yscale='log',ylim=[ymin,ymax])
-                    axbonk(ax1b,xlabel='',ylabel='',yscale='linear',ylim=[np.log10(ymin),np.log10(ymax)])
-
-                    ax2.plot( t[:nframe+1], vrad[:nframe+1,:], c=c,linewidth=0.2)
-                    ax2.scatter( [t[nframe]]*nparticles, vrad[nframe,:], c='k',s=0.2)
-                    ax2.violinplot( vrad[nframe,:], positions=[t[nframe]])
-                    axbonk(ax2,xlabel='t/tff',ylabel='Vradial')
-                    ax2.plot(t,vrad_cell_avg,c='r',label='cell')
-                    ax2.plot(t,vrad_cell_avg+vrad_cell_var,c='r')
-                    ax2.plot(t,vrad_cell_avg-vrad_cell_var,c='r')
-                    ax2.plot(t,vrad_mass_avg,c='g',label='mass')
-                    ax2.legend(loc=0)
-
-
-                    #density-radius
-                    #ax2.plot( rrr[:nframe+1,:], den[:nframe+1,:] , c=c, linewidth=0.2)
-                    #ax2.scatter( rrr[nframe,:], den[nframe,:], c='k',s=0.2)
-                    #axbonk(ax2,xlabel='r',ylabel='rho',xscale='log',yscale='log', xlim=[xmin,xmax],ylim=[ymin,ymax])
-
-                    #ax3.plot( t[:nframe+1], cen_vmag[:nframe+1,:], c=[0.5]*4,linewidth=0.2)
-                    #ax3.scatter( [t[nframe]]*nparticles, cen_vmag[nframe,:], c='k',s=0.2)
-                    #ax3.violinplot( cen_vmag[nframe,:], positions=[t[nframe]])
-
-                    #ax4.plot( vel[0][:nframe+1,:], vel[1][:nframe+1,:], c=[0.5]*4, linewidth=0.2)
-                    #ax4.scatter( vel[0][nframe+1,:], vel[1][nframe+1,:], c='k', s=0.2)
-                    #axbonk(ax4,xlim=[vel[0].min(),vel[0].max()], ylim=[vel[1].min(),vel[1].max()])
-
-                    for aaa,bbb in enumerate([ax3,ax4,ax5]):
-                        bbb.plot( t[:nframe+1], vel[aaa][:nframe+1,:], c=c,linewidth=0.2)
-                        bbb.scatter( [t[nframe]]*nparticles, vel[aaa][nframe,:], c='k',s=0.2)
-                        bbb.violinplot( vel[aaa][nframe,:], positions=[t[nframe]])
-                        axbonk(bbb,xlabel='t/tff',ylabel='V'+'xyz'[aaa])
-                
+                ax0.plot( rrr[:nframe+1], vrad[:nframe+1,:], c=c,linewidth=0.2)
+                #ax0.scatter( [t[nframe]]*nparticles, vrad[nframe,:], c='k',s=0.2)
+                #ax0.violinplot( vrad[nframe,:], positions=[t[nframe]])
+                #axbonk(ax0,xlabel='R',ylabel='Vradial')
+                from mpl_toolkits import mplot3d
+                fig = plt.figure()
+                ax = plt.axes(projection='3d')
+                #fig,ax=plt.subplots(1,1)
+                for npart in range(pos[0].shape[0]):
+                    ax.plot(rrr[npart,:],vrad[npart,:],pos[2][npart,:],c=c)
 
 
                 #ax.plot( ms.this_x.transpose(), ms.this_y.transpose(), c=[0.5]*4, linewidth=0.2)
-                outname='plots_to_sort/so_much_hair_%s_c%04d_i%04d'%(name,core_id,iframe)
+                outname='plots_to_sort/hair_3d_vr_%s_c%04d_i%04d'%(name,core_id,iframe)
                 fig.savefig(outname)
                 print(outname)
 
@@ -198,16 +149,11 @@ if 0:
     this_looper=TL.loops[this_simname]
     nt = more_hair(this_looper)
     nt.run(core_list=[76], frames=[10,106])
-if 0:
-    this_simname = 'u501'
-    this_looper=TL.loops[this_simname]
-    nt = more_hair(this_looper)
-    nt.run(core_list=[122], frames=[125])#frames=list(range(0,106,10))+[106])
 if 1:
     this_simname = 'u501'
     this_looper=TL.loops[this_simname]
     nt = more_hair(this_looper)
-    nt.run(core_list=None, frames=[125])#frames=list(range(0,106,10))+[106])
+    nt.run(core_list=[122], frames=[106])#frames=list(range(0,106,10))+[106])
 if 0:
     this_simname = 'u503'
     this_looper=TL.loops[this_simname]
