@@ -1,4 +1,5 @@
 from starter2 import *
+import annotate_particles_4
 from scipy.spatial import ConvexHull
 from yt.data_objects.level_sets.api import *
 from collections import defaultdict
@@ -255,7 +256,7 @@ def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directo
                 p_size = 1
             else:
                 p_size = 7
-            pw.annotate_these_particles2(1.0,col='r',positions= top1.leaf['particle_position'], p_size=p_size)
+            pw.annotate_these_particles4(1.0,col='r',positions= top1.leaf['particle_position'], p_size=p_size)
             pw.zoom(0.5/radius.v)
             pw.set_axes_unit('code_length')
 
