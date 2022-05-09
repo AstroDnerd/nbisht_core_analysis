@@ -578,13 +578,14 @@ class mini_scrubber():
         ind = np.arange(this_r.shape[1])
         take = np.ravel_multi_index( nar([argmin,ind]), this_r.shape)
 
-        vxc = vx.flatten()[take]
-        vyc = vy.flatten()[take]
-        vzc = vz.flatten()[take]
+        self.vxc = vx.flatten()[take]
+        self.vyc = vy.flatten()[take]
+        self.vzc = vz.flatten()[take]
+        self.vcentral=np.stack([self.vxc,self.vyc,self.vzc])
 
-        self.cen_vx = self.raw_vx-vxc
-        self.cen_vy = self.raw_vy-vyc
-        self.cen_vz = self.raw_vz-vzc
+        self.cen_vx = self.raw_vx-self.vxc
+        self.cen_vy = self.raw_vy-self.vyc
+        self.cen_vz = self.raw_vz-self.vzc
         self.cen_vmag = (self.cen_vx**2+self.cen_vy**2+self.cen_vz**2)**(0.5)
 
         self.rc_vmag = self.rx_hat*self.cen_vx+\
