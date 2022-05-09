@@ -220,6 +220,16 @@ class core_looper2():
             self.snaps[frame] = this_snap # not a weak ref, needs to persist.weakref.proxy(this_snap)
         return this_snap
 
+    def read_targets_only(self,target_fname):
+        import mountain_top
+        if self.targets is None:
+            self.targets = {}
+        h5ptr = h5py.File(target_fname,'r')
+        for group_name in h5ptr:
+            core_id = h5ptr[group_name]['peak_id'][()]
+            #read from disk
+            self.targets[core_id] = mountain_top.target_info(h5ptr=h5ptr[group_name])
+        
     #reload(mountain_top)
     def read_targets(self,target_fname):
         import mountain_top
