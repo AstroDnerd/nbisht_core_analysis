@@ -7,6 +7,10 @@ color.update({'u401':'r','u402':'g','u403':'b'})
 color.update({'u501':'r','u502':'g','u503':'b'})
 color.update({'u601':'r','u602':'g','u603':'b'})
 
+mean_field={'u05':11.21, 'u10':3.545, 'u11':1.121}
+mean_field.update({'u501':11.21, 'u502':3.545, 'u503':1.121})
+mean_field.update({'u601':11.21, 'u602':3.545, 'u603':1.121})
+
 #temporary definition, should be redudnant to davetools.
 class rainbow_map():
     def __init__(self,n, cmap='jet'):
