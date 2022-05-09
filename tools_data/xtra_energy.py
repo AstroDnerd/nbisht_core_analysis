@@ -53,21 +53,21 @@ def add_energies(obj):
             gx =data.ds.arr(grad(data,YT_potential_field,0),'code_length/code_time**2')
             gy =data.ds.arr(grad(data,YT_potential_field,1),'code_length/code_time**2')
             gz =data.ds.arr(grad(data,YT_potential_field,2),'code_length/code_time**2')
-            alpha = 1./data.ds['GravitationalConstant'] #=1/4 pi G
+            alpha = 1./(2*data.ds['GravitationalConstant']) #=1/8 pi G)
             alpha = data.ds.quan(alpha, '1/(code_length**3/code_time**2/code_mass)')
             return ( -(gx**2+gy**2+gz**2)*alpha )
         obj.add_field(YT_grav_energy,grav_energy,validators=[yt.ValidateGridType()],
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
         def abs_grav_energy(field,data):
-            return np.abs( data['grav_energy'] )
+            return np.abs( data[YT_grav_energy] )
         obj.add_field(YT_abs_grav_energy,abs_grav_energy,validators=[yt.ValidateSpatial(1,'PotentialField')],
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
     def therm_energy(field,data):
         sound_speed = data.ds.quan(1.,'code_velocity')
         rho_0 = data.ds.quan(1.,'code_mass/code_length**2')
-        e = sound_speed**2*np.log( data['density']/rho_0)
-        therme = data['density']*e
+        e = sound_speed**2*np.log( data[YT_density]/rho_0)
+        therme = data[YT_density]*e
         return therme
     obj.add_field(YT_therm_energy,therm_energy,
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
