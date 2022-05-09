@@ -41,7 +41,7 @@ class product():
             """
     def __init__(self, name="P", regexp=None,myglob="glob",
                  parameters=['core_id','frame'],style='single',width=200,
-                 fname=None,field=None,number_format="%0.2e"):
+                 fname=None,field=None,number_format="%0.2e", data_dir=None,link_dir=None):
         if regexp is not None:
             self.regexp=re.compile(regexp)
             self.re_string=regexp
@@ -51,6 +51,8 @@ class product():
         self.style=style
         self.field=field
         self.fname=fname
+        self.data_dir=data_dir
+        self.link_dir=link_dir
         if style=='single':
             self.render = self.single_render
         elif style == 'core_id':
@@ -80,17 +82,24 @@ class product():
         print(self.myglob)
         print(file_list)
 
-    def get_frames(self):
-        dirname = os.path.dirname(self.re_string)
+    def get_frames(self,verbose=False):
+        data_path = self.data_dir+"/"+self.re_string
+        dirname = os.path.dirname(data_path)
         file_list = glob.glob(dirname+"/*")
+        icut = len(self.data_dir)
         for fname in file_list:
-            match = self.regexp.match(fname)
+            short_name = fname[icut:]
+            link_name = self.link_dir+"/"+short_name
+            match = self.regexp.match(short_name)
             if match is None:
                 continue
             mygroups = match.groups()
             params = dict(zip(self.parameters,mygroups))
             core_id = int(params['core_id'])
-            myplot = plot(fname,params)
+            #trim off leading /
+            while link_name[0]=="/":
+                link_name=link_name[1:]
+            myplot = plot(link_name,params)
             self.plots[core_id].append(myplot)
 #       if len(self.parameters) > 1 and len(self.plots[core_id]) > 1:
 #           for p in self.parameters:
