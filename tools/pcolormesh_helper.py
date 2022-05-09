@@ -1,12 +1,21 @@
 from starter1 import *
 
 
-def helper(h,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None, **pcolormesh_args):
+def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=True, **pcolormesh_args):
     #takes the output of np.histogram2d (or any other 2d histogram)
     #xbins is 1 larger than h.size[0].
 
     xbins = xbins_in+0
     ybins = ybins_in+0
+    h=h_in+0
+
+    if transpose:
+        h = h.transpose()
+        temp = xbins.transpose()
+        xbins=ybins.transpose()
+        ybins=temp
+
+
     if xbins.size > h.shape[0]:
         xbins = 0.5*(xbins[1:] + xbins[:-1])
         ybins = 0.5*(ybins[1:] + ybins[:-1])
