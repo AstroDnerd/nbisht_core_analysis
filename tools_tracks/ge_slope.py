@@ -12,6 +12,8 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
 
     ge_array=[]
     gmm_array=[]
+    alpha_rho=[]
+    alpha_gd=[]
     frame = this_looper.target_frame
     for core_id in core_list:
         print('Potential %s %d'%(this_looper.sim_name,core_id))
@@ -122,6 +124,7 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
                     return q*x+r0
                 popt, pcov=curve_fit(plain_powerlaw, np.log10(rok), np.log10(GE[ok_fit]))
                 GE_fit_line=10**plain_powerlaw(np.log10(rok), *popt)
+                alpha_gd.append(popt[0])
 
             if 1:
                 #Fit density
@@ -166,14 +169,6 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
                     phi_del_squ_analy = (4*np.pi*G*rho0*R_KEEP**(-alpha)*(alpha+2)/(alpha+3))**2*rok**power
                     ax0.plot( rok, phi_del_squ_analy ,c='g')
 
-                    ratio=GE_fit_line/phi_del_squ_analy
-                    #print(phi_del_squ_analy)
-                    fig3,ax3=plt.subplots(1,1)
-                    ax3.scatter(GE_fit_line,phi_del_squ_analy/GE_fit_line,c='k')
-                    #axbonk(ax3,xscale='log',yscale='log',xlabel='GE',ylabel='d')
-                    fig3.savefig('plots_to_sort/ratio.png')
-                    #print('poot',(ratio).mean(), ratio.std())
-
                 if 0:
                     #works pretty well
                     M = sp['cell_mass'].sum()
@@ -205,20 +200,22 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
             print(outname)
     return ge_array,gmm_array
 
-if 'ge' not in dir() or True:
-    for sim in TL.loops:
-        if sim != 'u501':
-            continue
+if 'stuff' not in dir():
+    for sim in ['u503']:
+        stuff={}
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
         core_list=list(all_cores)
-        core_list=[323]
-        ge,gmm=plot_phi( TL.loops[sim],core_list=core_list, do_plots=True)
+        core_list=None
+        ge,gmm=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
+        stuff[sim]=ge,gmm
 
-fig,ax=plt.subplots(1,2)
-ax0=ax[0];ax1=ax[1]
-ax0.scatter(ge,gmm)
-ax1.scatter(ge,nar(gmm)/nar(ge))
-ax0.plot(ge,ge)
-axbonk(ax0,xlabel='GE',ylabel='GMM/R',xscale='log',yscale='log')
-axbonk(ax1,xlabel='GE',ylabel='GMM/R/GE', xscale='log')
-fig.savefig('plots_to_sort/masses')
+for sim in stuff:
+    ge,gmm=stuff[sim]
+    fig,ax=plt.subplots(1,2)
+    ax0=ax[0];ax1=ax[1]
+    ax0.scatter(ge,gmm)
+    ax1.scatter(ge,nar(gmm)/nar(ge))
+    ax0.plot(ge,ge)
+    axbonk(ax0,xlabel='GE',ylabel='GMM/R',xscale='log',yscale='log')
+    axbonk(ax1,xlabel='GE',ylabel='GMM/R/GE', xscale='log')
+    fig.savefig('plots_to_sort/masses_%s'%sim)
