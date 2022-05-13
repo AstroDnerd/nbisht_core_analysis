@@ -235,17 +235,23 @@ class BRho_tool():
                 if 1:
                     if core_id == core_list[-1]:
                         if name == 'u601':
-                            meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
+                            #meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
+                            # the following is B_z
+                            meanbear = [0.193,0.057,0.530,0.484,0.384,0.247,0.454,0.173,-0.031,0.013,0.032,0.122,0.389,0.521]
                             fitbear = [0.037122767966842135,0.06130065264472109,0.10876453322815462,0.12037348290995548,0.1256151386016793,0.12584476500389483,\
                                        0.12960541113191903,0.14452750478517815,0.16035081563879608,0.17350352881649694,0.20320963091004954,0.22354626336366118,\
                                        0.27401985393584366,0.3323051356106275]
                         if name == 'u602':
-                            meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+                            #meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+                            # the following is B_z
+                            meanbear = [0.224,0.107,0.032,0.518,0.673,0.496,0.578,0.385,0.231,0.247,0.285,0.339,0.532]
                             fitbear = [0.15059829575793074,0.19999384737531586,0.24022574462120863,0.27614753632431754,0.27614753632431754,0.29332289603778755,\
                                        0.3097313041491559,0.30801461152950443,0.31782695369769487,0.3358170167076137,0.3148400500596815,0.28845754861915246,\
                                        0.41477394063271383]
                         if name == 'u603': 
-                            meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
+                            #meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
+                            # the following is B_z
+                            meanbear = [0.540,0.433,0.519,0.700,0.452,0.558,0.317,0.220,0.114,0.242,0.141,0.684]
                             fitbear = [0.22829863399090444,0.3185318136356117,0.37526692580639975,0.40111503807258014,0.40640704584839654,0.38681096100128876,\
                                        0.38332517520463627,0.39490446738439916,0.371243675696434,0.3321847915857663,0.32833900753678574,0.3893047090450924]
                         self.bear0 = np.append(self.bear0,(meanbear[0],fitbear[0]))
@@ -337,14 +343,16 @@ class BRho_tool():
  
             # FIELDS
             density = thtr.c([core_id],'density') 
-            magfield = thtr.c([core_id],'magnetic_field_strength')
+            #magfield = thtr.c([core_id],'magnetic_field_strength')  #EDITED FOR Z COMPONENT ONLY!!
+            magfield_sign = thtr.c([core_id],'magnetic_field_z') 
+            magfield = abs(magfield_sign)   
+
             magden = magfield/density
             cv = thtr.c([core_id],'cell_volume')  
  
             if name != 'u601': 
                 B_x = thtr.c([core_id],'magnetic_field_x')  
                 B_y = thtr.c([core_id],'magnetic_field_y')
-                B_z = thtr.c([core_id],'magnetic_field_z')
                 v_x = thtr.c([core_id],'velocity_x')
                 v_y = thtr.c([core_id],'velocity_y')
                 v_z = thtr.c([core_id],'velocity_z') 
@@ -894,7 +902,7 @@ def axisforbox(theAx=None):
 
         # TYPE OF PLOT: 'scatter_plot' OR 'frame_scatters' 
         # OR 'box_plot' OR 'vio_plot'? OR 'rms_plot' OR 'histogram'
-        which_plot = 'vio_plot' 
+        which_plot = 'box_plot' 
         # ALL TIME: 'all_time', OR PER FRAME: 'per_frame'?
         which_time = 'per_frame'
 
@@ -965,10 +973,10 @@ def axisforbox(theAx=None):
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME or as in box-vios
             fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-        if 0: 
+        if 1: 
             # CALL BOXPLOTS  
             tool.boxes(nt,simnames[nt],tff_labels,theAx)
-        if 1: 
+        if 0: 
             # CALL VIOLINPLOTS              
             tool.violins(nt,simnames[nt],tff_labels,theAx)
         if 0: 

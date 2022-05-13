@@ -68,7 +68,7 @@ class telescope():
             self.synthRho[nc] =(the_Cyl['density'] * the_Cyl['cell_volume']).sum()/cv  
 
             # PROJECTIONS
-            if 1:
+            if 0:
                 proj = ds.proj(('gas','density'),0,data_source = the_Cyl)  #EDIT
                 pw = proj.to_pw(center=the_center,origin='domain')  #EDIT
                 #pw.annotate_these_particles4(1.0) 

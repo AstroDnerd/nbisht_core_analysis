@@ -22,7 +22,10 @@ class magfield_density_tool():
         
         self.mean_field_comps=defaultdict(list) 
         self.mean_field_comps_py=defaultdict(list) 
-        
+        self.mean_field_x=defaultdict(list)
+        self.mean_field_y=defaultdict(list)
+        self.mean_field_z=defaultdict(list)
+
         self.mean_fieldOverRho = defaultdict(list) 
         self.mean_fieldOverRhoCheck = defaultdict(list) 
         self.mean_fieldOverRhoLogged = defaultdict(list)
@@ -124,8 +127,13 @@ class magfield_density_tool():
 
                 # GETTING THE AVERAGES
                 self.angle_mean[core_id].append(mean_cos_theta) 
+
                 self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())
+                self.mean_field_x[core_id].append((bx * cell_volume).sum()/cell_volume.sum())
+                self.mean_field_y[core_id].append((by * cell_volume).sum()/cell_volume.sum())
+                self.mean_field_z[core_id].append((bz * cell_volume).sum()/cell_volume.sum())
                 #self.mean_field_comps_py[core_id].append(bb.mean())  
+
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
                 #self.mean_rho_py[core_id].append(density.mean())  
                 self.mean_cv[core_id].append((cell_volume * cell_volume).sum()/(cell_volume.sum()))  #does this make sense to do...
@@ -322,7 +330,7 @@ if 1:
     # TO PLOT FIGUERS OF ALL THREE SIMS AT ONCE
     #fig0, ax0=plt.subplots(1,1) 
 
-    for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
+    for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):   
         # SET UP THE VARIABLE
         G=1620./(4*np.pi)
         tff_global = np.sqrt(3*np.pi/(32*G*1))
@@ -333,6 +341,9 @@ if 1:
 
         rhos = np.zeros([ntimes,ncores]) 
         fields = np.zeros([ntimes,ncores])
+        fields_x = np.zeros([ntimes,ncores])
+        fields_y = np.zeros([ntimes,ncores])
+        fields_z = np.zeros([ntimes,ncores])
         fieldOvers = np.zeros([ntimes,ncores])
         fieldOversCheck = np.zeros([ntimes,ncores])
         fieldOversLog = np.zeros([ntimes,ncores])
@@ -347,9 +358,10 @@ if 1:
         # SINGLE PANEL 
         if 0:
             fig, ax1=plt.subplots(1,1) 
+            fig0, ax0=plt.subplots(1,1)
 
         # OR MULTIPLE PANEL
-        if 1:
+        if 0:
             fig = plt.figure()
             #fig.text(0.365,0.03,r'$\rho/\rho_{o}$')
 
@@ -376,7 +388,7 @@ if 1:
                 lplots = [0,ax1,ax2,ax3,ax4,ax5,ax6,ax7,0,ax8,ax9,0] 
 
 
-        if 0:  # IF DOING <B> vs <n> BY FRAME, SINGLE PANEL
+        if 1:  # IF DOING <B> vs <n> BY FRAME, SINGLE PANEL
             fig2,ax2 = plt.subplots(1,1) 
             fig3,ax3 = plt.subplots(1,1) 
             fig4,ax4 = plt.subplots(1,1) 
@@ -405,19 +417,41 @@ if 1:
 
         the_v = np.empty([0],dtype=float)
         the_w = np.empty([0],dtype=float)
+
         the_x = np.empty([0],dtype=float)
         the_sxx = np.empty([0],dtype=float)
         the_a = np.empty([0],dtype=float)
+        
         the_y = np.empty([0],dtype=float)
         the_syy = np.empty([0],dtype=float)
         the_b = np.empty([0],dtype=float)
+
+        the_yx = np.empty([0],dtype=float)
+        the_syxx = np.empty([0],dtype=float)
+        the_c = np.empty([0],dtype=float)
+
+        the_yl = np.empty([0],dtype=float)
+        the_syll = np.empty([0],dtype=float)
+        the_d = np.empty([0],dtype=float)
+
+        the_yz = np.empty([0],dtype=float)
+        the_yzs = np.empty([0],dtype=float)
+        the_syzz = np.empty([0],dtype=float)
+        the_syzzs = np.empty([0],dtype=float)
+        the_e = np.empty([0],dtype=float)
+       
+
         the_z = np.empty([0],dtype=float) 
         the_cv = np.empty([0],dtype=float) 
-
+ 
+        print('new sim')
         # MAKE THE FIELDS INTO A 2D ARRAY WE CAN PLOT
         for ncore,core_id in enumerate(tool.cores_used):
             this_rho = tool.mean_rho[core_id] 
             this_field = tool.mean_field_comps[core_id] 
+            this_field_x = tool.mean_field_x[core_id]
+            this_field_y = tool.mean_field_y[core_id]
+            this_field_z = tool.mean_field_z[core_id]
 
             this_BRho = tool.mean_fieldOverRho[core_id]
             this_BRhoCheck = tool.mean_fieldOverRhoCheck[core_id]
@@ -427,18 +461,22 @@ if 1:
              
             this_alphaS = tool.alphaSum[core_id]
             this_alphaP = tool.alphaProd[core_id]
-
-            rhos[:,ncore]= this_rho  # was np.log10()
+            
+            # passing the tool to the initiated field of zeros
+            rhos[:,ncore]= this_rho 
             fields[:,ncore]= this_field
+            fields_x[:,ncore]=this_field_x
+            fields_y[:,ncore]=this_field_y
+            fields_z[:,ncore]=this_field_z
             fieldOvers[:,ncore]= this_BRho
             fieldOversCheck[:,ncore]= this_BRhoCheck
             fieldOversLog[:,ncore] = this_BRhoLog
             angles[:,ncore]= np.arccos(this_ang)*180/np.pi
             cvs[:,ncore]= this_cv
-
-            # is this redundant?
             alphaS[:,ncore] = this_alphaS
             alphaP[:,ncore] = this_alphaP
+
+            # passing it back to the original name
             this_alphaS = alphaS[:,ncore]
             this_alphaP = alphaP[:,ncore]
 
@@ -453,12 +491,33 @@ if 1:
             the_bb = this_field
             the_y= np.append(the_y,the_yy)  
             the_b= np.append(the_b,the_bb)  
+            
+            this_field_x = abs(fields_x[:,ncore])  
+            the_yxx = np.log10(this_field_x)
+            the_cc = this_field_x
+            the_yx =np.append(the_yx,the_yxx) 
+            the_c = np.append(the_c,the_cc)
+            
+            this_field_y = abs(fields_y[:,ncore])  
+            the_yll = np.log10(this_field_y)
+            the_dd = this_field_y
+            the_yl =np.append(the_yl,the_yll) 
+            the_d = np.append(the_d,the_dd)
+
+            this_field_z = abs(fields_z[:,ncore])  
+            this_field_zz = fields_z[:,ncore]  
+            the_yzz = np.log10(this_field_z)
+            the_yzzs = np.log10(this_field_zz)
+            the_ee = this_field_z
+            the_yz =np.append(the_yz,the_yzz) 
+            the_yzs =np.append(the_yzs,the_yzzs) 
+
+            the_e = np.append(the_e,the_ee)
           
             the_fieldOvRho = this_field/this_rho
             the_zz = np.log10(the_fieldOvRho)
             the_z = np.append(the_z,the_zz)
             
-            # other combinations...
             this_BRho = fieldOvers[:,ncore]
             the_vv = np.log10(this_BRho)
             the_v= np.append(the_w,the_vv)  
@@ -472,17 +531,28 @@ if 1:
       
 
             if 0: # FOR ALL TIME
-                tmap = rainbow_map(len(this_rho[:-1]))
-                ctr = [tmap(n) for n in range(len(this_rho[:-1]))]
-                ax1.scatter(this_rho[:-1], this_field[:-1],c=ctr,marker='*')  
+                tmap = rainbow_map(len(this_rho))  #used to be[:-1]
+                ctr = [tmap(n) for n in range(len(this_rho))]  #used to be[:-1]
+                ax1.scatter(this_field, this_field_z,c=ctr,marker='*')  
+                this_field = this_field_z
+                ax1.plot(this_field,this_field_z,linestyle='dashed')
+                #ax1.scatter(this_rho[:-1], this_field[:-1],c=ctr,marker='*')  
                 #ax1.scatter(this_rho[0], this_field[0],c='b',marker='*')  
                 #ax1.scatter(this_rho[-1], this_field[-1],c='r',marker='*')  
                 #ax1.plot(this_rho,this_field,c=[0.5]*4)
+                ax1.set_xlabel(r'$B_avg$')
+                ax1.set_ylabel(r'$B_avgz$')
+                ax1.set_xscale('log')
+                ax1.set_yscale('log')
+                if 0: # IF NOT PLOTTING POWER LAW
+                    outname_all='BzBTracks_%s'%simnames[nt]
+                    fig.savefig(outname_all)
+                    print("saved")
 
-            if 0: # FOR ONE FRAME PER TIME; SINGLE PANEL 
-                xlims = 0.4,1.8
-                ylims = 0.0,5.0
-                for i in range(len(axplts)):
+            if 1: # FOR ONE FRAME PER TIME; SINGLE PANEL 
+                #xlims = 0.4,1.8
+                #ylims = 0.0,5.0
+                for i in range(len(axplts)): 
                     if 1:
                         if nt == 0:
                             color = 'r'
@@ -490,28 +560,37 @@ if 1:
                             color = 'b'
                         if nt == 2:
                             color = 'g'
+                    if 0:
                         axplts[i].scatter(this_alphaS[i],this_alphaP[i],c=color,marker='*')
                         outname_frame='AlphaSP_%s_%d'%(simnames[nt],i)
                         magfield_density_tool.labelled(axplts[i],xscale=None,yscale=None,xlabel='Sum',ylabel='Product',\
                                                        title=None, xlim=xlims,ylim=ylims)
-                    if 0:
-                        axplts[i].scatter(this_rho[i],this_field[i],c='g',marker='*')
-                        axplts[i].scatter(this_rho[i],the_zz[i],c='g',alpha=0.2)
-                        magfield_density_tool.labelled(axplts[i],xscale=None,yscale=None,xlabel=r'$\rho$',ylabel=r'$log(B/ \rho)$',\
-                                                       title=None, xlim=None,ylim=None)
-                        outname_frame='Scatter_LogBRhovsRho_%s_%d'%(simnames[nt],i)
-                    figs[i].savefig(outname_frame)
+                    if 1:
+                        axplts[i].scatter(this_field[i],this_field_x[i],c=color,marker='*',alpha=0.4)
+                        #axplts[i].scatter(this_rho[i],this_field[i],c=color,marker='*',alpha=0.4)
+                        #axplts[i].scatter(this_rho[i],this_field_x[i],c='k',marker='x',alpha=0.4)
+                        #axplts[i].scatter(this_rho[i],this_field_y[i],c='k',marker='1',alpha=0.4)
+                        #axplts[i].scatter(this_rho[i],this_field_z[i],c='k',marker='*',alpha=0.4)
+                        #axplts[i].scatter(this_rho[i],the_zz[i],c='g',alpha=0.2)
+
+                        # IF PLOTTING THE POWER LAW, we can comment this out
+                        #magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$\rho$',ylabel=r'$Bz$',\
+                        #                               title=None, xlim=xlims,ylim=ylims)
+                        #outname_frame='Scatter_LogBzvsRho_%s_%d'%(simnames[nt],i)
+                    #figs[i].savefig(outname_frame)
                     #print("saved")
                 
 
-            if 1:  #for all extents I should combine these next ones with the extents in main definition
+            if 0:  #for all extents I should combine these next ones with the extents in main definition
                    #maybe include under the next switch
                 rho_extents=davetools.extents()
                 rho_extents(the_a)
                 magfield_extents = davetools.extents()
                 magfield_extents(the_b)
+                magfieldz_extents = davetools.extents()
+                magfieldz_extents(the_c)
 
-            if 1: # FOR ONE FRAME PER TIME; MULTIPLE PANEL ..in progress: I think it will be best if I end up moving this to the next if statement.
+            if 0: # FOR ONE FRAME PER TIME; MULTIPLE PANEL ..in progress: I think it will be best if I end up moving this to the next if statement.
                 tmap2 = rainbow_map(len(this_rho))
                 c2 = [tmap2(n) for n in range(len(this_rho))]  
                 for i in range(len(this_rho)):
@@ -528,71 +607,119 @@ if 1:
                         ax8.tick_params(axis='y',labelleft=False)
                         ax8.set_xlabel(r'$\left\langle \rho/\rho_{o} \right\rangle$')
                         ax9.tick_params(axis='y',labelleft=False)
+
+        print('max this_field_z',max(the_c))
+        print('min this_field_z',min(the_c))
         if 0:
             plt.close(figs[i])
 
         the_w = the_y/the_x
+
+        salpha_r = np.empty([0],dtype=float)
+        salpha_xr = np.empty([0],dtype=float)
+        salpha_yr = np.empty([0],dtype=float)
+        salpha_zr = np.empty([0],dtype=float) 
         if 1:
             # PLOT THE POWER LAW: per frame 
             numcores = len(the_x)/ncores 
             coreint = int(numcores)
             for i in range(coreint): 
-                #print('i in range(coreint)',i) 
-                #print('coreint',coreint) 
                 the_sx = the_x[i::coreint]
                 the_sy = the_y[i::coreint]
+                the_syx = the_yx[i::coreint]
+                the_syl = the_yl[i::coreint]
+                the_syz = the_yz[i::coreint]
+                the_syzs = the_yzs[i::coreint]  #BZ SIGNED
                 the_sz = the_z[i::coreint] 
                 the_sw = the_w[i::coreint] 
                 the_cvs = the_cv[i::coreint]
 
                 # for power law for all time minus the last frame 
                 minusone = coreint-1
-                if i < minusone: 
+                if i < minusone:  #for ALL frames 
                     the_sxx= np.append(the_sxx,the_sx)   
-                    the_syy= np.append(the_syy,the_sy)   
+                    the_syy= np.append(the_syy,the_sy) 
+                    the_syzz= np.append(the_syzz,the_syz)
+                    the_syzzs = np.append(the_syzzs,the_syzs)  
 
-                sX = np.linspace(the_sx.min(),the_sx.max(),num=len(the_sx))  #short: -2, +3   
+                #sX = np.linspace(the_sx.min(),the_sx.max(),num=len(the_sx))  #short: -2, +3   
+                sX = np.linspace(the_sy.min(),the_sy.max(),num=len(the_sy))  #short: -2, +3   
 
-                spfit = np.polyfit(the_sx,the_sy,1)
+                spfit = np.polyfit(the_sy,the_syx,1)
+                #spfit = np.polyfit(the_sy,the_syl,1)
+                #spfit = np.polyfit(the_sy,the_syz,1)
+                #spfit = np.polyfit(the_sx,the_sy,1)
+                spfit_x = np.polyfit(the_sx,the_syx,1)
+                spfit_y = np.polyfit(the_sx,the_syl,1)
+                spfit_z = np.polyfit(the_sx,the_syz,1)
                 salpha = spfit[0]
-                sBavg_o = spfit[1]
-                
+                salpha_x = spfit_x[0]
+                salpha_y = spfit_y[0]
+                salpha_z = spfit_z[0]
+                salpha_r = np.append(salpha_r,salpha)
+                salpha_xr = np.append(salpha_xr,salpha_x)
+                salpha_yr = np.append(salpha_yr,salpha_y)
+                salpha_zr = np.append(salpha_zr,salpha_z)
+
                 # pearsonR
-                xs = np.std(the_sx)
-                ys = np.std(the_sy)
-                if xs != 0 and ys != 0:
-                    pearX,pearY = scipy.stats.pearsonr(the_sx,the_sy)
-                    #print('pearX',pearX)
-                else:
-                    print("A zero encountered!!",xs,ys)
+                if 1:
+                    xs = np.std(the_sx)
+                    #ys = np.std(the_sy)
+                    ys = np.std(the_syz)
+                    if xs != 0 and ys != 0:
+                        #pearX,pearY = scipy.stats.pearsonr(the_sx,the_sy)
+                        pearX,pearY = scipy.stats.pearsonr(the_sx,the_syz)
+                        #print('pearX',pearX)
+                    else:
+                        print("A zero encountered!!",xs,ys)
                 
                 if nt == 0:
                     mag_den1.alpharr1 = np.append(mag_den1.alpharr1,salpha) 
-                    mag_den1.pearr1 = np.append(mag_den1.pearr1,pearX)    
+                    #print('601 bz alpha',mag_den1.alpharr1)
+                    #mag_den1.pearr1 = np.append(mag_den1.pearr1,pearX)    
                 if nt == 1:
                     mag_den2.alpharr2 = np.append(mag_den2.alpharr2,salpha) 
-                    mag_den2.pearr2 = np.append(mag_den2.pearr2,pearX)    
+                    #print('602 bz alpha',mag_den2.alpharr2)
+                    #mag_den2.pearr2 = np.append(mag_den2.pearr2,pearX)    
                 if nt == 2:
                     mag_den3.alpharr3 = np.append(mag_den3.alpharr3,salpha) 
-                    mag_den3.pearr3 = np.append(mag_den3.pearr3,pearX)    
+                    #print('603 bz alpha',mag_den3.alpharr3)
+                    #mag_den3.pearr3 = np.append(mag_den3.pearr3,pearX)    
                
                 sXX = 10 ** sX 
                 sY = 10 ** (spfit[0]*sX + spfit[1])                
+                sYx = 10 ** (spfit_x[0]*sX + spfit_x[1])                
+                sYy = 10 ** (spfit_y[0]*sX + spfit_y[1])                
+                sYz = 10 ** (spfit_z[0]*sX + spfit_z[1])                
                 
                 # PER PANEL
                 # need x,y limits
-                if 0:
+                if 1:
+                    xlims = 1e-1,1e8
+                    ylims = 1e-2,1e4
+                    print('inside plotting the power law')
                     axplts[i].plot(sXX,sY,c='k',linewidth=1.0)
-                    magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<\rho>$',ylabel=r'$<B>$',\
-                             xlim=xlims, ylim=ylims,title=r'$\alpha = %.3f$'%salpha) 
+                    #axplts[i].plot(sXX,sY,c='k',linewidth=1.0)
+                    #axplts[i].plot(sXX,sYx,c='r',linestyle='dotted',linewidth=1.0)
+                    #axplts[i].plot(sXX,sYy,c='r',linestyle='dashdot',linewidth=1.0)
+                    #axplts[i].plot(sXX,sYz,c='r',linestyle='dashed',linewidth=1.0)
+
+                    #pdb.set_trace()  #EDITTTT   
+                    magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<B>$',ylabel=r'$<Bx>$',\
+                             xlim=xlims, ylim=ylims,title=r'$\alpha = %.3f$'%salpha)
+                    #magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<\rho>$',ylabel=r'$<B>$',\
+                    #         xlim=xlims, ylim=ylims,title=r'$\alpha = %.3f, \alpha_x = %.3f, \alpha_y = %.3f, \alpha_z = %.3f$'%(salpha,salpha_x,salpha_y,salpha_z)) 
                
-                    outname_frame='BnFrameTracks_pl_%s_%d'%(simnames[nt],i)
-                    #figs[i].savefig(outname_frame)
+                    outname_frame='Scatter_LogBxvsB_%s_%d'%(simnames[nt],i)
+                    #outname_frame='Scatter_LogBxyz3dvsRho_%s_%d'%(simnames[nt],i)
+                    #outname_frame='Scatter_LogBzvsRho_%s_%d'%(simnames[nt],i)
+                    figs[i].savefig(outname_frame)
                     print("saved ",i)
-                    plt.close('all')
+                    plt.close(figs[i])
+
 
                 # MULTIPLE PANELS:
-                if 1: 
+                if 0: 
                     if i in frames:
                         lplots[i].plot(sXX,sY,c='k',linewidth=1.0)
 
@@ -641,8 +768,8 @@ if 1:
                     print("saved")
              
 
-        # SAVE THE MULTIPLE PANELS WITH THEIR LEAST SQUARE FIT
-        if 1: 
+        if 0: 
+            # SAVE THE MULTIPLE PANELS WITH THEIR LEAST SQUARE FIT
             outname = 'brhotffpanels_avgs_%s'%(simnames[nt])
             plt.savefig(outname)
             print("saved")
@@ -657,8 +784,9 @@ if 1:
             alphaFile.close()
 
         if 0:
-            # PLOT THE POWER LAW: all frames 
-            pfit = np.polyfit(the_sxx,the_syy,1)
+            # PLOT THE POWER LAW: all time 
+            #pfit = np.polyfit(the_sxx,the_syy,1)  #B VS RHO
+            pfit = np.polyfit(the_syy,the_syzz,1)  #BZsigned VS B
             alpha = pfit[0]
             Bavg_o = pfit[1]
             # AND THE PEARSON R
@@ -671,57 +799,136 @@ if 1:
             print('pearX_%s'%simnames[nt])
             print(pearX)
 
-            X = np.linspace(the_sxx.min(),the_sxx.max(),num=len(the_sxx))  #short: +2, -3   
+            #X = np.linspace(the_sxx.min(),the_sxx.max(),num=len(the_sxx))  #short: +2, -3   
+            X = np.linspace(the_syy.min(),the_syy.max(),num=len(the_syy))  #short: +2, -3   
             XX = 10 ** X
             Y = 10 ** (pfit[0]*X + pfit[1])                
             
-            if 0:
+            if 1:
                 ax1.plot(XX,Y,c='k',linewidth=1.0)
-                xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
-                ylabels = r'$\left\langle\mid B \mid\right\rangle$'
-                xlims = 1e-1,1e8
-                ylims = 1e0,1e4
-                magfield_density_tool.labelled(ax1,xscale='log',yscale='log',xlabel=xlabels,ylabel=ylabels,\
-                         xlim=xlims, ylim=ylims)#,title=r'$\alpha = %.3f$'%alpha)
+                if 1: # ORGANIZE YOUR PLOTTINGS!
+                    #xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
+                    #ylabels = r'$\left\langle\mid B \mid\right\rangle$'
+                    #xlims = 1e-1,1e8
+                    #ylims = 1e0,1e4
+                    ax1.set_title(r'$m = %.3f$'%alpha)
+                    #magfield_density_tool.labelled(ax1,xscale='log',yscale='log',xlabel=xlabels,ylabel=ylabels,\
+                    #         xlim=xlims, ylim=ylims)#,title=r'$\alpha = %.3f$'%alpha)
 
-                outname_all='BnTracks_pl_mone_%s'%simnames[nt]
+                #outname_all='BnTracks_pl_mone_%s'%simnames[nt]
+                outname_all='BzBTracks_%s'%simnames[nt]
                 fig.savefig(outname_all)
                 print("saved")
 
 
         # !!FOR LATER... #a tool for colors (tools/colors.py)!!! also look at make_core_cmap
+        # PLOT ALL ALPHA COMPS VS TIME
         if 0:  
             outname = 'alphaPerFrame'  #swap order with below if for allCores
             outname = 'alphaPerFrame_allData'  #and comment next one out
             outname = 'alphaRecords'
             outname = 'pearRecords'
+            outname = 'alpha_xyz3d_%s'%simnames[nt]
+            outname_o = 'alphaxyz_vs_3d_scatt_%s'%simnames[nt]
             if nt == 0:
                 therange = np.arange(0,1,0.075)
                 #ax0.plot(therange, mag_den1.alpharr1_ad, c='g')                
                 #ax0.plot(therange, mag_den1.alpharr1, c='g',linestyle='dashed')                
-                ax0.plot(therange, mag_den1.pearr1, c='g',linestyle='dashed')                
+                #ax0.plot(therange, mag_den1.pearr1, c='g',linestyle='dashed')                
+                ax1.plot(therange, salpha_r, c='k')                  
+                ax1.plot(therange, salpha_xr, c='g',linestyle='dashed')
+                ax1.plot(therange, salpha_yr, c='b',linestyle='dashed')
+                ax1.plot(therange, salpha_zr, c='r',linestyle='dashed')
+
+                ax0.plot(salpha_r,salpha_xr, c='g')                  
+                ax0.plot(salpha_r,salpha_yr, c='b')                  
+                ax0.plot(salpha_r,salpha_zr, c='r')                  
+                ax0.scatter(salpha_r[2],salpha_xr[2], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[3],salpha_xr[3], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_xr[8], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[2],salpha_yr[2], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[3],salpha_yr[3], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_yr[8], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[2],salpha_zr[2], c='r',alpha=0.4)                  
+                ax0.scatter(salpha_r[3],salpha_zr[3], c='r',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_zr[8], c='r',alpha=0.4)                  
+                #ax0.plot(salpha_xr,salpha_yr, c='k')                  
+
             if nt == 1:
                 therange = np.arange(0,1,0.075) 
+                salpha_r = np.append(salpha_r,[np.nan]*1)
+                salpha_xr = np.append(salpha_xr,[np.nan]*1)
+                salpha_yr = np.append(salpha_yr,[np.nan]*1)
+                salpha_zr = np.append(salpha_zr,[np.nan]*1)
                 #mag_den2.alpharr2 = np.append(mag_den2.alpharr2,[np.nan]*1) 
                 #mag_den2.alpharr2_ad = np.append(mag_den2.alpharr2_ad,[np.nan]*1) 
-                mag_den2.pearr2 = np.append(mag_den2.pearr2,[np.nan]*1) 
+                #mag_den2.pearr2 = np.append(mag_den2.pearr2,[np.nan]*1) 
                 #ax0.plot(therange, mag_den2.alpharr2_ad, c='b')
                 #ax0.plot(therange, mag_den2.alpharr2, c='b',linestyle='dashed')
-                ax0.plot(therange, mag_den2.pearr2, c='b',linestyle='dashed')
+                #ax0.plot(therange, mag_den2.pearr2, c='b',linestyle='dashed')
+                ax1.plot(therange, salpha_r, c='k')
+                ax1.plot(therange, salpha_xr, c='g',linestyle='dashed')
+                ax1.plot(therange, salpha_yr, c='b',linestyle='dashed')
+                ax1.plot(therange, salpha_zr, c='r',linestyle='dashed')
+
+                ax0.plot(salpha_r,salpha_xr, c='g')                  
+                ax0.plot(salpha_r,salpha_yr, c='b')                  
+                ax0.plot(salpha_r,salpha_zr, c='r')                  
+                ax0.scatter(salpha_r[3],salpha_xr[3], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_xr[8], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[3],salpha_yr[3], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_yr[8], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[3],salpha_zr[3], c='r',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_zr[8], c='r',alpha=0.4)                  
+                #ax0.plot(salpha_xr,salpha_yr, c='k')                  
+
             if nt == 2:
                 therange = np.arange(0,1,0.075) 
+                salpha_r = np.append(salpha_r,[np.nan]*2)
+                salpha_xr = np.append(salpha_xr,[np.nan]*2)
+                salpha_yr = np.append(salpha_yr,[np.nan]*2)
+                salpha_zr = np.append(salpha_zr,[np.nan]*2)
                 #mag_den3.alpharr3 = np.append(mag_den3.alpharr3,[np.nan]*2) 
                 #mag_den3.alpharr3_ad = np.append(mag_den3.alpharr3_ad,[np.nan]*2) 
-                mag_den3.pearr3 = np.append(mag_den3.pearr3,[np.nan]*2) 
+                #mag_den3.pearr3 = np.append(mag_den3.pearr3,[np.nan]*2) 
                 #ax0.plot(therange, mag_den3.alpharr3_ad, c='m')
                 #ax0.plot(therange, mag_den3.alpharr3, c='m',linestyle='dashed')
-                ax0.plot(therange, mag_den3.pearr3, c='m',linestyle='dashed')
+                #ax0.plot(therange, mag_den3.pearr3, c='m',linestyle='dashed')
+                ax1.plot(therange, salpha_r, c='k')
+                ax1.plot(therange, salpha_xr, c='g',linestyle='dashed')
+                ax1.plot(therange, salpha_yr, c='b',linestyle='dashed')
+                ax1.plot(therange, salpha_zr, c='r',linestyle='dashed')
+
+                ax0.plot(salpha_r,salpha_xr, c='g')                  
+                ax0.plot(salpha_r,salpha_yr, c='b')                  
+                ax0.plot(salpha_r,salpha_zr, c='r')                  
+                ax0.scatter(salpha_r[2],salpha_xr[2], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[5],salpha_xr[5], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_xr[8], c='g',alpha=0.4)                  
+                ax0.scatter(salpha_r[2],salpha_yr[2], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[5],salpha_yr[5], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_yr[8], c='b',alpha=0.4)                  
+                ax0.scatter(salpha_r[2],salpha_zr[2], c='r',alpha=0.4)                  
+                ax0.scatter(salpha_r[5],salpha_zr[5], c='r',alpha=0.4)                  
+                ax0.scatter(salpha_r[8],salpha_zr[8], c='r',alpha=0.4)                  
+                #ax0.plot(salpha_xr,salpha_yr, c='k')                  
                 
-                ax0.set_xlabel(r'$t_{\rm{ff}}$')
-                #ax0.set_ylabel(r'$\alpha_{B\rho}$')
-                ax0.set_ylabel(r'$R_{B\rho}$')
-                ax0.set_ylim(-.1,1.0)
-                #mag_den3.labelled(ax0,xlabel=r'$t_{\rm{ff}}$',ylabel=r'$R_{B\rho}$',ylim=ylim,title=None) 
+            ax1.set_xlabel(r'$t/t_{\rm{ff}}$')
+            #ax0.set_ylabel(r'$\alpha_{B\rho}$')
+            #ax0.set_ylabel(r'$R_{B\rho}$')
+            ax1.set_ylabel(r'$\alpha,\alpha_x,\alpha_y,\alpha_z$')
+            #ax0.set_ylim(-.1,1.0)
+            #mag_den3.labelled(ax0,xlabel=r'$t_{\rm{ff}}$',ylabel=r'$R_{B\rho}$',ylim=ylim,title=None) 
+            fig.savefig(outname)
+            print(outname," saved")
+            plt.close(fig)
+
+            #ax0.set_xlabel(r'$\alpha_x$')
+            ax0.set_xlabel(r'$\alpha$')
+            ax0.set_ylabel(r'$\alpha_x,\alpha_y,\alpha_z$')
+            fig0.savefig(outname_o)
+            print(outname_o," saved")
+            plt.close(fig0)
 
     if 0:
         print("calling alphaFieldDensity.py")
