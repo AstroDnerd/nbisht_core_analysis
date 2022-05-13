@@ -152,6 +152,7 @@ sims.update({'u201':sim_u201,'u202':sim_u202,'u203':sim_u203})
 sims.update({'u301':sim_u201,'u302':sim_u202,'u303':sim_u203})
 sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
 sims.update({'u601':sim_u501,'u602':sim_u502,'u603':sim_u503})
+sims.update({'u701':sim_u501,'u702':sim_u502,'u703':sim_u503})
 sims['u14']=sim_u14
 
 
@@ -170,6 +171,7 @@ peaks_u303 = 'datasets_small/u303_0107_peaklist.h5'
 peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103}
 peak_list.update( {'u201':peaks_u05,'u202':peaks_u202, 'u203':peaks_u203})
 peak_list.update( {'u301':peaks_u301,'u302':peaks_u302, 'u303':peaks_u303})
+peak_list.update( {'u701':peaks_u301,'u702':peaks_u302, 'u703':peaks_u303})
 peak_list['u14']=peaks_u14
 
 
@@ -179,6 +181,7 @@ target_frames.update({'u301':125,'u302':118,'u303':107})
 target_frames.update({'u401':125,'u402':118,'u403':107})
 target_frames.update({'u501':125,'u502':118,'u503':107})
 target_frames.update({'u601':125,'u602':118,'u603':107})
+target_frames.update({'u701':125,'u702':118,'u703':107})
 
 every_ten = {'u05':u05_every_ten,'u10':u10_every_ten,'u11':u11_every_ten, 'u101':u101_every_ten,'u102':u102_every_ten,'u103':u103_every_ten}
 every_ten.update({'u201':u201_every_ten,'u202':u202_every_ten,'u203':u203_every_ten})

@@ -4,7 +4,8 @@ import heat_map
 from scipy.optimize import curve_fit
 import colors
 reload(heat_map)
-
+import pcolormesh_helper as pch
+reload(pch)
 def b_from_rho(lnrho,slope,offset):
     return slope*lnrho+offset
 
@@ -37,6 +38,16 @@ class brho():
         self.b_array=np.zeros([len(core_list), len(tsorted)])
         self.d_array=np.zeros([len(core_list), len(tsorted)])
         self.a_array=np.zeros([len(core_list), len(tsorted)])
+        if plot:
+            ds = this_looper.load(frame)
+            ad = ds.all_data()
+            b = ad[YT_magnetic_field_strength].v
+            d = ad[YT_density].v
+            dv= ad[YT_cell_volume].v
+            dbins = np.geomspace( d[d>0].min(), d.max(),64)
+            bbins = np.geomspace( b[b>0].min(), b.max(),64)
+            hist, xb, yb = np.histogram2d( d, b, bins=[dbins,bbins],weights=dv)
+
         for nc,core_id in enumerate(core_list):
             print('do %s %d'%(self.this_looper.sim_name,core_id))
             #continue    
@@ -62,20 +73,25 @@ class brho():
             if plot:
                 fig,ax=plt.subplots(1,1)
 
-            for nframe in range(B.shape[1]-1):
+                pch.helper(hist,xb,yb,ax=ax)
+
+            for nframe in [0]:#range(B.shape[1]-1):
                 BBB=np.log10(B[:,nframe])
                 DDD=np.log10(density[:,nframe])
                 popt,pcov = curve_fit( b_from_rho, DDD, BBB, p0=[1,1])
                 self.alpha_FTA[core_id].append(popt[0])
 
                 if plot:
-                    ax.scatter(DDD , BBB, c=[rm(nframe)]*density.shape[0])
+
+                    ax.scatter(10**DDD , 10**BBB, c=[rm(nframe)]*density.shape[0])
+                    #ax.scatter(DDD , BBB, c=[rm(nframe)]*density.shape[0])
                     #ax.plot(DDD, DDD*pfit[1]+pfit[0])
-                    ax.plot( DDD, b_from_rho(DDD,*popt),c='k')
+                    ax.plot( 10**DDD, 10**b_from_rho(DDD,*popt),c='k')
             if np.isnan(self.alpha_FTA[core_id]).any():
                 pdb.set_trace()
             self.a_array[nc,:-1]=self.alpha_FTA[core_id]
             if plot:
+                axbonk(ax,xscale='log',yscale='log',xlabel='density',ylabel='magnetic_field_strength')
                 fig.savefig('plots_to_sort/b_rho_%s_c%04d.png'%(self.this_looper.sim_name, core_id))
 
 
@@ -92,7 +108,57 @@ if 'brthings' not in dir():
     brthings={}
     for sim in simlist:
         brthings[sim]= brho(TL5.loops[sim])
-        brthings[sim].run()
+        #brthings[sim].run(core_list=[32],plot=True)
+        #brthings[sim].run(plot=True)
+        brthings[sim].run(plot=False)
+
+if 1:
+    nf=0
+    frame=0
+    farts=[]
+    b_ext = extents()
+    d_ext = extents()
+    for nsim,sim_name in enumerate(simlist):
+        brthing = brthings[sim_name]
+        this_looper = brthings[sim_name].this_looper
+        ds = this_looper.load(frame)
+        ad = ds.all_data()
+        b = ad[YT_magnetic_field_strength].v
+        b_ext(b)
+        d = ad[YT_density].v 
+        d_ext(d)
+    for nsim,sim_name in enumerate(simlist):
+        fig,axes=plt.subplots(1,2)
+        ax=axes[0]; ax1=axes[1]
+        brthing = brthings[sim_name]
+        this_looper = brthings[sim_name].this_looper
+        print(sim_name)
+        ds = this_looper.load(frame)
+        print(ds.fullpath)
+        ad = ds.all_data()
+        b = ad[YT_magnetic_field_strength].v
+        d = ad[YT_density].v 
+        dv= ad[YT_cell_volume].v
+        #dbins = np.geomspace( d[d>0].min(), d.max(),64)
+        #bbins = np.geomspace( b[b>0].min(), b.max(),65)
+        dbins = np.geomspace( d_ext.minmax[0], d_ext.minmax[1],64)
+        bbins = np.geomspace( b_ext.minmax[0], b_ext.minmax[1],65)
+
+
+        hist, xb, yb = np.histogram2d( d, b, bins=[dbins,bbins],weights=dv)
+        #pch.helper(hist,xb,yb,ax=ax)
+        
+        d = this_looper.tr.track_dict['density'][:,nf]
+        b = this_looper.tr.track_dict['magnetic_field_strength'][:,nf]
+        dv = this_looper.tr.track_dict['cell_volume'][:,nf]
+        hist, xb, yb = np.histogram2d( d, b, bins=[dbins,bbins],weights=dv)
+        pch.helper(hist,xb,yb,ax=ax1)
+        axbonk(ax,xscale='log',yscale='log',xlabel='density',ylabel='magnetic', xlim=d_ext.minmax,ylim=b_ext.minmax)
+        axbonk(ax1,xscale='log',yscale='log',xlabel='density',ylabel='magnetic', xlim=d_ext.minmax,ylim=b_ext.minmax)
+        #ax1.set_xlim( ax.get_xlim())
+        #ax1.set_ylim( ax.get_ylim())
+
+        fig.savefig('plots_to_sort/b_rho_ab_%s.png'%sim)
 
 
 if 0:
@@ -102,28 +168,48 @@ if 0:
 
 if 0:
     #make ATF
-    fig,ax=plt.subplots(1,1)
-    d_array=brthing.d_array
-    b_array=brthing.b_array
-    a_array=brthing.a_array
+    for sim_name in brthings:
+        brthing = brthings[sim_name]
+        this_looper = brthing.this_looper
+        fig,ax=plt.subplots(1,1)
+        d_array=brthing.d_array
+        b_array=brthing.b_array
+        a_array=brthing.a_array
 
-    alpha_ATF=[]
-    for nf in np.arange(0,120,10):
-        ddd = np.log10(d_array[:,nf])
-        bbb = np.log10(b_array[:,nf])
-        aaa = a_array[:,nf]
-        ax.scatter( ddd,bbb)
-        drho=0.02*np.mean(ddd)
-        d1 = ddd-drho
-        d2 = ddd+drho
-        b1=bbb-aaa*drho
-        b2=bbb+aaa*drho
-        dlines=np.stack([d1,d2])
-        blines=np.stack([b1,b2])
-        plt.plot(dlines,blines)
-        outname='plots_to_sort/b_rho_WTF_%s_i%04d.png'%(this_looper.sim_name,nf)
-        fig.savefig(outname)
-        print(outname)
+        alpha_ATF=[]
+        #frame_list = this_looper.tr.frames[::10]
+        frame_list = this_looper.tr.frames[:1]
+        
+        for nf,frame in enumerate(frame_list):
+
+            if 1:
+                ds = this_looper.load(frame)
+                ad = ds.all_data()
+                b = ad[YT_magnetic_field_strength].v
+                d = ad[YT_density].v
+                dv= ad[YT_cell_volume].v
+                dbins = np.geomspace( d[d>0].min(), d.max(),64)
+                bbins = np.geomspace( b[b>0].min(), b.max(),64)
+                hist, xb, yb = np.histogram2d( d, b, bins=[dbins,bbins],weights=dv)
+                pch.helper(hist,xb,yb,ax=ax)
+            #ddd = np.log10(d_array[:,nf])
+            #bbb = np.log10(b_array[:,nf])
+            ddd = d_array[:,nf]
+            bbb = b_array[:,nf]
+            aaa = a_array[:,nf]
+            ax.scatter( ddd,bbb)
+            drho=0.02*np.mean(ddd)
+            d1 = ddd/drho
+            d2 = ddd*drho
+            b1=bbb/drho**aaa
+            b2=bbb*drho**aaa
+            dlines=np.stack([d1,d2])
+            blines=np.stack([b1,b2])
+            #plt.plot(dlines,blines)
+            outname='plots_to_sort/b_rho_WTF_%s_i%04d.png'%(this_looper.sim_name,nf)
+            axbonk(ax,xscale='log',yscale='log',xlabel='density',ylabel='magnetic field strength')
+            fig.savefig(outname)
+            print(outname)
 
 if 0:
     #mean B
@@ -159,7 +245,7 @@ if 0:
             ax.plot( DDD, b_from_rho(DDD,*popt))
         fig.savefig('plots_to_sort/b_rho_AFT_%s.png'%sim)
 
-if 1:
+if 0:
     #plot FTA and overplot ATF.
     import heat_map
     reload(heat_map)

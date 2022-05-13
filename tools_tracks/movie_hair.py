@@ -57,10 +57,27 @@ class flow():
 
                 all_x,all_y,all_z=ms.particle_x,ms.particle_y, ms.particle_z
                 all_p = [all_x,all_y,all_z]
+                all_p_s = np.stack(all_p)
+                max_max = all_p_s.max(axis=1).max(axis=1)
+                min_min = all_p_s.min(axis=1).min(axis=1)
+                cen = 0.5*(min_min+max_max)
 
                 for nff,n2 in enumerate(frames):
                     n1 = np.where(thtr.frames==n2)[0][0]
                     ax.clear()
+                    if 1:
+                        ds = this_looper.load(n2)
+                        rect  = ds.region(cen, min_min,max_max)
+                        proj = ds.proj('density',0,center=cen,data_source=rect)
+                        #ax.imshow(frb['density'])
+                        #ax.pcolormesh( proj['px'], proj['py'], proj['density'])
+                        pw = proj.to_pw()
+                        pw.axes=ax
+                        pw.figure=fig
+                        pw._setup_plots()
+                        pdb.set_trace()
+                        pw.save('plots_to_sort/temp.png')
+
                     XX,YY= all_p[x].transpose(), all_p[y].transpose()
 
 
@@ -68,8 +85,9 @@ class flow():
                     ax.plot(XX[:n1+1,:],YY[:n1+1,:], c=[0.5]*4, zorder=7, linewidth=0.1)
                     ax.scatter(XX[n1,:],YY[n1,:], c='r', s=1,zorder=1)
 
-                    outname='plots_to_sort/movie_hair_%s_c%04d_%04d.png'%(self.loop.sim_name,core_id,n2)
+                    outname='plots_to_sort/movie_hair_%s_c%04d_%04d.png'%(self.loop.sim_name,core_id,nff)
                     fig.savefig(outname)
+                    pw.save('plots_to_sort/temp2.png')
                     print('save',outname)
 
                 
@@ -124,3 +142,10 @@ if 0:
     core_list=[323]
     #thing.run(core_list=core_list, frames='reg',axis=0)
     thing.run(core_list=core_list, frames='reg',axis=0)
+
+if 1:
+    import three_loopers_u500 as TL5
+    thing = flow(TL5.loops['u501'])
+    core_list=[64]
+    #thing.run(core_list=core_list, frames='reg',axis=0)
+    thing.run(core_list=core_list, frames=[0,30],axis=0)

@@ -82,10 +82,11 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                        only_sphere=True, center_on_sphere=True,
                        zoom=True, moving_center=False, slab=None,
                        grids=True, plot_particles=True, annotate=False, 
-                      fields=False, velocity=False, lic=False, 
+                      fields=False, velocity=False, mean_velocity=False, lic=False, 
                        code_length=True, 
                       tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
-                      marker_size=1, path_only=False, verbose=False, plot_y_tracks=True, plot_points=False):
+                      marker_size=1, path_only=False, verbose=False, plot_y_tracks=True, plot_points=False,
+                      derived=[]):
     """
     Plots an collection of cores in a smooth manner.
     FIRST loop over frames,
@@ -118,7 +119,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     if verbose:
         print("MS 1")
     for core_id in core_list:
-        mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=False)
+        if mean_velocity:
+            do_velocity=True
+        mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=do_velocity)
     if verbose:
         print("MS 2")
 
@@ -133,6 +136,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     all_positions={}
     for frame in frame_list:
         ds = looper.load(frame)
+        frame_ind = np.where(looper.tr.frames == frame)[0]
+        for ddd in derived:
+            ddd(ds)
 
         # Check to see if the image was made already,
         # and skips it if it has.
@@ -166,7 +172,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             ms = mini_scrubbers[core_id]
             
             if tracker_positions:
-                frame_ind = np.where(looper.tr.frames == frame)[0]
                 if shifted_tracker:
                     this_x=ms.this_x[:,frame_ind]
                     this_y=ms.this_y[:,frame_ind]
@@ -368,7 +373,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         # main plot loop
         #
         for ax in axis_list:
-            Rmax = np.sqrt( ( (right-left)).max(axis=0)).max()
+            Rmax = np.sqrt( ( (right-left)**2).max(axis=0)).max()
             scale = Rmax.v #2*max([Rmax, scale_min]).v
             print("SCALE", scale)
             scale = min([scale,1])
@@ -377,7 +382,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 #sph = ds.sphere(center,Rmax)
                 proj = ds.proj(field,ax,center=center, data_source = sph) 
             else:
-                proj = ds.proj(field,ax,center=center)
+                bv = ds.arr([10,10,10],'code_velocity')
+                proj = ds.proj(field,ax,center=center, field_parameters={'bulk_velocity':bv})
             looper.proj=proj
             #if moving_center:
             #    #not quite working.
@@ -387,8 +393,10 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             #    pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
             pw = proj.to_pw(center = center, origin='domain')
             
-            if zoom:
+            if zoom == 'scale':
                 pw.zoom(1./(scale))
+            elif type(zoom) == float or type(zoom) == int:
+                pw.zoom(zoom)
             if monotonic:
                 array = proj[field]
                 used_min = proj[field][ proj['weight_field']>0].min()
@@ -422,6 +430,27 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             pw.annotate_streamlines("magnetic_field_x","magnetic_field_y",plot_args={'color':'b'})
         if velocity:
             pw.annotate_velocity()
+        if mean_velocity:
+            Hcoord=ds.coordinates.x_axis[ax]
+            Vcoord=ds.coordinates.y_axis[ax]
+            VH = "velocity_"+"xyz"[Hcoord]
+            VV = "velocity_"+"xyz"[Vcoord]
+            ms = mini_scrubbers[core_id]
+            ms.get_central_at_once(core_id)
+            bulk = np.stack([ms.mean_vx,ms.mean_vy,ms.mean_vz])[:,frame_ind]
+            #bulk = np.stack([ms.vxc,ms.vyc,ms.vzc])[:,frame_ind]
+            def vvh(field,data):
+                thing1=data[VH]
+                thing2=ds.arr(bulk[Hcoord],'code_velocity')
+                return thing1-thing2
+            def vvv(field,data):
+                return data[VV]-ds.arr(bulk[Vcoord],'code_velocity')
+            ds.add_field(('gas','vh'),vvh,units='code_velocity',sampling_type='cell')
+            ds.add_field(('gas','vv'),vvv,units='code_velocity',sampling_type='cell')
+
+            pw.annotate_quiver('vh','vv')
+
+
         if grids:
             pw.annotate_grids()
         if code_length:

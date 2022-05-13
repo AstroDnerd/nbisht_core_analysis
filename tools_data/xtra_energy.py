@@ -23,6 +23,30 @@ def grad(data,fieldname,direction):
     out[all_all] = (data[fieldname][ Right ]- data[fieldname][ Left]) *dxi[direction]
     return out
 
+def add_b_over_rho(obj):
+    def bx_hat(field,data):
+        return data['magnetic_field_x']/data['magnetic_field_strength']
+    obj.add_field(YT_bx_hat,bx_hat, units='dimensionless', sampling_type='cell')
+    def by_hat(field,data):
+        return data['magnetic_field_y']/data['magnetic_field_strength']
+    obj.add_field(YT_by_hat,by_hat, units='dimensionless', sampling_type='cell')
+    def bz_hat(field,data):
+        return data['magnetic_field_z']/data['magnetic_field_strength']
+    obj.add_field(YT_bz_hat,bz_hat, units='dimensionless', sampling_type='cell')
+    def bx_over_rho(field,data):
+        output=xo.AdotDel(data,[YT_bx_hat,YT_by_hat,YT_bz_hat],'velocity_x')
+        return output
+    obj.add_field(YT_bx_over_rho,bx_over_rho, units='1/s',sampling_type='cell',validators=std_validators_2)
+    def by_over_rho(field,data):
+        output=xo.AdotDel(data,[YT_bx_hat,YT_by_hat,YT_bz_hat],'velocity_y')
+        return output
+    obj.add_field(YT_by_over_rho,by_over_rho, units='1/s',sampling_type='cell',validators=std_validators_2)
+    def bz_over_rho(field,data):
+        output=xo.AdotDel(data,['bx_hat','by_hat','bz_hat'],'velocity_z')
+        return output
+    obj.add_field(YT_bz_over_rho,bz_over_rho, units='1/s',sampling_type='cell',validators=std_validators_2)
+
+
 def add_energies(obj):
     if obj.parameters['SelfGravity']:
         def grav_energy(field,data):

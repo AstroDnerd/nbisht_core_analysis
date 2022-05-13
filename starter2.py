@@ -37,3 +37,6 @@ import loop_apps
 reload(loop_apps)
 
 
+from collections import defaultdict
+import colors
+reload(colors)

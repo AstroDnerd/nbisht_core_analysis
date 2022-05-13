@@ -40,6 +40,38 @@ def verify_cores_u303(this_top):
         out=False
     return out
 
+def verify_cores_u701(this_top):
+    out = True
+    if this_top.rhomax < 1e4:
+        out = False
+    if this_top.peak_id in skip_301:
+        out=False
+    if this_top.leaf['particle_index'].size <10:
+        out=False
+    return out
+
+
+def verify_cores_u702(this_top):
+    out = True
+    if this_top.rhomax < 1e4:
+        out = False
+    if this_top.peak_id in skip_302:
+        out=False
+    if this_top.leaf['particle_index'].size <10:
+        out=False
+    return out
+
+def verify_cores_u703(this_top):
+    out = True
+    if this_top.rhomax < 1e4:
+        out = False
+    if this_top.peak_id in skip_303:
+        out=False
+    print('verify')
+    if this_top.leaf['particle_index'].size <10:
+        out=False
+    return out
+
 #things that are probably obsolete, but we'll keep until 
 #we're sure we can reliably reproduce these results.
 

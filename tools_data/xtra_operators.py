@@ -13,6 +13,20 @@ def gradf(field,direction,dds):
     Left = tuple(Left); Right=tuple(Right);all_all=tuple(all_all)
     out[all_all] = (field[ Right ]- field[ Left]) *dxi[direction]
     return out
+def gradf2d(field,direction,dds):
+    iM1 = slice(None,-2)
+    iP1 = slice(2,None)
+    all = slice(1,-1)
+    all_all=[all]*2
+    Left = [all]*2
+    Right = [all]*2
+    dxi=1./(2*dds )
+    out = np.zeros_like(field*dxi[0])
+    Right[direction] = iP1
+    Left[direction] = iM1
+    Left = tuple(Left); Right=tuple(Right);all_all=tuple(all_all)
+    out[all_all] = (field[ Right ]- field[ Left]) *dxi[direction]
+    return out
 def grad(data,fieldname,direction):
     iM1 = slice(None,-2)
     iP1 = slice(2,None)

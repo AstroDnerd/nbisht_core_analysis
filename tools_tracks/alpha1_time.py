@@ -150,9 +150,11 @@ class alpha_tool():
 
 #import three_loopers_mountain_top as TLM
 #sim_list=['u301','u302','u303']
-import three_loopers_tenfour as TL4
+#import three_loopers_tenfour as TL4
+import three_loopers_six as TL
 sim_list=['u401','u402','u403']
-loops = TL4.loops
+sim_list=['u601','u602','u603']
+loops = TL.loops
 if 'atlist' not in dir():
     atlist={}
     for this_simname in sim_list:
@@ -172,11 +174,11 @@ import means_etc
 reload(means_etc)
 if 1:
 
-    Pearson_rand=[]
-    Pearson_sim=[]
-    alpha_rand=[]
-    alpha_sim=[]
     for ns,this_simname in  enumerate(sim_list):
+        Pearson_rand=[]
+        Pearson_sim=[]
+        alpha_rand=[]
+        alpha_sim=[]
         if ns == 0:
             lab = sim_list[ns]
         else:
@@ -186,23 +188,18 @@ if 1:
         alpha_rand += (spheres[this_simname].alpha_randos)
         alpha_sim += (atlist[this_simname].alpha_t[0])
 
-    fig, ax, ax_alpha,ax_r =means_etc.three_way_bean()
-    ax_r.hist( Pearson_sim, histtype='step', color='r',linestyle='-',density=True, orientation='horizontal')
-    ax_r.hist( Pearson_rand, histtype='step', color='k', linestyle='-',density=True, label=lab, orientation='horizontal')
-    ax.scatter( alpha_sim, Pearson_sim, color='r', s=0.1, label='core preimages')
-    ax.scatter( alpha_rand, Pearson_rand, color='k', s=0.1, label='random spheres')
-    ax_alpha.hist( alpha_sim, histtype='step', color='r',linestyle='-',density=True)
-    ax_alpha.hist( alpha_rand, histtype='step', color='k', linestyle='-',density=True, label=lab)
+        plt.clf()
+        fig, ax, ax_alpha,ax_r =means_etc.three_way_bean()
+        ax_r.hist( Pearson_sim, histtype='step', color='r',linestyle='-',density=True, orientation='horizontal')
+        ax_r.hist( Pearson_rand, histtype='step', color='k', linestyle='-',density=True, label=lab, orientation='horizontal')
+        ax.scatter( alpha_sim, Pearson_sim, color='r', s=0.1, label='core preimages')
+        ax.scatter( alpha_rand, Pearson_rand, color='k', s=0.1, label='random spheres')
+        ax_alpha.hist( alpha_sim, histtype='step', color='r',linestyle='-',density=True)
+        ax_alpha.hist( alpha_rand, histtype='step', color='k', linestyle='-',density=True, label=lab)
 
-    axbonk(ax,xlabel=r'$\alpha_1$',ylabel=r'Pearson $r_P$')
-
-    #ax.hist()
-
-
-    #ax.legend(loc=0)
-    #axbonk(ax,xlabel=r'$\rm{Pearson\ }r$', ylabel=r'$P(r)$')
-    fig.savefig('plots_to_sort/pearson_randos.pdf')
-    plt.close(fig)
+        axbonk(ax,xlabel=r'$\alpha_1$',ylabel=r'Pearson $r_P$')
+        fig.savefig('plots_to_sort/pearson_randos_%s.pdf'%this_simname)
+        plt.close(fig)
 
 
 
