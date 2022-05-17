@@ -15,11 +15,11 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
     alpha_rho=[]
     alpha_gd=[]
     frame = this_looper.target_frame
+    ds = this_looper.load(frame)
+    xtra_energy.add_energies(ds)
     for core_id in core_list:
         print('Potential %s %d'%(this_looper.sim_name,core_id))
 
-        ds = this_looper.load(frame)
-        xtra_energy.add_energies(ds)
         ms = trackage.mini_scrubber(this_looper.tr,core_id)
         c = nar([ms.mean_x[-1], ms.mean_y[-1],ms.mean_z[-1]])
         
@@ -116,27 +116,29 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
         ge_array.append(ge_total)
         gmm_array.append(gmm)
 
+        if 1:
+            #Just fit GE
+            def plain_powerlaw( x, q, r0):
+                return q*x+r0
+            popt, pcov=curve_fit(plain_powerlaw, np.log10(rok), np.log10(GE[ok_fit]))
+            GE_fit_line=10**plain_powerlaw(np.log10(rok), *popt)
+            alpha_gd.append(popt[0])
+
+        if 1:
+            #Fit density
+            #Maybe its not necessary to histogram first, but it makes plotting easier.
+            rbins = np.geomspace( RR [RR >0].min(), RR .max(),67)
+            dbins = np.geomspace( DD[DD>0].min(), DD.max(),65)
+            dhist, xbdr, ybdr = np.histogram2d( RR , DD, bins=[rbins,dbins],weights=dv)
+
+            dok=DD[ok_fit]
+            def powerlaw_r0_rkeep( r, q, rho0):
+                return q*np.log10(r/R_KEEP)+np.log10(rho0)
+            poptd, pcovd=curve_fit(powerlaw_r0_rkeep, rok, np.log10(dok))
+            alpha_rho.append(poptd[0])
+
         #Some plotting and fitting.
         if do_plots:
-            if 1:
-                #Just fit GE
-                def plain_powerlaw( x, q, r0):
-                    return q*x+r0
-                popt, pcov=curve_fit(plain_powerlaw, np.log10(rok), np.log10(GE[ok_fit]))
-                GE_fit_line=10**plain_powerlaw(np.log10(rok), *popt)
-                alpha_gd.append(popt[0])
-
-            if 1:
-                #Fit density
-                #Maybe its not necessary to histogram first, but it makes plotting easier.
-                rbins = np.geomspace( RR [RR >0].min(), RR .max(),67)
-                dbins = np.geomspace( DD[DD>0].min(), DD.max(),65)
-                dhist, xbdr, ybdr = np.histogram2d( RR , DD, bins=[rbins,dbins],weights=dv)
-
-                dok=DD[ok_fit]
-                def powerlaw_r0_rkeep( r, q, rho0):
-                    return q*np.log10(r/R_KEEP)+np.log10(rho0)
-                poptd, pcovd=curve_fit(powerlaw_r0_rkeep, rok, np.log10(dok))
 
             fig,ax=plt.subplots(1,2)
             ax0=ax[0]; ax1=ax[1]
@@ -198,7 +200,7 @@ def plot_phi(this_looper,core_list=None, do_plots=True):
             axbonk(ax0,xscale='log',yscale='log',xlabel='r',ylabel='grad phi sq')
             fig.savefig(outname)
             print(outname)
-    return ge_array,gmm_array
+    return ge_array,gmm_array, alpha_rho, alpha_gd
 
 if 'stuff' not in dir():
     for sim in ['u503']:
@@ -206,16 +208,30 @@ if 'stuff' not in dir():
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
         core_list=list(all_cores)
         core_list=None
-        ge,gmm=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
-        stuff[sim]=ge,gmm
+        stuff[sim]=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
 
 for sim in stuff:
-    ge,gmm=stuff[sim]
+    ge,gmm1, arho, bgd=stuff[sim]
+    gmm1=nar(gmm1)
+    ge=nar(ge)
+    arho=nar(arho)
+    bgd=nar(bgd)
+    agd = (nar(bgd)-2)/2
+
+    gmm2 = gmm1/(4*agd+10)
+    gmm2 = gmm1*(3+agd)/(5+2*agd)
+
+    gmm=gmm2
     fig,ax=plt.subplots(1,2)
     ax0=ax[0];ax1=ax[1]
     ax0.scatter(ge,gmm)
-    ax1.scatter(ge,nar(gmm)/nar(ge))
+    ax1.scatter(ge,nar(ge)/nar(gmm))
+    ax0.plot(ge,ge*(1/(4*(-2)+10)))
     ax0.plot(ge,ge)
     axbonk(ax0,xlabel='GE',ylabel='GMM/R',xscale='log',yscale='log')
-    axbonk(ax1,xlabel='GE',ylabel='GMM/R/GE', xscale='log')
+    axbonk(ax1,xlabel='GE',ylabel='GE/GMM/R', xscale='log')
     fig.savefig('plots_to_sort/masses_%s'%sim)
+    plt.close(fig)
+    fig,ax=plt.subplots(1,1)
+    ax.hist(agd,histtype='step')
+    fig.savefig('plots_to_sort/a_from_b_hist_%s'%sim)
