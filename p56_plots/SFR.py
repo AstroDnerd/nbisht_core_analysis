@@ -259,49 +259,25 @@ for nsim,this_simname in enumerate(sims_to_use):
         #ax.plot( bcen1[ok],fit_line , c='g')
         #guess_line=10**powerlaw(bcen1, rhomax**-0.5, 1, 0.5)
         guess_line=10**powerlaw(bcen1, rhomax**-popt_p[2], 1, popt_p[2])
-        #ax.plot( bcen1,guess_line , 'g:')
-        #ax.plot( bcen1, guess_line*vals1, 'g:')
-        ax.plot( bcen1, guess_line*gaussian_1, 'g:')
+        ax.plot( bcen1,guess_line , 'g')
+        ax.plot( bcen1, guess_line*vals1, 'r:')
+        #ax.plot( bcen1, guess_line*gaussian_1, 'g:')
 
         #guess_b=guess_line*gaussian_1
         #ax.plot( bcen1, guess_b,'b:')
 
-        oldnorm=popt1[0]
-        mu = popt1[1]
-        sigma=popt1[2]
-        a = popt_p[2]+1
-        #a = 3/2
-        newnorm = np.exp(mu*a+a**2*sigma**2/2)*oldnorm*rhomax**(-(a-1))
-        #nrm = eta1
-        newmu = mu+(a)*sigma**2
-        newsigma=sigma
-        newgauss=gaussian(np.log(bcen1),oldnorm,mu,sigma)*guess_line
-        Tmu=mu; Tsigma=sigma
-        NORM=oldnorm/np.sqrt(2*np.pi*Tsigma**2)
-        s = np.log(bcen1)
-        a = popt_p[2]
-        newgauss=NORM*np.exp(-(s-Tmu)**2/(2*Tsigma**2))*(bcen1/rhomax)**popt_p[2]
-        newgauss=NORM*np.exp(-(s-Tmu)**2/(2*Tsigma**2)+popt_p[2]*np.log(bcen1))*(rhomax)**-popt_p[2]
-        newgauss=NORM*np.exp(-((s-Tmu)**2-2*Tsigma**2*a*s)/(2*Tsigma**2))*(rhomax)**-a
-        newgauss=NORM*np.exp(-(s**2-2*s*Tmu+Tmu**2-2*Tsigma**2*a*s)/(2*Tsigma**2))*(rhomax)**-a
-        newgauss=NORM*np.exp(-(s**2-2*s*(Tmu+a*Tsigma**2)+Tmu**2)/(2*Tsigma**2))*(rhomax)**-a
-        newgauss=NORM*np.exp(-(s**2-2*s*(Tmu+a*Tsigma**2)+(Tmu+a*Tsigma**2)**2-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(2*Tsigma**2))*(rhomax)**-a
-        newgauss=NORM*np.exp(-((s-(Tmu+a*Tsigma**2))**2-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(2*Tsigma**2))*(rhomax)**-a
-        newgauss=NORM*np.exp(-((s-(Tmu+a*Tsigma**2))**2)/(2*Tsigma**2))*(rhomax)**-a*np.exp((-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(-2*Tsigma**2))
-        NewFactor=np.exp((Tmu*a+a**4/2))
-        NewNorm = NORM*NewFactor*(rhomax)**-a
-        newgauss=np.exp(-((s-(Tmu+a*Tsigma**2))**2)/(2*Tsigma**2))*(rhomax)**-a*NewNorm
-        newgauss=np.exp(-((s-(NewMu))**2)/(2*Tsigma**2))*(rhomax)**-a*NewNorm
-        newgauss=np.exp(-((s-(NewMu))**2)/(2*Tsigma**2))*NewNorm
-        newgauss = gauss_temp( s,NewNorm, NewMu, sigma)
-        #newgauss=gaussian(s, Factor, NewMu, sigma)
-        #newgauss=gaussian(np.log(bcen1),newnorm, newmu,newsigma)
-        #newgauss=gaussian(np.log10(bcen1[ok1]),newnorm, newmu,newsigma)
-        #renorm=vals2.max()/newgauss.max()
-        #newgauss*=renorm
-        ax.plot( bcen1, newgauss,c='r')
+        if 1:
+            #Prediction: Gaussian
+            s = np.log(bcen1)
+            oldnorm=popt1[0]
+            a = popt_p[2]
+            Tmu=mu; Tsigma=sigma
 
-
+            #thing=np.sqrt(2*np.pi*Tsigma**2)
+            NewMu = Tmu+a*Tsigma**2
+            Norm = oldnorm*(rhomax)**-a*np.exp((Tmu*a+a**4/2))
+            newgauss = gaussian( s,Norm, NewMu, sigma)
+            ax.plot( bcen1, newgauss,c='r')
 
         eta_vrhostar=np.sum( vals2*db2)
         eta_pstarrho=(p_star_given_rho*db1).sum()
