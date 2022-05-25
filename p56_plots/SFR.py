@@ -28,6 +28,9 @@ def toplot(prof,quan = YT_cell_volume):
 def gaussian(the_x,norm,x0,sigma):
     #return norm*np.exp( -(the_x-x0)**2/(2*sigma**2))
     return norm/np.sqrt(2*np.pi*sigma**2)*np.exp( -(the_x-x0)**2/(2*sigma**2))
+def gauss_temp(the_x,norm,x0,sigma):
+    #return norm*np.exp( -(the_x-x0)**2/(2*sigma**2))
+    return norm*np.exp( -(the_x-x0)**2/(2*sigma**2))
 
 if 'loop_dict' not in dir():
     if 0:
@@ -70,7 +73,7 @@ vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 sims_to_use = ['u301', 'u302','u303']
 sims_to_use = ['u401', 'u402','u403']
 sims_to_use = ['u601', 'u602','u603']
-sims_to_use=['u601']
+#sims_to_use=['u601']
 #sims_to_use = ['u05','u10','u11']
 #sims_to_use = ['u201', 'u202','u203']
 for nsim,this_simname in enumerate(sims_to_use):
@@ -225,40 +228,93 @@ for nsim,this_simname in enumerate(sims_to_use):
         ok_p = ok_both
         ks_string = do_ks( vals2[ok_p], p_star_given_rho[ok_p])
         lab = r'$\eta_1\rho^{%0.2f}V(\rho)$: %s'%(popt_p[2], ks_string)
-        ax.plot( bcen1,p_star_given_rho,linewidth=2, label=lab, linestyle='--',c=[0.5]*4)
+        #ax.plot( bcen1,p_star_given_rho,linewidth=2, label=lab, linestyle='--',c=[0.5]*4)
 
 
         #fit V(rho) V(rho|*)
-        popt1,pcov1 = curve_fit( gaussian,np.log10(bcen1[ok1]),vals1[ok1])
-        #ax.plot( bcen1[ok1], gaussian(np.log10(bcen2[ok1]),*popt1),c='b')
-        popt2,pcov2 = curve_fit( gaussian,np.log10(bcen2[ok2]),vals2[ok2])
+        b3=np.geomspace(1e-6,1e6,2048)
+        #bcen3=0.5*(b3[1:]+b3[:-1]);db3=b3[1:]-b3[:-1]
+        bcen3=bcen1;db3=db1
+        popt1,pcov1 = curve_fit( gaussian,np.log(bcen1[ok1]),vals1[ok1])
+        gaussian_1=gaussian(np.log(bcen3),*popt1)
+        ax.plot( bcen3, gaussian_1,c='b')
+        popt2,pcov2 = curve_fit( gaussian,np.log(bcen2[ok2]),vals2[ok2])
         #ax.plot( bcen2[ok2], gaussian(np.log10(bcen2[ok2]),*popt2),c='b')
+        print("==========")
+        print(popt1)
+        A = ( vals1*db3/bcen3).sum()
+        mu = ( np.log(bcen3)*vals1*db3/bcen3).sum()/A
+        sigma = (( (np.log(bcen3)-mu)**2*vals1*db3/bcen3).sum()/A)**0.5
+        print(A, mu, sigma)
+        plt.scatter(A, mu)
+        #print('sigma',var)
+        #print(A)
+        #print(mu)
 
         rhomax = bcen1.max()
         rhomin = bcen1.min()
-        also_eta = 1/(popt_p[2]+1)*(rhomax**(popt_p[2]+1)-rhomin**(popt_p[2]+1))
-        also_eta = eta1/(rhomax**-2)
 
-        print( np.sum( vals2*db2), eta1, (p_star_given_rho*db1).sum(), also_eta)
-        mu2=popt2[1]
 
-        
+        fit_line=10**powerlaw(bcen1[ok], *popt_p)
+        #ax.plot( bcen1[ok],fit_line , c='g')
+        #guess_line=10**powerlaw(bcen1, rhomax**-0.5, 1, 0.5)
+        guess_line=10**powerlaw(bcen1, rhomax**-popt_p[2], 1, popt_p[2])
+        #ax.plot( bcen1,guess_line , 'g:')
+        #ax.plot( bcen1, guess_line*vals1, 'g:')
+        ax.plot( bcen1, guess_line*gaussian_1, 'g:')
 
+        #guess_b=guess_line*gaussian_1
+        #ax.plot( bcen1, guess_b,'b:')
+
+        oldnorm=popt1[0]
         mu = popt1[1]
-        a = popt_p[2]+1
         sigma=popt1[2]
-        nrm = np.exp(-2*mu*a*sigma**2+a**2*sigma**4/4)
-        nrm = eta1
-        newmu = mu+a*sigma**2
+        a = popt_p[2]+1
+        #a = 3/2
+        newnorm = np.exp(mu*a+a**2*sigma**2/2)*oldnorm*rhomax**(-(a-1))
+        #nrm = eta1
+        newmu = mu+(a)*sigma**2
         newsigma=sigma
-        ax.plot( bcen1[ok1], gaussian(np.log10(bcen1[ok1]),popt1[0]*nrm, newmu,newsigma),c='r')
+        newgauss=gaussian(np.log(bcen1),oldnorm,mu,sigma)*guess_line
+        Tmu=mu; Tsigma=sigma
+        NORM=oldnorm/np.sqrt(2*np.pi*Tsigma**2)
+        s = np.log(bcen1)
+        a = popt_p[2]
+        newgauss=NORM*np.exp(-(s-Tmu)**2/(2*Tsigma**2))*(bcen1/rhomax)**popt_p[2]
+        newgauss=NORM*np.exp(-(s-Tmu)**2/(2*Tsigma**2)+popt_p[2]*np.log(bcen1))*(rhomax)**-popt_p[2]
+        newgauss=NORM*np.exp(-((s-Tmu)**2-2*Tsigma**2*a*s)/(2*Tsigma**2))*(rhomax)**-a
+        newgauss=NORM*np.exp(-(s**2-2*s*Tmu+Tmu**2-2*Tsigma**2*a*s)/(2*Tsigma**2))*(rhomax)**-a
+        newgauss=NORM*np.exp(-(s**2-2*s*(Tmu+a*Tsigma**2)+Tmu**2)/(2*Tsigma**2))*(rhomax)**-a
+        newgauss=NORM*np.exp(-(s**2-2*s*(Tmu+a*Tsigma**2)+(Tmu+a*Tsigma**2)**2-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(2*Tsigma**2))*(rhomax)**-a
+        newgauss=NORM*np.exp(-((s-(Tmu+a*Tsigma**2))**2-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(2*Tsigma**2))*(rhomax)**-a
+        newgauss=NORM*np.exp(-((s-(Tmu+a*Tsigma**2))**2)/(2*Tsigma**2))*(rhomax)**-a*np.exp((-2*Tmu*a*Tsigma**2-a**4*Tsigma**2)/(-2*Tsigma**2))
+        NewFactor=np.exp((Tmu*a+a**4/2))
+        NewNorm = NORM*NewFactor*(rhomax)**-a
+        newgauss=np.exp(-((s-(Tmu+a*Tsigma**2))**2)/(2*Tsigma**2))*(rhomax)**-a*NewNorm
+        newgauss=np.exp(-((s-(NewMu))**2)/(2*Tsigma**2))*(rhomax)**-a*NewNorm
+        newgauss=np.exp(-((s-(NewMu))**2)/(2*Tsigma**2))*NewNorm
+        newgauss = gauss_temp( s,NewNorm, NewMu, sigma)
+        #newgauss=gaussian(s, Factor, NewMu, sigma)
+        #newgauss=gaussian(np.log(bcen1),newnorm, newmu,newsigma)
+        #newgauss=gaussian(np.log10(bcen1[ok1]),newnorm, newmu,newsigma)
+        #renorm=vals2.max()/newgauss.max()
+        #newgauss*=renorm
+        ax.plot( bcen1, newgauss,c='r')
 
-        ax.plot( bcen1[ok], 10**powerlaw(bcen1[ok], *popt_p), c='g')
-        atest = 1/np.sqrt(rhomax)
-        a = 0.5
-        fake_line=10**powerlaw(bcen1[ok], atest, 1, a)
-        ax.plot( bcen1[ok], fake_line,c='y')
-        ax.plot( bcen1[ok], fake_line*vals1[ok], c='m')
+
+
+        eta_vrhostar=np.sum( vals2*db2)
+        eta_pstarrho=(p_star_given_rho*db1).sum()
+
+        also_eta = (newgauss*vals1*db1).sum()
+        print( "eta1 %0.2e V(rho|*) %0.2e V(*|rho) %0.2e Also %0.2e"%(eta1, eta_vrhostar, eta_pstarrho,also_eta))
+
+
+#        atest = 1/np.sqrt(rhomax)
+#        a = 0.5
+#        fake_line=10**powerlaw(bcen1[ok], atest, 1, a)
+#        ax.plot( bcen1[ok], fake_line,c='y')
+#        ax.plot( bcen1[ok], fake_line*vals1[ok], c='m')
 
 #
 
