@@ -237,16 +237,16 @@ for nsim,this_simname in enumerate(sims_to_use):
         bcen3=bcen1;db3=db1
         popt1,pcov1 = curve_fit( gaussian,np.log(bcen1[ok1]),vals1[ok1])
         gaussian_1=gaussian(np.log(bcen3),*popt1)
-        ax.plot( bcen3, gaussian_1,c='b')
+        #ax.plot( bcen3, gaussian_1,c='b')
         popt2,pcov2 = curve_fit( gaussian,np.log(bcen2[ok2]),vals2[ok2])
         #ax.plot( bcen2[ok2], gaussian(np.log10(bcen2[ok2]),*popt2),c='b')
         print("==========")
         print(popt1)
-        A = ( vals1*db3/bcen3).sum()
-        mu = ( np.log(bcen3)*vals1*db3/bcen3).sum()/A
-        sigma = (( (np.log(bcen3)-mu)**2*vals1*db3/bcen3).sum()/A)**0.5
-        print(A, mu, sigma)
-        plt.scatter(A, mu)
+        A_measured = ( vals1*db3/bcen3).sum()
+        mu_measured = ( np.log(bcen3)*vals1*db3/bcen3).sum()/A_measured
+        sigma_measured = (( (np.log(bcen3)-mu_measured)**2*vals1*db3/bcen3).sum()/A_measured)**0.5
+        print(A_measured, mu_measured, sigma_measured)
+        plt.scatter(A_measured, mu_measured)
         #print('sigma',var)
         #print(A)
         #print(mu)
@@ -257,27 +257,41 @@ for nsim,this_simname in enumerate(sims_to_use):
 
         fit_line=10**powerlaw(bcen1[ok], *popt_p)
         #ax.plot( bcen1[ok],fit_line , c='g')
-        #guess_line=10**powerlaw(bcen1, rhomax**-0.5, 1, 0.5)
-        guess_line=10**powerlaw(bcen1, rhomax**-popt_p[2], 1, popt_p[2])
+        guess_line=10**powerlaw(bcen1, rhomax**-0.5, 1, 0.5)
+        #guess_line=10**powerlaw(bcen1, rhomax**-popt_p[2], 1, popt_p[2])
         ax.plot( bcen1,guess_line , 'g')
-        ax.plot( bcen1, guess_line*vals1, 'r:')
+        ax.plot( bcen1, guess_line*vals1, 'r')
         #ax.plot( bcen1, guess_line*gaussian_1, 'g:')
 
         #guess_b=guess_line*gaussian_1
         #ax.plot( bcen1, guess_b,'b:')
 
-        if 1:
+        if 0:
             #Prediction: Gaussian
             s = np.log(bcen1)
             oldnorm=popt1[0]
             a = popt_p[2]
-            Tmu=mu; Tsigma=sigma
+            Tmu=popt1[1]; Tsigma=popt1[2]
+            #Tmu=mu; Tsigma=sigma
 
             #thing=np.sqrt(2*np.pi*Tsigma**2)
             NewMu = Tmu+a*Tsigma**2
-            Norm = oldnorm*(rhomax)**-a*np.exp((Tmu*a+a**4/2))
-            newgauss = gaussian( s,Norm, NewMu, sigma)
-            ax.plot( bcen1, newgauss,c='r')
+            Norm = oldnorm*(rhomax)**-a*np.exp((Tmu*a+a**2*Tsigma**2/2))
+            newgauss = gaussian( s,Norm, NewMu, Tsigma)
+            ax.plot( bcen1, newgauss,c='r--')
+        if 1:
+            #Prediction: Measure
+            s = np.log(bcen1)
+            oldnorm=A_measured
+            a = 1/2# popt_p[2]
+            Tmu=mu_measured; Tsigma=sigma_measured
+
+            #thing=np.sqrt(2*np.pi*Tsigma**2)
+            NewMu = Tmu+a*Tsigma**2
+            #Norm = oldnorm*(rhomax)**-a*np.exp((Tmu*a+a**4/2))
+            Norm = oldnorm*(rhomax)**-a*np.exp((Tmu*a+a**2*Tsigma**2/2))
+            newgauss = gaussian( s,Norm, NewMu, sigma_measured)
+            ax.plot( bcen1, newgauss,'r--')
 
         eta_vrhostar=np.sum( vals2*db2)
         eta_pstarrho=(p_star_given_rho*db1).sum()
@@ -327,7 +341,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
 
         #ax.plot( bcen2,vals2*vals1.max()/vals2.max(),'r:')
-        outname = "plots_to_sort/%s_pdf_%s_preimage_fits.pdf"%(this_simname,FIELD[1])
+        outname = "plots_to_sort/%s_pdf_%s_preimage_prediction.pdf"%(this_simname,FIELD[1])
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='log',yscale='log')
         #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='linear',yscale='linear')
         
