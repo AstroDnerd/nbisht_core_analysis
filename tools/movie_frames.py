@@ -1,6 +1,5 @@
 from starter2 import *
 
-import three_loopers_u500 as TL5
 
 def quantized_mask(this_looper):
     #Takes only those separated by dt
@@ -15,6 +14,7 @@ def quantized_mask(this_looper):
     return frame_mask
 
 if 0:
+    #import three_loopers_u500 as TL5
     loop = TL5.loops['u503']
     times = loop.tr.times
     plt.clf()
