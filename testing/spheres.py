@@ -52,7 +52,7 @@ ok1 = r>rsphere
 Phi_analytic[ok1] = -G*M/r[ ok1]
 Phi_analytic[~ok1] = -G*M*(3*rsphere**2-r[~ok1]**2)/(2*rsphere**3)
 
-
+print('1')
 def shifter(x,m,b):
     #Shifter slides the analytic solution Phi_analytic around to match the data
     if hasattr(Phi_analytic,'v'):
@@ -75,15 +75,26 @@ if 0:
     plt.legend(loc=0)
     plt.savefig('plots_to_sort/ray.png')
 
+print('2')
 grad_phi_2 = np.zeros_like(r)
-grad_phi_2[ok1] = (G*M/r[ok1]**2)**2
-grad_phi_2[~ok1]= (G*M*r[~ok1]/rsphere**3)**2
-grad_phi_2 /= -8*np.pi*G
+grad_phi_2[ok1] = (1/r[ok1]**2)**2
+grad_phi_2[~ok1]= (1*r[~ok1]/rsphere**3)**2
+grad_phi_2 *= -G*M*M/(4*np.pi)
+
+nabla_phi_squ  = np.zeros_like(r)
+ok2 = r>rsphere
+angle = -(M**2*G)/(4*np.pi)
+nabla_phi_squ[ok2] = angle/(r[ok2]**4)
+nabla_phi_squ[~ok2] = angle*(r[~ok2]**2/rsphere**6)
+print('3')
 
 grad_phi_2_data = ad[YT_grav_energy]
 #mult = grad_phi_2_data.max()/grad_phi_2.max()
 fig,ax=plt.subplots(1,1)
-ax.scatter( r, grad_phi_2_data,c='k')
-ax.plot( r, grad_phi_2)
+sl=slice(None,None,10)
+ax.scatter( r[sl], grad_phi_2_data[sl],c='k')
+ax.plot( r[sl], grad_phi_2[sl],c='r')
 ax.set_yscale('symlog',linthresh=1)
+print('5')
 fig.savefig('plots_to_sort/grad_phi_2.png')
+print('4')
