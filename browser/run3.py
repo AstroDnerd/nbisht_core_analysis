@@ -62,6 +62,10 @@ for isim,this_simname in enumerate(sim_list):
     RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_0125.png"%(nsim,nsim))
     NAMES.append('Otherones')
 
+    NAMES.append('(Grad phi)^2')
+    RE.append(r"/*BindingEnergy/u50%d/u50%d_c(\d\d\d\d)_potfit.png"%(nsim,nsim))
+
+    link_dir=''
     for N in range(len(RE)):
         print(RE[N])
         newprod = product.product(NAMES[N], regexp=RE[N], parameters=['core_id'],style='single',width=400,data_dir=basedir,link_dir=link_dir)
