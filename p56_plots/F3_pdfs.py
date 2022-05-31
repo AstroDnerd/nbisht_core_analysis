@@ -78,10 +78,10 @@ for nsim,this_simname in enumerate(sims_to_use):
     this_looper = loop_dict[this_simname]
 
 
-    #FIELD = YT_density; label = 'abc'[nsim]
+    FIELD = YT_density; label = 'abc'[nsim]
     #FIELD = YT_velocity_magnitude; label='def'[nsim]
     #FIELD = YT_magnetic_field_strength; label='ghi'[nsim]
-    FIELD = YT_potential_field; label='jkl'[nsim]
+    #FIELD = YT_potential_field; label='jkl'[nsim]
 
     #core_list = [10,32,84]
     core_list = np.unique(this_looper.tr.core_ids)
@@ -189,7 +189,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
     field_latex = {'density':r"\rho", 'velocity_magnitude':'v','magnetic_field_strength':'B','PotentialField':r'\Phi'}[FIELD[1]]
     PDF_LABEL = r'$V(%s)$'%(field_latex)
-    PDF_LABEL_C = r'$V(%s|*)$'%(field_latex)
+    PDF_LABEL_C = r'$V(%s|*)V(*)$'%(field_latex)
     PDF_LABEL_R = r'$V(*|%s)$'%(field_latex)
 
 
@@ -215,10 +215,12 @@ for nsim,this_simname in enumerate(sims_to_use):
     if FIELD[1]== 'density':
         popt, pcov = curve_fit(powerlaw, bcen1[ok], np.log10(ratio[ok]), p0=[1,1,-2])
 
-        p_star_given_rho = vals1*bcen1**popt[2]
-        p_star_given_rho *= eta1
+        #p_star_given_rho = vals1*bcen1**popt[2]
+        #p_star_given_rho *= eta1
+        rhomax = bcen1.max()
+        p_star_given_rho = (bcen1/rhomax)**(popt[2])*vals1
         ok_p = ok_both
-        ks_string = do_ks( vals2[ok_p], p_star_given_rho[ok_p])
+        ks_string = do_ks( np.log(vals2[ok_p])[::-1], np.log(p_star_given_rho[ok_p])[::-1])
         lab = r'$\eta_1\rho^{%0.2f}V(\rho)$: %s'%(popt[2], ks_string)
         ax.plot( bcen1,p_star_given_rho,linewidth=2, label=lab, linestyle='--',c=[0.5]*4)
 
