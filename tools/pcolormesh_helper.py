@@ -1,7 +1,7 @@
 from starter1 import *
 
 
-def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=True, **pcolormesh_args):
+def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=False, **pcolormesh_args):
     #takes the output of np.histogram2d (or any other 2d histogram)
     #xbins is 1 larger than h.size[0].
 
