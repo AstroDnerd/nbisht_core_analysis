@@ -86,6 +86,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                        code_length=True, 
                       tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
                       marker_size=1, path_only=False, verbose=False, plot_y_tracks=True, plot_points=False,
+                       zlim=None,
                       derived=[]):
     """
     Plots an collection of cores in a smooth manner.
@@ -121,6 +122,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     for core_id in core_list:
         if mean_velocity:
             do_velocity=True
+        else:
+            do_velocity=False
         mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=do_velocity)
     if verbose:
         print("MS 2")
@@ -405,6 +408,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 zlim = monotonic['zlim'](zlim, verbose=True)
                 pw.set_zlim(field,zlim[0],zlim[1])
                 print("ZZZZ %0.2e %0.2e MMM %0.2e %0.2e"%(zmin,zmax,zlim[0],zlim[1]))
+            if zlim is not None:
+                pw.set_zlim(field,zlim[0],zlim[1])
 
             pw.set_cmap(field,'Greys')
             if force_log is not None:
