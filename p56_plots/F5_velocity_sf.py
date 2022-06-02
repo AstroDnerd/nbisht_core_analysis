@@ -163,7 +163,7 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=No
         ax.plot(the_x,the_y,c='k')
         pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
         print("================",pfit)
-        ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
+        #ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
 
     outname = "%s/%svelocity_sf_%s_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory,longorno,self.lab, self.this_looper.out_prefix, frame)
     if external_ax is None:
