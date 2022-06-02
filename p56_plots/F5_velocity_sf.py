@@ -153,11 +153,18 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=No
     xlim=self.rmin,self.rmax
     xlim=1./128,self.rmax
     ylim=self.vmin,self.vmax
-    axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$\sigma_{v,total}^2$',xlabel=r'$r$')
+    axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$\sigma_{v,L}^2, S_{2,L}$',xlabel=r'$r$')
     if external_ax is None:
         fig.colorbar(ploot,ax=ax)
     if my_sf2 is not None:
-        ax.plot(my_sf2[0][1:],my_sf2[1][1:],c='k')
+        print(my_sf2)
+        the_x = my_sf2[0][1:]
+        the_y = my_sf2[1][1:]
+        ax.plot(the_x,the_y,c='k')
+        pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
+        print("================",pfit)
+        ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
+
     outname = "%s/%svelocity_sf_%s_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory,longorno,self.lab, self.this_looper.out_prefix, frame)
     if external_ax is None:
         fig.savefig(outname)
@@ -211,7 +218,18 @@ if 'R' not in dir():
 SCALE = 128**6
 SCALE = 1/128**3
 
-
+if 1:
+    fig,ax=plt.subplots(1,1)
+    for n in range(3):
+        the_x = Things[n][0][1:]
+        the_y = Things[n][1][1:]*SCALE
+        ax.plot(the_x,the_y,c='k')
+        pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
+        print("================",pfit)
+        ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
+        ax.set_yscale('log')
+        ax.set_xscale('log')
+    fig.savefig('plots_to_sort/messup.png')
 if 1:
     import sf2
     reload( sf2)
@@ -226,7 +244,7 @@ if 1:
         #    msf = sf2.make_sf(this_run.this_looper,0)
         #    rbins,SS = msf.bin_sf2(); SS/=2*np.pi
         #plot(this_run,0, my_sf2=[rbins,SS])
-        plot_obj=plot(this_run,0, my_sf2=[Things[n][0],Things[n][1]*SCALE],longorno='long',
+        plot_obj=plot(this_run,0, my_sf2=[Things[nrun][0],Things[nrun][1]*SCALE],longorno='long',
              external_ax=ax[nrun], 
              external_norm = norm)
         if nrun > 0:
