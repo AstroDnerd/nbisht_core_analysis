@@ -40,6 +40,7 @@ class slope_tool():
             R_SPHERE = 8/128
             rsph = ds.arr(R_SPHERE,'code_length')
             sp = ds.sphere(c,rsph)
+            print('V1')
 
 
 
@@ -51,41 +52,13 @@ class slope_tool():
 
             R_KEEP = R_SPHERE #self.rinflection[core_id]
 
-            #2d distribution of GE vs r
-
-            gbins = np.geomspace( GE[GE>0].min(), GE.max(),65)
-            rbins = np.geomspace( RR [RR >0].min(), RR .max(),67)
-            r_cen = 0.5*(rbins[1:]+rbins[:-1]) #we'll need this later.
-            hist, xb, yb = np.histogram2d( RR , GE, bins=[rbins,gbins],weights=dv)
-
-            if 1:
-                #h2 is the histogram.
-                #we'll remove any stragglers.
-                h2 = hist+0
-                shifter = np.zeros(nar(h2.shape)+2)
-                cuml = np.zeros(h2.shape)
-                c_center = slice(1,-1)
-                #hb is just "is h2 nonzero"
-                #we'll slide this around to look for neighbors
-                hb = (h2>0)
-                shifter[c_center,c_center]=hb
-                nx,ny=shifter.shape
-                for i in [0,1,2]:
-                    for j in [0,1,2]:
-                        if i==1 and j==1:
-                            continue
-                        s1 = slice(i,nx-2+i)
-                        s2 = slice(j,ny-2+j)
-                        cuml += shifter[s1,s2]
-                #kill points that don't have neighbors.
-                h2 *= (cuml >0)
-
 
             #get the zones in the sphere that are
             #within R_KEEP
             ok_fit = np.logical_and(RR  < R_KEEP, GE>0)
 
             rok=RR[ok_fit].v
+            print('V2')
 
             #
             # Binding energy and GMM/R
@@ -99,45 +72,7 @@ class slope_tool():
             #store stuff
             self.output['mass'].append(mtotal)
             self.output['r0'].append(R_KEEP)
-
-            if 1:
-                #Better ge fit
-                def plain_powerlaw( x, q, norm):
-                    return (2*q+2)*x+norm#np.log10(G*mtotal/R_KEEP)
-                popt, pcov=curve_fit(plain_powerlaw, np.log10(rok/R_KEEP), np.log10(GE[ok_fit]))
-                A = 10**popt[1]
-                alpha = popt[0]
-                rmax = (rok).max()
-                rmin = (rok).min()
-
-                rfit = np.linspace(rmin,rmax,128)
-                rr = 0.5*(rfit[1:]+rfit[:-1])
-                dr = rfit[1:]-rfit[:-1]
-
-                GE_fit_line=10**plain_powerlaw(np.log10(rr/R_KEEP), *popt)
-                #GE_fit_line=10**plain_powerlaw(np.log10(rok/R_KEEP), *popt)
-                self.output['alpha_ge'].append(alpha)
-                self.output['A'].append(A)
-                self.output['AA'].append( G**2*mtotal**2/R_KEEP**(2*alpha+2))
-
-                R0=R_KEEP
-                self.output['analytic'].append( 4*np.pi*A/( (R0**(2*alpha+2)*(2*alpha+5)))*(rmax**(2*alpha+5)-rmin**(2*alpha+5)))
-                self.output['rmin'].append(rmin)
-                self.output['rmax'].append(rmax)
-                self.output['analytic2'].append( 4*np.pi*A/( (R0**(2*alpha+2)*(2*alpha+5)))*(R_KEEP**(2*alpha+5)))
-                R0 = R_KEEP
-                M = mtotal 
-                E1 = (-G*M*M/R0**(2*alpha+6)/(2*alpha+5))*(R0**(2*alpha+5)-rmin**(2*alpha+5))
-
-                self.output['ann_good'].append( E1)
-
-
-            ge_good= 4*np.pi*A/( (R0**(2*alpha+2)*(2*alpha+5)))*(rmax**(2*alpha+5)-rmin**(2*alpha+5))
-
-
-
-
-
+            print('V3')
 
             fig2,ax2=plt.subplots(1,1)
             #ay0=ax2[0][0]; ay1=ax2[0][1];ay2=ax2[1][0]ay3=ax3[1][1]
@@ -151,25 +86,52 @@ class slope_tool():
             rr_o  = RR[ok_fit][ORDER].v
             mass_r = (rho_o*dv_o).cumsum()
             enrg_r = (ge_o*dv_o).cumsum()
+            print('V4')
 
-            ay0.plot( rr_o, enrg_r, marker='*')
+            ay0.plot( rr_o, enrg_r, marker='*', c='k')
 
-            ge_r= 4*np.pi*A/( (rr_o**(2*alpha+2)*(2*alpha+5)))*(rr_o**(2*alpha+5)-rmin**(2*alpha+5))
-            ay0.plot( rr_o, ge_r)
+            #ge_r= 4*np.pi*A/( (rr_o**(2*alpha+2)*(2*alpha+5)))*(rr_o**(2*alpha+5)-rmin**(2*alpha+5))
+            #ay0.plot( rr_o, ge_r)
 
-            ay0.scatter( R_KEEP, ge_good, c='r', marker='*')
+            #ay0.scatter( R_KEEP, ge_good, c='r', marker='*')
 
             gmm_r = G*mass_r**2/rr_o
             ay0.scatter(R_KEEP,self.output['gmm'][-1])
-            ay0.plot( rr_o, gmm_r)
+            ay0.plot( rr_o, gmm_r, c='r')
 
+            
             az0=ay0.twinx()
-            az0.plot( rr_o[1:], mass_r[1:])
+            all_r,all_m=rr_o[1:], mass_r[1:]
+            from scipy.interpolate import interp1d
+            mfunc = interp1d( all_r, all_m)
+            my_r = np.linspace(1/2048,all_r.max(),128)
+            my_m = mfunc(my_r)
+            #ay0.plot( my_r, my_m * enrg_r.max()/my_m.max(), c='m')
+            az0.plot( my_r, my_m )
             #az0.plot( rr_o, rho_o)
-            az0.set_yscale('log')
+            #az0.set_yscale('log')
+            dm=(my_m[1:]- my_m[:-1])
+            mm =0.5*(my_m[1:]+my_m[:-1])
+            dr=(my_r[1:]-my_r[:-1])
+            dm_dr = dm/dr
+            rbins = 0.5*(my_r[1:]+my_r[:-1])
+
+            fig3,ax3=plt.subplots(1,1)
+            SWITCH=2*rbins*dm_dr/mm 
+            ax3.plot( rbins, SWITCH)
+            ax3.plot( rbins, rbins*0+1)
+            ax4=ax3.twinx()
+            ax4.plot( my_r, my_m)
+            ok = np.where(np.logical_and( rbins>0.01, SWITCH < 1))[0][0]
+            print('OK',ok)
+            ax4.scatter( my_r[ok-1], my_m[ok-1])
+
+            fig3.savefig('plots_to_sort/dr.png')
 
 
-            fig2.savefig('plots_to_sort/%s_cuml_c%04d.png'%(this_looper.sim_name, core_id))
+            print('V5')
+
+            #fig2.savefig('plots_to_sort/%s_cuml_c%04d.png'%(this_looper.sim_name, core_id))
 
 
 
@@ -275,20 +237,6 @@ class slope_tool():
                         ax0.plot( rbins, phi_del_squ_analy ,c='k')
 
 
-                if 0:
-                    #color the upper envelope
-                    #to make sure we get it right.
-                    print(hist.shape)
-                    y = np.arange(hist.shape[1])
-                    y2d = np.stack([y]*hist.shape[0])
-                    argmax = np.argmax(y2d*(hist>0),axis=1)
-                    ind = np.arange( hist.shape[0])
-                    #take = np.ravel_multi_index(nar([argmax,ind]),hist.shape)
-                    take = np.ravel_multi_index(nar([ind,argmax]),hist.shape)
-                    h1=hist.flatten()
-                    h1[take]=hist.max()
-                    h1.shape=hist.shape
-                    pch.helper(h1,xb,yb,ax=ax0,transpose=False)
 
                 outname='plots_to_sort/%s_c%04d_potfit'%(this_looper.sim_name,core_id)
                 axbonk(ax0,xscale='log',yscale='log',xlabel='r',ylabel='grad phi sq')
