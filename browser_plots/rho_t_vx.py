@@ -94,7 +94,7 @@ sims=['u501', 'u502','u503']
 if 'vels' not in dir():
     vels={}
     for sim in sims:
-        vels[sim]=velocity_things(TL.loops[sim], do_plots=False)#, core_list=[323])
+        vels[sim]=velocity_things(TL.loops[sim], do_plots=True)#, core_list=[323])
 
 for sim in vels:
     fig,ax=plt.subplots(1,3)
