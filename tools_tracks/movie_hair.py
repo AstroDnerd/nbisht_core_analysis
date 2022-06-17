@@ -65,7 +65,7 @@ class flow():
                 for nff,n2 in enumerate(frames):
                     n1 = np.where(thtr.frames==n2)[0][0]
                     ax.clear()
-                    if 1:
+                    if 0:
                         ds = this_looper.load(n2)
                         rect  = ds.region(cen, min_min,max_max)
                         proj = ds.proj('density',0,center=cen,data_source=rect)
@@ -87,7 +87,7 @@ class flow():
 
                     outname='plots_to_sort/movie_hair_%s_c%04d_%04d.png'%(self.loop.sim_name,core_id,nff)
                     fig.savefig(outname)
-                    pw.save('plots_to_sort/temp2.png')
+                    #pw.save('plots_to_sort/temp2.png')
                     print('save',outname)
 
                 
@@ -143,9 +143,16 @@ if 0:
     #thing.run(core_list=core_list, frames='reg',axis=0)
     thing.run(core_list=core_list, frames='reg',axis=0)
 
-if 1:
+if 0:
     import three_loopers_u500 as TL5
     thing = flow(TL5.loops['u501'])
     core_list=[64]
     #thing.run(core_list=core_list, frames='reg',axis=0)
     thing.run(core_list=core_list, frames=[0,30],axis=0)
+
+if 1:
+    import three_loopers_u500 as TL5
+    thing = flow(TL5.loops['u503'])
+    core_list=[206]
+    #thing.run(core_list=core_list, frames='reg',axis=0)
+    thing.run(core_list=core_list, frames='reg',axis=0)
