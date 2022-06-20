@@ -323,7 +323,6 @@ if 'mag_den3' not in dir() or clobber:
     #mag_den3.profiles(simname3)
 simnames = [simname1, simname2, simname3]
 
-
 # UNCOMMENT IF OVERLAYING ALL PLOTS
 #import alphaFieldDensity as afd
 if 1:
@@ -419,6 +418,7 @@ if 1:
         the_w = np.empty([0],dtype=float)
 
         the_x = np.empty([0],dtype=float)
+        the_xX = np.empty([0],dtype=float)
         the_sxx = np.empty([0],dtype=float)
         the_a = np.empty([0],dtype=float)
         
@@ -439,7 +439,9 @@ if 1:
         the_syzz = np.empty([0],dtype=float)
         the_syzzs = np.empty([0],dtype=float)
         the_e = np.empty([0],dtype=float)
-       
+      
+        the_sxyz = np.empty([0],dtype=float) 
+        the_xyz = np.empty([0],dtype=float) 
 
         the_z = np.empty([0],dtype=float) 
         the_cv = np.empty([0],dtype=float) 
@@ -484,6 +486,13 @@ if 1:
             the_xx = np.log10(this_rho)
             the_aa = this_rho
             the_x= np.append(the_x,the_xx)  
+            #print('the_xX0',len(the_x))
+            the_xX= np.append(the_xX,the_xx)
+            #print('the_xX1',len(the_xX))
+            the_xX= np.append(the_xX,the_xx)  
+            #print('the_xX2',len(the_xX))
+            the_xX= np.append(the_xX,the_xx)  #I know..but it works..  
+            #print('the_xX3',len(the_xX))
             the_a= np.append(the_a,the_aa) 
            
             this_field = fields[:,ncore]
@@ -513,6 +522,9 @@ if 1:
             the_yzs =np.append(the_yzs,the_yzzs) 
 
             the_e = np.append(the_e,the_ee)
+            the_xyz = np.append(the_xyz,the_yxx)
+            the_xyz = np.append(the_xyz,the_yll) 
+            the_xyz = np.append(the_xyz,the_yzz) 
           
             the_fieldOvRho = this_field/this_rho
             the_zz = np.log10(the_fieldOvRho)
@@ -566,11 +578,11 @@ if 1:
                         magfield_density_tool.labelled(axplts[i],xscale=None,yscale=None,xlabel='Sum',ylabel='Product',\
                                                        title=None, xlim=xlims,ylim=ylims)
                     if 1:
-                        axplts[i].scatter(this_field[i],this_field_x[i],c=color,marker='*',alpha=0.4)
+                        #axplts[i].scatter(this_field[i],this_field_x[i],c=color,marker='*',alpha=0.4)
                         #axplts[i].scatter(this_rho[i],this_field[i],c=color,marker='*',alpha=0.4)
-                        #axplts[i].scatter(this_rho[i],this_field_x[i],c='k',marker='x',alpha=0.4)
-                        #axplts[i].scatter(this_rho[i],this_field_y[i],c='k',marker='1',alpha=0.4)
-                        #axplts[i].scatter(this_rho[i],this_field_z[i],c='k',marker='*',alpha=0.4)
+                        axplts[i].scatter(this_rho[i],this_field_x[i],c='k',marker='x',alpha=0.4)
+                        axplts[i].scatter(this_rho[i],this_field_y[i],c='k',marker='1',alpha=0.4)
+                        axplts[i].scatter(this_rho[i],this_field_z[i],c='k',marker='*',alpha=0.4)
                         #axplts[i].scatter(this_rho[i],the_zz[i],c='g',alpha=0.2)
 
                         # IF PLOTTING THE POWER LAW, we can comment this out
@@ -621,14 +633,17 @@ if 1:
         salpha_zr = np.empty([0],dtype=float) 
         if 1:
             # PLOT THE POWER LAW: per frame 
-            numcores = len(the_x)/ncores 
+            #numcores = len(the_x)/ncores 
+            numcores = len(the_xX)/(ncores*3)   #for all comps 
             coreint = int(numcores)
             for i in range(coreint): 
                 the_sx = the_x[i::coreint]
+                the_sX = the_xX[i::coreint]  #for alpha of all comps...
                 the_sy = the_y[i::coreint]
                 the_syx = the_yx[i::coreint]
                 the_syl = the_yl[i::coreint]
                 the_syz = the_yz[i::coreint]
+                the_sxyz = the_xyz[i::coreint]  #for alpha of all comps
                 the_syzs = the_yzs[i::coreint]  #BZ SIGNED
                 the_sz = the_z[i::coreint] 
                 the_sw = the_w[i::coreint] 
@@ -643,11 +658,13 @@ if 1:
                     the_syzzs = np.append(the_syzzs,the_syzs)  
 
                 #sX = np.linspace(the_sx.min(),the_sx.max(),num=len(the_sx))  #short: -2, +3   
-                sX = np.linspace(the_sy.min(),the_sy.max(),num=len(the_sy))  #short: -2, +3   
+                sX = np.linspace(the_sX.min(),the_sX.max(),num=len(the_sX))  #short: -2, +3   
+                #sX = np.linspace(the_sy.min(),the_sy.max(),num=len(the_sy))  #short: -2, +3   
 
-                spfit = np.polyfit(the_sy,the_syx,1)
+                #spfit = np.polyfit(the_sy,the_syx,1)
                 #spfit = np.polyfit(the_sy,the_syl,1)
                 #spfit = np.polyfit(the_sy,the_syz,1)
+                spfit = np.polyfit(the_sX,the_sxyz,1)  #all comps at once attempt
                 #spfit = np.polyfit(the_sx,the_sy,1)
                 spfit_x = np.polyfit(the_sx,the_syx,1)
                 spfit_y = np.polyfit(the_sx,the_syl,1)
@@ -662,7 +679,7 @@ if 1:
                 salpha_zr = np.append(salpha_zr,salpha_z)
 
                 # pearsonR
-                if 1:
+                if 0:
                     xs = np.std(the_sx)
                     #ys = np.std(the_sy)
                     ys = np.std(the_syz)
@@ -698,6 +715,9 @@ if 1:
                     xlims = 1e-1,1e8
                     ylims = 1e-2,1e4
                     print('inside plotting the power law')
+                    print('i',i)
+                    print('numcores',numcores)
+                    print('len(the_xX)',len(the_xX))
                     axplts[i].plot(sXX,sY,c='k',linewidth=1.0)
                     #axplts[i].plot(sXX,sY,c='k',linewidth=1.0)
                     #axplts[i].plot(sXX,sYx,c='r',linestyle='dotted',linewidth=1.0)
@@ -705,13 +725,13 @@ if 1:
                     #axplts[i].plot(sXX,sYz,c='r',linestyle='dashed',linewidth=1.0)
 
                     #pdb.set_trace()  #EDITTTT   
-                    magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<B>$',ylabel=r'$<Bx>$',\
+                    magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<\rho>$',ylabel=r'$<Bx,By,Bz>$',\
                              xlim=xlims, ylim=ylims,title=r'$\alpha = %.3f$'%salpha)
                     #magfield_density_tool.labelled(axplts[i],xscale='log',yscale='log',xlabel=r'$<\rho>$',ylabel=r'$<B>$',\
                     #         xlim=xlims, ylim=ylims,title=r'$\alpha = %.3f, \alpha_x = %.3f, \alpha_y = %.3f, \alpha_z = %.3f$'%(salpha,salpha_x,salpha_y,salpha_z)) 
                
-                    outname_frame='Scatter_LogBxvsB_%s_%d'%(simnames[nt],i)
-                    #outname_frame='Scatter_LogBxyz3dvsRho_%s_%d'%(simnames[nt],i)
+                    #outname_frame='Scatter_LogBxvsB_%s_%d'%(simnames[nt],i)
+                    outname_frame='Scatter_LogBxyz3dvsRho_%s_%d'%(simnames[nt],i)
                     #outname_frame='Scatter_LogBzvsRho_%s_%d'%(simnames[nt],i)
                     figs[i].savefig(outname_frame)
                     print("saved ",i)
@@ -804,7 +824,7 @@ if 1:
             XX = 10 ** X
             Y = 10 ** (pfit[0]*X + pfit[1])                
             
-            if 1:
+            if 0:
                 ax1.plot(XX,Y,c='k',linewidth=1.0)
                 if 1: # ORGANIZE YOUR PLOTTINGS!
                     #xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'

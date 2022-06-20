@@ -232,7 +232,7 @@ class BRho_tool():
                     self.bear12 = np.append(self.bear12,self.betarr[12])    
                     self.bear13 = np.append(self.bear13,self.betarr[13]) 
 
-                if 1:
+                if 0:
                     if core_id == core_list[-1]:
                         if name == 'u601':
                             #meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
@@ -346,6 +346,7 @@ class BRho_tool():
             #magfield = thtr.c([core_id],'magnetic_field_strength')  #EDITED FOR Z COMPONENT ONLY!!
             magfield_sign = thtr.c([core_id],'magnetic_field_z') 
             magfield = abs(magfield_sign)   
+            velocity = thtr.c([core_id],'velocity_magnitude')
 
             magden = magfield/density
             cv = thtr.c([core_id],'cell_volume')  
@@ -392,11 +393,14 @@ class BRho_tool():
 
                     YY = np.log10(magfield[mask,n_time])
                     Y = np.log10(magfield[mask,n_time]).flatten() 
-
+              
                     Z = np.log10(magden[mask,n_time]).flatten()
                     C = np.log(cv[mask,n_time]).flatten()
                     WW = YY/XX
                     W = WW.flatten() 
+                     
+                    V = np.log10(velocity[mask,n_time]).flatten()
+                    Vstd = np.std(V)
 
                 if timing == 'all_time':
                     #time=thtr.times[n_time]
@@ -436,7 +440,7 @@ class BRho_tool():
                     B_o = pfit[1]  
                     YY = 10 ** (pfit[0]*X2 + pfit[1]) 
 
-                    self.betarr = np.append(self.betarr,beta)                         
+                    self.betarr = np.append(self.betarr,Vstd)  #MODIFIED TO OUTPUT A V-std BOXPLOT!!                         
                     # THE NEGATIVE OUTLIERS
                     #if beta < 0: 
                     #    self.time_stamp = np.append(self.time_stamp,n_time)
@@ -707,7 +711,7 @@ class BRho_tool():
             y = data[i] 
             x = np.random.normal(1+i, 0.04, size=len(y))
             ax1.plot(x, y, 'b.', alpha=0.2)
-            if 1:
+            if 0:
                 y2 = data[i][-2]
                 x2 = x[-2] 
                 ax1.plot(x2,y2,'r.',alpha=1)  #alpha changes the opacity  
@@ -973,7 +977,7 @@ def axisforbox(theAx=None):
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME or as in box-vios
             fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-        if 0: 
+        if 1: 
             # CALL BOXPLOTS  
             tool.boxes(nt,simnames[nt],tff_labels,theAx)
         if 0: 
@@ -993,6 +997,5 @@ def axisforbox(theAx=None):
 # COMMENT OUT WHEN USING THIS FILE AS AN IMPORT TO A PY FILE
 axisforbox()
 print("GOOD-BYE")
-
 
 
