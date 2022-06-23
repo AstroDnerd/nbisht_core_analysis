@@ -1,8 +1,8 @@
 from starter2 import *
 
 import three_loopers_six as TL
-simlist=['u603']
-core_id = 1
+simlist=['u601']
+core_id = 323
 import gravity
 reload(gravity)
 
