@@ -42,6 +42,9 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append("mountain top")
     RE.append(r"/*mountain_tops/%s/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( this_simname, this_simname))
 
+    NAMES.append('GE mass')
+    RE.append(r"/*ge_cuml/u50%d/u50%d_cuml_c(\d\d\d\d).png"%(nsim,nsim))
+
     NAMES.append("Pathlines")
     RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
 
@@ -56,6 +59,12 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append("Velocity heatmap")
     RE.append(r"/*velocity_heat/u50%d/u50%d_v_t_heat_c(\d\d\d\d).png"%(nsim,nsim))
 
+    NAMES.append("V-Vmean")
+    RE.append(r"/*velocity_mean/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
+
+    NAMES.append("V extras")
+    RE.append(r"/*velocity_mean_with_pearson/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
+
     NAMES.append("VR VT")
     RE.append(r'/*vr_vt/u50%d/u50%d_vr_vt_c(\d\d\d\d).png'%(nsim,nsim))
 
@@ -64,6 +73,9 @@ for isim,this_simname in enumerate(sim_list):
 
     NAMES.append('(Grad phi)^2')
     RE.append(r"/*BindingEnergy/u50%d/u50%d_c(\d\d\d\d)_potfit.png"%(nsim,nsim))
+
+    NAMES.append('B and rho') #u503_b_and_rho_t_c0248
+    RE.append(r"/*B_and_rho/u50%d/u50%d_b_and_rho_t_c(\d\d\d\d).png"%(nsim,nsim))
 
     link_dir=''
     for N in range(len(RE)):
