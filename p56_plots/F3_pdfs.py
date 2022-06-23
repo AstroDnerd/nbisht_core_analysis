@@ -78,10 +78,10 @@ for nsim,this_simname in enumerate(sims_to_use):
     this_looper = loop_dict[this_simname]
 
 
-    FIELD = YT_density; label = 'abc'[nsim]
+    #FIELD = YT_density; label = 'abc'[nsim]
     #FIELD = YT_velocity_magnitude; label='def'[nsim]
     #FIELD = YT_magnetic_field_strength; label='ghi'[nsim]
-    #FIELD = YT_potential_field; label='jkl'[nsim]
+    FIELD = YT_potential_field; label='jkl'[nsim]
 
     #core_list = [10,32,84]
     core_list = np.unique(this_looper.tr.core_ids)
