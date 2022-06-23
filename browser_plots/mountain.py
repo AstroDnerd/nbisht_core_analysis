@@ -1,5 +1,5 @@
 from starter2 import *
-
+import xtra_energy
 import three_loopers_six as TL
 import mountain_top
 
@@ -9,6 +9,7 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
         core_list=np.unique(this_looper.tr.core_ids)
 
     ds = this_looper.load(this_looper.target_frame)
+    xtra_energy.add_energies(ds)
     reload(mountain_top)
     #radius=1e-2
     radius=4/128
@@ -56,7 +57,7 @@ if 1:
         axbonk(ax[nsim],xscale='log',yscale='log', xlabel='min density',ylabel='peak density')
 
     fig.savefig('plots_to_sort/test.png')
-sim_list=['u603']
+sim_list=['u601','u602','u603']
 
 if 1:
     import three_loopers_six as TL
@@ -67,7 +68,7 @@ if 1:
         for sim in sim_list:
             inflection[sim]=r_inflection.R_INFLECTION( TL.loops[sim])
             inflection[sim].run()
-if 1:
+if 0:
     import three_loopers_six as TL
     import mass_edge_tool
     reload(mass_edge_tool)
@@ -87,8 +88,8 @@ if 1:
         infl=None
         massedge=None
         infl=inflection[sim].rinflection
-        massedge=mass_edge[sim].edge
+        #massedge=mass_edge[sim].edge
         
         plot_mountain_top(this_looper,core_list=None,
-                          r_inflection=infl,
-                          r_mass=massedge)
+                          r_inflection=infl)
+                          #r_mass=massedge)
