@@ -81,9 +81,16 @@ class flow():
                     XX,YY= all_p[x].transpose(), all_p[y].transpose()
 
 
-                    ax.scatter(XX[0,:],YY[0,:], c='k', zorder=2)
-                    ax.plot(XX[:n1+1,:],YY[:n1+1,:], c=[0.5]*4, zorder=7, linewidth=0.1)
-                    ax.scatter(XX[n1,:],YY[n1,:], c='r', s=1,zorder=1)
+                    if 0:
+                        c = [0.5]*4
+                        sl = slice(None)
+                    if 1:
+                        sl = slice(None,None,10)
+                        c = [0.1]*4
+                    npart = YY[0,sl].size
+                    ax.scatter(XX[0,sl],YY[0,sl], c=[[0.5]*4]*npart, zorder=2)
+                    ax.plot(XX[:n1+1,sl],YY[:n1+1,sl], c=[0.5]*4, zorder=7, linewidth=0.1)
+                    ax.scatter(XX[n1,sl],YY[n1,sl], c=[[1.0,0.,0.,0.1]]*npart, s=0.5,zorder=1)
 
                     outname='plots_to_sort/movie_hair_%s_c%04d_%04d.png'%(self.loop.sim_name,core_id,nff)
                     fig.savefig(outname)
@@ -155,4 +162,5 @@ if 1:
     thing = flow(TL5.loops['u503'])
     core_list=[206]
     #thing.run(core_list=core_list, frames='reg',axis=0)
-    thing.run(core_list=core_list, frames='reg',axis=0)
+    #thing.run(core_list=core_list, frames='reg',axis=0, frames=[0,30])
+    thing.run(core_list=core_list,axis=0, frames='reg')
