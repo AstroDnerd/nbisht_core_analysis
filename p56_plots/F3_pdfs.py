@@ -234,7 +234,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
         ks_string = do_ks( vals2[ok_p], maxwell[ok_p])
 
-        lab = r'$\eta_1 \mathcal{M}(\sigma_{1d}=%0.1f)$: %s'%(sigmav, ks_string)
+        lab = r'$\eta_1 \mathcal{M}(v;\sigma_{1d}=%0.1f)$: %s'%(sigmav, ks_string)
 
 
         ax.plot( v[ok_p], maxwell[ok_p] , label=lab, linestyle='--',c=[0.5]*4)
