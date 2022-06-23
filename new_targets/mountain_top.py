@@ -110,9 +110,9 @@ def leaf_with_center(leaf_list):
 
 
 def get_density(peak, test_main):
-    X = test_main['x'].to('code_length')
-    Y = test_main['y'].to('code_length')
-    Z = test_main['z'].to('code_length')
+    X = test_main[YT_x].to('code_length')
+    Y = test_main[YT_y].to('code_length')
+    Z = test_main[YT_z].to('code_length')
     tolerance = 0.5/2048
     mask = ( np.abs(X - peak[0])<tolerance)*( np.abs(Y-peak[1])<tolerance)*(np.abs(Z-peak[2])<tolerance)
     if mask.sum() != 1:
