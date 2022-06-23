@@ -380,3 +380,74 @@ def get_overlapping_cores(self,core_id):
     overlap_with = nar(self.overlaps[core_id])[with_overlap]
     argsort = np.argsort(overlap_with)
     return overlap_with[argsort], used_with[argsort]
+
+def filler(htool, core_list=None,do_plots=True):
+    this_looper=htool.this_looper
+    thtr=this_looper.tr
+
+    if core_list is None:
+        core_list = np.unique(this_looper.tr.core_ids)
+
+
+    volume_hull = []
+    volume_part = []
+    volume_all_part=[]
+    volume_fill = []
+    
+    points=None
+    nframe=0
+    print('Get all points.  Streamline if problematic.')
+    for core_id in core_list:
+        ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
+        newpoints = np.stack([ms.this_x[:,nframe], ms.this_y[:,nframe],ms.this_z[:,nframe]])
+        if points is not None:
+            points = np.hstack([points,newpoints])
+        else:
+            points=newpoints
+
+
+
+        
+    points=points.transpose()
+    for core_id in core_list:
+        this_hull = htool.hulls[core_id]
+        minmin=(np.floor(this_hull.points.min(axis=0)*128).astype('int')+0.5)/128
+        maxmax=(np.floor(this_hull.points.max(axis=0)*128).astype('int')+0.5+1)/128
+        dx = 1./128
+        #
+        # The code to check that we're not missing anything.  Runs a while.
+        #
+        if 0:
+            xx,yy,zz=np.mgrid[minmin[0]:maxmax[0]:dx, minmin[1]:maxmax[1]:dx, minmin[2]:maxmax[2]:dx]
+            points = np.stack( [xx.flatten(),yy.flatten(),zz.flatten()]).transpose()
+
+        points3d = htool.points_3d[core_id]
+        print("Ask the question %s c%04d np %d"%(this_looper.sim_name, core_id, points.shape[0]))
+        ok = in_hull( points, htool.points_3d[core_id])
+
+        volume_hull.append(this_hull.volume)
+        volume_part.append( (1/128**3)*points3d.shape[0])
+        volume_fill.append( (1/128**3)*ok.sum())
+
+        if do_plots:
+            fig,ax=plt.subplots(1,1)
+            this_p = htool.points_3d[core_id]
+            x=1;y=2
+            points_2d = np.array(list(zip(this_p[:,x],this_p[:,y])))
+            hull_2d = ConvexHull(points_2d)
+            vert_x = points_2d[hull_2d.vertices,0]
+            vert_y = points_2d[hull_2d.vertices,1]
+            vert_x = np.concatenate([vert_x,vert_x[0:1]])
+            vert_y = np.concatenate([vert_y,vert_y[0:1]])
+            ax.plot(vert_x, vert_y, 'k', linewidth=0.3)
+            ax.scatter( points[ok,1], points[ok,2])
+            ax.scatter( this_p[:,x],this_p[:,y])
+            fig.savefig('plots_to_sort/in_hull_%s_c%04d.png'%(this_looper.sim_name, core_id))
+    return {'volume_hull':volume_hull,'volume_part':volume_part,'volume_fill':volume_fill, 'volume_all_part':volume_all_part}
+
+
+
+
+
+
+
