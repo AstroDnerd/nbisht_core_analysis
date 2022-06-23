@@ -380,6 +380,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             scale = Rmax.v #2*max([Rmax, scale_min]).v
             print("SCALE", scale)
             scale = min([scale,1])
+            scale = max([scale,1/128])
             if only_sphere:
                 sph = ds.region(center,left,right)
                 #sph = ds.sphere(center,Rmax)
@@ -398,6 +399,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             
             if zoom == 'scale':
                 pw.zoom(1./(scale))
+                print('ZOOM',scale*128)
             elif type(zoom) == float or type(zoom) == int:
                 pw.zoom(zoom)
             if monotonic:
@@ -417,6 +419,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             for core_id in core_list:
                 positions = position_dict[core_id]
                 color=color_dict[core_id]
+                color = [1.0,0.0,0.0,0.8]
+                alpha=0.1
+                marker_size=1
                 if annotate:
                     #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
                     centroid=positions.mean(axis=0)
@@ -426,7 +431,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                                      coord_system='data')
                 if plot_particles:
                     pw.annotate_these_particles4(1.0, col=[color]*positions.shape[0], positions=positions, 
-                                                 p_size=marker_size)
+                                                 p_size=marker_size, alpha=alpha)
         pw.save('plots_to_sort/P3')
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))
