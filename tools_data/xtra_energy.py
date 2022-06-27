@@ -8,6 +8,7 @@ mag_validators = [yt.ValidateSpatial(1,['magnetic_field_x','magnetic_field_y','m
 kinetic_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','kinetic_energy'])]
 kinetic_validators=[yt.ValidateSpatial(1,['density'])]
 pressure_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','pressure'])]
+work_units='erg/(cm**3*s)'
 def grad(data,fieldname,direction):
     iM1 = slice(None,-2)
     iP1 = slice(2,None)
@@ -72,35 +73,7 @@ def add_energies(obj):
     obj.add_field(YT_therm_energy,therm_energy,
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
-def add_force_terms(obj):
-    work_units='erg/(cm**3*s)'
-    def gas_pressure(field,data):
-        return data[YT_density]*data.ds.quan(1,'code_velocity')**2
-    obj.add_field(YT_gas_pressure,gas_pressure,units='dyne/cm**2', sampling_type='cell')
-    def pressure_work(field,data):
-        try:
-            gi =-1*xo.AdotDel(data, [YT_velocity_x, YT_velocity_y, YT_velocity_z], YT_gas_pressure) #-data.ds.arr(grad(data,'PotentialField',2),'code_length/code_time**2')
-        except:
-            return np.zeros_like(data[YT_density])
-        
-        return gi
-    obj.add_field(YT_pressure_work,pressure_work,validators=pressure_validators,
-                 units=work_units,sampling_type='cell', take_log=True)
-    def dpdx(field,data):
-        output = xo.grad(data,YT_gas_pressure,0)
-        return output
-    obj.add_field(YT_dpdx,dpdx,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
-    def dpdy(field,data):
-        output = xo.grad(data,YT_gas_pressure,1)
-        return output
-    obj.add_field(YT_dpdy,dpdy,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
-    def dpdz(field,data):
-        output = xo.grad(data,YT_gas_pressure,2)
-        return output
-    obj.add_field(YT_dpdz,dpdz,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
-    def pressure_accel_mag(field,data):
-        return np.sqrt( data[YT_dpdx]**2+data[YT_dpdy]**2+data[YT_dpdz]**2)/data[YT_density]
-    obj.add_field(YT_pressure_accel_mag,pressure_accel_mag,units='code_length/code_time**2', validators=[yt.ValidateSpatial(1,[YT_pressure])], sampling_type='cell')
+def add_gravity(obj):
     if obj.parameters['SelfGravity']:
         def grav_x(field,data):
             gi =-data.ds.arr(grad(data,'PotentialField',0),'code_length/code_time**2')
@@ -133,6 +106,34 @@ def add_force_terms(obj):
             return np.sqrt( data[YT_grav_x]**2 + data[YT_grav_y]**2 + data[YT_grav_z]**2)
         obj.add_field(YT_grav_norm,grav_norm, validators=pressure_validators,
                       units='code_length/code_time**2', sampling_type='cell')
+def add_force_terms(obj):
+    def gas_pressure(field,data):
+        return data[YT_density]*data.ds.quan(1,'code_velocity')**2
+    obj.add_field(YT_gas_pressure,gas_pressure,units='dyne/cm**2', sampling_type='cell')
+    def pressure_work(field,data):
+        try:
+            gi =-1*xo.AdotDel(data, [YT_velocity_x, YT_velocity_y, YT_velocity_z], YT_gas_pressure) #-data.ds.arr(grad(data,'PotentialField',2),'code_length/code_time**2')
+        except:
+            return np.zeros_like(data[YT_density])
+        
+        return gi
+    obj.add_field(YT_pressure_work,pressure_work,validators=pressure_validators,
+                 units=work_units,sampling_type='cell', take_log=True)
+    def dpdx(field,data):
+        output = xo.grad(data,YT_gas_pressure,0)
+        return output
+    obj.add_field(YT_dpdx,dpdx,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
+    def dpdy(field,data):
+        output = xo.grad(data,YT_gas_pressure,1)
+        return output
+    obj.add_field(YT_dpdy,dpdy,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
+    def dpdz(field,data):
+        output = xo.grad(data,YT_gas_pressure,2)
+        return output
+    obj.add_field(YT_dpdz,dpdz,units='dyne/cm**3', validators=[yt.ValidateSpatial(1,YT_pressure)], sampling_type='cell')
+    def pressure_accel_mag(field,data):
+        return np.sqrt( data[YT_dpdx]**2+data[YT_dpdy]**2+data[YT_dpdz]**2)/data[YT_density]
+    obj.add_field(YT_pressure_accel_mag,pressure_accel_mag,units='code_length/code_time**2', validators=[yt.ValidateSpatial(1,[YT_pressure])], sampling_type='cell')
     def momentum_flux(field,data):
         f1 = xo.gradf(0.5*data[YT_velocity_x]*data[YT_kinetic_energy],0,data.dds)
         f2 = xo.gradf(0.5*data[YT_velocity_y]*data[YT_kinetic_energy],1,data.dds)
