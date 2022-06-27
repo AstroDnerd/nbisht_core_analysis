@@ -28,21 +28,43 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
     xtra_energy.add_gravity(ds)
     reload(mountain_top)
     #radius=1e-2
-    radius=1/128
-    radius = ds.arr(radius,'code_length')
     for core_id in core_list:
         ms = trackage.mini_scrubber(thtr,core_id,do_velocity=True) 
+        ms.get_central_at_once(core_id)
+
+        if r_inflection is not None and False:
+            radius = r_inflection[core_id]
+            radius = ds.arr(radius, 'code_length')
+        else:
+            radius=1/128
+            radius = ds.arr(radius,'code_length')
+
 
         peak = this_looper.targets[core_id].peak_location
         this_target = this_looper.targets[core_id]
-        #top1 = mountain_top.top(ds,peak, rhomin = this_target.min_density, peak_id=core_id, radius=radius)
+        top1=None
+        if 0:
+            top1 = mountain_top.top(ds,peak, rhomin = this_target.min_density, peak_id=core_id, radius=radius)
         proj_axis=0
+        if proj_axis == 1:
+            print("ERROR: plotting messed up for axis 1")
+            raise
         h_axis = ds.coordinates.x_axis[proj_axis]
         v_axis = ds.coordinates.y_axis[proj_axis]
         left = peak - radius.v
         right = peak + radius.v
         dx = 1/2048
         nzones = np.floor((right-left)/dx).astype('int')
+
+        SphereVbar = None
+        if 1:
+            if r_inflection is not None:
+                RRR = r_inflection[core_id]
+                sph = ds.sphere( peak, RRR)
+                M = (sph[YT_density]*sph[YT_cell_volume]).sum()
+                SphereVbar = [( (sph[('gas','velocity_%s'%s)]*sph[YT_cell_mass]).sum()/M ).v for s in 'xyz']
+                #SphereVbar = [( (sph[('gas','momentum_%s'%s)]*sph[YT_cell_mass]).sum()/M ).v for s in 'xyz']
+
 
 
         cg = ds.covering_grid(4,left,nzones, num_ghost_zones=1)
@@ -56,6 +78,7 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
         ax.set_aspect('equal')
 
 
+        #field = ('gas','momentum_x')
         field='density'
         #field=YT_grav_energy
         if type(field) is tuple:
@@ -65,30 +88,46 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
         rho= from_cg(field)
         dv = from_cg(YT_cell_volume)
         PPP= proj(rho)
-        norm = mpl.colors.LogNorm(vmin=PPP.min(), vmax=PPP.max())
-        #norm = mpl.colors.Normalize(vmin=PPP.min(), vmax=PPP.max())
 
-        #x_h = cg[('gas','xyz'[h_axis])].sum(axis=proj_axis).v
-        #x_v = cg[('gas','xyz'[v_axis])].sum(axis=proj_axis).v
+        if field_name in ['density']:
+            norm = mpl.colors.LogNorm(vmin=PPP.min(), vmax=PPP.max())
+        else:
+            norm = mpl.colors.Normalize(vmin=PPP.min(), vmax=PPP.max())
+
         x_h = proj( from_cg( ('gas','xyz'[h_axis]) ) )
         x_v = proj( from_cg( ('gas','xyz'[v_axis]) ) )
 
 
         "H for horizontal, V for vertical"
-        stream_h = 'velocity_%s'%'xyz'[h_axis]
-        stream_v = 'velocity_%s'%'xyz'[v_axis]
+        if 0:
+            stream_name='momentum'
+            stream_h = 'momentum_%s'%'xyz'[h_axis]
+            stream_v = 'momentum_%s'%'xyz'[v_axis]
+        if 1:
+            stream_name='velocity'
+            stream_h = 'velocity_%s'%'xyz'[h_axis]
+            stream_v = 'velocity_%s'%'xyz'[v_axis]
+        if 0:
 
-        #stream_h = 'grav_%s'%'xyz'[v_axis]
-        #stream_v = 'grav_%s'%'xyz'[h_axis]
+            stream_name='accel'
+            stream_h = 'grav_%s'%'xyz'[h_axis]
+            stream_v = 'grav_%s'%'xyz'[v_axis]
+
+
 
 
         Q_H = from_cg(stream_h)
         Q_V = from_cg(stream_v)
         M = (rho*dv).sum()
         if 0:
+            Q_H_mean=0
+            Q_V_mean=0
+        if 0:
             Q_H_mean = Q_H.mean()
             Q_V_mean = Q_V.mean()
-        if 1:
+        if 0:
+            stream_name += "_whole_mean"
+            #works pretty good
             Q_H_mean = (Q_H*dv*rho).sum()/M
             Q_V_mean = (Q_V*dv*rho).sum()/M
         if 0:
@@ -98,9 +137,23 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
             mean = [mean_vx, mean_vy, mean_vz]
             Q_H_mean = mean[ h_axis]
             Q_V_mean = mean[ v_axis]
+        if 1:
+            stream_name += "_vcentral"
+            Q_H_mean = ms.vcentral[h_axis,-1]
+            Q_V_mean = ms.vcentral[v_axis,-1]
+        if 0:
+            LLL = top1.leaf
+            Q_H_mean =((LLL['density']*LLL['cell_volume']*LLL[stream_h]).sum()/(LLL['density']*LLL['cell_volume']).sum()).v
+            Q_V_mean =((LLL['density']*LLL['cell_volume']*LLL[stream_v]).sum()/(LLL['density']*LLL['cell_volume']).sum()).v
+        if 0:
+            LLL = top1.leaf
+            Q_H_mean =((LLL['cell_volume']*LLL[stream_h]).sum()/(LLL['cell_volume']).sum()).v
+            Q_V_mean =((LLL['cell_volume']*LLL[stream_v]).sum()/(LLL['cell_volume']).sum()).v
+        if 0:
+            Q_H_mean = SphereVbar[ h_axis]
+            Q_V_mean = SphereVbar[ v_axis]
         Q_H -= Q_H_mean
         Q_V -= Q_V_mean
-        print("Q_mean", Q_H_mean, Q_V_mean)
 
         Q_H_p = proj(Q_H)
         Q_V_p = proj(Q_V)
@@ -142,11 +195,13 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
 
         #U_to_plot[ PPP_to_plot == 0] = np.nan
         #V_to_plot[ PPP_to_plot == 0] = np.nan
-        ax.streamplot(X_to_plot, Y_to_plot, U_to_plot, V_to_plot)
+        ax.streamplot(X_to_plot, Y_to_plot, U_to_plot, V_to_plot, density=2.5)
 
 
         axbonk(ax, xlabel='xyz'[h_axis], ylabel='xyz'[v_axis])
-        fig.savefig('plots_to_sort/proj_%s_%s_c%04d_n%04d_%s.png'%('xyz'[proj_axis],sim_name, core_id, frame,field_name))
+        outname='plots_to_sort/proj_%s_%s_c%04d_n%04d_%s_%s.png'%('xyz'[proj_axis],sim_name, core_id, frame,field_name, stream_name)
+        fig.savefig(outname)
+        print(outname)
 #       if 0:
 #           acceleration = [YT_grav_x, YT_grav_y, YT_grav_z]
 #           pw.annotate_streamlines( acceleration[h_axis], acceleration[v_axis], plot_args={'color':'g'})
@@ -198,7 +253,7 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
 #       print(pw.save('plots_to_sort/mountain_top_%s_c%04d%s'%(this_looper.sim_name, core_id, streamline)))
 
 
-if 1:
+if 0:
     fig,ax=plt.subplots(1,3,figsize=(12,4))
 
     for nsim,sim in enumerate(TL.loops):
@@ -212,7 +267,7 @@ if 1:
 
     fig.savefig('plots_to_sort/test.png')
 sim_list=['u601','u602','u603']
-sim_list=['u601']
+#sim_list=['u601']
 
 if 0:
     import three_loopers_six as TL
@@ -242,9 +297,9 @@ if 1:
             this_looper.read_targets_only(mountain_top_fname)
         infl=None
         massedge=None
-        #infl=inflection[sim].rinflection
+        infl=inflection[sim].rinflection
         #massedge=mass_edge[sim].edge
         
-        output=plot_mountain_top(this_looper,core_list=[120],
+        output=plot_mountain_top(this_looper,core_list=None,
                           r_inflection=infl)
                           #r_mass=massedge)
