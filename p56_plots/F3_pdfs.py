@@ -78,10 +78,10 @@ for nsim,this_simname in enumerate(sims_to_use):
     this_looper = loop_dict[this_simname]
 
 
-    FIELD = YT_density; label = 'abc'[nsim]
+    #FIELD = YT_density; label = 'abc'[nsim]
     #FIELD = YT_velocity_magnitude; label='def'[nsim]
     #FIELD = YT_magnetic_field_strength; label='ghi'[nsim]
-    #FIELD = YT_potential_field; label='jkl'[nsim]
+    FIELD = YT_potential_field; label='jkl'[nsim]
 
     #core_list = [10,32,84]
     core_list = np.unique(this_looper.tr.core_ids)
@@ -234,7 +234,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
         ks_string = do_ks( vals2[ok_p], maxwell[ok_p])
 
-        lab = r'$\eta_1 \mathcal{M}(\sigma_{1d}=%0.1f)$: %s'%(sigmav, ks_string)
+        lab = r'$\eta_1 \mathcal{M}(v;\sigma_{1d}=%0.1f)$: %s'%(sigmav, ks_string)
 
 
         ax.plot( v[ok_p], maxwell[ok_p] , label=lab, linestyle='--',c=[0.5]*4)

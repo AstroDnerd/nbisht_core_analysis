@@ -475,12 +475,13 @@ class mini_scrubber():
             self.rel_vz = self.raw_vz-self.mean_vz
             self.rel_vmag = (self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)**(0.5)
 
-            self.rx_hat = self.rx_rel/self.r
-            self.ry_hat = self.ry_rel/self.r
-            self.rz_hat = self.rz_rel/self.r
-            self.rx_hat[self.r==0]=0
-            self.ry_hat[self.r==0]=0
-            self.rz_hat[self.r==0]=0
+            self.rx_hat = np.zeros_like(self.r)
+            self.ry_hat = np.zeros_like(self.r)
+            self.rz_hat = np.zeros_like(self.r)
+            ok = self.r > 0
+            self.rx_hat[ok]= self.rx_rel[ok]/self.r[ok]
+            self.ry_hat[ok]= self.ry_rel[ok]/self.r[ok]
+            self.rz_hat[ok]= self.rz_rel[ok]/self.r[ok]
 
             self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
 
@@ -655,5 +656,12 @@ class mini_scrubber():
         self.float_x += shift_x
         self.float_y += shift_y
         self.float_z += shift_z
+    def compute_ge(self,core_id):
+        self.gx = self.trk.c([core_id],'grav_x')
+        self.gy = self.trk.c([core_id],'grav_y')
+        self.gz = self.trk.c([core_id],'grav_z')
+
+
+        self.ge = -1/(np.pi*8)*(self.gx**2+self.gy**2+self.gz**2)
 
 

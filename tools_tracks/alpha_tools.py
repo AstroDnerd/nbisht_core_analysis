@@ -19,7 +19,7 @@ class sub_trial():
         self.max_length=defaultdict(list)
         self.rms_length=defaultdict(list)
 
-        self.mass_interior=defaultdict(list)
+        self.mass_fraction_interior=defaultdict(list)
         self.EG_interior=defaultdict(list)
         self.EK_interior=defaultdict(list)
         self.virial_parameter=defaultdict(list)
@@ -55,6 +55,7 @@ class sub_trial():
             fig3,ax3=plt.subplots(1,1)
         for nc,core_id in enumerate(core_list):
             ms = trackage.mini_scrubber(thtr,core_id)
+            ms.compute_ge()
             tmap=rainbow_map(ms.ntimes)
             if ms.nparticles < 10:
                 continue
@@ -69,8 +70,12 @@ class sub_trial():
                 ax2list=ax2.flatten()
 
             for nt, time in enumerate(self.times):
+                mask = ms.compute_unique_mask(core_id,1/2048,nt)
+                ms.get_central_velocity(core_id,nt)
+
                 density = thtr.c([core_id],'density')[:,nt]
                 phi = thtr.c([core_id],'PotentialField')[:,nt]
+                ge = ms.ge[:,nt]
                 cell_volume = thtr.c([core_id],'cell_volume')[:,nt]
                 this_r = ms.r[:,nt]
                 this_r[ this_r < rmin] = rmin
@@ -79,7 +84,6 @@ class sub_trial():
                 rsort = this_r[asort]
                 dv = cell_volume[asort]
 
-                ms.get_central_velocity(core_id,nt)
                 #ms.get_central_velocity2(core_id,nt)
                 if velocity_method == 'vrm':
                     self.lab='vrm'
@@ -122,10 +126,18 @@ class sub_trial():
                 self.subsonic_length[core_id].append( subsonic_length)
 
                 #
+                # mass fraction interior
+                #
+                mass_total = (density[mask]*cell_volume[mask]).sum()
+                sorted_mask = mask[asort]
+
+                mass_interior = np.cumsum( density[asort][sorted_mask]*cell_volume[asort][sorted_mask])
+                self.mass_fraction_interior.append(mass_interior/mass_total)
+                #
                 # virial
                 #
 
-                EG_interior = np.cumsum(G*density[asort]*phi[asort]*cell_volume[asort])
+                EG_interior = np.cumsum(G*ge[asort]*cell_volume[asort])
                 EK_interior = np.cumsum(G*density[asort]*vrs**2*cell_volume[asort])
                 virial = EK_interior/EG_interior
                 self.virial_parameter[core_id].append( virial)

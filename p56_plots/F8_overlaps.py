@@ -85,10 +85,10 @@ if 1:
             ax[1][1].set_ylabel( ax[1][0].get_ylabel())
             ax[1][1].set_xlabel(r'$t/t_{\rm{ff}}$')
 
-            figure_sublabel.labs(0.68,-0.08,r'$8a$')(ax[0][0])
-            figure_sublabel.labs(0.758,-0.08,r'$8b$')(ax[0][1])
-            figure_sublabel.labs(0.68,1.15,r'$8c$')(ax[1][0])
-            figure_sublabel.labs(0.0,1.15,r'$8d$')(ax[1][1])
+            figure_sublabel.labs(0.68,-0.08  ,r'$7a$')(ax[0][0])
+            figure_sublabel.labs(0.758,-0.08 ,r'$7b$')(ax[0][1])
+            figure_sublabel.labs(0.68,1.15   ,r'$7c$')(ax[1][0])
+            figure_sublabel.labs(0.0,1.15    ,r'$7d$')(ax[1][1])
 
 
 

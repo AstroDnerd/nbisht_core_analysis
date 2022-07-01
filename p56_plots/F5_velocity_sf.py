@@ -127,8 +127,8 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=No
     minmin = pdf[pdf>0].min()
     vr_max = max([v.max() for v in self.vr])
     vr_min = min([ 0.1, my_sf2[1].min()])
-    print("MIN MIN", minmin, pdf.max())
-    print("MIN MIN", self.hist[ self.hist>0].min(), self.hist.max())
+    #print("MIN MIN", minmin, pdf.max())
+    #print("MIN MIN", self.hist[ self.hist>0].min(), self.hist.max())
     if external_norm is None:
         norm = mpl.colors.LogNorm(vmin=minmin,vmax=pdf.max())
     else:
@@ -157,12 +157,12 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=No
     if external_ax is None:
         fig.colorbar(ploot,ax=ax)
     if my_sf2 is not None:
-        print(my_sf2)
+        #print(my_sf2)
         the_x = my_sf2[0][1:]
         the_y = my_sf2[1][1:]
         ax.plot(the_x,the_y,c='k')
         pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
-        print("================",pfit)
+        #print("================",pfit)
         #ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
 
     outname = "%s/%svelocity_sf_%s_%s_hist_cXXXX_n%04d.pdf"%(dl.output_directory,longorno,self.lab, self.this_looper.out_prefix, frame)
@@ -224,13 +224,23 @@ if 1:
         the_x = Things[n][0][1:]
         the_y = Things[n][1][1:]*SCALE
         ax.plot(the_x,the_y,c='k')
-        pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
-        print("================",pfit)
-        ax.plot( the_x, 10**(np.log10(the_x)*pfit[0]+pfit[1]),c='r')
+        def yet_another_powerlaw(x,x0,a):
+            return a*np.log10(x/x0)
+        popt,pcov=curve_fit(yet_another_powerlaw, the_x, np.log10(the_y))
+        #ax.plot(the_x, 10**yet_another_powerlaw(the_x,*popt),c='g')
+        ax.plot(the_x, (the_x/popt[0])**popt[1],c='b')
+        print('cs (x/%0.8f)^(%0.2f)'%(popt[0],popt[1]))
+        if 0:
+            #pfit = np.polyfit(np.log10(the_x),np.log10(the_y), 1)
+            #print("================",pfit)
+            print(popt)
+            the_y=10**(np.log10(the_x)*pfit[0]+pfit[1])
+            the_y=the_x**pfit[0]*10**pfit[1]
+            ax.plot( the_x,the_y ,c='g')
         ax.set_yscale('log')
         ax.set_xscale('log')
     fig.savefig('plots_to_sort/messup.png')
-if 1:
+if 0:
     import sf2
     reload( sf2)
     fig,ax=plt.subplots(1,3,figsize=(12,4))

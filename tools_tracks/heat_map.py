@@ -84,7 +84,7 @@ def plot_heat(times=None, cores_used=None, quan_dict=None, ax=None, bins=None, n
     if 0:
         for ncore in a_few:
             ax.plot(these_times, quantity[ncore,:],c=[0.5]*4)
-    TheX, TheY, hist, dv=heat_map(quantity,  these_times,bins=bins,ax=ax)
+    TheX, TheY, hist, dv, plot=heat_map(quantity,  these_times,bins=bins,ax=ax)
     #axes[nt].plot(these_times, [2]*tool.times.size,c='r')#,lw=0.2)
     #axes[nt].plot(these_times, [1./2]*tool.times.size,c='r')#,lw=0.2)
     #axbonk(ax,ylabel=None,xlabel=r'$t/t_{\rm{ff}}$',yscale='log')

@@ -5,6 +5,7 @@ from scipy.optimize import curve_fit
 from scipy.ndimage import gaussian_filter
 sim_list=['u501']
 
+from scipy.interpolate import interp1d
 from collections import defaultdict
 import r_inflection
 
@@ -32,7 +33,7 @@ class slope_tool():
         G = ds['GravitationalConstant']/(4*np.pi)
         xtra_energy.add_energies(ds)
         for core_id in core_list:
-            print('Potential %s %d'%(this_looper.sim_name,core_id))
+            #print('Potential %s %d'%(this_looper.sim_name,core_id))
 
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
             c = nar([ms.mean_x[-1], ms.mean_y[-1],ms.mean_z[-1]])
@@ -40,10 +41,6 @@ class slope_tool():
             R_SPHERE = 8/128
             rsph = ds.arr(R_SPHERE,'code_length')
             sp = ds.sphere(c,rsph)
-            print('V1')
-
-
-
 
             GE = np.abs(sp['grav_energy'])
             dv = np.abs(sp['cell_volume'])
@@ -52,30 +49,14 @@ class slope_tool():
 
             R_KEEP = R_SPHERE #self.rinflection[core_id]
 
-
             #get the zones in the sphere that are
             #within R_KEEP
             ok_fit = np.logical_and(RR  < R_KEEP, GE>0)
 
             rok=RR[ok_fit].v
-            print('V2')
-
-            #
-            # Binding energy and GMM/R
-            #
-            ge_total = (GE[ok_fit]*dv[ok_fit]).sum()
-            mtotal = (sp['cell_mass'][ok_fit]).sum()
-            gmm      = G*mtotal**2/R_KEEP
-            self.output['ge_total'].append(ge_total)
-            self.output['gmm'].append(gmm)
-
-            #store stuff
-            self.output['mass'].append(mtotal)
-            self.output['r0'].append(R_KEEP)
-            print('V3')
 
             fig2,ax2=plt.subplots(1,1)
-            #ay0=ax2[0][0]; ay1=ax2[0][1];ay2=ax2[1][0]ay3=ax3[1][1]
+
             ay0=ax2
 
 
@@ -83,31 +64,32 @@ class slope_tool():
             rho_o = DD[ok_fit][ORDER].v
             ge_o = GE[ok_fit][ORDER].v
             dv_o  = dv[ok_fit][ORDER].v
-            rr_o  = RR[ok_fit][ORDER].v
+            rr_o_full  = RR[ok_fit][ORDER].v
             mass_r = (rho_o*dv_o).cumsum()
             enrg_r = (ge_o*dv_o).cumsum()
-            print('V4')
 
-            ay0.plot( rr_o, enrg_r, marker='*', c='k')
+            rr_o = np.linspace( max([1/2048, rr_o_full.min()]), rr_o_full.max(), 128)
 
-            #ge_r= 4*np.pi*A/( (rr_o**(2*alpha+2)*(2*alpha+5)))*(rr_o**(2*alpha+5)-rmin**(2*alpha+5))
-            #ay0.plot( rr_o, ge_r)
+            enrg_i = interp1d( rr_o_full, enrg_r)
+            ay0.plot( rr_o, enrg_i(rr_o), c='k')
 
-            #ay0.scatter( R_KEEP, ge_good, c='r', marker='*')
-
-            gmm_r = G*mass_r**2/rr_o
-            ay0.scatter(R_KEEP,self.output['gmm'][-1])
-            ay0.plot( rr_o, gmm_r, c='r')
+            gmm_r = interp1d( rr_o_full, G*mass_r**2/rr_o_full)
+            ay0.plot( rr_o, gmm_r(rr_o), c='r')
 
             
             az0=ay0.twinx()
-            all_r,all_m=rr_o[1:], mass_r[1:]
-            from scipy.interpolate import interp1d
-            mfunc = interp1d( all_r, all_m)
-            my_r = np.linspace(1/2048,all_r.max(),128)
-            my_m = mfunc(my_r)
-            #ay0.plot( my_r, my_m * enrg_r.max()/my_m.max(), c='m')
-            az0.plot( my_r, my_m )
+            all_r,all_m=rr_o_full[1:], mass_r[1:]
+            my_r = np.linspace(max([1/2048, all_r.min()]),all_r.max(),1024)
+            mbins = np.linspace( all_m.min(), all_m.max(), 128)
+            thing, mask = np.unique( all_r, return_index=True)
+              
+            mfunc = interp1d( all_r[mask], all_m[mask])
+            my_m = gaussian_filter(mfunc(my_r),2)
+            fact=enrg_r.max()/my_m.max()
+            ay0.plot( all_r, all_m*fact, c=[0.5]*4)
+            ay0.plot( my_r, my_m * fact, c='m')
+            #ay0.plot( xcen, average_mass, c='r')
+            #az0.plot( my_r, my_m )
             #az0.plot( rr_o, rho_o)
             #az0.set_yscale('log')
             dm=(my_m[1:]- my_m[:-1])
@@ -116,27 +98,31 @@ class slope_tool():
             dm_dr = dm/dr
             rbins = 0.5*(my_r[1:]+my_r[:-1])
 
-            fig3,ax3=plt.subplots(1,1)
             SWITCH=2*rbins*dm_dr/mm 
-            ax3.plot( rbins, SWITCH)
-            ax3.plot( rbins, rbins*0+1)
-            ax4=ax3.twinx()
-            ax4.plot( my_r, my_m)
-            ok = np.where(np.logical_and( rbins>0.01, SWITCH < 1))[0][0]
-            print('OK',ok)
-            ax4.scatter( my_r[ok-1], my_m[ok-1])
+            #az0.plot( rbins, SWITCH*my_m.max()/SWITCH.max())
+            az0.plot( rbins, SWITCH)
+            findit=np.logical_and( rbins>0.01, SWITCH < 1)
+            PROBLEM=False
+            if findit.sum() > 0:
+                ok = np.where(findit)[0][0]
+                SWITCH=2*rbins*dm_dr/mm 
+                az0.scatter( my_r[ok-1], my_m[ok-1])
+            else:
+                PROBLEM=True
+                print("PROBLEM CANNOT FIND RMASS")
+                
+            if PROBLEM:
+                ay0.set_title('NO MASS EDGE')
+            outname='plots_to_sort/%s_cuml_c%04d.png'%(this_looper.sim_name, core_id)
+            axbonk( ay0, xlabel='r',ylabel='E/M')
+            axbonk( az0, ylabel=r'$2 M^\prime/(M/R)$')
+            fig2.savefig(outname)
+            print(outname)
 
-            fig3.savefig('plots_to_sort/dr.png')
-
-
-            print('V5')
-
-            #fig2.savefig('plots_to_sort/%s_cuml_c%04d.png'%(this_looper.sim_name, core_id))
 
 
 
-
-            if 1:
+            if 0:
                 #Fit density
                 #Maybe its not necessary to histogram first, but it makes plotting easier.
                 rbins = np.geomspace( RR [RR >0].min(), RR .max(),67)
@@ -245,13 +231,14 @@ class slope_tool():
 
 if 'stuff' not in dir() or True:
     stuff={}
-    for sim in ['u503']:
+    for sim in ['u502', 'u503']:
         #stuff={}
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
-        core_list=list(all_cores)
-        core_list=all_cores[:1]
+        core_list=nar(all_cores)
+        #core_list = core_list[ core_list>12]
+        #core_list=all_cores[:1]
         #core_list=[323]
         #stuff[sim]=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
         stuff[sim]=slope_tool(TL.loops[sim], inflection[sim])
-        stuff[sim].run(core_list=core_list,do_plots=False, do_proj=False)
+        dr=stuff[sim].run(core_list=core_list,do_plots=False, do_proj=False)
 

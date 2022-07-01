@@ -161,7 +161,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
 
         if not center_on_sphere:
             center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
-            continue
+            all_left[frame]=left
+            all_right[frame]=right
+            all_center[frame]=center
 
         #
         # Find the extents of all cores.
@@ -242,12 +244,14 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                     print('wtf')
                     pdb.set_trace()
 
-        all_left[frame] = ds.arr(left,'code_length')
-        all_right[frame]= ds.arr(right,'code_length')
-        all_center[frame]=ds.arr(center,'code_length')
-        if (all_left[frame] >= all_right[frame]).any():
-            print("Should not have left bigger than right")
-            pdb.set_trace()
+
+        if center_on_sphere:
+            all_left[frame] = ds.arr(left,'code_length')
+            all_right[frame]= ds.arr(right,'code_length')
+            all_center[frame]=ds.arr(center,'code_length')
+            if (all_left[frame] >= all_right[frame]).any():
+                print("Should not have left bigger than right")
+                pdb.set_trace()
 
 
     #
@@ -311,6 +315,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                 #every line
                 for core_id in sorted_core_list:
                     color=color_dict[core_id]
+                    color=[1.0,0.5,0.5,0.5]
                     nparticles = mini_scrubbers[core_id].nparticles
                     if nparticles > 100:
                         #skip every 10 for the large ones.
@@ -377,9 +382,14 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         #
         for ax in axis_list:
             Rmax = np.sqrt( ( (right-left)**2).max(axis=0)).max()
-            scale = Rmax.v #2*max([Rmax, scale_min]).v
+            if hasattr(Rmax,'v'):
+                scale = Rmax.v #2*max([Rmax, scale_min]).v
+            else:
+                scale = Rmax
+
             print("SCALE", scale)
             scale = min([scale,1])
+            scale = max([scale,1/128])
             if only_sphere:
                 sph = ds.region(center,left,right)
                 #sph = ds.sphere(center,Rmax)
@@ -396,8 +406,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             #    pw = proj.to_pw(center = center,width=(1.0,'code_length'), origin='domain')
             pw = proj.to_pw(center = center, origin='domain')
             
-            if zoom == 'scale':
+            if zoom == 'scale' or zoom is True:
                 pw.zoom(1./(scale))
+                print('ZOOM',scale*128)
             elif type(zoom) == float or type(zoom) == int:
                 pw.zoom(zoom)
             if monotonic:
@@ -417,6 +428,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             for core_id in core_list:
                 positions = position_dict[core_id]
                 color=color_dict[core_id]
+                color = [1.0,0.0,0.0,0.8]
+                alpha=0.1
+                marker_size=1
                 if annotate:
                     #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
                     centroid=positions.mean(axis=0)
@@ -426,7 +440,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                                      coord_system='data')
                 if plot_particles:
                     pw.annotate_these_particles4(1.0, col=[color]*positions.shape[0], positions=positions, 
-                                                 p_size=marker_size)
+                                                 p_size=marker_size, alpha=alpha)
         pw.save('plots_to_sort/P3')
         if lic:
             pw.annotate_line_integral_convolution('magnetic_field_x','magnetic_field_y', lim=(0.5,0.65))

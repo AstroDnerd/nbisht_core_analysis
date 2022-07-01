@@ -11,7 +11,8 @@ import colors
 reload(colors)
 
 #import three_loopers_1tff as tl
-import three_loopers_mountain_top as TLM
+#import three_loopers_mountain_top as TLM
+import three_loopers_six as TLM
 
 clobber=False
 
@@ -25,16 +26,20 @@ import convex_hull_tools as CHT
 #    ht2.plot_2d(frames=[0])
 #if 'ht3' not in dir() or clobber:
 #    ht3 = hull_tool(tl.looper3)
-if 'ht1' not in dir() or clobber: 
-    ht1 = CHT.hull_tool(TLM.loops['u301'])
-if 'ht2' not in dir() or clobber:
-    ht2 = CHT.hull_tool(TLM.loops['u302'])
-    #ht2.plot_2d(frames=[0])
-if 'ht3' not in dir() or clobber:
-    ht3 = CHT.hull_tool(TLM.loops['u303'])
+#if 'ht1' not in dir() or clobber: 
+#    ht1 = CHT.hull_tool(TLM.loops['u301'])
+#if 'ht2' not in dir() or clobber:
+#    ht2 = CHT.hull_tool(TLM.loops['u302'])
+#    #ht2.plot_2d(frames=[0])
+#if 'ht3' not in dir() or clobber:
+#    ht3 = CHT.hull_tool(TLM.loops['u303'])
 
-looper_list = [TLM.loops['u301'], TLM.loops['u302'], TLM.loops['u303']]
-ht_list = [ht1,ht2,ht3]
+#looper_list = [TLM.loops['u301'], TLM.loops['u302'], TLM.loops['u303']]
+#ht_list = [ht1,ht2,ht3]
+simlist = ['u601','u602','u603']
+if 'ht_list' not in dir():
+    ht_list = [CHT.hull_tool( TLM.loops[sim]) for sim in simlist]
+    looper_list = [TLM.loops[sim] for sim in simlist]
 
 for ht in ht_list:
     if len(ht.hull_volumes) == 0:
@@ -64,6 +69,7 @@ if 'Lsonic' not in dir():
         pfit = np.polyfit(the_x,the_y, 1)
         Lsonic[name] = 10**(-pfit[1]/pfit[0])
         lab = r'$p = %0.2f L_s =$'%pfit[0]
+        print('Lsonic',Lsonic[name], 'exp',pfit[0])
         lab += davetools.expform(Lsonic[name])
         pfits[name]=pfit
         ax.plot(rbins, SS, colors.color[name]+"-", label = lab)
@@ -77,10 +83,10 @@ if 1:
     import p56_plots.density_AC as AC
     reload(AC)
     if 'a1' not in dir():
-        a1 = AC.ac_thing('u301'); a1.plot()
-        a2 = AC.ac_thing('u302'); a2.plot()
-        a3 = AC.ac_thing('u303'); a3.plot()
-        acs={'u301':a1,'u302':a2,'u303':a3}
+        a1 = AC.ac_thing('u601'); a1.plot()
+        a2 = AC.ac_thing('u602'); a2.plot()
+        a3 = AC.ac_thing('u603'); a3.plot()
+        acs={'u601':a1,'u602':a2,'u603':a3}
 
 if 1:
     #
@@ -90,14 +96,26 @@ if 1:
     L_rho={}
     L_jea={}
     fig,ax=plt.subplots(1,1)
-    for nrun,ht in enumerate([ht1,ht2,ht3]):
-        c=colors.color[ ht.this_looper.out_prefix]
+    for nrun,ht in enumerate(ht_list):
+        name =  ht.this_looper.out_prefix
+        c=colors.color[name]
+        ac = acs[name]
         name = ht.this_looper.out_prefix
 
         do_label=False
         lab=None
         if nrun==0:
             do_label=True
+
+        #
+        # Jeans Length
+        #
+        csound = 1
+        rho0 = 1
+        G = 1620/(4*np.pi)
+        Ljeans = csound/np.sqrt(G*rho0)
+        #ax.plot([Ljeans,Ljeans],[0,0.6], 'k')
+        L_jea[name] = Ljeans
 
         #
         # Hull lengths
@@ -112,7 +130,7 @@ if 1:
 
         stuff += r'$L_s =$%s'%davetools.expform(Lsonic[name])
 
-        stuff += r'$L_v =$%s'%davetools.expform(L)
+        stuff += r'$L_v =$%s'%davetools.expform(ac.L)
 
         stuff += r'$L_J =$%s'%davetools.expform(Ljeans)
 
@@ -129,7 +147,7 @@ if 1:
         rbins, Vac,L  = sfs[name].bin_ac()
         ax.plot(rbins, Vac/Vac[0], c=c,linestyle='--',label=lab)
         L_vel[name] = L
-        print(L)
+        print('Velocity AC',L)
 
 
         #
@@ -141,16 +159,8 @@ if 1:
         ax.plot(ac.binned[1],ac.binned[2]/ac.binned[2][0], c=c,linestyle=':',label=lab)
         #ax.plot([ac.L,ac.L],[0,0.6], c)
         L_rho[name]=ac.L
+        print('Rho AC', ac.L)
 
-        #
-        # Jeans Length
-        #
-        csound = 1
-        rho0 = 1
-        G = 1620/(4*np.pi)
-        Ljeans = csound/np.sqrt(G*rho0)
-        #ax.plot([Ljeans,Ljeans],[0,0.6], 'k')
-        L_jea[name] = Ljeans
 
 
         #rect=patches.Rectangle((0,0),ac.L,ac.ACb[0],facecolor=[0.8]*3)

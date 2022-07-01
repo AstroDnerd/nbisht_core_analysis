@@ -25,7 +25,9 @@ import sf2
 frame=0
 sim_list = ['u601']
 
-method = "vtc"
+#methos vrc is relative to center.
+method = "vrc"
+#method = "vtc"
 #total or radial (tr)
 #central, mean, central dentisy (c,m,cd)
 # vrc is radial central, for comparison with S2L.
@@ -35,7 +37,8 @@ if 'Lsubtool' not in dir():
     Lsubtool={}
     for this_simname in sim_list:
         Lsubtool[this_simname] = alpha_tools.sub_trial( TL.loops[this_simname])
-        Lsubtool[this_simname].run(do_plots=['virial_radius'], velocity_method=method)
+        Lsubtool[this_simname].run(do_plots=None, velocity_method=method)
+        #Lsubtool[this_simname].run(do_plots=['virial_radius'], velocity_method=method)
         #Lsubtool[this_simname].v_hist(frame, core_list = [13,14,15,16,17,18,19,21])
 #   run2 = sub_trial(TLM.loops['u302'])
 #   run2.v_hist(frame)#, core_list = [10,32,323])
@@ -60,7 +63,9 @@ subsonic_ext = extents()
 for core in Lsubtool[this_simname].subvirial_length:
     subvirial_ext( nar(Lsubtool[this_simname].subvirial_length[core]))
     subsonic_ext( nar(Lsubtool[this_simname].subsonic_length[core]))
-if 1:
+
+if 0:
+    #4 panel length heatmap.
     for this_simname in sim_list:
         fig,axes=plt.subplots(2,2)
         axlist=axes.flatten()
@@ -89,11 +94,28 @@ if 1:
         bins = np.concatenate([[0],np.geomspace(0.5/2048,0.6,32)])
         virial_max={}
         v_m_rat = extents()
-        for core_id in Lsubtool[this_simname].subvirial_length:
-            virial_max[core_id] = nar(Lsubtool[this_simname].subvirial_length[core_id])/nar(Lsubtool[this_simname].max_length[core_id])
+        core_list = list(Lsubtool[this_simname].subsonic_length.keys())
+        ntimes = len(Lsubtool[this_simname].subsonic_length[core_list[0]])
+        RatioArray=np.zeros( [len(core_list), ntimes])
+        for nc,core_id in enumerate(core_list):
+            VL = nar(Lsubtool[this_simname].subsonic_length[core_id])
+            VM = nar(Lsubtool[this_simname].max_length[core_id])
+            VM = nar(Lsubtool[this_simname].rms_length[core_id])
+            virial_max[core_id] = VL/VM
+            RAT=VL/VM
+            axlist[0].plot( virial_max[core_id], c=[0.3]*4)
+            axlist[1].plot( Lsubtool[this_simname].mass_interior)
+            RatioArray[nc,:]=RAT
+            #axlist[0].plot( VL, c=[0.3]*4)
+            #axlist[1].plot( VM, c=[0.3]*4)
+            #axlist[0].plot( RAT, c=[0.3]*4)
+
+            #virial_max[core_id] = nar(Lsubtool[this_simname].subvirial_length[core_id])
             v_m_rat(virial_max[core_id])
-        qmatrix=heat_map.plot_heat( tool=Lsubtool[this_simname], quan_dict = virial_max,
-                                   ax=axlist[0])
+        bins = np.concatenate([[0],np.geomspace(0.5/2048,1.5,32)])
+        axlist[1].boxplot(np.log10(RatioArray))
+        #qmatrix=heat_map.plot_heat( tool=Lsubtool[this_simname], quan_dict = virial_max,
+        #                           ax=axlist[0], bins=bins)
 #        qmatrix=heat_map.plot_heat( tool=Lsubtool[this_simname], quan_dict = Lsubtool[this_simname].subvirial_length, 
 #                                   ax=axlist[1],bins=bins)
 #        qmatrix=heat_map.plot_heat( tool=Lsubtool[this_simname], quan_dict = Lsubtool[this_simname].max_length, 
@@ -101,7 +123,10 @@ if 1:
 #        qmatrix=heat_map.plot_heat( tool=Lsubtool[this_simname], quan_dict = Lsubtool[this_simname].rms_length, 
 #                                   ax=axlist[3],bins=bins)
         outname = "plots_to_sort/%s_length_ratios_%s.png"%(this_simname,method)
-        axbonk(axlist[0],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{subvirial}/L_{max}$')
+        axbonk(axlist[0],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{subvirial}/L_{max}$', yscale='log')
+        #axbonk(axlist[1],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{subvirial}/L_{max}$', yscale='log')
+        #axlist[0].set_ylim([5e-4,1])
+        #axlist[1].set_ylim([5e-4,1])
 #        axbonk(axlist[1],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{subvirial}$',yscale='log')
 #        axbonk(axlist[2],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{max}$',yscale='log')
 #        axbonk(axlist[3],xlabel=r'$t/t_{ff}$', ylabel=r'$L_{rms}$',yscale='log')
