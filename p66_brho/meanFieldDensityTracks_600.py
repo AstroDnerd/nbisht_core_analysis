@@ -355,7 +355,7 @@ if 1:
 
         # OPEN UP ALL THE FIGURES AND AXIS 
         # SINGLE PANEL 
-        if 0:
+        if 1:
             fig, ax1=plt.subplots(1,1) 
             fig0, ax0=plt.subplots(1,1)
 
@@ -387,7 +387,7 @@ if 1:
                 lplots = [0,ax1,ax2,ax3,ax4,ax5,ax6,ax7,0,ax8,ax9,0] 
 
 
-        if 1:  # IF DOING <B> vs <n> BY FRAME, SINGLE PANEL
+        if 0:  # IF DOING <B> vs <n> BY FRAME, SINGLE PANEL
             fig2,ax2 = plt.subplots(1,1) 
             fig3,ax3 = plt.subplots(1,1) 
             fig4,ax4 = plt.subplots(1,1) 
@@ -542,26 +542,26 @@ if 1:
             the_cv=np.append(the_cv,this_cv)
       
 
-            if 0: # FOR ALL TIME
+            if 1: # FOR ALL TIME
                 tmap = rainbow_map(len(this_rho))  #used to be[:-1]
                 ctr = [tmap(n) for n in range(len(this_rho))]  #used to be[:-1]
-                ax1.scatter(this_field, this_field_z,c=ctr,marker='*')  
-                this_field = this_field_z
-                ax1.plot(this_field,this_field_z,linestyle='dashed')
-                #ax1.scatter(this_rho[:-1], this_field[:-1],c=ctr,marker='*')  
+                #ax1.scatter(this_field, this_field_z,c=ctr,marker='*')  
+                #this_field = this_field_z
+                #ax1.plot(this_field,this_field_z,linestyle='dashed')
+                ax1.scatter(this_rho, this_field,c=ctr,marker='*',alpha=0.5)  
                 #ax1.scatter(this_rho[0], this_field[0],c='b',marker='*')  
                 #ax1.scatter(this_rho[-1], this_field[-1],c='r',marker='*')  
                 #ax1.plot(this_rho,this_field,c=[0.5]*4)
-                ax1.set_xlabel(r'$B_avg$')
-                ax1.set_ylabel(r'$B_avgz$')
-                ax1.set_xscale('log')
-                ax1.set_yscale('log')
+                #ax1.set_xlabel(r'$B_avg$')
+                #ax1.set_ylabel(r'$B_avg$')
+                #ax1.set_xscale('log')
+                #ax1.set_yscale('log')
                 if 0: # IF NOT PLOTTING POWER LAW
                     outname_all='BzBTracks_%s'%simnames[nt]
                     fig.savefig(outname_all)
                     print("saved")
 
-            if 1: # FOR ONE FRAME PER TIME; SINGLE PANEL 
+            if 0: # FOR ONE FRAME PER TIME; SINGLE PANEL 
                 #xlims = 0.4,1.8
                 #ylims = 0.0,5.0
                 for i in range(len(axplts)): 
@@ -650,12 +650,12 @@ if 1:
                 the_cvs = the_cv[i::coreint]
 
                 # for power law for all time minus the last frame 
-                minusone = coreint-1
-                if i < minusone:  #for ALL frames 
-                    the_sxx= np.append(the_sxx,the_sx)   
-                    the_syy= np.append(the_syy,the_sy) 
-                    the_syzz= np.append(the_syzz,the_syz)
-                    the_syzzs = np.append(the_syzzs,the_syzs)  
+                #minusone = coreint-1
+                #if i < minusone:  #for ALL frames 
+                the_sxx= np.append(the_sxx,the_sx)   
+                the_syy= np.append(the_syy,the_sy) 
+                the_syzz= np.append(the_syzz,the_syz)
+                the_syzzs = np.append(the_syzzs,the_syzs)  
 
                 #sX = np.linspace(the_sx.min(),the_sx.max(),num=len(the_sx))  #short: -2, +3   
                 sX = np.linspace(the_sX.min(),the_sX.max(),num=len(the_sX))  #short: -2, +3   
@@ -679,7 +679,7 @@ if 1:
                 salpha_zr = np.append(salpha_zr,salpha_z)
 
                 # pearsonR
-                if 0:
+                if 1:
                     xs = np.std(the_sx)
                     #ys = np.std(the_sy)
                     ys = np.std(the_syz)
@@ -711,7 +711,7 @@ if 1:
                 
                 # PER PANEL
                 # need x,y limits
-                if 1:
+                if 0:
                     xlims = 1e-1,1e8
                     ylims = 1e-2,1e4
                     print('inside plotting the power law')
@@ -803,11 +803,12 @@ if 1:
             #alphaFile.write("Sim %s Alpha %f \n"%(simnames[nt],salpha))
             alphaFile.close()
 
-        if 0:
+        if 1:
             # PLOT THE POWER LAW: all time 
-            #pfit = np.polyfit(the_sxx,the_syy,1)  #B VS RHO
-            pfit = np.polyfit(the_syy,the_syzz,1)  #BZsigned VS B
+            pfit = np.polyfit(the_sxx,the_syy,1)  #B VS RHO
+            #pfit = np.polyfit(the_syy,the_syzz,1)  #BZsigned VS B
             alpha = pfit[0]
+            print('alpha',alpha)
             Bavg_o = pfit[1]
             # AND THE PEARSON R
             allxs = np.std(the_sxx)
@@ -819,24 +820,24 @@ if 1:
             print('pearX_%s'%simnames[nt])
             print(pearX)
 
-            #X = np.linspace(the_sxx.min(),the_sxx.max(),num=len(the_sxx))  #short: +2, -3   
-            X = np.linspace(the_syy.min(),the_syy.max(),num=len(the_syy))  #short: +2, -3   
+            X = np.linspace(the_sxx.min(),the_sxx.max(),num=len(the_sxx))  #short: +2, -3   
+            #X = np.linspace(the_syy.min(),the_syy.max(),num=len(the_syy))  #short: +2, -3   
             XX = 10 ** X
             Y = 10 ** (pfit[0]*X + pfit[1])                
             
-            if 0:
-                ax1.plot(XX,Y,c='k',linewidth=1.0)
+            if 1:
+                ax1.plot(XX,Y,c='m',linewidth=1.0)
                 if 1: # ORGANIZE YOUR PLOTTINGS!
-                    #xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
-                    #ylabels = r'$\left\langle\mid B \mid\right\rangle$'
-                    #xlims = 1e-1,1e8
-                    #ylims = 1e0,1e4
-                    ax1.set_title(r'$m = %.3f$'%alpha)
-                    #magfield_density_tool.labelled(ax1,xscale='log',yscale='log',xlabel=xlabels,ylabel=ylabels,\
-                    #         xlim=xlims, ylim=ylims)#,title=r'$\alpha = %.3f$'%alpha)
+                    xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
+                    ylabels = r'$\left\langle\mid B \mid\right\rangle (\mu G)$'
+                    xlims = 1e-1,1e8
+                    ylims = 1e0,1e4
+                    #ax1.set_title(r'$m = %.3f$'%alpha)
+                    magfield_density_tool.labelled(ax1,xscale='log',yscale='log',xlabel=xlabels,ylabel=ylabels,\
+                             xlim=xlims, ylim=ylims)#,title=r'$\alpha = %.3f$'%alpha)
 
-                #outname_all='BnTracks_pl_mone_%s'%simnames[nt]
-                outname_all='BzBTracks_%s'%simnames[nt]
+                outname_all='BnTracks_pl_final%s'%simnames[nt]
+                #outname_all='BzBTracks_%s'%simnames[nt]
                 fig.savefig(outname_all)
                 print("saved")
 

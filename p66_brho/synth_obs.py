@@ -52,18 +52,17 @@ class telescope():
             Bx = 'magnetic_field_x'
             By = 'magnetic_field_y'
             Bz = 'magnetic_field_z'
+            
             xax = ds.coordinates.x_axis[2]  #..[proj_axis]  
             yax = ds.coordinates.y_axis[2]
-            #zax = ds.coordinates.z_axis[0]  
             Rx = all_particles[xax]
-            Ry = all_particles[yax]
-            #Rz = all_particles[zax]
-            R2d = np.sqrt(Rx**2 + Ry**2)  #find the other two
+            Ry = all_particles[yax] 
+            R2d = np.sqrt(Rx**2 + Ry**2)
             #radius = R2d.max()
+            
             radius = 1/128
             area = np.pi * radius**2
-            areaXY = np.pi * radius**2
-            #the_radius = max([radius,3./128])
+            #radius = max([radius,3./128])
          
             # THE AVERAGED BLOS AND DENSITY TO BE PLOTTED
             the_Cyl = ds.disk(the_center,the_normalZ,radius,height=(1,'code_length'))

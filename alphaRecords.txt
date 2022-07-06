@@ -1,0 +1,3 @@
+Sim u601 meanAlpha 0.203707 
+Sim u602 meanAlpha 0.312828 
+Sim u603 meanAlpha 0.376199 

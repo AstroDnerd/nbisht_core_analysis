@@ -14,6 +14,10 @@ FIG 1 MASKED, WITHOUT FINAL FRAME
 Sim u401 meanAlpha 0.196332 
 Sim u402 meanAlpha 0.313983 
 Sim u403 meanAlpha 0.383146 
+FIG 1 MASKED, FTA, with the last frame included
+Sim u601 meanAlpha 0.203707 
+Sim u602 meanAlpha 0.312828 
+Sim u603 meanAlpha 0.376199 
 
 
 FIG #5, no meanbears or figbears
@@ -173,3 +177,5 @@ SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), noOK: Bz, [2], normal = [0,0,1]
 Sim 0 alpha 0.955191 
 Sim 1 alpha 0.967184 
 Sim 2 alpha 0.998295 
+
+

@@ -23,7 +23,7 @@ from scipy.optimize import curve_fit
 import matplotlib.gridspec as gridspec
 import matplotlib.ticker as mtick
 
-
+import math
 plt.close('all')
 
 
@@ -147,18 +147,18 @@ class BRho_tool():
 
         def scatterplots(fig=None,ax1=None,ax2=None,ax3=None,ax4=None,ax5=None,ax7=None,ax8=None,
                          lplots=None,xx2=None,yy=None,yym=None):
-           
+          
             if typeplot == 'scatter_plot' and core_id == core_val:
-                if n_time <= asort[-2]:
+                if n_time <= asort[-1]:
                     #print('n_time',n_time)  #TIME CHECK
                     ax1.scatter(density[mask,n_time],magfield[mask,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times            
 
                 xlims = 10e-3,10e6      
                 ylims = 10e-2,10e3      
-                if n_time == asort[-2]:  #this way THIS DOES NOT SAVE THE FINAL erronous frame  
+                if n_time == asort[-1]:  #this way THIS DOES NOT SAVE THE FINAL erronous frame  
                     #print('tfflabs for printing',tfflabs[n_time])  #TIME CHECK
                     ax1.plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
-                    ax1.plot(xx2,yym,'--',c='k',linewidth=1.0) #c=c[0] for colors
+                    ax1.plot(xx2,yym,'--',c='m',linewidth=1.0) #c=c[0] for colors
                     BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu G)$',
                                        xlim=xlims, ylim=ylims)#,title=r'$\alpha_{b\rho} = %.3f$'%beta)
                                        #xlim=rho_extents.minmax, ylim=magfield_extents.minmax,title=r'$\alpha_{b\rho} = %.3f$'%beta) 
@@ -235,40 +235,40 @@ class BRho_tool():
                 if 1:
                     if core_id == core_list[-1]:
                         if name == 'u601':
-                            #meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
+                            meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
                             # the following is B_z
-                            meanbear = [0.193,0.057,0.530,0.484,0.384,0.247,0.454,0.173,-0.031,0.013,0.032,0.122,0.389,0.521]
+                            #meanbear = [0.193,0.057,0.530,0.484,0.384,0.247,0.454,0.173,-0.031,0.013,0.032,0.122,0.389,0.521]
                             fitbear = [0.037122767966842135,0.06130065264472109,0.10876453322815462,0.12037348290995548,0.1256151386016793,0.12584476500389483,\
                                        0.12960541113191903,0.14452750478517815,0.16035081563879608,0.17350352881649694,0.20320963091004954,0.22354626336366118,\
                                        0.27401985393584366,0.3323051356106275]
                         if name == 'u602':
-                            #meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+                            meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
                             # the following is B_z
-                            meanbear = [0.224,0.107,0.032,0.518,0.673,0.496,0.578,0.385,0.231,0.247,0.285,0.339,0.532]
+                            #meanbear = [0.224,0.107,0.032,0.518,0.673,0.496,0.578,0.385,0.231,0.247,0.285,0.339,0.532]
                             fitbear = [0.15059829575793074,0.19999384737531586,0.24022574462120863,0.27614753632431754,0.27614753632431754,0.29332289603778755,\
                                        0.3097313041491559,0.30801461152950443,0.31782695369769487,0.3358170167076137,0.3148400500596815,0.28845754861915246,\
                                        0.41477394063271383]
                         if name == 'u603': 
-                            #meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
+                            meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
                             # the following is B_z
-                            meanbear = [0.540,0.433,0.519,0.700,0.452,0.558,0.317,0.220,0.114,0.242,0.141,0.684]
+                            #meanbear = [0.540,0.433,0.519,0.700,0.452,0.558,0.317,0.220,0.114,0.242,0.141,0.684]
                             fitbear = [0.22829863399090444,0.3185318136356117,0.37526692580639975,0.40111503807258014,0.40640704584839654,0.38681096100128876,\
                                        0.38332517520463627,0.39490446738439916,0.371243675696434,0.3321847915857663,0.32833900753678574,0.3893047090450924]
-                        self.bear0 = np.append(self.bear0,(meanbear[0],fitbear[0]))
-                        self.bear1 = np.append(self.bear1,(meanbear[1],fitbear[1]))
-                        self.bear2 = np.append(self.bear2,(meanbear[2],fitbear[2])) 
-                        self.bear3 = np.append(self.bear3,(meanbear[3],fitbear[3])) 
-                        self.bear4 = np.append(self.bear4,(meanbear[4],fitbear[4])) 
-                        self.bear5 = np.append(self.bear5,(meanbear[5],fitbear[5])) 
-                        self.bear6 = np.append(self.bear6,(meanbear[6],fitbear[6]))  
-                        self.bear7 = np.append(self.bear7,(meanbear[7],fitbear[7])) 
-                        self.bear8 = np.append(self.bear8,(meanbear[8],fitbear[8])) 
-                        self.bear9 = np.append(self.bear9,(meanbear[9],fitbear[9]))
-                        self.bear10 = np.append(self.bear10,(meanbear[10],fitbear[10])) 
-                        self.bear11 = np.append(self.bear11,(meanbear[11],fitbear[11]))
+                        self.bear0 = np.append(self.bear0,(meanbear[0]))#,fitbear[0]))
+                        self.bear1 = np.append(self.bear1,(meanbear[1]))#,fitbear[1]))
+                        self.bear2 = np.append(self.bear2,(meanbear[2]))#,fitbear[2])) 
+                        self.bear3 = np.append(self.bear3,(meanbear[3]))#,fitbear[3])) 
+                        self.bear4 = np.append(self.bear4,(meanbear[4]))#,fitbear[4])) 
+                        self.bear5 = np.append(self.bear5,(meanbear[5]))#,fitbear[5])) 
+                        self.bear6 = np.append(self.bear6,(meanbear[6]))#,fitbear[6]))  
+                        self.bear7 = np.append(self.bear7,(meanbear[7]))#,fitbear[7])) 
+                        self.bear8 = np.append(self.bear8,(meanbear[8]))#,fitbear[8])) 
+                        self.bear9 = np.append(self.bear9,(meanbear[9]))#,fitbear[9]))
+                        self.bear10 = np.append(self.bear10,(meanbear[10]))#,fitbear[10])) 
+                        self.bear11 = np.append(self.bear11,(meanbear[11]))#,fitbear[11]))
                         if name == 'u601':
-                            self.bear12 = np.append(self.bear12,(meanbear[12],fitbear[12]))    
-                            self.bear13 = np.append(self.bear13,(meanbear[13],fitbear[13])) 
+                            self.bear12 = np.append(self.bear12,(meanbear[12]))#,fitbear[12]))    
+                            self.bear13 = np.append(self.bear13,(meanbear[13]))#,fitbear[13])) 
 
                 self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
                               self.bear7,self.bear8,self.bear9,self.bear10,self.bear11,self.bear12,self.bear13]
@@ -343,9 +343,9 @@ class BRho_tool():
  
             # FIELDS
             density = thtr.c([core_id],'density') 
-            #magfield = thtr.c([core_id],'magnetic_field_strength')  #EDITED FOR Z COMPONENT ONLY!!
+            magfield = thtr.c([core_id],'magnetic_field_strength')  #EDITED FOR Z COMPONENT ONLY!!
             magfield_sign = thtr.c([core_id],'magnetic_field_z') 
-            magfield = abs(magfield_sign)   
+            #magfield = abs(magfield_sign)   
 
             magden = magfield/density
             cv = thtr.c([core_id],'cell_volume')  
@@ -405,7 +405,6 @@ class BRho_tool():
                     densityflat = np.log10(density[mask,n_time]).flatten()
                     magfieldflat = np.log10(magfield[mask,n_time]).flatten()
                 
-                if 0:  #FOR ALL TIME ALPHA
                     densitymasked = np.append(densitymasked,densityflat)
                     magfieldmasked = np.append(magfieldmasked, magfieldflat)
 
@@ -414,7 +413,7 @@ class BRho_tool():
                         densitymasked = np.append(densitymasked,densityflat)
                         magfieldmasked = np.append(magfieldmasked, magfieldflat)
 
-                if timing =='all_time' and n_time == asort[-2]:
+                if timing == 'all_time' and n_time == asort[-1]:
                     #print('tfflabs masked for polyfit',tfflabs[n_time])  #TIME CHECK
                     X = densitymasked
                     X2 = np.linspace(X.min(),X.max(),num=len(X))  # FOR ALL TIME, ONE PANEL PLOTS 
@@ -422,13 +421,13 @@ class BRho_tool():
                     Y = magfieldmasked
 
                 elif timing == 'all_time': 
-                    #print('tfflabs wait while being masked',tfflabs[n_time])  #TIME CHECK
+                #    #print('tfflabs wait while being masked',tfflabs[n_time])  #TIME CHECK
                     XX2 = 0
                     YY = 0
                     YY_mean = 0
                                
                 # POLY-FITTING:
-                if timing == 'per_frame' or n_time == asort[-2]:
+                if timing == 'per_frame' or n_time == asort[-1]:
                     #print('tfflabs the polyfit',tfflabs[n_time])  #TIME CHECK
                     pfit = np.polyfit(X,Y,1) 
                     other = np.poly1d(pfit)
@@ -437,6 +436,7 @@ class BRho_tool():
                     YY = 10 ** (pfit[0]*X2 + pfit[1]) 
 
                     self.betarr = np.append(self.betarr,beta)                         
+                    
                     # THE NEGATIVE OUTLIERS
                     #if beta < 0: 
                     #    self.time_stamp = np.append(self.time_stamp,n_time)
@@ -452,13 +452,13 @@ class BRho_tool():
                             print("A zero encountered!!",allxs,allys)
  
                     # plot the alpha of the mean;  #may need to be edited 
-                    # these have mask & not the last frame incorporated
+                    # these have mask
                     if name == 'u601':
-                        YY_mean = 10 ** ((0.196)*X2 + pfit[1])
+                        YY_mean = 10 ** ((0.204)*X2 + pfit[1])
                     if name == 'u602':
-                        YY_mean = 10 ** ((0.314)*X2 + pfit[1])
+                        YY_mean = 10 ** ((0.313)*X2 + pfit[1])
                     if name == 'u603':
-                        YY_mean = 10 ** ((0.383)*X2 + pfit[1])
+                        YY_mean = 10 ** ((0.373)*X2 + pfit[1])
 
  
                 # FOR HISTOGRAMS OF DESIRED VALUES
@@ -564,24 +564,34 @@ class BRho_tool():
             plt.close(fig)  # at this position, †his closes the plot of each core for all time
             if 0:  # write alpha means of all cores for all time at once
                 if core_id == core_list[-1]:
-                    alphaFile = open("alphaRecords.txt",'a')
+                    alphaFile = open("p66_brho/alphaRecords.txt",'a')
                     # the following 3 prints should match
                     print("core_list_len",len(core_list))
                     print("lenAlphas ",len(self.betarr))   
-                    print("lenPears ",len(self.pearsonr))   
+                    #print("lenPears ",len(self.pearsonr))   
                     meanAlpha = np.mean(self.betarr)
-                    meanPear = np.mean(self.pearsonr)
+                    #meanPear = np.mean(self.pearsonr)
                     print('meanAlpha ',meanAlpha)
-                    print('meanPear',meanPear)
+                    #print('meanPear',meanPear)
                     alphaFile.write("Sim %s meanAlpha %f \n"%(name,meanAlpha))
-                    alphaFile.write("Sim %s meanPear %f \n"%(name,meanPear))
+                    #alphaFile.write("Sim %s meanPear %f \n"%(name,meanPear))
                     alphaFile.close()
         return ax2,fig
 
 
     def twopanels(self,num,name,ax2,fig,coreval):
         # this panel needs to run ALL CORES
-        ax2.hist(self.betarr, 64, density=True, histtype='step', color='k')
+        the_min = self.betarr.min()
+        the_max = self.betarr.max()
+        the_bins = math.isqrt(len(self.betarr))
+        the_FTA = np.mean(self.betarr)
+        atf = [0.175,0.270,0.316]
+        the_ATF = atf[num]  
+        the_bins = np.linspace(the_min,the_max,num=the_bins)  #'original': 64
+        ax2.hist(self.betarr, bins=the_bins, density=True, histtype='step', color='k')
+        ax2.axvline(the_FTA, color='m', linestyle='dashed')
+        ax2.axvline(the_ATF, color='m')
+
         ax2.yaxis.tick_right()
         ax2.set_xlabel(r'$\alpha$') 
         ax2.set_ylabel('%') 
@@ -698,28 +708,27 @@ class BRho_tool():
             index.append(key)
             data.append(val)
         fig, ax1=plt.subplots(1,1)    
+        #fig, (ax1, ax2) = plt.subplots(1, 2)
+        #fig.subplots_adjust(wspace=0, hspace=0)
+
 
         meanpointprops = dict(marker='.', markeredgecolor='black',markerfacecolor='blue')  # was firebrick :), # marker options
         # showmeans = triangle green, meanline = solid orange line, by default, set meanline=True for dotted green of mean...
-        #bparts = ax1.boxplot(data,showfliers=True,showmeans=True,meanline=True)  # bparts is now a dictionary; the originial box     
-        bparts = ax1.boxplot(data,meanprops=meanpointprops,showmeans=True,meanline=False,showfliers=False)
+        bparts = ax1.boxplot(data, meanprops=meanpointprops, showmeans=True, meanline=False, showfliers=False)
         for i,val in enumerate(tff_lab):
             y = data[i] 
             x = np.random.normal(1+i, 0.04, size=len(y))
+
             ax1.plot(x, y, 'b.', alpha=0.2)
             if 1:
-                y2 = data[i][-2]
-                x2 = x[-2] 
+                y2 = data[i][-1]
+                x2 = x[-1] 
                 ax1.plot(x2,y2,'r.',alpha=1)  #alpha changes the opacity  
                 #y3 = data[i][-1]
                 #x3 = x[-1] 
                 #ax1.plot(x3,y3,'k.',alpha=1)
                                           #CAREFUL because now I have changed the mean, see if it makes a huge difference :(,\
                                           #compare relative spacings with excel values
-        #ax = df.boxplot()
-        #ax.scatter(np.arange(df.shape[1])+1, df.loc[2000], color='r')
-        #ax1.scatter(np.arange(ax1.shape[1])+1, bparts.loc[data[-1][-1]], color='r')  #EDIT
-
 
         # EXPERIMENTS
         if 0: #not tested yet
@@ -740,23 +749,35 @@ class BRho_tool():
             breakpoint()  #to try the dictionary
  
         #To compare boxplot with a zero, affects the position of the plots
+        a = 0.4
         if num == 0: 
-            ax1.plot([1,13],[0,0],c=[0.5]*4) 
-            ax1.plot([1,13],[0.667,0.667],'m--',c=[0.5]*4)
+            meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12,13],meanbear[:-1],c='r',alpha=a)
+            #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11,12,13],meanbear[:-1],s=12,c='r')
+
+            ax1.plot([1,13],[0,0],'--',c=[0.5]*4) 
+            ax1.plot([1,13],[0.667,0.667],'--',c=[0.5]*4)
             ax1.plot([1,13],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,13],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,13],[0.333,0.333],'--',c=[0.5]*4)
+
+            ax1.plot([1,13],[0.238,0.238],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,13],[0.204,0.204],'--',c='m',alpha=a)  #our own average FTA
             tff_mod = [0.0,0.0,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95] 
             ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
             title = r'$\beta = 0.2$'
  
-            therange = np.arange(0,1,0.075)
-            #means = np.append(means,[np.nan]*1) 
-            #ax.plot(therange,means,c='g',linestyle='dotted')
         if num == 1: 
-            ax1.plot([1,12],[0,0],c=[0.5]*4) 
+            meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12],meanbear[:-1],c='r',alpha=a)
+            #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11,12],meanbear[:-1],s=12,c='r')
+
+            ax1.plot([1,12],[0,0],'--',c=[0.5]*4) 
             ax1.plot([1,12],[0.667,0.667],'--',c=[0.5]*4)
             ax1.plot([1,12],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,12],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,12],[0.333,0.333],'--',c=[0.5]*4)
+
+            ax1.plot([1,12],[0.302,0.302],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,12],[0.313,0.313],'--',c='m',alpha=a)  #our own average FTA
             tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97] 
             ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
             title = r'$\beta = 2.0$'
@@ -765,10 +786,17 @@ class BRho_tool():
             #means = np.append(means,[np.nan]*2) 
             #ax.plot(therange,means,c='b',linestyle='dotted')
         if num == 2: 
-            ax1.plot([1,11],[0,0],c=[0.5]*4) 
+            meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11],meanbear[:-1],c='r',alpha=a)
+            #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11],meanbear[:-1],s=12,c='r')
+
+            ax1.plot([1,11],[0,0],'--',c=[0.5]*4) 
             ax1.plot([1,11],[0.667,0.667],'--',c=[0.5]*4)
             ax1.plot([1,11],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,11],[0.4,0.4],'--',c=[0.5]*4)
+            ax1.plot([1,11],[0.333,0.333],'--',c=[0.5]*4)
+
+            ax1.plot([1,11],[0.324,0.324],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,11],[0.376,0.376],'--',c='m',alpha=a)  #our own average FTA
             tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91] 
             ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
             title = r'$\beta = 20$'
@@ -779,9 +807,9 @@ class BRho_tool():
 
         ax1.set_xticklabels(tff_mod)       
         ylim = -0.5,1.0
-        BRho_tool.labelled(ax1,xlabel=r'$t/t_{\rm{ff}}$',ylabel=r'$\alpha$',ylim=ylim,title=title) 
+        BRho_tool.labelled(ax1,xlabel=r'$t/t_{\rm{ff}}$',ylabel=r'$\alpha$',ylim=ylim)#,title=title) 
                
-        fig.savefig('BearsBoxplot_%s'%name)
+        fig.savefig('BearsBoxplot_c%s'%name)
         print("BOX SAVED")
         plt.close(fig)
       
@@ -973,7 +1001,7 @@ def axisforbox(theAx=None):
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME or as in box-vios
             fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-        if 0: 
+        if 1: 
             # CALL BOXPLOTS  
             tool.boxes(nt,simnames[nt],tff_labels,theAx)
         if 0: 
