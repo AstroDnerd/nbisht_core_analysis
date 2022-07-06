@@ -194,7 +194,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
     field_latex = {'density':r"\rho", 'velocity_magnitude':'v','magnetic_field_strength':'B','PotentialField':r'\Phi'}[FIELD[1]]
     PDF_LABEL = r'$V(%s)$'%(field_latex)
-    PDF_LABEL_C = r'$V(%s|*)$'%(field_latex)
+    PDF_LABEL_C = r'$V(%s|*)V(*)$'%(field_latex)
     PDF_LABEL_R = r'$V(*|%s)$'%(field_latex)
 
 
@@ -349,7 +349,8 @@ for nsim,this_simname in enumerate(sims_to_use):
 
         if 1:
             #figure sublabel
-            lab = r'$3%s$'%label
+            #lab = r'$3%s$'%label
+            lab = ''#r'$3%s$'%label
             xloc = ax.get_xlim()[1]*0.5
             yloc = ax.get_ylim()[0]*1.2
             ax.text(xloc,yloc,lab)
