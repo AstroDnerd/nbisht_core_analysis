@@ -45,6 +45,18 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append('GE mass')
     RE.append(r"/*ge_cuml/u50%d/u50%d_cuml_c(\d\d\d\d).png"%(nsim,nsim))
 
+    NAMES.append("mountain rings")
+    RE.append(r"/*mountain_rings/u60%d/mountain_top_u60%d_c(\d\d\d\d)_Projection_x_density.png"%(nsim,nsim))
+
+    NAMES.append("Gravity Density Ring")
+    RE.append(r"/*proj_grav/u60%d/mountain_top_u60%d_c(\d\d\d\d)_acceleration_Projection_x_density.png"%(nsim,nsim))
+
+    frame = [125,118, 107][isim] 
+    NAMES.append("Swirl M1")
+    RE.append(r"/*swirl_1/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity.png"%(nsim,nsim, frame))
+    NAMES.append("Swirl M2")
+    RE.append(r"/*swirl_2/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity_whole_mean.png"%(nsim,nsim,frame))
+
     NAMES.append("Pathlines")
     RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
 

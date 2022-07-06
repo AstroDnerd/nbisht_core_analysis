@@ -9,8 +9,6 @@ from scipy.interpolate import interp1d
 from collections import defaultdict
 import r_inflection
 
-import three_loopers_u500 as TL
-#import three_loopers_six as TL
 if 'inflection' not in dir():
     inflection = {}
     for sim in TL.loops:
@@ -20,8 +18,13 @@ class slope_tool():
     def __init__(self, this_looper, inflection):
         self.this_looper=this_looper
         self.output = defaultdict(list)
-        self.rinflection=inflection.rinflection
-        self.rinflection_list=inflection.rinflection_list
+        if inflection is not None:
+            self.rinflection=inflection.rinflection
+            self.rinflection_list=inflection.rinflection_list
+        else:
+
+            self.rinflection=None
+            self.rinflection_list=None
 
     def run(self,core_list=None, do_plots=True,do_proj=True):
         if core_list is None:
@@ -49,15 +52,16 @@ class slope_tool():
 
             R_KEEP = R_SPHERE #self.rinflection[core_id]
 
+            rinflection=None
+            if self.rinflection is not None:
+                rinflection = self.rinflection[core_id]
+
             #get the zones in the sphere that are
             #within R_KEEP
             ok_fit = np.logical_and(RR  < R_KEEP, GE>0)
 
             rok=RR[ok_fit].v
 
-            fig2,ax2=plt.subplots(1,1)
-
-            ay0=ax2
 
 
             ORDER = np.argsort(rok)
@@ -71,13 +75,11 @@ class slope_tool():
             rr_o = np.linspace( max([1/2048, rr_o_full.min()]), rr_o_full.max(), 128)
 
             enrg_i = interp1d( rr_o_full, enrg_r)
-            ay0.plot( rr_o, enrg_i(rr_o), c='k')
 
             gmm_r = interp1d( rr_o_full, G*mass_r**2/rr_o_full)
-            ay0.plot( rr_o, gmm_r(rr_o), c='r')
 
-            
-            az0=ay0.twinx()
+
+
             all_r,all_m=rr_o_full[1:], mass_r[1:]
             my_r = np.linspace(max([1/2048, all_r.min()]),all_r.max(),1024)
             mbins = np.linspace( all_m.min(), all_m.max(), 128)
@@ -86,8 +88,15 @@ class slope_tool():
             mfunc = interp1d( all_r[mask], all_m[mask])
             my_m = gaussian_filter(mfunc(my_r),2)
             fact=enrg_r.max()/my_m.max()
-            ay0.plot( all_r, all_m*fact, c=[0.5]*4)
-            ay0.plot( my_r, my_m * fact, c='m')
+
+            fig2,ax2=plt.subplots(1,1)
+            ay0=ax2
+            ay0.plot( rr_o, enrg_i(rr_o), c='k', label=r'$E_G$')
+            ay0.plot( rr_o, gmm_r(rr_o), c='r', label = r'$GM(<R)^2/R$')
+
+            az0=ay0.twinx()
+            ay0.plot( all_r, all_m*fact, c=[0.5]*4)#, label=r'$M*f$')
+            ay0.plot( my_r, my_m * fact, c='m', label=r'$M*f$')
             #ay0.plot( xcen, average_mass, c='r')
             #az0.plot( my_r, my_m )
             #az0.plot( rr_o, rho_o)
@@ -100,22 +109,28 @@ class slope_tool():
 
             SWITCH=2*rbins*dm_dr/mm 
             #az0.plot( rbins, SWITCH*my_m.max()/SWITCH.max())
-            az0.plot( rbins, SWITCH)
-            findit=np.logical_and( rbins>0.01, SWITCH < 1)
+            az0.plot( rbins, SWITCH, c='b', label='$2 M^\prime /M$')
+            findit=np.logical_and( rbins>0.01, SWITCH <= 1)
             PROBLEM=False
             if findit.sum() > 0:
                 ok = np.where(findit)[0][0]
                 SWITCH=2*rbins*dm_dr/mm 
-                az0.scatter( my_r[ok-1], my_m[ok-1])
+                az0.scatter( my_r[ok-1], SWITCH[ok-1], c='b')
+                az0.axvline( my_r[ok-1], c='b')
+                az0.axhline(1, c='b')
             else:
                 PROBLEM=True
                 print("PROBLEM CANNOT FIND RMASS")
+            if rinflection is not None:
+                ay0.axvline( rinflection, c='r', label='$R_I$')
                 
             if PROBLEM:
                 ay0.set_title('NO MASS EDGE')
             outname='plots_to_sort/%s_cuml_c%04d.png'%(this_looper.sim_name, core_id)
-            axbonk( ay0, xlabel='r',ylabel='E/M')
-            axbonk( az0, ylabel=r'$2 M^\prime/(M/R)$')
+            ay0.legend(loc=2)
+            az0.legend(loc=4)
+            axbonk( ay0, xlabel='r',ylabel='E/M', xscale='log', yscale='log')
+            axbonk( az0, ylabel=r'$2 M^\prime/(M/R)$', xscale='log', yscale='log')
             fig2.savefig(outname)
             print(outname)
 
@@ -229,13 +244,15 @@ class slope_tool():
                 fig.savefig(outname)
                 print(outname)
 
+#import three_loopers_u500 as TL
+import three_loopers_six as TL
 if 'stuff' not in dir() or True:
     stuff={}
-    for sim in ['u502', 'u503']:
+    for sim in ['u601','u602', 'u603']:
         #stuff={}
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
         core_list=nar(all_cores)
-        #core_list = core_list[ core_list>12]
+        #core_list = core_list[ 5:7]
         #core_list=all_cores[:1]
         #core_list=[323]
         #stuff[sim]=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
