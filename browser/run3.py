@@ -11,6 +11,7 @@ sim_list=['u601','u602','u603']
 #sim_list=['u301']
 
 for isim,this_simname in enumerate(sim_list):
+    frame = [125,118, 107][isim] 
     nsim=isim+1
 
     RE = []
@@ -51,11 +52,22 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append("Gravity Density Ring")
     RE.append(r"/*proj_grav/u60%d/mountain_top_u60%d_c(\d\d\d\d)_acceleration_Projection_x_density.png"%(nsim,nsim))
 
-    frame = [125,118, 107][isim] 
+    NAMES.append('GE cuml')
+    RE.append(r"/*GEcuml/u60%d/u60%d_cuml_c(\d\d\d\d).png"%(nsim,nsim))
+
+    ilook = len(RE) 
+    NAMES.append("GE/KE")
+    RE.append(r"/*GEKEmass/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t1.png"%(nsim,nsim,frame))
+    NAMES.append("GE/KE 2/128")
+    RE.append(r"/*GEKEmass_larger/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t2.png"%(nsim,nsim,frame))
+
     NAMES.append("Swirl M1")
     RE.append(r"/*swirl_1/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity.png"%(nsim,nsim, frame))
     NAMES.append("Swirl M2")
     RE.append(r"/*swirl_2/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity_whole_mean.png"%(nsim,nsim,frame))
+    NAMES.append("Swirl M3")
+    RE.append(r"/*swirl_3/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity_vcentral.png"%(nsim,nsim,frame))
+
 
     NAMES.append("Pathlines")
     RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
