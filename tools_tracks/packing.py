@@ -16,7 +16,7 @@ reload(davetools)
 import colors
 plt.close('all')
 
-class more_hair():
+class packing():
     def __init__(self,this_looper):
         self.this_looper=this_looper
         self.cores_used=[]
@@ -124,5 +124,5 @@ class more_hair():
 if 1:
     this_simname = 'u503'
     this_looper=TL.loops[this_simname]
-    nt = more_hair(this_looper)
+    nt = packing(this_looper)
     nt.run(core_list=[2], frames='reg')
