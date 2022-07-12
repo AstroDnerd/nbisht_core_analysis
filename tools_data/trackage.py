@@ -15,6 +15,7 @@ import pdb
 from importlib import reload
 from collections import defaultdict
 import weakref
+import colors
 if 0:
     import loop_tools
     reload(loop_tools)
@@ -662,6 +663,9 @@ class mini_scrubber():
         self.gz = self.trk.c([core_id],'grav_z')
 
 
-        self.ge = -1/(np.pi*8)*(self.gx**2+self.gy**2+self.gz**2)
+        self.ge = -1/(np.pi*8*colors.G)*(self.gx**2+self.gy**2+self.gz**2)
+    def compute_ke(self,core_id):
+        self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
+
 
 
