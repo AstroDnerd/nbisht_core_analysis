@@ -57,12 +57,12 @@ def add_energies(obj):
             alpha = 1./(2*data.ds['GravitationalConstant']) #=1/8 pi G)
             alpha = data.ds.quan(alpha, '1/(code_length**3/code_time**2/code_mass)')
             return ( -(gx**2+gy**2+gz**2)*alpha )
-        obj.add_field(YT_grav_energy,grav_energy,validators=[yt.ValidateGridType()],
+        obj.add_field(YT_grav_energy,grav_energy,validators=[ yt.ValidateSpatial(1, 'PotentialField')],
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
-        def abs_grav_energy(field,data):
-            return np.abs( data[YT_grav_energy] )
-        obj.add_field(YT_abs_grav_energy,abs_grav_energy,validators=[yt.ValidateSpatial(1,'PotentialField')],
-                 units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
+#       def abs_grav_energy(field,data):
+#           return np.abs( data[YT_grav_energy] )
+#       obj.add_field(YT_abs_grav_energy,abs_grav_energy,validators=[yt.ValidateSpatial(1,'PotentialField')],
+#                units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
     def therm_energy(field,data):
         sound_speed = data.ds.quan(1.,'code_velocity')
@@ -106,6 +106,12 @@ def add_gravity(obj):
             return np.sqrt( data[YT_grav_x]**2 + data[YT_grav_y]**2 + data[YT_grav_z]**2)
         obj.add_field(YT_grav_norm,grav_norm, validators=pressure_validators,
                       units='code_length/code_time**2', sampling_type='cell')
+        def geke(field, data):
+            out = data.ds.arr(np.zeros_like( data[YT_grav_energy].v), 'dimensionless')
+            ok = np.abs(data[YT_grav_energy])>0
+            out[ok]=np.abs(data[YT_grav_energy][ok].v)/data[YT_kinetic_energy][ok].v
+            return out.v
+        obj.add_field(YT_ge_ke, function=geke, sampling_type='cell')
 def add_force_terms(obj):
     def gas_pressure(field,data):
         return data[YT_density]*data.ds.quan(1,'code_velocity')**2
