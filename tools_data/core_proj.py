@@ -77,7 +77,7 @@ class MonotoneEnforcer2():
         self.values.append(val)
         return new_val
 
-def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
+def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
                     core_list=None,frame_list=None, clobber=True,
                        only_sphere=True, center_on_sphere=True,
                        zoom=True, moving_center=False, slab=None,
@@ -131,123 +131,8 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     #Loop over all cores and get the bounding box.
     #
 
-    all_center={}
-    all_left={}
-    all_right={}
-    all_positions={}
-    for frame in frame_list:
-        ds = looper.load(frame)
-        frame_ind = np.where(looper.tr.frames == frame)[0]
-        for ddd in derived:
-            ddd(ds)
+    camera.run(core_list, frame_list, mini_scrubbers)
 
-        # Check to see if the image was made already,
-        # and skips it if it has.
-        outname = "%s/%s_n%04d_multi"%(looper.plot_directory,looper.out_prefix, frame)
-        got_one = False
-        for i in all_png:
-            if i.startswith(outname):
-                print(i)
-                got_one=True
-        if got_one and not clobber:
-            print("File exists, skipping")
-            return
-        #get extents and bounding region
-        #it's backwards because we're looking for extrema
-        left =  ds.domain_right_edge.v
-        right = ds.domain_left_edge.v
-
-        if not center_on_sphere:
-            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge).v
-            all_left[frame]=ds.domain_left_edge.v
-            all_right[frame]=ds.domain_right_edge.v
-            all_center[frame]=center
-
-        #
-        # Find the extents of all cores.
-        # Fill position dict
-        #
-        position_dict={}
-        if verbose:
-            print("CoreLoop 1")
-        mean_pos=None
-        for core_id in core_list:
-            ms = mini_scrubbers[core_id]
-            
-            if tracker_positions:
-                if shifted_tracker:
-                    this_x=ms.this_x[:,frame_ind]
-                    this_y=ms.this_y[:,frame_ind]
-                    this_z=ms.this_z[:,frame_ind]
-                else:
-                    this_x=ms.raw_x[:,frame_ind]
-                    this_y=ms.raw_y[:,frame_ind]
-                    this_z=ms.raw_z[:,frame_ind]
-                if float_positions:
-                    ms.make_floats(core_id)
-                    this_x = ms.float_x[:,frame_ind]
-                    this_y = ms.float_y[:,frame_ind]
-                    this_z = ms.float_z[:,frame_ind]
-
-                positions = np.column_stack([this_x,this_y,this_z])
-                position_dict[core_id] = positions
-                if mean_pos is None:
-                    mean_pos=copy.copy(positions)
-                else:
-                    mean_pos = np.row_stack([mean_pos,positions])
-            else:
-                snapshot = looper.snaps[frame][core_id]
-                if snapshot.R_centroid is None:
-                    snapshot.get_all_properties()
-                positions = snapshot.pos
-                position_dict[core_id]=positions
-
-            this_left =  positions.min(axis=0)
-            this_right = positions.max(axis=0)
-            left = np.row_stack([this_left,left]).min(axis=0)
-            right = np.row_stack([this_right,right]).max(axis=0)
-        all_positions[frame]=position_dict
-
-        center = 0.5*(left+right)
-        left = np.row_stack([left,center - 1/128]).min(axis=0)
-        right = np.row_stack([right,center + 1/128]).max(axis=0)
-
-        #Make it a square
-        if 1:
-            centroid = mean_pos.mean(axis=0)
-            centroid.shape = 1,centroid.size
-            distance=(mean_pos-centroid)
-            extent = np.sqrt( ((distance)**2).sum(axis=1).max() )
-            size = max([extent,1/128])
-            centroid.shape = centroid.size
-            square_left  = centroid - size
-            square_right = centroid + size
-
-            #left  = np.row_stack([square_left,left]).min(axis=0)
-            #right = np.row_stack([square_right,right]).max(axis=0)
-            left = square_left
-            right = square_right
-            if ( left >= right).any():
-                print('wtf')
-                pdb.set_trace()
-
-        if monotonic:
-            if 'left' in monotonic:
-                left = monotonic['left'](left)
-                right  = monotonic['right'](right)
-                center = 0.5*(left+right)
-                if ( left >= right).any():
-                    print('wtf')
-                    pdb.set_trace()
-
-
-        if center_on_sphere:
-            all_left[frame] = ds.arr(left,'code_length')
-            all_right[frame]= ds.arr(right,'code_length')
-            all_center[frame]=ds.arr(center,'code_length')
-            if (all_left[frame] >= all_right[frame]).any():
-                print("Should not have left bigger than right")
-                pdb.set_trace()
 
 
     #
@@ -258,7 +143,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         for nframe,frame in enumerate(frame_list):
             L = monotonic['left'].extrema[nframe]
             R = monotonic['right'].extrema[nframe]
-            print(R-L)
             for ax in ax2.flatten():
                 ax.clear()
             for LOS in [0,1,2]:
@@ -281,7 +165,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             #    ax.set_xlim(0,1)
             #    ax.set_ylim(0,1)
             fig2.savefig(oname)
-            print(oname)
             plt.close(fig2)
 
     #
@@ -289,7 +172,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     #
     if plot_y_tracks:
         if verbose:
-            print("p2")
+            print("plot y track")
 
         nparticles = nar([mini_scrubbers[core_id].nparticles for core_id in core_list])
         from_biggest = np.argsort(nparticles)[::-1] #from biggest to smallest
@@ -297,7 +180,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
 
         fig,ax=plt.subplots(2,2, figsize=(12,12))
 
-        center_to_plot = np.column_stack(nar([all_center[frame] for frame in frame_list]))
+        center_to_plot = np.column_stack(nar([camera.all_center[frame] for frame in frame_list]))
+        left_to_plot = np.column_stack(nar([camera.all_left[frame] for frame in frame_list]))
+        right_to_plot = np.column_stack(nar([camera.all_right[frame] for frame in frame_list]))
         for LOS in [0,1,2,3]:
 
             #x = [1,0,0][LOS]
@@ -332,25 +217,13 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                     for ny in  particles:
                         this_ax.plot(all_times,quan[ny,:],linewidth=0.1, c=color)
 
-                if LOS < 3 and monotonic:
-                    if 'left' in monotonic:
-                        this_ax.plot(times,center_to_plot[LOS,:],c='k')
-                        RRR=np.column_stack(monotonic['right'].values)
-                        LLL=np.column_stack(monotonic['left'].values)
-                        this_ax.plot(times,RRR[LOS,:],'r--')
-                        this_ax.plot(times,LLL[LOS,:],'k--')
-                        RRR=np.column_stack(monotonic['right'].extrema)
-                        LLL=np.column_stack(monotonic['left'].extrema)
-                        this_ax.plot(times,RRR[LOS,:],c='r')
-                        this_ax.plot(times,LLL[LOS,:],c='k')
-
-        if verbose:
-            print('save')
+                if LOS < 3:
+                    this_ax.plot(camera.times,center_to_plot[LOS,:],c='k')
+                    this_ax.plot(camera.times,left_to_plot[LOS,:],c='k')
+                    this_ax.plot(camera.times,right_to_plot[LOS,:],c='k')
+#
         fig.savefig('plots_to_sort/%s_Y.png'%looper.out_prefix)
-        print("SAVE Y")
         plt.close(fig)
-        if verbose:
-            print("p4")
     if path_only:
         return monotonic
 
@@ -368,10 +241,10 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         if got_one and not clobber:
             print("File exists, skipping")
             return
-        left = all_left[frame]
-        right = all_right[frame]
-        center=all_center[frame]
-        position_dict=all_positions[frame]
+        left = camera.all_left[frame]
+        right = camera.all_right[frame]
+        center=camera.all_center[frame]
+        position_dict=camera.all_positions[frame]
 
         #
         # main plot loop
@@ -404,7 +277,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             
             if zoom == 'scale' or zoom is True:
                 pw.zoom(1./(scale))
-                print('ZOOM',scale*128)
             elif type(zoom) == float or type(zoom) == int:
                 pw.zoom(zoom)
             if monotonic:
