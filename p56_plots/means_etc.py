@@ -1,6 +1,6 @@
 from starter2 import *
 #import three_loopers_1tff as tl
-
+from multiplots import *
 def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_bins=64,extrema=None):
     reg = ds.all_data()
     prof = yt.create_profile(reg,fields[0],fields[1] ,weight_field=weight_field,accumulation=accumulation,
@@ -74,30 +74,4 @@ class means_etc():
 
         if 'prof_vel' not in dir():
             prof_vel=make_prof(ds1,['velocity_magnitude','cell_volume'])
-
-def three_way_bean():
-    from matplotlib.ticker import NullFormatter
-    nullfmt = NullFormatter()         # no labels
-
-    # definitions for the axes
-    left, width = 0.1, 0.65
-    bottom, height = 0.1, 0.65
-    bottom_h = left_h = left + width + 0.02
-
-    rect_scatter = [left, bottom, width, height]
-    rect_histx = [left, bottom_h, width, 0.2]
-    rect_histy = [left_h, bottom, 0.2, height]
-
-    # start with a rectangular Figure
-    fig=plt.figure(1, figsize=(8, 8))
-
-    axScatter = plt.axes(rect_scatter)
-    axHistx =   plt.axes(rect_histx)
-    axHisty =   plt.axes(rect_histy)
-
-    # no labels
-    axHistx.xaxis.set_major_formatter(nullfmt)
-    axHisty.yaxis.set_major_formatter(nullfmt)
-
-    return fig, axScatter,axHistx, axHisty
 
