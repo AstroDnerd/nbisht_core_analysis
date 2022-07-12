@@ -87,7 +87,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
                       tracker_positions=True, shifted_tracker=True, monotonic=False, float_positions=False,
                       marker_size=1, path_only=False, verbose=False, plot_y_tracks=True, plot_points=False,
                        zlim=None,
-                      derived=[]):
+                      derived=[], cmap='Greys'):
     """
     Plots an collection of cores in a smooth manner.
     FIRST loop over frames,
@@ -116,17 +116,15 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
     #We should speed this code up.
     #
 
-    mini_scrubbers = {}
     if verbose:
-        print("MS 1")
+        print("Mini scrubbers")
+    mini_scrubbers = {}
     for core_id in core_list:
         if mean_velocity:
             do_velocity=True
         else:
             do_velocity=False
         mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=do_velocity)
-    if verbose:
-        print("MS 2")
 
 
     #
@@ -160,9 +158,9 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
         right = ds.domain_left_edge.v
 
         if not center_on_sphere:
-            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge)
-            all_left[frame]=left
-            all_right[frame]=right
+            center = 0.5*(ds.domain_left_edge+ds.domain_right_edge).v
+            all_left[frame]=ds.domain_left_edge.v
+            all_right[frame]=ds.domain_right_edge.v
             all_center[frame]=center
 
         #
@@ -208,8 +206,6 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             this_right = positions.max(axis=0)
             left = np.row_stack([this_left,left]).min(axis=0)
             right = np.row_stack([this_right,right]).max(axis=0)
-        if verbose:
-            print("CoreLoop 2")
         all_positions[frame]=position_dict
 
         center = 0.5*(left+right)
@@ -363,7 +359,7 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
 
         # Check to see if the image was made already,
         # and skips it if it has.
-        outname = "%s/%s_n%04d_multi"%(looper.plot_directory,looper.out_prefix, frame)
+        outname = "%s/%s_c%04d_n%04d_"%(looper.plot_directory,looper.out_prefix, core_list[0],frame)
         got_one = False
         for i in all_png:
             if i.startswith(outname):
@@ -389,11 +385,11 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
 
             print("SCALE", scale)
             scale = min([scale,1])
-            scale = max([scale,1/128])
+            scale = max([scale,4/128])
             if only_sphere:
                 sph = ds.region(center,left,right)
                 #sph = ds.sphere(center,Rmax)
-                proj = ds.proj(field,ax,center=center, data_source = sph) 
+                proj = ds.proj(field,ax,center=center, data_source = sph, weight_field=YT_density)
             else:
                 bv = ds.arr([10,10,10],'code_velocity')
                 proj = ds.proj(field,ax,center=center, field_parameters={'bulk_velocity':bv})
@@ -422,14 +418,15 @@ def core_proj_multiple(looper, field='density', axis_list=[0,1,2], color_dict={}
             if zlim is not None:
                 pw.set_zlim(field,zlim[0],zlim[1])
 
-            pw.set_cmap(field,'Greys')
+            pw.set_cmap(field,cmap)
             if force_log is not None:
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
                 positions = position_dict[core_id]
                 color=color_dict[core_id]
-                color = [1.0,0.0,0.0,0.8]
-                alpha=0.1
+                #color = [1.0,0.0,0.0,0.8]
+                #alpha=0.1
+                alpha=0.4
                 marker_size=1
                 if annotate:
                     #pw.annotate_sphere(snapshot.R_centroid,Rmax, circle_args={'color':color} ) #R_mag.max())
