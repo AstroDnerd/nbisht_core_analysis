@@ -49,4 +49,5 @@ YT_potential_field = ('enzo','PotentialField')
 YT_grav_energy = 'gas', 'grav_energy'
 YT_abs_grav_energy = 'gas', 'abs_grav_energy'
 YT_therm_energy = 'gas','therm_energy'
-
+YT_ge_ke = ('gas','ge_ke')
+YT_grad_rho = ('gas','grad_rho')
