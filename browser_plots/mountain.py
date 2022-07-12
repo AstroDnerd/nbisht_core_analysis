@@ -19,7 +19,8 @@ def plot_mountain_top(this_looper, core_list=None, r_inflection=None, r_mass=Non
         this_target = this_looper.targets[core_id]
         top1 = mountain_top.top(ds,peak, rhomin = this_target.min_density, peak_id=core_id, radius=radius)
         proj = ds.proj('density',0,center=top1.location,data_source=top1.region)
-        pw = proj.to_pw()
+        pw = proj.to_pw(origin='domain')
+
         pw.set_cmap('density','Greys')
         #pw.annotate_clumps([master_clump]+master_clump.leaves)
         if top1.leaf['particle_index'].size > 10:
@@ -58,8 +59,9 @@ if 1:
 
     fig.savefig('plots_to_sort/test.png')
 sim_list=['u601','u602','u603']
+sim_list=['u601']
 
-if 1:
+if 0:
     import three_loopers_six as TL
     import r_inflection
     reload(r_inflection)
@@ -87,9 +89,10 @@ if 1:
             this_looper.read_targets_only(mountain_top_fname)
         infl=None
         massedge=None
-        infl=inflection[sim].rinflection
+        #infl=inflection[sim].rinflection
         #massedge=mass_edge[sim].edge
+        core_list=[323]
         
-        plot_mountain_top(this_looper,core_list=None,
+        plot_mountain_top(this_looper,core_list=core_list,
                           r_inflection=infl)
                           #r_mass=massedge)
