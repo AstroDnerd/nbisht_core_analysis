@@ -51,3 +51,7 @@ YT_abs_grav_energy = 'gas', 'abs_grav_energy'
 YT_therm_energy = 'gas','therm_energy'
 YT_ge_ke = ('gas','ge_ke')
 YT_grad_rho = ('gas','grad_rho')
+YT_velocity_divergence = ('gas','velocity_divergence')
+YT_density_grad_x = ('gas','density_grad_x')
+YT_divv = ('gas','divv')
+YT_density_log = ('gas','density_log')

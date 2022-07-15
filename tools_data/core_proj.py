@@ -158,7 +158,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
                 for core_id in core_list:
                     position_dict=all_positions[frame]
                     nparticles = len( position_dict[core_id][:,x])
-                    ax2[px][py].scatter( position_dict[core_id][:,x], position_dict[core_id][:,y],c=[color_dict[core_id]]*nparticles)
+                    ax2[px][py].scatter( position_dict[core_id][:,x], position_dict[core_id][:,y],c=[color_dict.get(core_id,'k')]*nparticles)
 
             oname = 'plots_to_sort/%s_points_%04d.png'%(looper.out_prefix, frame)
             #for ax in ax2.flatten():
@@ -195,7 +195,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
             if 1:
                 #every line
                 for core_id in sorted_core_list:
-                    color=color_dict[core_id]
+                    color=color_dict.get(core_id, 'k')
                     color=[1.0,0.5,0.5,0.5]
                     nparticles = mini_scrubbers[core_id].nparticles
                     if nparticles > 100:
@@ -222,7 +222,11 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
                     this_ax.plot(camera.times,left_to_plot[LOS,:],c='k')
                     this_ax.plot(camera.times,right_to_plot[LOS,:],c='k')
 #
-        fig.savefig('plots_to_sort/%s_Y.png'%looper.out_prefix)
+
+        suffix = 'multi_cores'
+        if len(core_list)==1:
+            suffix  = 'c%04d'%core_list[0]
+        fig.savefig('plots_to_sort/%s_Y_%s.png'%(looper.out_prefix, suffix))
         plt.close(fig)
     if path_only:
         return monotonic
@@ -232,7 +236,11 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
 
         # Check to see if the image was made already,
         # and skips it if it has.
-        outname = "%s/%s_c%04d_n%04d_"%(looper.plot_directory,looper.out_prefix, core_list[0],frame)
+        if len(core_list) == 1:
+            suffix = "c%04d"%core_list[0]
+        else:
+            suffix = 'multi'
+        outname = "%s/%s_%s_n%04d_"%(looper.plot_directory,looper.out_prefix,suffix,frame)
         got_one = False
         for i in all_png:
             if i.startswith(outname):
@@ -295,7 +303,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
                 positions = position_dict[core_id]
-                color=color_dict[core_id]
+                color=color_dict.get(core_id, 'k')
                 #color = [1.0,0.0,0.0,0.8]
                 #alpha=0.1
                 alpha=0.4

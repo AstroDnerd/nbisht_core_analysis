@@ -12,15 +12,94 @@ class camera_1():
         self.method=method
         self.times=[]
     def run(self, core_list, frame_list, mini_scrubbers):
+        self.times=[]
         if self.method == 'domain':
             self.run_domain(core_list, frame_list,mini_scrubbers)
-        if self.method.startswith('tight'):
+        elif self.method.startswith('tight'):
             self.run_tight(core_list,frame_list, mini_scrubbers )
-        if self.method == 'smooth_zoom':
+        elif self.method == 'smooth_zoom':
             self.run_smooth_zoom(core_list,frame_list,mini_scrubbers)
+        elif self.method == 'smooth_zoom_2':
+            self.run_smooth_zoom_2(core_list,frame_list,mini_scrubbers)
         else:
             print("ill defined camera")
             raise
+
+    def run_smooth_zoom_2(self,core_list,frame_list, mini_scrubbers):
+        """Moothly zoom from 0.25 to 4/128, centered on the centroid of the particles.
+        Also expand enough to see all the particles."""
+        looper=self.looper
+        ds = looper.load( frame_list[0])
+        particle_left=[]
+        particle_right=[]
+        for frame in frame_list:
+            frame_ind = np.where(looper.tr.frames == frame)[0]
+            self.times.append(looper.tr.times[frame_ind])
+
+            #get extents and bounding region
+            #it's backwards because we're looking for extrema
+
+            position_dict={}
+            left =  ds.domain_right_edge.v
+            right = ds.domain_left_edge.v
+            for core_id in core_list:
+                ms = mini_scrubbers[core_id]
+                
+                ms.make_floats(core_id)
+                this_x = ms.float_x[:,frame_ind]
+                this_y = ms.float_y[:,frame_ind]
+                this_z = ms.float_z[:,frame_ind]
+
+                positions = np.column_stack([this_x,this_y,this_z])
+                position_dict[core_id] = positions
+
+                this_left =  positions.min(axis=0)
+                this_right = positions.max(axis=0)
+                left = np.row_stack([this_left,left]).min(axis=0)
+                right = np.row_stack([this_right,right]).max(axis=0)
+
+            self.all_positions[frame]=position_dict
+
+            center = 0.5*(left+right)
+            particle_left.append( left)
+            particle_right.append(right)
+        particle_left = np.stack(particle_left)
+        particle_right = np.stack(particle_right)
+        particle_center=0.5*(particle_left+particle_right)
+        first_center = particle_center[0,:]
+        last_center = particle_center[-1,:]
+        first_time = self.times[0]
+        last_time = self.times[-1]
+        first_left = first_center - 0.25
+        first_right= first_center + 0.25
+        last_left = last_center - 4./128
+        last_right= last_center + 4./128
+        dL = last_left - first_left
+        dR = last_right - first_right
+        dt = last_time - first_time
+
+
+        if 1:
+            for nf,frame in enumerate(frame_list):
+                frame_ind = np.where(looper.tr.frames == frame)[0]
+                time=looper.tr.times[frame_ind]-first_time
+                smooth_left=first_left + dL/dt * time
+                smooth_right=first_right + dR/dt * time
+                used_left = np.stack([smooth_left, particle_left[nf,:]]).min(axis=0)
+                used_right = np.stack([smooth_right, particle_right[nf,:]]).max(axis=0)
+                self.all_left[frame] = used_left
+                self.all_right[frame] = used_right
+                self.all_center[frame]=0.5*(self.all_left[frame]+self.all_right[frame])
+
+
+        if 0:
+            for nf,frame in enumerate(frame_list):
+                frame_ind = np.where(looper.tr.frames == frame)[0]
+                time=looper.tr.times[frame_ind]
+                Rt = 0.25 + (4./128-0.25)*time/colors.tff
+                self.all_left[frame] = particle_center[nf] - Rt
+                self.all_right[frame] = particle_center[nf] + Rt
+                self.all_center[frame] = particle_center[nf]
             
     def run_smooth_zoom(self,core_list,frame_list, mini_scrubbers):
         looper=self.looper
@@ -98,10 +177,11 @@ class camera_1():
         ds = looper.load( frame_list[0])
         for frame in frame_list:
             frame_ind = np.where(looper.tr.frames == frame)[0]
+            self.times.append(looper.tr.times[frame_ind])
 
-            #get extents and bounding region
-            #it's backwards because we're looking for extrema
 
+            #Fill the positions dict.  
+            #Probably should be done somewhere else.
             position_dict={}
             for core_id in core_list:
                 ms = mini_scrubbers[core_id]
