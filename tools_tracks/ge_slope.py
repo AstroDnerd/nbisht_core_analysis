@@ -6,13 +6,15 @@ from scipy.ndimage import gaussian_filter
 sim_list=['u501']
 
 from collections import defaultdict
-
+import r_inflection
 #import three_loopers_u500 as TL
 import three_loopers_six as TL
 if 'inflection' not in dir():
     inflection = {}
-    for sim in TL.loops:
-        inflection[sim]=R_INFLECTION( TL.loops[sim])
+for sim in TL.loops:
+    if sim not in inflection:
+        inflection[sim]=r_inflection.R_INFLECTION( TL.loops[sim])
+        inflection[sim].run()
 
 class slope_tool():
     def __init__(self, this_looper, inflection):
@@ -22,6 +24,7 @@ class slope_tool():
         self.rinflection_list=inflection.rinflection_list
 
     def run(self,core_list=None, do_plots=True,do_proj=True):
+        print("CORE LIST",core_list)
         if core_list is None:
             core_list = np.unique(this_looper.tr.core_ids)
 
@@ -31,7 +34,7 @@ class slope_tool():
         G = ds['GravitationalConstant']/(4*np.pi)
         xtra_energy.add_energies(ds)
         for core_id in core_list:
-            print('Potential %s %d'%(this_looper.sim_name,core_id))
+            print('GE slope %s %d'%(this_looper.sim_name,core_id))
 
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
             c = nar([ms.mean_x[-1], ms.mean_y[-1],ms.mean_z[-1]])
@@ -225,19 +228,20 @@ class slope_tool():
                 fig.savefig(outname)
                 print(outname)
 
-if 'stuff' not in dir() or True:
+
+if 'stuff' not in dir():# or True:
     stuff={}
     for sim in ['u603']:
         #stuff={}
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
         #core_list=list(all_cores)
-        core_list=all_cores[:1]
+        core_list=all_cores
         #core_list=[323]
         #stuff[sim]=plot_phi( TL.loops[sim],core_list=core_list, do_plots=False)
         stuff[sim]=slope_tool(TL.loops[sim], inflection[sim])
-        stuff[sim].run(core_list=core_list,do_plots=True, do_proj=True)
+        stuff[sim].run(core_list=core_list,do_plots=False, do_proj=False)
 
-if 0:
+if 1:
     for sim in stuff:
         ge   =nar(stuff[sim].output['ge_total'])
         gmm1 =nar(stuff[sim].output['gmm'])
