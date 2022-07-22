@@ -50,6 +50,14 @@ def add_b_over_rho(obj):
 
 def add_energies(obj):
     if obj.parameters['SelfGravity']:
+        def grav_energy2(field,data):
+            gx =data.ds.arr(data[YT_acceleration_x],'code_length/code_time**2')
+            gy =data.ds.arr(data[YT_acceleration_y],'code_length/code_time**2')
+            gz =data.ds.arr(data[YT_acceleration_z],'code_length/code_time**2')
+            alpha = 1./(2*data.ds['GravitationalConstant']) #=1/8 pi G)
+            alpha = data.ds.quan(alpha, '1/(code_length**3/code_time**2/code_mass)')
+            return ( -(gx**2+gy**2+gz**2)*alpha )
+        obj.add_field(YT_grav_energy_2,grav_energy2, units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
         def grav_energy(field,data):
             gx =data.ds.arr(grad(data,YT_potential_field,0),'code_length/code_time**2')
             gy =data.ds.arr(grad(data,YT_potential_field,1),'code_length/code_time**2')
@@ -74,8 +82,23 @@ def add_energies(obj):
                  units='code_mass*code_length**2/(code_time**2*code_length**3)', sampling_type='cell')
 
 def add_gravity(obj):
+    add_energies(obj)
+    def density_log(field,data):
+        return np.log(data['density'].v)
+    obj.add_field(YT_density_log,density_log,sampling_type='cell')
     if obj.parameters['SelfGravity']:
+        #def rho_x(field,data):
+        #    FFF = data[YT_potential_field].v
+        #    gi = xo.gradf( FFF, 0,data.dds)
+        #    pdb.set_trace()
+        #    #gi =-grad(data,YT_density_log,0)
+        #    #gi+=-grad(data,YT_density_log,1)
+        #    #gi+=-grad(data,YT_density_log,1)
+        #    return gi
+        #obj.add_field(YT_density_grad_x,rho_x,validators=[yt.ValidateSpatial(1,[YT_density_log])],
+        #             units='1/code_length',sampling_type='cell')
         def grav_x(field,data):
+
             gi =-data.ds.arr(grad(data,'PotentialField',0),'code_length/code_time**2')
             return gi
         obj.add_field(YT_grav_x,grav_x,validators=[yt.ValidateSpatial(1,[YT_potential_field])],
@@ -111,7 +134,13 @@ def add_gravity(obj):
             ok = np.abs(data[YT_grav_energy])>0
             out[ok]=np.abs(data[YT_grav_energy][ok].v)/data[YT_kinetic_energy][ok].v
             return out.v
-        obj.add_field(YT_ge_ke, function=geke, sampling_type='cell')
+        obj.add_field(YT_ge_ke, function=geke, sampling_type='cell', validators=[yt.ValidateSpatial(1)])
+        def geke2(field, data):
+            out = data.ds.arr(np.zeros_like( data[YT_grav_energy_2].v), 'dimensionless')
+            ok = np.abs(data[YT_grav_energy_2])>0
+            out[ok]=np.abs(data[YT_grav_energy_2][ok].v)/data[YT_kinetic_energy][ok].v
+            return out.v
+        obj.add_field(YT_ge_ke_2, function=geke2, sampling_type='cell', validators=[yt.ValidateSpatial(1)])
 def add_force_terms(obj):
     def gas_pressure(field,data):
         return data[YT_density]*data.ds.quan(1,'code_velocity')**2

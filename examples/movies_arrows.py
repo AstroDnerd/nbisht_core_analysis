@@ -64,7 +64,7 @@ for this_simname in sim_list:
     import camera_path
     reload(camera_path)
 
-#camera = camera_path.camera_1( set_looper, 'tight_float')
+    camera = camera_path.camera_1( set_looper, 'tight_float')
 #camera = camera_path.camera_1( set_looper, 'domain')
 #camera = camera_path.camera_1( set_looper, 'smooth_zoom')
     camera = camera_path.camera_1( set_looper, 'smooth_zoom_2')
@@ -74,8 +74,9 @@ for this_simname in sim_list:
 #color_dict = colors.make_core_cmap(core_list, cmap = 'tab20c', seed = -1)
 #frame_list = [0,50,111]
     #frame_list=[0,1,2]
-    set_looper.plot_directory = "./MOVIE_PLOTS"
-    for core_id in all_cores:
+    set_looper.plot_directory = "./plots_to_sort"
+    #frame_list=[0]
+    for core_id in [74]:
         core_list=[core_id]
         color_dict={core_id:'k'}
         set_looper.ds_list={}
@@ -89,16 +90,18 @@ for this_simname in sim_list:
                                           cmap='seismic',
                                      color_dict=color_dict,
                                      frame_list = frame_list,
-                                     field=YT_ge_ke_2,
+                                     field=YT_density,
                                           velocity=False,
                                           mean_velocity=False,
                                      core_list=core_list,
                                      slab=False, zoom=True, only_sphere=True, center_on_sphere=True, 
                                      annotate=True,  plot_particles=True,
+                                          annotate_velocity_streamlines=True,
                                      grids=False, float_positions=True, monotonic=False, 
                                           verbose=True,
                                           path_only=False, 
-                                         plot_y_tracks=False, plot_points=False,
-                                         derived=derived, zlim=[1e-3,1e3])
+                                         plot_y_tracks=True, plot_points=False,
+                                         derived=derived, #zlim=[-5,5],#zlim=[1e-3,1e3], 
+                                          annotate_gravity=True)
                                    #zoom=False, grids=False, particles=False, moving_center=True) #, frame_list=[1])
 #loop_apps.core_proj_multiple(this_looper,axis_list=[0], field='density', color_dict=color_dict, particles=True, fields=False, core_list )#, frame_list=[31])

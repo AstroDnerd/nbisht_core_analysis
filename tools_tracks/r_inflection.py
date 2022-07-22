@@ -13,7 +13,7 @@ class R_INFLECTION():
         self.rinflection={}
         self.rinflection_list=[]
 
-    def run(self,core_list=None):
+    def run(self,core_list=None, do_plots=False):
         this_looper=self.this_looper
         if core_list is None:
             core_list = np.unique(this_looper.tr.core_ids)
@@ -42,6 +42,7 @@ class R_INFLECTION():
             rbins = np.geomspace( RR [RR >0].min(), RR .max(),67)
             r_cen = 0.5*(rbins[1:]+rbins[:-1]) #we'll need this later.
             hist, xb, yb = np.histogram2d( RR , GE, bins=[rbins,gbins],weights=dv)
+
 
             #clear out annoying stragglers in the distribution.
             #any point that doesn't have any neighbors is eliminated.
@@ -107,6 +108,14 @@ class R_INFLECTION():
                 R_KEEP = r_cen[keepers][index]
                 self.rinflection[core_id] = R_KEEP
                 self.rinflection_list.append(R_KEEP)
+            if do_plots:
+                fig, ax = plt.subplots(1,1)
+                pch.helper(hist,xb,yb,ax=ax,transpose=False)
+                ax.plot(r_cen[keepers], UE, c='k')
+                ax.scatter( r_cen[keepers][index], UE[index], c='r')
+                axbonk(ax,xscale='log',yscale='log',xlabel='r',ylabel='rho')
+                fig.savefig('plots_to_sort/r_inflection_%s_c%04d.png'%(this_looper.sim_name, core_id))
+
 
 if 0:
     import three_loopers_six as TL

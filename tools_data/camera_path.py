@@ -205,12 +205,10 @@ class camera_1():
 
     def run_tight(self,core_list,frame_list, mini_scrubbers, derived=None):
         looper=self.looper
+        ds = looper.load( frame_list[0])
         for frame in frame_list:
-            ds = looper.load(frame)
             frame_ind = np.where(looper.tr.frames == frame)[0]
-            if derived is not None:
-                for ddd in derived:
-                    ddd(ds)
+            self.times.append(looper.tr.times[frame_ind])
 
             #get extents and bounding region
             #it's backwards because we're looking for extrema

@@ -182,9 +182,13 @@ class product():
         if len( self.plots[core_id]) == 0:
             img = "x"
         else:
-            img_tag_template = '<a h<figure><a href="%s"><img src="%s" width=%s></a><figcaption>%s</figcaption></figure>'
             fname = self.plots[core_id][0].fname
+            suffix = fname.split(".")[-1]
+            img_tag_template = '<a h<figure><a href="%s"><img src="%s" width=%s></a><figcaption>%s</figcaption></figure>'
             img = img_tag_template%(fname, fname, self.width,"")
+            if suffix == 'mp4':
+                img_tag_template = '<video width=%s controls> <source src=%s type="video/mp4" >video</video>'
+                img = img_tag_template%(self.width, fname)
 
         out1 = "<td>%s</td>"%img
 

@@ -3,9 +3,9 @@ import annotate_particles_4
 reload(annotate_particles_4)
 
 
-def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color_dict={}
-                    core_list=None,frame_list=None, 
-                       annotate_grids=True, plot_particles=True, annotate=False, 
+def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color_dict={},
+                    core_list=None,frame_list=None, cores_to_save=None,
+                       annotate_grids=True, 
                       annotate_fields=False, annotate_gravity=False, annotate_velocity=False,annotate_velocity_streamlines=False, annotate_lic=False, 
                        annotate_particles=False, annotate_core_ids=True,
                        code_length=True, 
@@ -24,12 +24,10 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
     tr = looper.tr
     if core_list is None:
         core_list = np.unique(tr.core_ids)
+    if cores_to_save is None:
+        cores_to_save=core_list
     if frame_list is None:
         frame_list = looper.frame_list
-    if monotonic is True:
-        #monotonic  ={'zlim':MonotoneEnforcer()}#, 'left':MonotoneEnforcer2(nvalues=6),'right':MonotoneEnforcer2(nvalues=6)}
-        monotonic  ={'zlim':MonotoneColorbar()}#, 'left':MonotoneEnforcer2(nvalues=6),'right':MonotoneEnforcer2(nvalues=6)}
-        #monotonic  ={'zlim':MonotoneEnforcer(), 'left':MonotoneEnforcer(),'right':MonotoneEnforcer()}
     tracker_index =  [np.where(looper.tr.frames == frame)[0][0] for frame in frame_list]
     times=nar(looper.tr.times[ tracker_index] )
     all_times=looper.tr.times
@@ -40,19 +38,16 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
     #We should speed this code up.
     #
 
-    if 
     if verbose:
         print("Mini scrubbers")
     mini_scrubbers = {}
-    if annotate_particles:
-        for core_id in core_list:
-            if mean_velocity:
-                do_velocity=True
-            else:
-                do_velocity=False
-            mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=do_velocity)
+    for core_id in core_list:
+        do_velocity=False
+        mini_scrubbers[core_id]=  trackage.mini_scrubber(looper.tr,core_id, do_velocity=do_velocity)
+        mini_scrubbers[core_id].make_floats(core_id)
 
     for frame in frame_list:
+        frame_ind = np.where(looper.tr.frames == frame)[0]
 
         # Check to see if the image was made already,
         # and skips it if it has.
@@ -66,8 +61,8 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
         # main plot loop
         #
         for ax in axis_list:
-            proj = ds.proj(field,ax,center=center, weight_field=weight_field)
-            pw = proj.to_pw(center = center, origin='domain')
+            proj = ds.proj(field,ax, weight_field=weight_field)
+            pw = proj.to_pw(origin='domain')
             
             pw.zoom(zoom)
             if zlim is not None:
@@ -104,10 +99,10 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
             looper.pw = pw
             if verbose:
                 print('save')
-            if verbose:
-                print('annotate')
             for core_id in core_list:
-                positions = position_dict[core_id]
+                ms = mini_scrubbers[core_id]
+
+                positions = np.column_stack([ms.float_x[:,frame_ind], ms.float_y[:,frame_ind], ms.float_z[:,frame_ind]])
                 color=color_dict.get(core_id, 'k')
                 #color = [1.0,0.0,0.0,0.8]
                 #alpha=0.1
@@ -123,7 +118,27 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
                 if annotate_particles:
                     pw.annotate_these_particles4(1.0, col=[color]*positions.shape[0], positions=positions, 
                                                  p_size=marker_size, alpha=alpha)
+            for core_id in cores_to_save:
+                ms = mini_scrubbers[core_id]
+                positions = np.column_stack([ms.float_x[:,frame_ind], ms.float_y[:,frame_ind], ms.float_z[:,frame_ind]])
+                centroid=positions.mean(axis=0)
+                pw.set_center([ centroid[Hcoord], centroid[Vcoord]])
+                print(pw.save( "plots_to_sort/friends_%s_c%04d_n%04d"%(looper.sim_name,core_id,frame)))
 
-
+sim_list=['u501','u502', 'u503']
+import three_loopers_u500 as TL
+for sim in sim_list:
+    this_looper = TL.loops[sim]
+    frame_list = [this_looper.target_frame]
+    core_proj_multiple(this_looper,  field='density', zoom=8,axis_list=[0], 
+                    core_list=core_list,frame_list=frame_list, 
+                       annotate_grids=False, 
+                      annotate_fields=False, annotate_gravity=False, annotate_velocity=False,annotate_velocity_streamlines=False, annotate_lic=False, 
+                       annotate_particles=False, annotate_core_ids=True,
+                       code_length=True, 
+                      tracker_positions=True, shifted_tracker=True, float_positions=False,
+                      marker_size=1, verbose=False,
+                       zlim=None,
+                       cmap='Greys', weight_field=None)
 
 

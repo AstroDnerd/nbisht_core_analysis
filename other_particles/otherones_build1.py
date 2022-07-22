@@ -10,16 +10,16 @@ reload(hair_dryer)
 import looper2
 import three_loopers_tenfour as TL4
 if 'this_simname' not in dir():
-    if 1:
+    if 0:
         new_simname = 'a001'
         other_simname = 'u301'
         this_simname = 'u401'
         save='a001_all_particles.h5'
-    if 0:
+    if 1:
         new_simname = 'a002'
         other_simname = 'u302'
         this_simname = 'u402'
-        save='a002_all_particles.h5'
+        save='/data/cb1/Projects/P19_CoreSimulations/CoreSets/a000/a002_all_particles.h5'
     if 0:
         new_simname = 'a003'
         other_simname = 'u303'
@@ -75,7 +75,7 @@ if 1:
     import otherones_hair
     reload(otherones_hair)
     core_loop = TL4.loops[this_simname]
-    core_list=[323]
+    core_list=None
     #core_list =np.unique(ht[this_simname].this_looper.tr.core_ids)[:1]
     IM = otherones_hair.images(new_looper, core_loop)
     IM.run(frames=[0, core_loop.target_frame], core_list=core_list, output_prefix=this_simname)#,core_list=[3])
