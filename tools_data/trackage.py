@@ -666,6 +666,8 @@ class mini_scrubber():
         self.ge = -1/(np.pi*8*colors.G)*(self.gx**2+self.gy**2+self.gz**2)
     def compute_ke(self,core_id):
         self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
+    def compute_ke_rel(self,core_id):
+        self.ke_rel = 0.5*self.density*(self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)
 
 
 

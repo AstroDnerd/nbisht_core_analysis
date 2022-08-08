@@ -33,34 +33,58 @@ for isim,this_simname in enumerate(sim_list):
     PROD.append(p_neighbor)
     PROD.append(p_mode)
 
+    NAMES.append("Anatomy")
+    RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+    #NAMES.append("Density Velocity")
+    #RE.append(r"/*density_velocity/u50%d/u50%d_rho_vnorm_t_c(\d{4}).png"%(nsim,nsim))
+
+    #Clearly shows that mass conservation is only as good as the resolution is steady.
+    #NAMES.append("Density mass")
+    #RE.append(r"/*density_mass_dof/u50%d/u50%d_mass_volume_t_c(\d{4}).png"%(nsim,nsim))
+    #Shows that mass is not conserved.
+    #NAMES.append("Density Mass")
+    #RE.append(r"/*density_mass/u50%d/u50%d_rho_mass_t_c(\d{4}).png"%(nsim,nsim))
+
+    #proto anatomy
+    #NAMES.append("Density vel hist")
+    #RE.append(r"/*density_vel_hist/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+
+    #good velocity plots.
+    NAMES.append("V extras")
+    RE.append(r"/*velocity_mean_with_pearson/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
+    #just velocity
+    #NAMES.append("V-Vmean")
+    #RE.append(r"/*velocity_mean/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
+
+
+    #good movies
     NAMES.append("GE/KE")
     RE.append(r"/*GE_KE_zoom4/u50%d/u50%d_c(\d{4}).mp4"%(nsim,nsim))
+
+    #context, zoomed to 8 root grid zones
     NAMES.append("friends zoom8")
     RE.append(r"/*friends_zoom8/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
+    #context, zoomed to 1 root grid zones
     NAMES.append("friends zoom1")
     RE.append(r"/*friends_zoom1/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
 
+    #nice mountain top image with the acceleration field
     NAMES.append("Gravity Density Ring")
     RE.append(r"/*proj_grav/u60%d/mountain_top_u60%d_c(\d\d\d\d)_acceleration_Projection_x_density.png"%(nsim,nsim))
 
-    NAMES.append("Density Velocity")
-    RE.append(r"/*density_velocity/u50%d/u50%d_rho_vnorm_t_c(\d{4}).png"%(nsim,nsim))
-
-
+    #energies.
     NAMES.append("GE/KE 2/128")
     RE.append(r"/*GEKEmass_larger/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t2.png"%(nsim,nsim,frame))
 
+    #velocity streamlines, v=v-v_mean_particles
     NAMES.append("Velocity Streamlines M1")
     RE.append(r"/*swirl_1/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity.png"%(nsim,nsim, frame))
 
+    #hair
     NAMES.append("Pathlines")
     RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
 
-    NAMES.append("V-Vmean")
-    RE.append(r"/*velocity_mean/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
 
-    NAMES.append("V extras")
-    RE.append(r"/*velocity_mean_with_pearson/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
 
 
     RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_0125.png"%(nsim,nsim))
