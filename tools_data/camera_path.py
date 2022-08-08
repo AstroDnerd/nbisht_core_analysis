@@ -22,7 +22,7 @@ class camera_1():
         elif self.method == 'smooth_zoom_2':
             self.run_smooth_zoom_2(core_list,frame_list,mini_scrubbers)
         else:
-            print("ill defined camera")
+            print("ill defined camera", self.method)
             raise
 
     def run_smooth_zoom_2(self,core_list,frame_list, mini_scrubbers):
