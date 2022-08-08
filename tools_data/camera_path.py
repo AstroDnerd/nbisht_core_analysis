@@ -14,19 +14,40 @@ class camera_1():
     def run(self, core_list, frame_list, mini_scrubbers):
         self.times=[]
         if self.method == 'domain':
+            #fixed full domain.
             self.run_domain(core_list, frame_list,mini_scrubbers)
         elif self.method.startswith('tight'):
+            #Tight sphere on the particles.
             self.run_tight(core_list,frame_list, mini_scrubbers )
         elif self.method == 'smooth_zoom':
             self.run_smooth_zoom(core_list,frame_list,mini_scrubbers)
         elif self.method == 'smooth_zoom_2':
+            #zoom from 0.25 to 4/128, centered on the particles.
             self.run_smooth_zoom_2(core_list,frame_list,mini_scrubbers)
+        elif self.method == 'sphere':
+            self.run_sphere(core_list,frame_list,mini_scrubbers)
         else:
             print("ill defined camera", self.method)
             raise
 
+    def run_sphere(self,core_list,frame_list, mini_scrubbers):
+        looper=self.looper
+        ds = looper.load( frame_list[0])
+        all_positions=None
+        for ncore,core_id in enumerate(core_list):
+            ms = mini_scrubbers[core_id]
+            ms.make_floats(core_id)
+            this_x = ms.float_x
+            this_y = ms.float_y
+            this_z = ms.float_z
+
+            positions = np.column_stack([this_x,this_y,this_z])
+            if all_positions is None:
+                all_positions = positions
+            else:
+                all_positions = np.stack( positions, all_positions)
     def run_smooth_zoom_2(self,core_list,frame_list, mini_scrubbers):
-        """Moothly zoom from 0.25 to 4/128, centered on the centroid of the particles.
+        """Smoothly zoom from 0.25 to 4/128, centered on the centroid of the particles.
         Also expand enough to see all the particles."""
         looper=self.looper
         ds = looper.load( frame_list[0])
