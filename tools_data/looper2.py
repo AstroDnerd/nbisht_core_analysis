@@ -24,6 +24,9 @@ def load_looper(fname, directory=None):
         #It's actually not great to store this if you move machines.
         directory = h5ptr['directory'].asstr()[()]
     new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
+    new_looper.core_ids = np.sort(np.unique(new_looper.tr.core_ids))
+
+    new_looper.read_mode()
 
     return new_looper
 
@@ -145,6 +148,17 @@ class core_looper2():
         #        #treat each line as a command to run on 'self'
         #        exec("self.%s"%sline)
 
+    def read_mode(self):
+        import read_mode
+        reload(read_mode)
+        package = read_mode.read( self.sim_name)
+        self.modes = package['modes']
+        self.mode_dict=package['mode_dict']
+        self.core_by_mode = package['core_by_mode']
+        self.unique_modes = package['unique_modes']
+        if np.abs( package['core_ids'] - self.core_ids).sum() > 0:
+            print("Core ID problem.")
+            raise
     def get_current_frame(self):
         if self.current_frame is None:
             self.current_frame = self.frame_list[0]
