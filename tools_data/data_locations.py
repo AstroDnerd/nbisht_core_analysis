@@ -42,9 +42,9 @@ if machine == 'Nazare':
     #sim_u202 =  '/archive2/dcollins4096/Paper19/u202-Beta2/GravPotential'
     #sim_u203 =  '/archive2/dcollins4096/Paper19/u203-Beta20/GravPotential'
 
-    sim_u201 =  '/scratch3/dcollins/Paper19/Simulations_Good/u05-Beta0.2'
-    sim_u202 =  '/scratch3/dcollins/Paper19/Simulations_Good/u202-Beta2'
-    sim_u203 =  '/scratch3/dcollins/Paper19/Simulations_Good/u203-Beta20'
+    sim_u201 =  '/scratch3/dcollins/Paper19/Simulations_Good/u05-beta0.2'
+    sim_u202 =  '/scratch3/dcollins/Paper19/Simulations_Good/u202-beta2'
+    sim_u203 =  '/scratch3/dcollins/Paper19/Simulations_Good/u203-beta20'
 
     sim_u301 = sim_u201
     sim_u302 = sim_u202

@@ -41,11 +41,24 @@ class camera_1():
             this_y = ms.float_y
             this_z = ms.float_z
 
-            positions = np.column_stack([this_x,this_y,this_z])
+            positions = np.stack([this_x,this_y,this_z])
             if all_positions is None:
                 all_positions = positions
             else:
-                all_positions = np.stack( positions, all_positions)
+                all_positions = np.append(all_positions, positions, axis=1)
+        center = all_positions.mean(axis=1)
+        center.shape = center.shape[0],1,center.shape[1]
+        all_positions = all_positions - center
+        all_radius = (all_positions*all_positions).sum(axis=0)**0.5
+        max_radius = all_radius.max(axis=0)
+        radius = all_radius
+        self.all_center=center
+        self.all_center.shape=self.all_center.shape[0], self.all_center.shape[2]
+        self.all_radius=radius
+        self.max_radius=max_radius
+
+
+
     def run_smooth_zoom_2(self,core_list,frame_list, mini_scrubbers):
         """Smoothly zoom from 0.25 to 4/128, centered on the centroid of the particles.
         Also expand enough to see all the particles."""

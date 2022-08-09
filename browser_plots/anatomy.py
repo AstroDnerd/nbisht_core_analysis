@@ -4,13 +4,17 @@ from collections import defaultdict
 import scipy
 import colors
 
+import camera_path
+reload(camera_path)
 import hair_dryer
 reload(hair_dryer)
 
 import three_loopers_u500 as TL
 import movie_frames 
 
-def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volume=None):
+from scipy.ndimage import gaussian_filter
+
+def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volume=None):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -27,6 +31,7 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
     rho_min=rho_all.min()
     rho_max=rho_all.max()
 
+    mini_scrubbers={}
     for nc,core_id in enumerate(core_list):
         print('V %s %d'%(this_looper.sim_name,core_id))
             
@@ -35,6 +40,7 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
         ms.compute_ge(core_id)
         ms.compute_ke(core_id)
         ms.compute_ke_rel(core_id)
+        mini_scrubbers[core_id]=ms
 
         if ms.nparticles < 1000:
             sl=slice(None)
@@ -88,7 +94,7 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
 
 
         frame_index=[]
-        for frac in [.1, .9]:
+        for frac in [0.0,0.5, .9]:
             target = frac*frames[singularity]
             argmin = np.argmin( np.abs( frames-target))
             frame_index.append( frames[argmin])
@@ -100,7 +106,8 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
         
 
         rmap = rainbow_map(all_times.size)
-        color_list = [ rmap(frame) for frame in frame_index]
+        rmap = rainbow_map(len(frame_index))
+        color_list = [ rmap(frame) for frame in range(len(frame_index))]
         color_list[-2]='g'
         color_list[-1]='r'
         line_list = {frames[singularity]:2, frames[collapse_done]:2}
@@ -128,22 +135,27 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
             nx = len(frame_index)
             fig = plt.figure(figsize=(8, 8))
             outer_grid = fig.add_gridspec(3, 1)
-            ax = outer_grid[0,0].subgridspec(1,1).subplots()
+            #ax = outer_grid[0,0].subgridspec(1,1).subplots()
+            #ax2 = ax.twinx()
+            ax2 = outer_grid[0,0].subgridspec(1,1).subplots()
+            ax = ax2.twinx()
             ax1 = outer_grid[1,0].subgridspec(1,1).subplots()
             ax3 = outer_grid[2,0].subgridspec(1,nx,wspace=0).subplots()
-            ax2 = ax.twinx()
 
         ax.plot(times , rho, c=c, linewidth=0.1)
         axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
 
+        #velocity plots
         if 1:
             ok = vrm>0
             ax2.plot(times[ok], vrm[ok], 'r--')
             ax2.plot(times[~ok], np.abs(vrm[~ok]), c='r',label=r'$v_r$')
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
+        ax2.plot( times, times*0+1, c=[0.5]*4)
         axbonk(ax2, ylim=[0,10], ylabel=r'$velocity$')
 
+        #density CDF
         scale = [ms.density.min(),ms.density.max()]
         bins=np.geomspace( scale[0],scale[1],64)
         for nnn,frame in enumerate(frame_index):
@@ -159,6 +171,8 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
         #
         # Binding Energy
         #
+        camera = camera_path.camera_1(this_looper, 'sphere')
+        camera.run([core_id], frames, mini_scrubbers)
         y_ext = extents()
         r_ext = extents()
         if 1:
@@ -169,7 +183,8 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
                 ds = this_looper.load(frame)
                 xtra_energy.add_energies(ds)
                 nf = np.where( this_looper.tr.frames == frame)[0][0]
-                rsph = ds.arr(8.0/128,'code_length')
+                #rsph = ds.arr(8.0/128,'code_length')
+                rsph = max([camera.max_radius[nf], 1/128])
                 center = nar([ms.mean_x[nf], ms.mean_y[nf],ms.mean_z[nf]])
                 sp = ds.sphere(center,rsph)
 
@@ -188,19 +203,35 @@ def mass_density(this_looper,core_list=None, do_plots=True, mass=None, dof=None,
                 vz = sp[YT_velocity_z].v - ms.mean_vz[nf]
                 EK = 0.5*DD*(vx*vx+vy*vy+vz*vz)
 
-                ORDER = np.argsort( RR)
-                V_cuml =  np.cumsum( dv[ORDER])
-                V_local =  dv[ORDER]
-                RR_cuml = RR[ORDER]
-                EG_cuml = np.cumsum( EG[ORDER]*V_local)/V_cuml
-                EK_cuml = np.cumsum( EK[ORDER]*V_local)/V_cuml
+                if 0:
+                    #RADIAL PLOTS
+                    ORDER = np.argsort( RR)
+                    V_cuml =  np.cumsum( dv[ORDER])
+                    V_local =  dv[ORDER]
+                    RR_cuml = RR[ORDER]
+                    EG_cuml = np.cumsum( EG[ORDER]*V_local)/V_cuml
+                    EK_cuml = np.cumsum( EK[ORDER]*V_local)/V_cuml
 
-                line=line_list.get(frame,1)
-                ax3[nnn].plot(  RR_cuml, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line)
-                ax3[nnn].plot( RR_cuml, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line)
-                y_ext(EG_cuml)
-                y_ext(EK_cuml)
-                r_ext(RR_cuml)
+                    line=line_list.get(frame,1)
+                    ax3[nnn].plot(  RR_cuml, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line)
+                    ax3[nnn].plot( RR_cuml, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line)
+                    y_ext(EG_cuml)
+                    y_ext(EK_cuml)
+                    r_ext(RR_cuml)
+                if 1:
+                    #PHASE PLOTS
+                    xxbins=np.geomspace(5e-3,1e7,128)
+                    yybins=np.geomspace(5e-3,1e7,128)
+                    #xxbins = np.geomspace(ke.min(),ke.max(),128)
+                    #yybins = np.geomspace(ge[ge>0].min(),ge.max(),128)
+                    hist, xbins,ybins=np.histogram2d(EK.flatten(),EG.flatten(),bins=[xxbins,yybins])
+
+                    pch.helper(hist,xbins,ybins,ax=ax3[nnn])
+                    axbonk(ax3[nnn],xscale='log',yscale='log',xlabel='KE',ylabel='GE')
+                    ax3[nnn].plot( xxbins,xxbins,c='k')
+                    ax3[nnn].scatter(ms.ke_rel[:,nf],np.abs(ms.ge[:,nf]), edgecolor='r',s=30, facecolor='None')
+                    y_ext = extents(xxbins)
+                    r_ext = extents(yybins)
                 #ax3.hist( EG_cuml)
             for na,aaa in enumerate(ax3):
                 axbonk(aaa,xscale='log',yscale='log', xlabel=r'$r$',ylim=y_ext.minmax, xlim=r_ext.minmax)
@@ -238,7 +269,8 @@ sims=['u501', 'u502','u503']
 for sim in sims:
     #core_list=[381]
     #core_list={'u501':[323], 'u502':[381]}[sim]
+    #core_list={'u501':[323], 'u502':[112]}[sim]
     #core_list=[31,32]
     core_list=None
-    frrt=mass_density(TL.loops[sim], do_plots=True, core_list=core_list)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
+    frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
