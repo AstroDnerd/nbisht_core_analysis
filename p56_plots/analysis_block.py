@@ -1,10 +1,14 @@
-
+"""
+Analysis block 1
+"""
 
 from starter2 import *
 
 import convex_hull_tools as CHT
 import matplotlib.colors as colors
 
+import r_inflection
+reload(r_inflection)
 import supersets
 reload(supersets)
 reload(CHT)
@@ -31,3 +35,12 @@ if 'st' not in dir():
     for this_simname in sim_list:
         st[this_simname] = supersets.superset( TL.loops[this_simname], ht[this_simname])
         st[this_simname].find()
+
+if 'inflection' not in dir():
+    inflection = {}
+for sim in sim_list:
+    if sim in inflection:
+        continue
+    inflection[sim]=r_inflection.R_INFLECTION( TL.loops[sim])
+    inflection[sim].run()
+

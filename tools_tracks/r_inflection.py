@@ -32,9 +32,9 @@ class R_INFLECTION():
             rsph = ds.arr(R_SPHERE,'code_length')
             sp = ds.sphere(c,rsph)
 
-            GE = np.abs(sp['grav_energy'])
-            dv = np.abs(sp['cell_volume'])
-            RR = sp['radius']
+            GE = np.abs(sp[YT_grav_energy_2])
+            dv = np.abs(sp[YT_cell_volume])
+            RR = sp[YT_radius]
 
             #2d distribution of GE vs r
 

@@ -41,3 +41,4 @@ def three_way_bean():
 
     return fig, axScatter,axHistx, axHisty
 
+
