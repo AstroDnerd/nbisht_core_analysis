@@ -14,7 +14,8 @@ import movie_frames
 
 from scipy.ndimage import gaussian_filter
 
-def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volume=None):
+def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volume=None,
+           annotate_phases=False):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -142,8 +143,16 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax1 = outer_grid[1,0].subgridspec(1,1).subplots()
             ax3 = outer_grid[2,0].subgridspec(1,nx,wspace=0).subplots()
 
+        #density plot
         ax.plot(times , rho, c=c, linewidth=0.1)
         axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
+
+        if annotate_phases:
+            ax2.text( 0.0, 8, "collection")
+            ax2.text( 0.4, 8, "hardening")
+            ax2.text( 0.6, 8, "singularity")
+            ax2.text( 0.8, 8, "accretion+mosh")
+
 
         #velocity plots
         if 1:
@@ -203,7 +212,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 vz = sp[YT_velocity_z].v - ms.mean_vz[nf]
                 EK = 0.5*DD*(vx*vx+vy*vy+vz*vz)
 
-                if 0:
+                if 1:
                     #RADIAL PLOTS
                     ORDER = np.argsort( RR)
                     V_cuml =  np.cumsum( dv[ORDER])
@@ -213,12 +222,24 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     EK_cuml = np.cumsum( EK[ORDER]*V_local)/V_cuml
 
                     line=line_list.get(frame,1)
-                    ax3[nnn].plot(  RR_cuml, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line)
-                    ax3[nnn].plot( RR_cuml, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line)
+                    label_g=None
+                    label_k=None
+                    if nnn==0:
+                        label_g=r'$E_G$'
+                        label_k=r'$E_K$'
+                    ax3[nnn].plot(  RR_cuml, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line,
+                                  label=label_g)
+                    ax3[nnn].plot( RR_cuml, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line,
+                                 label=label_k)
+                    if nnn==0:
+                        ax3[nnn].legend(loc=2)
                     y_ext(EG_cuml)
                     y_ext(EK_cuml)
                     r_ext(RR_cuml)
-                if 1:
+                    ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r$', ylabel='',
+                                 xlim=[1/2048,0.2],ylim=[.5,2e5])
+
+                if 0:
                     #PHASE PLOTS
                     xxbins=np.geomspace(5e-3,1e7,128)
                     yybins=np.geomspace(5e-3,1e7,128)
@@ -234,7 +255,6 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     r_ext = extents(yybins)
                 #ax3.hist( EG_cuml)
             for na,aaa in enumerate(ax3):
-                axbonk(aaa,xscale='log',yscale='log', xlabel=r'$r$',ylim=y_ext.minmax, xlim=r_ext.minmax)
                 if na>0:
                     aaa.set(yticks=[],ylabel='')
                 else:
@@ -271,6 +291,10 @@ for sim in sims:
     #core_list={'u501':[323], 'u502':[381]}[sim]
     #core_list={'u501':[323], 'u502':[112]}[sim]
     #core_list=[31,32]
+    #core_list=[114]
+
     core_list=None
-    frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
+    annotate_phases=False
+    #annotate_phases=True
+    frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
