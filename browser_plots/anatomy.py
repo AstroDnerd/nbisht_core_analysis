@@ -3,7 +3,7 @@ from starter2 import *
 from collections import defaultdict
 import scipy
 import colors
-
+import xtra_energy
 import camera_path
 reload(camera_path)
 import hair_dryer
@@ -119,7 +119,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
 
         if 0:
-            fig,axes=plt.subplots(3,1, figsize=(12,12))
+            fig,axes=plt.subplots(3,1, figsize=(12,13))
             ax=axes[0];ax1=axes[1]; ax3=axes[2]
             ax2=ax.twinx()
         elif 0:
@@ -134,7 +134,8 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax2 = ax.twinx()
         else:
             nx = len(frame_index)
-            fig = plt.figure(figsize=(8, 8))
+            fig = plt.figure(figsize=(8, 10))
+            fig.tight_layout()
             outer_grid = fig.add_gridspec(3, 1)
             #ax = outer_grid[0,0].subgridspec(1,1).subplots()
             #ax2 = ax.twinx()
@@ -146,6 +147,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         #density plot
         ax.plot(times , rho, c=c, linewidth=0.1)
         axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
+        ax2.set(xlabel=r'$t/t_{ff}$')
 
         if annotate_phases:
             ax2.text( 0.0, 8, "collection")
@@ -162,7 +164,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
         ax2.plot( times, times*0+1, c=[0.5]*4)
-        axbonk(ax2, ylim=[0,10], ylabel=r'$velocity$')
+        ax2.set( ylim=[0,10], ylabel=r'$velocity$')
 
         #density CDF
         scale = [ms.density.min(),ms.density.max()]
@@ -175,7 +177,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
             #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
             ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
-        axbonk(ax1,xlabel='Cumulative Density', yscale='linear',xscale='log', xlim=scale, ylabel='N')
+        axbonk(ax1,xlabel='Density', yscale='linear',xscale='log', xlim=scale, ylabel='Cumulative Density')
 
         #
         # Binding Energy
@@ -238,8 +240,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     y_ext(EG_cuml)
                     y_ext(EK_cuml)
                     r_ext(RR_cuml)
-                    ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r$', ylabel='',
-                                 xlim=r_ext.minmax,ylim=y_ext.minmax)
+                    ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r$', ylabel='')
                     print('2')
 
                 if 0:
@@ -258,10 +259,13 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     r_ext = extents(yybins)
                 #ax3.hist( EG_cuml)
             for na,aaa in enumerate(ax3):
+                print('wut')
+                print(y_ext.minmax)
                 if na>0:
                     aaa.set(yticks=[],ylabel='')
                 else:
                     aaa.set(ylabel='Energy')
+                aaa.set( xlim=r_ext.minmax, ylim=y_ext.minmax)
 
 
 
@@ -298,7 +302,7 @@ for sim in sims:
 
     core_list=None
     annotate_phases=False
-    core_list = [32]
+    core_list = [112]
     #annotate_phases=True
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
