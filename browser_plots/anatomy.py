@@ -182,11 +182,12 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         #
         camera = camera_path.camera_1(this_looper, 'sphere')
         camera.run([core_id], frames, mini_scrubbers)
-        y_ext = extents()
-        r_ext = extents()
+        y_ext = extents(nar([.5,2e5]))
+        r_ext = extents(nar([1./2048, 0.3]))
         if 1:
             nnn=-1
             for frame in frame_index:
+                print('frame',frame)
                 nnn+=1
 
                 ds = this_looper.load(frame)
@@ -211,6 +212,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 vy = sp[YT_velocity_y].v - ms.mean_vy[nf]
                 vz = sp[YT_velocity_z].v - ms.mean_vz[nf]
                 EK = 0.5*DD*(vx*vx+vy*vy+vz*vz)
+                print('1')
 
                 if 1:
                     #RADIAL PLOTS
@@ -237,7 +239,8 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     y_ext(EK_cuml)
                     r_ext(RR_cuml)
                     ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r$', ylabel='',
-                                 xlim=[1/2048,0.2],ylim=[.5,2e5])
+                                 xlim=r_ext.minmax,ylim=y_ext.minmax)
+                    print('2')
 
                 if 0:
                     #PHASE PLOTS
@@ -284,8 +287,8 @@ if 0:
             mt[sim]=mass_tools.mass_tool(TL.loops[sim])
             mt[sim].run()
 
-sims=['u501', 'u502','u503']
-#sims=['u502']#, 'u501']
+sims=[ 'u502','u503']
+sims=['u502']#, 'u501']
 for sim in sims:
     #core_list=[381]
     #core_list={'u501':[323], 'u502':[381]}[sim]
@@ -295,6 +298,7 @@ for sim in sims:
 
     core_list=None
     annotate_phases=False
+    core_list = [32]
     #annotate_phases=True
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
