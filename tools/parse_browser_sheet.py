@@ -13,6 +13,7 @@ for sim in sim_list:
     print(modes)
     fptr = h5py.File('browser_data/core_formation_mode_%s.h5'%sim,'w')
     try:
+        argsort = np.argsort(core_ids)
         fptr['core_ids'] = core_ids
         fptr['modes'] = modes
     except:
