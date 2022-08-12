@@ -156,7 +156,7 @@ class core_looper2():
         self.mode_dict=package['mode_dict']
         self.core_by_mode = package['core_by_mode']
         self.unique_modes = package['unique_modes']
-        if np.abs( package['core_ids'] - self.core_ids).sum() > 0:
+        if np.abs( nar(sorted(package['core_ids'])) - nar(sorted(self.core_ids))).sum() > 0:
             print("Core ID problem.")
             raise
     def get_current_frame(self):
