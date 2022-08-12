@@ -42,8 +42,9 @@ def read(sim_name):
         if add_cluster:
             mode.append('Cluster')
             core_by_mode['Cluster'].append( core_ids[nm])
-        if one:
-            core_by_mode['One'].append( core_ids[nm])
+        #this is already done.
+        #if one:
+        #    core_by_mode['One'].append( core_ids[nm])
         #if add_binary + add_cluster + one == False:
         #    pdb.set_trace()
             
