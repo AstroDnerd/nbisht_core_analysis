@@ -34,7 +34,9 @@ for isim,this_simname in enumerate(sim_list):
     PROD.append(p_mode)
 
     NAMES.append("Anatomy")
-    RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+    RE.append(r"/*Anatomy3/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+    #NAMES.append("Anatomy")
+    #RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
     #NAMES.append("Density Velocity")
     #RE.append(r"/*density_velocity/u50%d/u50%d_rho_vnorm_t_c(\d{4}).png"%(nsim,nsim))
 
