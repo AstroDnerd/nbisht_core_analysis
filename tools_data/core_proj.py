@@ -78,7 +78,7 @@ class MonotoneEnforcer2():
         return new_val
 
 def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], color_dict={},force_log=None,linthresh=100,
-                    core_list=None,frame_list=None, clobber=True,
+                    core_list=None,frame_list=None, clobber=True, weight_field=None,
                        only_sphere=True, center_on_sphere=True,
                        zoom=True, moving_center=False, slab=None,
                        grids=True, plot_particles=True, annotate=False, 
@@ -262,7 +262,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
             if only_sphere:
                 sph = ds.region(center,left,right)
                 #sph = ds.sphere(center,Rmax)
-                proj = ds.proj(field,ax,center=center, data_source = sph, weight_field=YT_density)
+                proj = ds.proj(field,ax,center=center, data_source = sph, weight_field=weight_field)
             else:
                 bv = ds.arr([10,10,10],'code_velocity')
                 proj = ds.proj(field,ax,center=center, field_parameters={'bulk_velocity':bv})
