@@ -1,0 +1,17 @@
+\begin{table}[h] \begin{center} \input{table1_caption} \label{table1}                                                                                       
+\begin{tabular}{ r l l l }
+    \hline
+& & \sima & \simb & \simc \\
+\hline
+{% for name in first_modes %}
+{{name}} & {{ stuff['u501'][name]}} & {{ stuff['u502'][name]}} &  {{ stuff['u503'][name]}} \\
+{% endfor %}
+\hline
+\hline
+{% for name in other_modes %}
+{{labels[name]}} & {{ stuff['u501'].get(name,"")}} & {{ stuff['u502'].get(name,"")}} & {{ stuff['u503'].get(name,"")}}\\
+{% endfor %}
+\hline
+\end{tabular}                                                                                       
+\end{center}                                                                                       
+\end{table}       
