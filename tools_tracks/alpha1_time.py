@@ -163,17 +163,17 @@ if 'atlist' not in dir():
     for this_simname in  sim_list:
         atlist[this_simname].run(do_plots=False )
 
-if 'spheres' not in dir():
-    spheres={}
-    for this_simname in sim_list:
-        spheres[this_simname]= random_pearson( loops[this_simname])
-    for this_simname in  sim_list:
-        spheres[this_simname].run()
+if 0:
+    if 'spheres' not in dir():
+        spheres={}
+        for this_simname in sim_list:
+            spheres[this_simname]= random_pearson( loops[this_simname])
+        for this_simname in  sim_list:
+            spheres[this_simname].run()
 
 import means_etc
 reload(means_etc)
-if 1:
-
+if 0:
     for ns,this_simname in  enumerate(sim_list):
         Pearson_rand=[]
         Pearson_sim=[]
@@ -187,7 +187,6 @@ if 1:
         Pearson_sim += (atlist[this_simname].pearson_t[0])
         alpha_rand += (spheres[this_simname].alpha_randos)
         alpha_sim += (atlist[this_simname].alpha_t[0])
-
         plt.clf()
         fig, ax, ax_alpha,ax_r =means_etc.three_way_bean()
         ax_r.hist( Pearson_sim, histtype='step', color='r',linestyle='-',density=True, orientation='horizontal')
@@ -203,12 +202,10 @@ if 1:
 
 
 
-
-
-if 0:
+if 1:
     #violin plots
 
-    for this_simname in  ['u301']:#,'u302','u303']:
+    for this_simname in  ['u601']:#,'u302','u303']:
         fig,ax=plt.subplots(1,2)
         ax0=ax[0]; ax1=ax[1]
         at = atlist[this_simname]
