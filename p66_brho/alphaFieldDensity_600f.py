@@ -228,21 +228,23 @@ class BRho_tool():
                 self.bear9 = np.append(self.bear9,self.betarr[9])
                 self.bear10 = np.append(self.bear10,self.betarr[10]) 
                 self.bear11 = np.append(self.bear11,self.betarr[11])
-                if name == 'u601':
+                if name =='u601' or name =='u602': 
                     self.bear12 = np.append(self.bear12,self.betarr[12])    
+                if name == 'u601':
+                    #self.bear12 = np.append(self.bear12,self.betarr[12])    
                     self.bear13 = np.append(self.bear13,self.betarr[13]) 
 
                 if 1:
                     if core_id == core_list[-1]:
                         if name == 'u601':
-                            meanbear = [0.209,0.201813,0.235,0.230126,0.160165,0.072,0.106,0.079,0.030422,0.044,0.101638,0.176109,0.354,0.456282]    
+                            meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
                             # the following is B_z
                             #meanbear = [0.193,0.057,0.530,0.484,0.384,0.247,0.454,0.173,-0.031,0.013,0.032,0.122,0.389,0.521]
                             fitbear = [0.037122767966842135,0.06130065264472109,0.10876453322815462,0.12037348290995548,0.1256151386016793,0.12584476500389483,\
                                        0.12960541113191903,0.14452750478517815,0.16035081563879608,0.17350352881649694,0.20320963091004954,0.22354626336366118,\
                                        0.27401985393584366,0.3323051356106275]
                         if name == 'u602':
-                            meanbear = [0.273494,0.265940,0.330,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+                            meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
                             # the following is B_z
                             #meanbear = [0.224,0.107,0.032,0.518,0.673,0.496,0.578,0.385,0.231,0.247,0.285,0.339,0.532]
                             fitbear = [0.15059829575793074,0.19999384737531586,0.24022574462120863,0.27614753632431754,0.27614753632431754,0.29332289603778755,\
@@ -266,8 +268,10 @@ class BRho_tool():
                         self.bear9 = np.append(self.bear9,(meanbear[9]))#,fitbear[9]))
                         self.bear10 = np.append(self.bear10,(meanbear[10]))#,fitbear[10])) 
                         self.bear11 = np.append(self.bear11,(meanbear[11]))#,fitbear[11]))
-                        if name == 'u601':
+                        if name =='u601' or name =='u602': 
                             self.bear12 = np.append(self.bear12,(meanbear[12]))#,fitbear[12]))    
+                        if name == 'u601':
+                            #self.bear12 = np.append(self.bear12,(meanbear[12]))#,fitbear[12]))    
                             self.bear13 = np.append(self.bear13,(meanbear[13]))#,fitbear[13])) 
 
                 self.bears = [self.bear0,self.bear1,self.bear2,self.bear3,self.bear4,self.bear5,self.bear6,\
@@ -751,34 +755,34 @@ class BRho_tool():
         #To compare boxplot with a zero, affects the position of the plots
         a = 0.4
         if num == 0: 
-            meanbear = [0.209,0.201813,0.235,0.230126,0.160165,0.072,0.106,0.079,0.030422,0.044,0.101638,0.176109,0.354,0.456282]    
-            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12,13],meanbear[:-1],c='r',alpha=a)
+            meanbear = [0.207432,0.201813,0.234106,0.230126,0.160165,0.074837,0.107986,0.079870,0.030422,0.043188,0.101638,0.176109,0.353048,0.456282]    
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12,13,14],meanbear,c='r',alpha=a)
             #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11,12,13],meanbear[:-1],s=12,c='r')
+
+            ax1.plot([1,14],[0,0],'--',c=[0.5]*4) 
+            ax1.plot([1,14],[0.667,0.667],'--',c=[0.5]*4)
+            ax1.plot([1,14],[0.5,0.5],'--',c=[0.5]*4)
+            ax1.plot([1,14],[0.333,0.333],'--',c=[0.5]*4)
+
+            ax1.plot([1,14],[0.238,0.238],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,14],[0.204,0.204],'--',c='m',alpha=a)  #our own average FTA
+            tff_mod = [0.0,0.0,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89,0.95] 
+            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
+            title = r'$\beta = 0.2$'
+ 
+        if num == 1: 
+            meanbear = [0.273494,0.265940,0.329641,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12,13],meanbear,c='r',alpha=a)
+            #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11,12],meanbear[:-1],s=12,c='r')
 
             ax1.plot([1,13],[0,0],'--',c=[0.5]*4) 
             ax1.plot([1,13],[0.667,0.667],'--',c=[0.5]*4)
             ax1.plot([1,13],[0.5,0.5],'--',c=[0.5]*4)
             ax1.plot([1,13],[0.333,0.333],'--',c=[0.5]*4)
 
-            ax1.plot([1,13],[0.238,0.238],'-',c='m',alpha=a)  #our own average ATF
-            ax1.plot([1,13],[0.204,0.204],'--',c='m',alpha=a)  #our own average FTA
-            tff_mod = [0.0,0.0,0.07,0.15,0.23,0.30,0.38,0.45,0.53,0.61,0.68,0.75,0.82,0.89]#,0.95] 
-            ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
-            title = r'$\beta = 0.2$'
- 
-        if num == 1: 
-            meanbear = [0.273494,0.265940,0.330,0.385815,0.344329,0.284348,0.203154,0.173078,0.160007,0.166019,0.240440,0.277389,0.479462]
-            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12],meanbear[:-1],c='r',alpha=a)
-            #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11,12],meanbear[:-1],s=12,c='r')
-
-            ax1.plot([1,12],[0,0],'--',c=[0.5]*4) 
-            ax1.plot([1,12],[0.667,0.667],'--',c=[0.5]*4)
-            ax1.plot([1,12],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,12],[0.333,0.333],'--',c=[0.5]*4)
-
-            ax1.plot([1,12],[0.302,0.302],'-',c='m',alpha=a)  #our own average ATF
-            ax1.plot([1,12],[0.313,0.313],'--',c='m',alpha=a)  #our own average FTA
-            tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90]#,0.97] 
+            ax1.plot([1,13],[0.302,0.302],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,13],[0.313,0.313],'--',c='m',alpha=a)  #our own average FTA
+            tff_mod = [0.0,0.0,0.08,0.16,0.25,0.33,0.41,0.50,0.58,0.66,0.74,0.82,0.90,0.97] 
             ax1.xaxis.set_major_locator(plt.MultipleLocator(1))
             title = r'$\beta = 2.0$'
 
@@ -787,17 +791,17 @@ class BRho_tool():
             #ax.plot(therange,means,c='b',linestyle='dotted')
         if num == 2: 
             meanbear = [0.279555,0.336840,0.355424,0.325673,0.268460,0.232444,0.258084,0.252883,0.206200,0.239367,0.283474,0.617871]
-            ax1.plot([1,2,3,4,5,6,7,8,9,10,11],meanbear[:-1],c='r',alpha=a)
+            ax1.plot([1,2,3,4,5,6,7,8,9,10,11,12],meanbear,c='r',alpha=a)
             #ax1.scatter([1,2,3,4,5,6,7,8,9,10,11],meanbear[:-1],s=12,c='r')
 
-            ax1.plot([1,11],[0,0],'--',c=[0.5]*4) 
-            ax1.plot([1,11],[0.667,0.667],'--',c=[0.5]*4)
-            ax1.plot([1,11],[0.5,0.5],'--',c=[0.5]*4)
-            ax1.plot([1,11],[0.333,0.333],'--',c=[0.5]*4)
+            ax1.plot([1,12],[0,0],'--',c=[0.5]*4) 
+            ax1.plot([1,12],[0.667,0.667],'--',c=[0.5]*4)
+            ax1.plot([1,12],[0.5,0.5],'--',c=[0.5]*4)
+            ax1.plot([1,12],[0.333,0.333],'--',c=[0.5]*4)
 
-            ax1.plot([1,11],[0.324,0.324],'-',c='m',alpha=a)  #our own average ATF
-            ax1.plot([1,11],[0.376,0.376],'--',c='m',alpha=a)  #our own average FTA
-            tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86]#,0.91] 
+            ax1.plot([1,12],[0.324,0.324],'-',c='m',alpha=a)  #our own average ATF
+            ax1.plot([1,12],[0.376,0.376],'--',c='m',alpha=a)  #our own average FTA
+            tff_mod = [0.0,0.0,0.08,0.17,0.26,0.35,0.44,0.52,0.60,0.69,0.77,0.86,0.91] 
             ax1.xaxis.set_major_locator(plt.MultipleLocator(1)) 
             title = r'$\beta = 20$'
 
@@ -809,7 +813,7 @@ class BRho_tool():
         ylim = -0.5,1.0
         BRho_tool.labelled(ax1,xlabel=r'$t/t_{\rm{ff}}$',ylabel=r'$\alpha$',ylim=ylim)#,title=title) 
                
-        fig.savefig('BearsBoxplot_c%s'%name)
+        fig.savefig('BearsBoxplot_cf%s'%name)
         print("BOX SAVED")
         plt.close(fig)
       
@@ -918,7 +922,6 @@ if 'BRho_tool2' not in dir() or clobber:
 if 'BRho_tool3' not in dir() or clobber: 
     BRho_tool3=BRho_tool(TL6.loops['u603'])  
     simname3 = 'u603'
-
 simnames = [simname1,simname2,simname3]
 print("GREETINGS")
 
@@ -943,19 +946,19 @@ def axisforbox(theAx=None):
         # fix "core_list" respectively! 
         thtr = tool.this_looper.tr
         if nt == 0: 
-            tff_p = thtr.times[:-1]/t_ff
+            tff_p = thtr.times/t_ff
             #tff_p = thtr.times[:]/t_ff
             frames = [1,3,6,8,10,12]   
             core_list = [27]
             corenum = 27
         if nt == 1:
-            tff_p = thtr.times[:-1]/t_ff 
+            tff_p = thtr.times/t_ff 
             #tff_p = thtr.times[:]/t_ff
             frames = [1,3,5,7,9,11] 
             core_list = [32]
             corenum = 32
         if nt == 2:
-            tff_p = thtr.times[:-1]/t_ff 
+            tff_p = thtr.times/t_ff 
             #tff_p = thtr.times[:]/t_ff
             frames = [1,3,5,7,9,10] 
             core_list = [98]
