@@ -116,6 +116,8 @@ class R_INFLECTION():
                 axbonk(ax,xscale='log',yscale='log',xlabel='r',ylabel='rho')
                 fig.savefig('plots_to_sort/r_inflection_%s_c%04d.png'%(this_looper.sim_name, core_id))
 
+        return self.rinflection_list
+
 
 if 0:
     import three_loopers_six as TL

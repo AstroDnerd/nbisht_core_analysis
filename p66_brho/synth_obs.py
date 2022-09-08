@@ -54,7 +54,8 @@ class telescope():
             # THE PIECES FOR THE OBJECT
             all_particles = np.stack([ms.particle_x,ms.particle_y,ms.particle_z])  #stack along 0 axis                
             the_center = ms.mean_center[:,-1]  #the three coords for the last frame 
-            the_radius = rinf[core_id]  #inflection[sim].rinflection[core_id]  #r_inflection.rinflection_list[core_id]  ;HOWWW
+            the_radius = rinf[sim][nc]
+            print('we have a rinf radius!')
 
             the_left = the_center - the_radius 
             the_right = the_center + the_radius
@@ -113,14 +114,14 @@ class telescope():
                 #proj = yt.ProjectionPlot(ds, 2, ('gas','density'),data_source = the_CylZ) 
                 #frb = proj.frb
                 
-                if 0:
+                if 1:
                     # APPLY GAUSS BEAM
                     #frb.apply_gauss_beam(nbeam=25,sigma=2.0)  #YT version didn't work 
                     density_gauss = gaussian_filter(frb['gas','density'], 2)
-                    cv_gauss = gaussian_filter(frb['gas','cell_volume'], 2)
-                    bz_gauss = gaussian_filter(frb[Bz], 2)
+                    #cv_gauss = gaussian_filter(frb['gas','cell_volume'], 2)
+                    #bz_gauss = gaussian_filter(frb[Bz], 2)
 
-                if 0: 
+                if 1: 
                     plt.close('all')
                     fig, ax = plt.subplots(1,2)
                     ax[0].imshow(frb['gas','density'].v)  
@@ -142,21 +143,19 @@ if 'clobber' not in dir():
 
 if 'scope1' not in dir() or clobber:
     scope1=telescope(TL6.loops['u601'])
+    rinf1 = r_inflection.R_INFLECTION(TL6.loops['u601'])
+    rinf_1 = rinf1.run()
 if 'scope2' not in dir() or clobber:
     scope2=telescope(TL6.loops['u602'])
+    rinf2 = r_inflection.R_INFLECTION(TL6.loops['u602'])
+    rinf_2 = rinf2.run()
 if 'scope3' not in dir() or clobber:
     scope3=telescope(TL6.loops['u603'])
+    rinf3 = r_inflection.R_INFLECTION(TL6.loops['u603'])
+    rinf_3 = rinf3.run()
 
+rinfs = [rinf_1, rinf_2, rinf_3]
 simnames = ['u601','u602', 'u603']
-# AS FOUND IN tools_tracks/r_inflection
-
-if 'inflection' not in dir():
-    inflection = {}
-    for sim in TL6.loops:
-        inflection[sim]=r_inflection.R_INFLECTION(TL6.loops[sim])
-        inflection[sim].run()
-        print('after .run')
-
 
 atf = {}
 low_cores = {}
@@ -168,7 +167,7 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
     #core_list = all_cores[2:3]
     core_list = all_cores
 
-    tool.qtyRun(nt,inflection[nt],core_list=core_list)
+    tool.qtyRun(nt,rinfs,core_list=core_list)
 
     fig,ax = plt.subplots(1,1)
     Rhox = tool.synthRhox
@@ -182,7 +181,7 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
     Bz_Gauss = tool.synthBz_Gauss
     Bxyz = np.concatenate((Bx,By,Bz))
 
-    if 1:
+    if 0:
         atf[nt] = []
         low_cores[nt] = []
 
