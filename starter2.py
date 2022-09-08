@@ -40,3 +40,5 @@ reload(loop_apps)
 from collections import defaultdict
 import colors
 reload(colors)
+import r_inflection
+reload(r_inflection)
