@@ -97,7 +97,8 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
     """
 
     if core_list is None:
-        core_list = looper.core_list
+        core_list = np.unique( looper.tr.core_ids)
+        core_list.sort()
     if frame_list is None:
         frame_list = looper.frame_list
     all_png = glob.glob("*png")
@@ -156,9 +157,10 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
                 ax2[px][py].plot( [ L[x], R[x], R[x], L[x], L[x]], [L[y], L[y], R[y], R[y], L[y]], 'k--')
                 ax2[px][py].plot( [ 0, 1, 1, 0, 0], [0, 0, 1, 1, 0], c='k')
                 for core_id in core_list:
+                    color=color_dict.get(core_id, 'k')
                     position_dict=all_positions[frame]
                     nparticles = len( position_dict[core_id][:,x])
-                    ax2[px][py].scatter( position_dict[core_id][:,x], position_dict[core_id][:,y],c=[color_dict[core_id]]*nparticles)
+                    ax2[px][py].scatter( position_dict[core_id][:,x], position_dict[core_id][:,y],c=[color]*nparticles)
 
             oname = 'plots_to_sort/%s_points_%04d.png'%(looper.out_prefix, frame)
             #for ax in ax2.flatten():
@@ -195,7 +197,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
             if 1:
                 #every line
                 for core_id in sorted_core_list:
-                    color=color_dict[core_id]
+                    color=color_dict.get(core_id, 'k')
                     color=[1.0,0.5,0.5,0.5]
                     nparticles = mini_scrubbers[core_id].nparticles
                     if nparticles > 100:
@@ -295,7 +297,7 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
                 pw.set_log(field,force_log,linthresh=linthresh)
             for core_id in core_list:
                 positions = position_dict[core_id]
-                color=color_dict[core_id]
+                color=color_dict.get(core_id, 'k')
                 #color = [1.0,0.0,0.0,0.8]
                 #alpha=0.1
                 alpha=0.4
