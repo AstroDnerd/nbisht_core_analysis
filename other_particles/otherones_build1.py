@@ -14,17 +14,19 @@ if 'this_simname' not in dir():
         new_simname = 'a001'
         other_simname = 'u301'
         this_simname = 'u401'
-        save='a001_all_particles.h5'
-    if 1:
+        #save='a001_all_particles.h5'
+        save='/data/cb1/Projects/P19_CoreSimulations/CoreSets/a000/a001_all_particles.h5'
+    if 0:
         new_simname = 'a002'
         other_simname = 'u302'
         this_simname = 'u402'
         save='/data/cb1/Projects/P19_CoreSimulations/CoreSets/a000/a002_all_particles.h5'
-    if 0:
+    if 1:
         new_simname = 'a003'
         other_simname = 'u303'
         this_simname = 'u403'
-        save='a003_all_particles.h5'
+        #save='a003_all_particles.h5'
+        save='/data/cb1/Projects/P19_CoreSimulations/CoreSets/a000/a003_all_particles.h5'
     boxname = 'box_of_masses_%s.h5'%new_simname
     this_looper = looper2.core_looper2( directory = dl.sims[other_simname], savefile_only_trackage=save)
     print('make ms, takes about 90 sec')
