@@ -65,6 +65,8 @@ class product():
             self.render = self.number_render
         elif style == 'value_target_file':
             self.render = self.value_render_target_file
+        elif style == 'string':
+            self.render = self.string_render
         else:
             self.render = None
         
@@ -140,6 +142,23 @@ class product():
         out1 = "<td>%s</td>"%img
         return out1
 
+    def string_render(self,core_id):
+        if 'values' not in self.__dict__:
+            fptr = h5py.File(self.fname,'r')
+            values = fptr[self.field].asstr()[()]
+            core_ids = fptr['core_ids'][()]
+            self.values = dict(zip(core_ids,values))
+            fptr.close()
+            #print(self.values)
+        if core_id in self.values:
+            values=str(self.values[core_id])
+            parts = values.split(",")
+            n = len(parts)
+            out_str = self.number_format*n%tuple([str(v) for v in parts])
+            print(out_str)
+        else:
+            out_str = '-1'
+        return "<td>%s </td>"%out_str
     def value_render(self,core_id):
         if 'values' not in self.__dict__:
             fptr = h5py.File(self.fname,'r')
