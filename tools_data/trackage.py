@@ -422,7 +422,7 @@ class mini_scrubber():
         self.mean_xc = np.sum(self.this_x*self.density,axis=0)/self.density_tot
         self.mean_yc = np.sum(self.this_y*self.density,axis=0)/self.density_tot
         self.mean_zc = np.sum(self.this_z*self.density,axis=0)/self.density_tot
-        self.mean_center_density=nar([self.mean_x,self.mean_y,self.mean_z])
+        self.mean_center_density=nar([self.mean_xc,self.mean_yc,self.mean_zc])
 
 
         self.nparticles,self.ntimes=self.this_x.shape
