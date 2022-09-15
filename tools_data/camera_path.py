@@ -13,7 +13,10 @@ class camera_1():
         self.times=[]
     def run(self, core_list, frame_list, mini_scrubbers):
         self.times=[]
-        if self.method == 'domain':
+        if self.method == 'fixed8':
+            #fixed full domain.
+            self.run_8(core_list, frame_list,mini_scrubbers)
+        elif self.method == 'domain':
             #fixed full domain.
             self.run_domain(core_list, frame_list,mini_scrubbers)
         elif self.method.startswith('tight'):
@@ -29,6 +32,55 @@ class camera_1():
         else:
             print("ill defined camera", self.method)
             raise
+
+    def run_8(self,core_list,frame_list, mini_scrubbers):
+        looper=self.looper
+        ds = looper.load( frame_list[0])
+        P = None
+        for core_id in core_list:
+            ms = mini_scrubbers[core_id]
+            
+            ms.make_floats(core_id)
+            this_x = ms.float_x
+            this_y = ms.float_y
+            this_z = ms.float_z
+
+            positions = np.stack([this_x,this_y,this_z])
+            if P is None:
+                P=positions
+            else:
+                print(P.shape)
+                print(positions.shape)
+                P=np.concatenate([P,positions], axis=1)
+        self.all_center = P.mean(axis=1).transpose()
+        for frame in frame_list:
+            frame_ind = np.where(looper.tr.frames == frame)[0][0]
+            self.times.append(looper.tr.times[frame_ind])
+            self.all_left[frame]  = self.all_center[frame_ind] - 8./128
+            self.all_right[frame] = self.all_center[frame_ind] + 8./128
+
+
+        #this should not be done in the camera.
+
+        for frame in frame_list:
+            frame_ind = np.where(looper.tr.frames == frame)[0]
+
+
+            #Fill the positions dict.  
+            #Probably should be done somewhere else.
+            position_dict={}
+            P=None
+            for core_id in core_list:
+                ms = mini_scrubbers[core_id]
+                
+                ms.make_floats(core_id)
+                this_x = ms.float_x[:,frame_ind]
+                this_y = ms.float_y[:,frame_ind]
+                this_z = ms.float_z[:,frame_ind]
+
+               # positions = 
+                position_dict[core_id] = positions
+            self.all_positions[frame]=position_dict
 
     def run_sphere(self,core_list,frame_list, mini_scrubbers):
         looper=self.looper
