@@ -31,51 +31,7 @@ if 'mini_scrubbers' not in dir():
 
             mini_scrubbers[sim][core_id]=ms
 
-def get_other_cores(this_looper,core_list=None, mini_scrubbers=None, thresh=0.05):
-
-    if core_list is None:
-        core_list = np.unique(this_looper.tr.core_ids)
-    all_cores=np.unique(this_looper.tr.core_ids)
-
-    if mini_scrubbers is None:
-
-        mini_scrubbers={}
-        for core_id in all_cores:
-            print('ms',core_id)
-            ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
-            ms.particle_pos(core_id)
-
-            mini_scrubbers[core_id]=ms
-
-    other_cores={}
-    for main_core in core_list:
-
-        x_ext=extents()
-        y_ext=extents()
-        z_ext=extents()
-        other_cores[main_core]=[]
-        ms = mini_scrubbers[main_core]
-        mmx = ms.mean_x.mean()
-        mmy = ms.mean_y.mean()
-        mmz = ms.mean_z.mean()
-        left =  nar([mmx-thresh,mmy-thresh,mmz-thresh])
-        right = nar([mmx+thresh,mmy+thresh,mmz+thresh])
-        for ocore in all_cores:
-            if ocore==main_core:
-                continue
-            oms = mini_scrubbers[ocore]
-            if 0:
-                ok = ((oms.particle_x > left[0])*\
-                        (oms.particle_x < right[0])*\
-                        (oms.particle_y > left[1])*\
-                        (oms.particle_y < right[1])*\
-                        (oms.particle_z > left[2])*\
-                        (oms.particle_z < right[2])).any()
-            ok = ( ((oms.mean_x-ms.mean_x)**2+(oms.mean_y-ms.mean_y)**2+(oms.mean_z-ms.mean_z)**2) < 0.01).any()
-            if ok:
-                other_cores[main_core].append(ocore)
-    return other_cores
-
+import find_other_cores
 sim_list = ['u501','u502','u503']
 sim_list = ['u503']
 for sim in sim_list:
@@ -84,7 +40,7 @@ for sim in sim_list:
     main_core_list.sort()
     main_core_list=main_core_list[::-1]
     #main_core_list = [62]
-    other_cores= get_other_cores( set_looper, main_core_list, mini_scrubbers[sim])
+    other_cores= find_other_cores.get_other_cores( set_looper, main_core_list, mini_scrubbers[sim])
 
     if 1:
         movie_mask = movie_frames.quantized_mask(set_looper)
