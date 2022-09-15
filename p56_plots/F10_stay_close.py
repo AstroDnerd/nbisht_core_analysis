@@ -9,7 +9,7 @@ reload(hair_dryer)
 #import stay_close
 #import three_loopers_tenfour as TL4
 import three_loopers_six as TL
-
+import close_tool
 import convex_hull_tools as CHT
 reload(CHT)
 sim_list=['u601','u602','u603']
@@ -22,7 +22,7 @@ if 'ht' not in dir() :
 if 'ct' not in dir():
     ct = {}
     for this_simname in sim_list:
-        ct[this_simname] = close_tool( TL.loops[this_simname])
+        ct[this_simname] = close_tool.close_tool( TL.loops[this_simname])
         ct[this_simname].make_distance()
 
 import supersets
@@ -73,6 +73,8 @@ if 1:
         fig, ax, axtop,axright = means_etc.three_way_bean()
 
         Md = np.triu(ctool.distance_matrix).flatten()
+        #PHYSICS UNITS
+        Md *= 4.6 #NOW ITS IN PARSECS
         Mo = np.triu(overlap_matrix).flatten()
 
         ok = (Md > 0)*(Mo >= 0)
@@ -90,13 +92,17 @@ if 1:
         axtop.hist( Md[ok][ neighbor == 2], histtype='step',color='k',bins=bins)
         #axright.hist( Mo[ok][neighbor == 1], histtype='step',color='r',orientation='horizontal',bins=64)
         axright.hist( Mo[ok][neighbor == 2], histtype='step',color='k',orientation='horizontal',bins=64)
-        axbonk(ax, xlabel='Distance', ylabel='overlap',xscale='log',yscale='linear')
+        axbonk(ax, xlabel='Distance [pc]', ylabel='overlap',xscale='log',yscale='linear')
         axbonk(axtop, xlabel='', ylabel='N',xscale='log',yscale='log')
         axbonk(axright, xlabel='N', ylabel='',xscale='log',yscale='linear')
         axtop.set_xlim( ax.get_xlim())
         axright.set_ylim( ax.get_ylim())
         axtop.set_xticks([])
         axright.set_yticks([])
+
+        #ax.set_xticks( nar( ax.get_xticks())*4.6)
+        print("==========")
+        print( ax.get_xticks())
 
 
 
