@@ -32,3 +32,6 @@ class close_tool():
                 x1 = self.last_point[nc1]
                 x2 = self.last_point[nc2]
                 self.distance_matrix[ nc1, nc2 ] = np.sqrt( ((x1-x2)**2).sum() )
+    def __getitem__(self,core_id):
+        ind = np.where( nar(self.cores_used) == core_id)[0][0]
+        return self.distance_matrix[ind,:]
