@@ -126,11 +126,13 @@ def core_proj_multiple(looper,  field='density', zoom=1,axis_list=[0,1,2], color
                 print(pw.save( "plots_to_sort/friends_%s_c%04d_n%04d"%(looper.sim_name,core_id,frame)))
 
 sim_list=['u501','u502', 'u503']
+sim_list=['u502']
 import three_loopers_u500 as TL
 for sim in sim_list:
     this_looper = TL.loops[sim]
     frame_list = [this_looper.target_frame]
-    core_proj_multiple(this_looper,  field='density', zoom=8,axis_list=[0], 
+    core_list = [375, 373, 268]
+    core_proj_multiple(this_looper,  field='density', zoom=8,axis_list=[2], 
                     core_list=core_list,frame_list=frame_list, 
                        annotate_grids=False, 
                       annotate_fields=False, annotate_gravity=False, annotate_velocity=False,annotate_velocity_streamlines=False, annotate_lic=False, 
