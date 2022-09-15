@@ -72,7 +72,7 @@ class te_tc:
             this_tend = times[collapse_done][0]
             self.tsing_core[core_id]=this_tsing
             self.tend_core[core_id]=this_tend
-            if core_id in this_looper.core_by_mode['One']:
+            if core_id in this_looper.core_by_mode['Alone']:
                 self.mode.append(1)
                 self.tsing['One'].append( this_tsing)
                 self.tend['One'].append( this_tend)
