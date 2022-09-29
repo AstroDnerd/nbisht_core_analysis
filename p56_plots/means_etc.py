@@ -1,6 +1,6 @@
 from starter2 import *
 #import three_loopers_1tff as tl
-from multiplots import *
+#from multiplots import *
 def make_prof(ds,fields,weight_field=None,accumulation=False,fractional=True,n_bins=64,extrema=None):
     reg = ds.all_data()
     prof = yt.create_profile(reg,fields[0],fields[1] ,weight_field=weight_field,accumulation=accumulation,
