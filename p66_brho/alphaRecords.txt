@@ -1,3 +1,4 @@
+
 Sim u401 meanAlpha 0.254220 
 Sim u402 meanAlpha 0.309233 
 Sim u403 meanAlpha 0.330016 
@@ -17,7 +18,6 @@ FIG 1 MASKED, FTA, with the last frame included
 Sim u601 meanAlpha 0.203707 
 Sim u602 meanAlpha 0.312828 
 Sim u603 meanAlpha 0.376199 
-
 
 FIG #5, no meanbears or figbears
 Sim u401 meanAlphas Means:[-0.0010136983959460838, 0.0005361945851628814, 0.050401125577705444, 0.06389756655952986, 0.06782213499728725, 0.0685719436675541, 0.07444458319075785, 0.07936234988034464, 0.11212937423783423, 0.14354629024412702, 0.18293330003416872, 0.2127396877766102, 0.2357298853526708] 
@@ -73,7 +73,6 @@ Sim u403 Alpha 0.283474
 AVERAGE = 0.2762185454545455
 Sim u403 Alpha 0.617871 
 
-
 FIG 6 pears per frame for <B> vs <n>
 u401
 [0.46115629 0.386104   0.5580705  0.53245971 0.40396877 0.2024436
@@ -86,7 +85,6 @@ u402
 u403
 [0.60075925 0.62926192 0.7419749  0.69909184 0.63475069 0.52538688
 0.61374631 0.61529876 0.53526537 0.61416945 0.515072   0.74873393]
-
 
 FIG pears per frame for vioplots
 Sim u401 mean pears 
@@ -101,7 +99,6 @@ Sim u401 meanPear 0.7013842341346022
 Sim u402 meanPear 0.7719797139852619
 Sim u403 meanPear 0.8151474087779766
 
-
 TRITSIS ON CRUTCHER: our cores already take into account this break density...
 Sim u401 meanAlpha 0.230374 
 Sim u401 meanPear 0.705847 
@@ -109,26 +106,6 @@ Sim u402 meanAlpha 0.308959
 Sim u402 meanPear 0.727254 
 Sim u403 meanAlpha 0.344078 
 Sim u403 meanPear 0.751293 
-
-
-
-SYNTHETIC OBS: ...how it started
-sims alphas  [8.105270634247812, 7.790363468364117, 6.375595104801773,
-5.353303662833386, 4.345221950221608, 4.420717014131495, 3.126982714457789,
-2.545756603220253, 3.6250826931347957, 2.7825474455957444, 3.1577462762309905,
--0.924893423395326, 2.55531080568396]
-
-
-SYNTH_OBS CORRECTED/rho(CELL_VOLUME):Bz, [0], [1,0,0], blos/mass 
-sim601 alphas  [0.5275210379172189]  
-sims602 alphas  [0.43036518368600474]  
-sims603 alphas [0.16087079102597557]
-
-SYNTH OBS CORRECTED/rho(CELL_MASS):
-sim601 alphas  [0.6898528558564564]
-sim602 alphas  [-0.5836283636925115]
-sim603 alphas  [-0.27784003046415157]
-
 
 MAX,MIN of Bz, not logged
 max this_field_z 3561.78807369031
@@ -141,24 +118,81 @@ max this_field_z 3076.377563687941
 min this_field_z 0.008121238228399748
 
 
-# trying diving by area as: pi * radius**2
-Bz vs N, no restriction
-Sim 0 alpha -0.107919 
-Sim 1 alpha -0.085041 
-Sim 2 alpha 0.185515 
 
-Bz vs N, 'OK' restriction
-Sim 0 alpha 0.025918 
-Sim 1 alpha 0.006965 
-Sim 2 alpha 0.160849 
-#
+# - - - - - - - - - -
+SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: BxByBz, [2], all normals, Blos/mass
+(so 3x as many points)
+Sim 0 alpha 0.711603 
+Sim 1 alpha 0.713381 
+Sim 2 alpha 0.731364 
+SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: BxByBz, [2], all normals, Blos/mass
+WITH GAUSSIAN BLURR -- all projections, all  mass, cv 
+Sim 0 alpha 0.259914 
+Sim 1 alpha 0.260445 
+Sim 2 alpha 0.324500 
+CYLINDER: FRB!!
+Sim 0 alpha 0.621602 
+Sim 1 alpha 0.538634 
+Sim 2 alpha 0.654985 
+CYLINDER: FRB BLURR!! ..hm, same values?
+Sim 0 alpha 0.621602 
+Sim 1 alpha 0.538634 
+Sim 2 alpha 0.654985 
 
-Bz vs n 'OK' restriction
-Sim 0 alpha 1.124912 
-Sim 1 alpha 1.160686 
-Sim 2 alpha 1.380516 
+REGION: (2R)**2 ....grr.
+Sim 0 alpha 0.520261 
+Sim 1 alpha 0.446243 
+Sim 2 alpha 0.496914 
+REGION: (2R)**2 ; FRB, further corrected
+Sim 0 alpha 0.506340 
+Sim 1 alpha 0.494446 
+Sim 2 alpha 0.612830 
+
+# FRESH CODE:
+CYLINDER: ZONE METHOD: the_radius - inflection radius. 
+Sim 0 alpha 0.605488 
+Sim 1 alpha 0.545563 
+Sim 2 alpha 0.574237 
+CYLINDER: FRB METHOD: the_radius - inflection radius. 
+Sim 0 alpha 0.630350 
+Sim 1 alpha 0.618614 
+Sim 2 alpha 0.710875 
+MID CYLINDER: ZONE METHOD: the_radius - inflection radius. 
+Sim 0 alpha 0.515993 
+Sim 1 alpha 0.442296 
+Sim 2 alpha 0.488380 
+MID CYLINDER: ZONE METHOD: the_radius - 1/128
+Sim 0 alpha 0.594953 
+Sim 1 alpha 0.525792 
+Sim 2 alpha 0.622145 
+MID CYLINDER: FRB METHOD: the_radius - inflection radius. 
+Sim 0 alpha 0.506340 
+Sim 1 alpha 0.494446 
+Sim 2 alpha 0.612830 
+MID CYLINDER: FRB METHOD: the_radius - 1/128
+Sim 0 alpha 0.436585 
+Sim 1 alpha 0.342483 
+Sim 2 alpha 0.538080 
 
 
+
+# - - - - - - - - - -
+SYNTHETIC OBS: ...how it started
+sims alphas  [8.105270634247812, 7.790363468364117, 6.375595104801773,
+5.353303662833386, 4.345221950221608, 4.420717014131495, 3.126982714457789,
+2.545756603220253, 3.6250826931347957, 2.7825474455957444, 3.1577462762309905,
+-0.924893423395326, 2.55531080568396]
+
+SYNTH_OBS CORRECTED/rho(CELL_VOLUME):Bz, [0], [1,0,0], blos/mass 
+sim601 alphas  [0.5275210379172189]  
+sims602 alphas  [0.43036518368600474]  
+sims603 alphas [0.16087079102597557]
+
+SYNTH OBS CORRECTED/rho(CELL_MASS):
+sim601 alphas  [0.6898528558564564]
+sim602 alphas  [-0.5836283636925115]
+sim603 alphas  [-0.27784003046415157]
+CYLINDER
 SYNTH_OBS rho(CELL_VOLUME), OK: Bz, [2], normal = [0,0,1], blos/mass, Blos >1
 Sim 0 alpha 0.755277 
 Sim 1 alpha 0.799107 
@@ -167,12 +201,24 @@ SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: Bz, [2], normal = [0,0,1],B
 Sim 0 alpha 0.756430 
 Sim 1 alpha 0.808605 
 Sim 2 alpha 0.774754 
-SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: BxByBz, [2], normal = [0,0,1],Blos/mass
-(so 3x as many points)
-Sim 0 alpha 0.711603 
-Sim 1 alpha 0.713381 
-Sim 2 alpha 0.731364 
+SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: Bz, [2], normal = [0,0,1],Blos/mass
+WITH GAUSSIAN BLURR -- projection? gauss_massZ, cv_gauss; NOPE
+Sim 0 alpha 1.083760 
+Sim 1 alpha 0.931945 
+Sim 2 alpha 1.154013 
+SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: Bz, [2], normal = [0,0,1],Blos/mass
+WITH GAUSSIAN BLURR -- projection 2 massZ, cv_gauss; HM
+Sim 0 alpha 0.370030 
+Sim 1 alpha 0.214890 
+Sim 2 alpha 0.354595 
+SYNTH_OBS N(area with pi*radius^2)(CELL_VOLUME), OK: Bz, [2], normal = [0,0,1],Blos/mass
+WITH GAUSSIAN BLURR -- projection 2 massZ, cv; vs cv_gauss not significant
+Sim 0 alpha 0.370041 
+Sim 1 alpha 0.214858 
+Sim 2 alpha 0.354757 
 
+
+# NOT OK
 SYNTH_OBS rho(CELL_VOLUME), noOK: Bz, [2], normal = [0,0,1], blos/mass, Blos >1
 Sim 0 alpha 0.948639 
 Sim 1 alpha 0.995309 
@@ -182,14 +228,31 @@ Sim 0 alpha 0.955191
 Sim 1 alpha 0.967184 
 Sim 2 alpha 0.998295 
 
+REGION: wrong area..............
+SYNTH_OBS N(the_right: average areas xy,yz,zx)(CELL_VOLUME), OK: Bz, Blos/mass
+Sim 0 alpha 0.250175 
+Sim 1 alpha 0.076872 
+Sim 2 alpha 0.306664 
+SYNTH_OBS N(the_right: areas xy)(CELL_VOLUME), OK: Bz, Blos/mass
+Sim 0 alpha 0.124306 
+Sim 1 alpha 0.038608 
+Sim 2 alpha 0.265733 
+SYNTH_OBS N(the_right: areas xy,yz,zx)(CELL_VOLUME), OK: Bxyz, Blos/mass
+Sim 0 alpha 0.140630 
+Sim 1 alpha 0.065798 
+Sim 2 alpha 0.225044 
+SYNTH_OBS N(the_right: average areas xy,yz,zx)(CELL_VOLUME), OK: Bx,By,Bz, Blos/mass
+Sim 0 alpha 0.193673 
+Sim 1 alpha 0.104676 
+Sim 2 alpha 0.287341 
+REGION: (2R)**2 ; FRB ....hmmmmm
+Sim 0 alpha 0.294314 
+Sim 1 alpha 0.160423 
+Sim 2 alpha 0.563061 
 
-# ATTEMPTS
-Sim 0 alpha 0.011595 ,had mass Z only 
-Sim 1 alpha 0.017076 ,had mass Z only 
-Sim 0 alpha 0.009880  #hmmm 
-Sim 1 alpha 0.014326  #hmmm
-Sim 2 alpha 0.010713  #hmmm
 
+
+# - - - - - - - - - -
 FIGURE4, by mode, mOne:
 Sim 0: atf_list [0.18941526470836778, 0.20375557122369464, 0.23159105289239096,
 0.22841537157091604, 0.1705604025733461, 0.11313124268767354,
@@ -243,6 +306,6 @@ Sim 0: atf_list [-0.01142422845017509, -0.1020301160081093, -0.01835950054733975
 0.41298075873381035]
 
 
-Sim 0 alpha 1.083760 
-Sim 1 alpha 0.931945 
-Sim 2 alpha 1.154013 
+
+
+
