@@ -70,7 +70,8 @@ if 1:
                     ratio=rat[0]/rat[1]
 
                 color_matrix[nc1,nc2]=ratio
-        fig, ax, axtop,axright = means_etc.three_way_bean()
+        #fig, ax, axtop,axright = means_etc.three_way_bean()
+        fig, ax, axtop,axright = multiplots.three_way_bean(figsize=(4,4), left=0.15, width=0.62, bottom=0.11, height=0.62, histdepth=0.02)
 
         Md = np.triu(ctool.distance_matrix).flatten()
         #PHYSICS UNITS
