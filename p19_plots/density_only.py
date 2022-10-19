@@ -10,7 +10,7 @@ reload(hair_dryer)
 import three_loopers_u500 as TL
 import movie_frames 
 
-def simple_rho(this_looper,core_list=None):
+def simple_rho(this_looper,core_list=None, thicker=False):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -46,6 +46,8 @@ def simple_rho(this_looper,core_list=None):
             c=[0.1]*4
         #sl = slice(None,None,5)
         c=[0.1]*4
+        if thicker:
+            c=[0.5]*3
 
         rho = ms.density[sl].transpose()
         rho = rho[mask,:]
@@ -59,7 +61,7 @@ def simple_rho(this_looper,core_list=None):
         if na < len(axes)-1:
             aa.set(xticks=[])
 
-    outname='plots_to_sort/%s_rho_t_several.pdf'%(this_looper.sim_name)
+    outname='plots_to_sort/%s_rho_t_several.png'%(this_looper.sim_name)
     print(outname)
     fig.savefig(outname, bbox_inches='tight')
 
@@ -70,5 +72,5 @@ def simple_rho(this_looper,core_list=None):
 sims=['u502']
 for sim in sims:
     core_list = [193, 74, 112,113, 368]
-    simple_rho(TL.loops[sim],core_list=core_list)
+    simple_rho(TL.loops[sim],core_list=core_list, thicker=True)
 
