@@ -302,7 +302,7 @@ for sim in sims:
 
     core_list=None
     annotate_phases=False
-    core_list = [112]
+    core_list = [114]
     #annotate_phases=True
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
