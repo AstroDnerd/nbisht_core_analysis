@@ -3,9 +3,8 @@
 synthetic observations, version 3
 '''
 
+from cmath import log
 from starter2 import *
-import davetools
-reload(davetools)
 import annotate_particles_4_cpy
 reload(annotate_particles_4_cpy)
 
@@ -19,12 +18,13 @@ class telescope():
         print('inside qtyRun')
         thtr = self.this_looper.tr
 
+        # CORE_LIST
         all_cores = np.unique(thtr.core_ids)
         if core_list is None:
             core_list = all_cores
+        self.Rho = [np.zeros(len(core_list)) for x in range(3)]
+        self.Field = [np.zeros(len(core_list)) for x in range(3)]
 
-        # THE FINAL FRAME 
-        the_frame = thtr.frames[-1:]
         self.synthRho = [np.zeros(len(core_list)) for x in range(3)]
         self.synthRho_mid = [np.zeros(len(core_list)) for x in range(3)]
         self.synthField = [np.zeros(len(core_list)) for x in range(3)]
@@ -35,6 +35,11 @@ class telescope():
         self.synthField_frb = [np.zeros(len(core_list)) for x in range(3)]
         self.synthField_frbmid = [np.zeros(len(core_list)) for x in range(3)]
 
+        self.radii = [np.zeros(len(core_list)) for x in range(3)]
+
+        # THE FINAL FRAME 
+        the_frame = thtr.frames[-1:] 
+
         # CORES
         for nc,core_id in enumerate(core_list):
             ds = self.this_looper.load(the_frame[0]) 
@@ -44,8 +49,11 @@ class telescope():
 
             # PIECES FOR THE OBJECTS
             the_center = ms.mean_center[:,-1]  #the three coords for the last frame 
-            the_radius = rinf[sim][nc] # OR a fixed 1/128; what is most realistic for a telescope
-            the_area= np.pi * (the_radius**2) 
+            twoeight = 1/128
+            fivesix = 1/256
+            the_radius = [twoeight,fivesix] 
+            self.radii[sim][nc] = rinf[sim][nc] # OR a fixed 1/128; what is most realistic for a telescope
+            the_area= np.pi * (the_radius[0]**2) 
             the_normal = [[1,0,0],[0,1,0],[0,0,1]]
 
             # MAKE THE OBJECTS:
@@ -53,11 +61,11 @@ class telescope():
             the_cyl = {}
             the_mid_cyl = {}
             for i in range(3):
-                the_cyl[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius,height=(1,'code_length'))
-                the_mid_cyl[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius,height=the_radius) 
+                the_cyl[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius[0],height=(1,'code_length'))
+                the_mid_cyl[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius[0],height=the_radius[0]) 
 
 
-            # THE DENSITY & FIELD, ZONE METHOD: 
+            # THE DENSITY & FIELD, ZONE METHOD:  2D 
             B = ['magnetic_field_x','magnetic_field_y','magnetic_field_z']
             for j in range(3):
                 self.synthRho[j][nc] = (the_cyl[j]['density'] * the_cyl[j]['cell_volume']).sum()/the_area
@@ -66,9 +74,24 @@ class telescope():
                 self.synthRho_mid[j][nc] = (the_mid_cyl[j]['density'] * the_mid_cyl[j]['cell_volume']).sum()/the_area
                 self.synthField_mid[j][nc] = (the_mid_cyl[j]['density'] * the_mid_cyl[j][B[j]] * the_mid_cyl[j]['cell_volume']).sum()/the_mid_cyl[j]['gas','cell_mass'].sum()
 
-            # PROJECTIONS AND FRBS
+            # THE DENSITY & FIELD: 3D 
+            all_frames = thtr.frames
+            for nf,frame in enumerate(all_frames): 
+                if frame == all_frames[-1]:
+                    mask = ms.compute_unique_mask(core_id, dx=1./2048,frame=nf) 
+                    cell_volume = thtr.c([core_id],'cell_volume')[mask,nf]
+                    density = thtr.c([core_id],'density')[mask,nf]
+                    bx = thtr.c([core_id],'magnetic_field_x')[mask,nf]
+                    by = thtr.c([core_id],'magnetic_field_y')[mask,nf]
+                    bz = thtr.c([core_id],'magnetic_field_z')[mask,nf]                
+                    b = [bx, by, bz]
+                    for j in range(3):
+                        self.Field[j][nc] = (b[j] * cell_volume).sum()/cell_volume.sum()
+                        self.Rho[j][nc] = (density * cell_volume).sum()/(cell_volume.sum())  
+
+            # PROJECTIONS & THE DENSITY & FIELD, FRB: 2D
             if 0:
-                # DENSITY 
+                # PROJECT DENSITY 
                 projs_cyl_rho = []
                 projs_mid_cyl_rho = []
                 frbs_cyl_rho = []
@@ -77,10 +100,9 @@ class telescope():
                     projs_cyl_rho.append(ds.proj(('gas','density'),k,data_source = the_cyl[k]))
                     projs_mid_cyl_rho.append(ds.proj(('gas','density'),k,data_source = the_mid_cyl[k]))
 
-                    frbs_cyl_rho.append(projs_cyl_rho[k].to_frb(the_radius,[128,128],the_center))
-                    frbs_mid_cyl_rho.append(projs_mid_cyl_rho[k].to_frb(the_radius,[128,128],the_center))
-
-                # FIELD 
+                    frbs_cyl_rho.append(projs_cyl_rho[k].to_frb(the_radius[0],[128,128],the_center))
+                    frbs_mid_cyl_rho.append(projs_mid_cyl_rho[k].to_frb(the_radius[0],[128,128],the_center))
+                # PROJECT FIELD 
                 projs_cyl_B = []
                 projs_mid_cyl_B = []
                 frbs_cyl_B = []
@@ -89,10 +111,9 @@ class telescope():
                     projs_cyl_B.append(ds.proj(B[m],m,weight_field =('gas','density'),data_source = the_cyl[m]))
                     projs_mid_cyl_B.append(ds.proj(B[m],m,weight_field =('gas','density'),data_source = the_mid_cyl[m]))
 
-                    frbs_cyl_B.append(projs_cyl_B[m].to_frb(the_radius,[128,128],the_center))
-                    frbs_mid_cyl_B.append(projs_mid_cyl_B[m].to_frb(the_radius,[128,128],the_center))
+                    frbs_cyl_B.append(projs_cyl_B[m].to_frb(the_radius[0],[128,128],the_center))
+                    frbs_mid_cyl_B.append(projs_mid_cyl_B[m].to_frb(the_radius[0],[128,128],the_center))
 
-                # THE DENSITY & FIELD, FRB METHOD: 
                 length = len(frbs_mid_cyl_rho[0]['gas','density'])
                 for n in range(3):
                     self.synthRho_frb[n][nc] = (frbs_cyl_rho[n]['gas','density']).sum()/length
@@ -100,9 +121,8 @@ class telescope():
 
                     self.synthField_frb[n][nc] = (frbs_cyl_B[n][B[n]]).sum()/length
                     self.synthField_frbmid[n][nc] = (frbs_mid_cyl_B[n][B[n]]).sum()/length
-            #pdb.set_trace()
 
-            # SHOW IMAGES: PICKED Z PROJ FOR NOW (EDIT)
+            # IMAGES: PICKED Z PROJ FOR NOW
                 if 0:  
                     theArray_rho = frbs_cyl_rho[2]['gas','density'].v
                     theArray_midrho = frbs_mid_cyl_rho[2]['gas','density'].v 
@@ -156,19 +176,24 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
     #core_list = all_cores[2:4]  #DEBUG
     core_list = all_cores
 
+    # RUN
     tool.qtyRun(nt,rinfs,core_list=core_list) 
-
-    # PICKED DB FOR NOW... (EDIT)
-    fig,ax = plt.subplots(1,1)
+    
+    # WHAT TO PLOT
+    pRho3D = tool.Rho
+    Rho3D = np.concatenate((pRho3D[0],pRho3D[1],pRho3D[2]))
     pRho = tool.synthRho
     Rho = np.concatenate((pRho[0],pRho[1],pRho[2]))
-    pRho_frb = tool.synthRho_frb
-    Rho_frb = np.concatenate((pRho_frb[0],pRho_frb[1],pRho_frb[2]))
     pRho_mid = tool.synthRho_mid
     Rho_mid = np.concatenate((pRho_mid[0],pRho_mid[1],pRho_mid[2]))
+    pRho_frb = tool.synthRho_frb
+    Rho_frb = np.concatenate((pRho_frb[0],pRho_frb[1],pRho_frb[2]))
     pRho_midfrb = tool.synthRho_frbmid
     Rho_midfrb = np.concatenate((pRho_midfrb[0],pRho_midfrb[1],pRho_midfrb[2]))
     
+    pField3D = tool.Field
+    Field3D = np.concatenate((pField3D[0],pField3D[1],pField3D[2]))
+
     pField = tool.synthField
     Field = np.concatenate((pField[0],pField[1],pField[2]))
     pField_frb = tool.synthField_frb
@@ -177,56 +202,90 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
     Field_mid = np.concatenate((pField_mid[0],pField_mid[1],pField_mid[2]))
     pField_midfrb = tool.synthField_frbmid
     Field_midfrb = np.concatenate((pField_midfrb[0],pField_midfrb[1],pField_midfrb[2]))
+     
+    # SET THE DESIRED X & Y
+    the_x = Rho_mid
+    the_y = Field_mid
+    the_x3D = Rho3D
+    the_y3D = Field3D
+
+    RHO = np.log10(the_x) 
+    BLOS = np.log10(abs(the_y))  
+    RHO3D = np.log10(the_x3D) 
+    BLOS3D = np.log10(abs(the_y3D))  
+    ok = BLOS > 1
+
+    # WHICH CORES ARE LOW
+    core_low = []
+    three_core_list = np.concatenate((core_list,core_list,core_list))
+    for i,j in enumerate(three_core_list):
+        if ok[i] == False:
+            core_low.append(j)
+    alphaFile = open("p66_brho/alphaRecords.txt",'a')
+    alphaFile.write("Sim %d BLow_cores: %s \n"%(nt,core_low))
+    alphaFile.close()
+    print('core_low',core_low)
+
+    # WHAT IS THE ALPHA VALUE
+    pfit = np.polyfit(RHO[ok],BLOS[ok],1) 
+    alpha = pfit[0]
+    BLOS_o = pfit[1]
     
-
-    # TO PLOT/OBTAIN ALPHAS
-    if 0: 
-        DB[nt] = []
-        DB_frb[nt] = []
-        DB_mid[nt] = []
-        DB_mid_frb[nt] = []
-        
-        # SET THE DESIRED X & Y
-        the_x = Rho_frb
-        the_y = Field_frb
-
-        RHO = np.log10(the_x) 
-        BLOS = np.log10(abs(the_y))
-        ok = BLOS > 1
-
-        pfit = np.polyfit(RHO[ok],BLOS[ok],1) 
-        alpha = pfit[0]
-        BLOS_o = pfit[1]
-        
-        # PICKED DB FOR NOW... (EDIT)
-        DB[nt].append(alpha)
-
-        ax.scatter(the_x,the_y,alpha=0.4)
-        ax.scatter(the_x[ok],the_y[ok],color='g',alpha=0.4)
+    DB[nt] = []
+    DB_frb[nt] = []
+    DB_mid[nt] = []
+    DB_mid_frb[nt] = []
+    DB[nt].append(alpha)
+    
+    # PLOTTINGS
+    if 0:
+        fig,ax = plt.subplots(1,1)
+        ax.scatter(the_x,the_y,color='r',alpha=0.4)
+        ax.scatter(the_x[ok],the_y[ok],color='b',alpha=0.4)
         RHO_x = np.linspace(RHO[ok].min(),RHO[ok].max(),num=len(RHO[ok]))
         RHO_X = 10 ** RHO_x
-        BLOS_Y = 10 ** (alpha*RHO_x + BLOS_o)  #edited  
-        ax.plot(RHO_X,BLOS_Y) 
-
-        ax.set_xscale('log')
-        ax.set_yscale('log')
-        ax.set_title(r'$\alpha = %f$'%alpha)
-        fig.savefig('BxyzVsNxyz_cylfrb128projv2_synth_%s.png'%nt)
-        plt.close(fig)
-
+        BLOS_Y = 10 ** (alpha*RHO_x + BLOS_o)
+        ax.plot(RHO_X,BLOS_Y,color='k') 
+        
+        # write it to the records        
         alphaFile = open("p66_brho/alphaRecords.txt",'a')
         alphaFile.write("Sim %d alpha %f \n"%(nt,DB[nt][0]))
         alphaFile.close()
         print('sims alphas ',DB[nt])
 
+    if 1: 
+        fig, ax = plt.subplots(1,2)
+        ax[0].scatter(RHO,RHO3D,color='k',alpha=0.5)
+        ax[1].scatter(BLOS,BLOS3D,color='b',alpha=0.5)
 
-# PLOT OF THE 2D,3D ALPHAS
-if 0:  # EDITTTTTT!!!
-    fig,ax = plt.subplots(1,1)
-    a3D = [0.456282,0.479462,0.617871]
-    a2D_cyl =[0.711603,0.713381,0.731364]
-    a2D_reg = [0.520261,0.446243,0.496914]
-    ax.plot(a3D, a2D, 'bo',alpha=0.8)
-    ax.plot(a2D, a2D_blurr, 'bs',alpha=0.8)
-    fig.savefig('alpha_2D_vs_3D')
-    plt.close(fig)
+        ax[0].set_xscale('log')
+        ax[0].set_yscale('log')
+        ax[1].set_xscale('log')
+        ax[1].set_yscale('log')
+        label_rho3D =r'$\rho_{3D}$' 
+        label_rho2D =r'$\rho_{2D}$' 
+        label_rho2Dmid =r'$\rho_{2D,mid}$' 
+        label_b3D = r'$B_{3D}$'
+        label_b2D = r'$B_{2D}$'
+        label_b2Dmid = r'$B_{2D,mid}$'
+        label_blos = r'$\left\langle\mid B_i \mid\right\rangle (\mu G)$'
+        label_Nlos = r'$\left\langle N_i \right\rangle$'
+        ax[0].set_xlabel(label_rho2Dmid)
+        ax[0].set_ylabel(label_rho3D)
+        ax[0].set_xlim(1e-2,1e1)
+        ax[0].set_ylim(1e0,1e1)
+
+        ax[1].set_xlabel(label_b2Dmid)
+        ax[1].set_ylabel(label_b3D)
+        ax[1].set_xlim(1e-1,1e1)
+        ax[1].set_ylim(1e-1,1e1)
+
+        savename = 'BxyzVsNxyz_mcyl128_synth_%s.png'%nt
+        savenameD = 'RhoB3DvsRhoB2Dmid_128_%s.png'%nt 
+        fig.savefig(savenameD)
+        plt.close(fig)
+
+
+# EDIT
+# call synth_obs_plot.py
+# pdb.set_trace()
