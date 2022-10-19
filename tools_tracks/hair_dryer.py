@@ -191,17 +191,23 @@ class hair_tool():
             if 1:
                 if newplots:
                     ax.clear()
-                c=[0.5]*3
+                c=[0.5]*4
+                #c='g'
+                #c=[0.1,0.1,0.1,0.1]
                 if colors is not None:
                     c = colors[core_id]
 
                 skip=1
                 keep_all_tracks=True
-                if ms.nparticles > 1000 and keep_all_tracks==False:
+                #print('nparticles',ms.nparticles)
+                if ms.nparticles > 2000:# and keep_all_tracks==False:
                     skip = 10
+                    #c=[0.1]*4
+                    print('wooooord')
                 for ip in range(0,ms.nparticles,skip):
-                    ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=c, linewidth=0.1)
-                ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c=[c]*ms.nparticles, s=0.3)
+                    ax.plot(   ms.particle_y[ip,:], ms.particle_z[ip,:], c=c, linewidth=0.2)
+                #ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c=[c]*ms.nparticles, s=0.3)
+                ax.scatter(ms.particle_y[:,0],  ms.particle_z[:,0], c=[[0.5,0.5,0.5]]*ms.nparticles, s=0.5, edgecolor='None')
                 ax.scatter(ms.particle_y[:,-1], ms.particle_z[:,-1], c='r', s=0.3)
                 ax.set_title(r'$\rm{%s}\ \rm{core}\ %d$'%(self.sim_name, core_id))
                 if external_ax is None:
