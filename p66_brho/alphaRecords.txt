@@ -137,19 +137,40 @@ Sim 2 alpha 0.654985
 
 
 # FRESH CODE:
-CYLINDER: ZONE METHOD: the_radius - 1/128
+CYLINDER: ZONE METHOD: 
+the_radius - 1/128
 Sim 0 alpha 0.711603 
 Sim 1 alpha 0.713381 
 Sim 2 alpha 0.731364 
+
 the_radius - 1/256
-Sim 0 alpha 0.715826 rad1 
-Sim 1 alpha 0.750652 rad1 
-Sim 2 alpha 0.729464 rad1 
+Sim 0 alpha 0.715826 
+Sim 1 alpha 0.750652 
+Sim 2 alpha 0.729464 
+
 the_radius - inflection radiuses. 
 Sim 0 alpha 0.605488 
 Sim 1 alpha 0.545563 
 Sim 2 alpha 0.574237 
 
+
+MID CYLINDER: ZONE METHOD: the_radius - 1/128
+Sim 0 alpha 0.594953 
+Sim 1 alpha 0.525792 
+Sim 2 alpha 0.622145 
+
+the_radius - 1/256
+Sim 0 alpha 0.678143 
+Sim 1 alpha 0.601354
+Sim 2 alpha 0.635879
+
+the_radius - inflection radiuses. 
+Sim 0 alpha 0.515993 
+Sim 1 alpha 0.442296 
+Sim 2 alpha 0.488380 
+
+
+FRB
 CYLINDER: FRB: the_radius - 1/128
 Sim 0 alpha 0.647364 
 Sim 1 alpha 0.538634 
@@ -158,22 +179,6 @@ CYLINDER: FRB METHOD: the_radius - inflection radius.
 Sim 0 alpha 0.630350 
 Sim 1 alpha 0.618614 
 Sim 2 alpha 0.710875 
-
-
-MID CYLINDER: ZONE METHOD: the_radius - 1/128
-Sim 0 alpha 0.594953 
-Sim 1 alpha 0.525792 
-Sim 2 alpha 0.622145 
-take ii, fresh code, but was taken from a simultaneous run with full cylinger
-...hmmm
-Sim 0 alpha_mid 0.548488 
-Sim 1 alpha_mid 0.578147 
-Sim 2 alpha_mid 0.605387 
-the_radius - inflection radius. 
-Sim 0 alpha 0.515993 
-Sim 1 alpha 0.442296 
-Sim 2 alpha 0.488380 
-
 MID CYLINDER: FRB METHOD: the_radius - 1/128
 Sim 0 alpha 0.436585 
 Sim 1 alpha 0.342483 
@@ -266,6 +271,13 @@ REGION: (2R)**2 ; FRB ....hmmmmm
 Sim 0 alpha 0.294314 
 Sim 1 alpha 0.160423 
 Sim 2 alpha 0.563061 
+
+CYL MID - radius 128
+take ii, fresh code, but was taken from a simultaneous run with full cylinger
+...hmmm
+Sim 0 alpha_mid 0.548488 
+Sim 1 alpha_mid 0.578147 
+Sim 2 alpha_mid 0.605387 
 # - - - - - - - - - -
 # END OF FAILS
 
@@ -328,11 +340,11 @@ Sim 0: atf_list [-0.01142422845017509, -0.1020301160081093, -0.01835950054733975
 
 
 ZONE METHOD
-CORES WITH B < or = to 1: 2D, xyz concatenated, full cylinder
+CORES WITH B < or = to 1: 2D, xyz concatenated, FULL CYLINDER: 128
 Sim 0 BLow_cores: 
 [X: 44, 64, 67, 73, 74, 83, 85, 121, 122, 171, 180, 201, 231, 248, 286, 294; Y: 0, 1, 21, 93, 121, 135, 276, 286, 308; Z: 32, 44, 121, 123, 126, 127, 148, 248, 292, 297] 
 [X: C1, Al, Al, B8, B8, C2, C2, B11, B11, Alo, Alo, Alo, Alo, Alo, Alo, Alo; Y: B1,B1,F1C3,A, B11, Alo, B21, Alo, Alo; Z: C1, C1, B11, Alo, Alo, Alo, B12, Alo, Alo, Alo]            
-
+LEGNTHS ~ x:16, y:9, z:10 ; total: 35
 [XZ: 44, 248]; cluster, alone
 [XY: 286]; alone
 [YZ: na]
@@ -341,7 +353,7 @@ Sim 0 BLow_cores:
 Sim 1 BLow_cores: 
 [X: 7, 16, 37, 105, 191, 193, 270, 300, 301, 315, 329, 378, 381; Y: 7, 9, 84, 268, 301, 373; Z: 9, 49, 81, 83, 113, 191, 211, 270, 271, 278, 356, 377] 
 [X: C1,C1, C1, Alo, Alo, Alo, B3, Alon, Alo, B4, Alon, Alo, Alo; Y: C1,C1 C1, B2, Alon, B2 ; Z:C1, C1, C1, C1, B1, Alon, Alo, B3,  B3, Alon, Alo, B3]
-
+LEGNTHS ~ x:13, y:6, z:12 ; total: 31
 [XZ: 191, 270]; alone, binary 
 [XY: 7, 301]; cluster, alone
 [YZ: 9]; cluster
@@ -351,13 +363,11 @@ Sim 1 BLow_cores:
 Sim 2 BLow_cores: 
 [X: 3, 16, 24, 74, 84, 88, 90, 91, 130, 136, 138, 185, 222, 258, 270, 271, 274, 275; 
    C1, C1, C1, Al, Al, Al, Al, Al, Alo, Alo, Alo, Alo, C4,  B8,  B9,  B9,  B11, B11]
-
  Y: 23, 27, 57, 84, 89, 90, 93, 103, 119, 124, 128, 136, 138, 182, 208, 219, 223, 230, 233, 237, 248; 
-   Alo, B2, Al, Al, Al, Al, C3, C5 , B6,  Alo, C5,  Alo, Alo, C2,  C2,  Alo, Alo, C4,  C4,  C4,  Alo] 
-   
+   Alo, B2, Al, Al, Al, Al, C3, C5 , B6,  Alo, C5,  Alo, Alo, C2,  C2,  Alo, Alo, C4,  C4,  C4,  Alo]  
  Z: 3, 21, 27, 58, 83, 84, 85, 86, 91, 104, 130, 140, 191, 220, 223, 228, 229, 231, 246, 269, 274, 291, 295] 
    C1, C1, B2, Al, Al, Al, B5, B5, Al, C5,  Alo, Alo, Alo, Alo, Alo, B12, Alo, Alo, S4,  Alo, B11, Alo, B10]     
-
+LEGNTHS ~ x:18, y:21, z:23 ; total: 62
 [XZ: 3, 91, 130, 274]; cluster, alone, alone, binary  
 [XY: 90, 136, 138 ]; alone, alone, alone
 [YZ: 27, 223, ]; binary, alone
@@ -365,11 +375,11 @@ Sim 2 BLow_cores:
 
 
 
-CORES WITH B < or = to 1: 2D, xyz concatenated, mid cylinder
+CORES WITH B < or = to 1: 2D, xyz concatenated, MID CYLINDER: 128
 Sim 0 BLow_cores:
 [X: 70, 80, 81, 176, 201, 286; Y: 0, 1, 17, 121, 135, 231, 276, 286; Z: 18, 32, 44, 92, 121, 123, 126, 148, 248, 292, 297]
 [X: Al, B9, B9, B16, Alo, Alo; Y: B1,B1,F1C3,B11,Alo, Alo, B21, Alo; Z:F1C3,C1, C1, Al, B11, Alo, Alo, B12, Alo, Alo, Alo]
-
+LEGNTHS ~ x:6, y:8, z:11 ; total: 25
 [XZ: na]
 [XY: 286]; alone
 [YZ: 121]; binary 
@@ -378,7 +388,7 @@ Sim 0 BLow_cores:
 Sim 1 BLow_cores:
 [X: 37, 63, 69, 105, 191, 270, 300, 347; Y: 9, 79, 193, 301, 370, 373; Z: 9, 37, 51, 81, 113, 191, 203, 211, 271, 278, 283, 377]
 [X: C1, C1, C1, Alo, Alo, B3,  Alo, C5 ; Y:C1, Al, Alo, Alo, C2,  B2 ; Z:C1, C1, C1, C1, B1,  Alo, Alo, Alo, B3,  Alo, C4,  B3]
-
+LEGNTHS ~ x:8, y:6, z:12 ; total: 26
 [XZ: 37, 191]; cluster, alone 
 [XY: na]
 [YZ: 9]; cluster 
@@ -388,10 +398,9 @@ Sim 1 BLow_cores:
 Sim 2 BLow_cores:
 [X: 74, 84, 136, 185, 216, 258, 270, 271, 274, 275; Y: 27, 57, 84, 85, 93, 103, 124, 128, 136, 138, 182, 208, 237, 248; 
     Al, Al, Alo, Alo, C3,  B8,  B9,  B9,  B11, B11; Y: B2, Al, Al, B5, C6, C5,  Alo, C5,  Alo, Alo, C2,  C2,  C4,  Alo
-
  Z: 3, 8, 27, 83, 84, 85, 86, 103, 104, 140, 186, 191, 223, 231, 246, 269, 291] 
    C1, B1,B2, Al, Al, B5, B5, C5,  C5,  Alo, Alo, Alo, Alo, Al,  S4,  Alo, Alo 
-
+LEGNTHS ~ x:10, y:14, z:17 ; total: 41
 [XZ: na] 
 [XY: 136]; alone
 [YZ: 27, 85, 103]; binary, binary, cluster 
@@ -400,10 +409,45 @@ Sim 2 BLow_cores:
 
 
 
+CORES WITH B < or = to 1: 2D, xyz concatenated, FULL CYLINDER: 256
+Sim 0 BLow_cores 256: 
+[X: 70, 201, 294; Y: 0, 121, 231, 286, 32, 44, 92, 121, 123, 126, 148, 248, 292]  #SHOULD CHECK TO SEE IF THESE ARE ALL TRULY X, Y ONLY!!
+LEGNTHS ~ x:3, y:, z: ; total: 13 
+Sim 1 BLow_cores 256: 
+[X: 5, 37, 91, 105, 363, 378; Y: 24, 79, 131, 193, 301, 315, 352, 373; Z: 9, 13, 37, 68, 81, 113, 191, 203, 211, 285, 286] 
+LEGNTHS ~ x:6, y:8, z:11 ; total:25 
+Sim 2 BLow_cores 256: 
+[X: 8, 24, 27, 74, 84, 88, 91, 185, 188, 271, 274; Y: 23, 27, 93, 103, 136, 138, 189, 230; Z: 1, 21, 57, 84, 86, 104, 140, 186, 202, 219, 223, 231, 233, 269, 291] 
+LEGNTHS ~ x:11, y:8, z:15 ; total:34 
+
+CORES WITH B < or = to 1: 2D, xyz concatenated, MID CYLINDER: 256
+Sim 0 BLow_cores mid256: 
+[X: 45, 46, 80, 93, 201; Y: 0, 166, 231, 286, 18, 32, 37, 44, 92, 121, 123, 126, 148, 248] 
+LEGNTHS ~ x:5, y:15, z: ; total: 20 
+Sim 1 BLow_cores mid256: 
+[X: 37, 105, 378, 69, 131, 193; Y: 13, 37, 38, 68, 81, 113, 191, 203, 208, 211, 285, 286] 
+LEGNTHS ~ x:6, y:12, z: ; total: 18 
+Sim 2 BLow_cores mid256: 
+[X: 17, 28, 74, 84, 185, 188, 216, 226, 271, 274, 275; Y: 14, 27, 85, 93, 103,136, 138, 144, 189; Z:  1, 24, 27, 57, 84, 86, 103, 140, 186, 202, 219, 231, 233, 269, 291]
+LEGNTHS ~ x:11, y:9, z:15 ; total: 35 
 
 
 
-FULL CYL, FRB 
-Sim 0 BLow_cores: [] 
-Sim 1 BLow_cores: [] 
-Sim 2 BLow_cores: [] 
+
+
+
+
+
+
+
+
+
+Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] 
+Sim 1 Bhigh_ratio_cores 128: [193, 278] 
+Sim 2 Bhigh_ratio_cores 128: [3, 91, 165] 
+
+
+
+Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289], which should be x,x,x,z 
+Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289] 
+Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289] 
