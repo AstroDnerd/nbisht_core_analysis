@@ -50,7 +50,9 @@ class images():
             if external_ax is not None:
                 axes=external_ax
             else:
-                fig,axes=plt.subplots(nrows,3, figsize=(12,8))
+                fig,axes=plt.subplots(nrows,2)#, figsize=(12,8))
+                axes[0][0].set_aspect('equal')
+                axes[1][0].set_aspect('equal')
             for nt,frame in zip(frame_index, frames):
                 counter+=1
 
@@ -90,7 +92,7 @@ class images():
                     y_ext(this_p[y])
                     #they're quantized at t=0
                     dx = 1./128
-                    dx = [1./128, 1./256][counter]
+                    #dx = [1./128, 1./256][counter]
                     x_quantized = np.floor(nar(x_ext.minmax)/dx)*dx+0.5*dx
                     y_quantized = np.floor(nar(y_ext.minmax)/dx)*dx+0.5*dx
 
@@ -187,6 +189,7 @@ class images():
 
             if external_ax is None:
                 outname='plots_to_sort/otherones_%s_c%04d_%s.png'%(output_prefix,core_id,frame_str)
+                fig.tight_layout()
                 fig.savefig(outname)
                 plt.close(fig)
                 print(outname)

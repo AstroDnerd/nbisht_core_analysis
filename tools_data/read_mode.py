@@ -27,9 +27,9 @@ def read(sim_name):
                 unique_modes.append(m)
             if m.startswith('B'):
                 add_binary=True
-            if m.startswith('S'):
+            if m.startswith('C'):
                 add_cluster=True
-            if m.startswith('One'):
+            if m.startswith('Alone'):
                 one=True
             if m.startswith('Shard'):
                 shard=True

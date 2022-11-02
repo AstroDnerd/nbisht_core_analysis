@@ -25,7 +25,7 @@ for aaa in grid:
     aaa.set_aspect('equal')
 
 sim_list=['u601','u602','u603']
-sim_list=['u603']
+#sim_list=['u603']
 if 1:
 #import three_loopers_mountain_top as TLM
 
@@ -33,7 +33,8 @@ if 1:
         ht={}
         for sim in sim_list:
             ht[sim] = CHT.hull_tool(TL6.loops[sim])
-    cores_to_label={'u601':[323], 'u602':[],'u603':[]}
+    #cores_to_label={'u601':[323], 'u602':[],'u603':[]}
+    cores_to_label={'u601':[], 'u602':[],'u603':[]}
     TL6.loops['u601'].sublabel = figure_sublabel.labs(1.15, -0.2, r'$1a$')
     TL6.loops['u602'].sublabel = figure_sublabel.labs(1.1, -0.1, r'$1d$')
     TL6.loops['u603'].sublabel = figure_sublabel.labs(1.15, -0.2, r'$1g$')
@@ -50,7 +51,7 @@ if 1:
                     add_jitter=False,  center_image=True)
 
 
-if 0:
+if 1:
     import image_centroid
     reload(image_centroid)
     #This is annoyingly manual; subfigure labels
@@ -63,7 +64,7 @@ if 0:
             centool[sim] = image_centroid.image_track(TL6.loops[sim])
             centool[sim].run(external_ax=grid[ns+3])
 
-if 0:
+if 1:
     #plot projections
     #TO DO make the xticks not suck
     if 'pt' not in dir():

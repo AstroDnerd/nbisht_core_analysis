@@ -77,7 +77,7 @@ def v_hair(this_looper,core_list=None, suffix=''):
         ax.plot(times/tsing, v2, c=c, label=r'$v$', linewidth=0.1)
     labels = [r'$v_{rms}$', r'$v_{radial}$', r'$v_{tangent}$']
     for na,aaa in enumerate(axes):
-        aaa.set( ylim=[0,11], ylabel=labels[na])
+        aaa.set( ylim=[0,11], ylabel=labels[na], xlim=[0,3])
         if na==2:
             aaa.set(xlabel=r'$t/t_{singularity}$')
         else:
@@ -87,7 +87,7 @@ def v_hair(this_looper,core_list=None, suffix=''):
 
 
 
-    outname='plots_to_sort/%s_velocity_mean_hair_t%s.png'%(this_looper.sim_name,suffix)
+    outname='plots_to_sort/%s_velocity_mean_hair_t%s.pdf'%(this_looper.sim_name,suffix)
     fig.savefig(outname)
     print(outname)
 

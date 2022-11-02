@@ -11,6 +11,8 @@ form='pdf'
 
 import means_etc
 reload(means_etc)
+import multiplots
+reload(multiplots)
 #import three_loopers_mountain_top as TLM
 #import three_loopers_tenfour as TL4
 import three_loopers_six as TL6 
@@ -60,7 +62,7 @@ c3 = colors.color['u403']
 l1 = 'sim1'
 l2 = 'sim2'
 l3 = 'sim3'
-fig, ax, ax_den_hist,ax_vel_hist=means_etc.three_way_bean() 
+fig, ax, ax_den_hist,ax_vel_hist=multiplots.three_way_bean( figsize=(6,6)) 
 ok = slice(None)
 ok1 = m1.npart > 1
 ok2 = m2.npart > 1
@@ -76,16 +78,18 @@ r3 = ax_den_hist.hist(log_or_not(m3.dmeans[ok3]), histtype='step',color=c3,label
 v1 = ax_vel_hist.hist(log_or_notv(m1.variance[ok1]), histtype='step', orientation='horizontal',color=c1,bins=vbins)
 v2 = ax_vel_hist.hist(log_or_notv(m2.variance[ok2]), histtype='step', orientation='horizontal',color=c2,bins=vbins)
 v3 = ax_vel_hist.hist(log_or_notv(m3.variance[ok3]), histtype='step', orientation='horizontal',color=c3,bins=vbins)
-axbonk(ax,yscale=scales, xscale=scales,  ylabel=r'$\sigma_v$', xlabel=r'$ \langle\rho\rangle$',
+axbonk(ax,yscale=scales, xscale=scales,  ylabel=r'$\sigma_v/c_s$', xlabel=r'$ \langle\rho/\rho_0\rangle$',
       xlim = dlim, ylim = vlim)
 axbonk(ax_vel_hist,yscale=scales,  xscale='linear',  ylabel=None, xlabel=r'$N$')
 axbonk(ax_den_hist,yscale='linear', xscale=scales,  ylabel=r'$N$', xlabel=None)
-ax_den_hist.legend(loc=1)
+ax_den_hist.legend(loc=2)
+#ax.legend(loc=1)
 ax_den_hist.set_xticks([])
 ax_vel_hist.set_yticks([])
 ax_den_hist.set_xlim(ax.get_xlim())
 ax_vel_hist.set_ylim(ax.get_ylim())
 
 odir = "plots_to_sort"
-plt.savefig(odir+'/pre_rho_rms_v_rms.%s'%form)
+#fig.tight_layout()
+fig.savefig(odir+'/pre_rho_rms_v_rms.%s'%form)
 

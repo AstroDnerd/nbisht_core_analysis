@@ -48,19 +48,23 @@ if 1:
     set_looper.derived=derived
     set_looper.out_prefix = 'full_all_centers_%s'%set_looper.sim_name
     mono=core_proj.core_proj_multiple(set_looper,camera=camera,axis_list=[0], 
-                                      cmap='seismic',
+                                      #cmap='seismic',
+                                      #field=YT_ge_ke,
+                                      # zlim=[1e-3,1e3],
+                                      cmap='Greys',
+                                      field=YT_density,
                                       color_dict=color_dict,
                                       frame_list = frame_list,
-                                      field=YT_ge_ke,
                                       velocity=False,
                                       mean_velocity=False,
                                       core_list=core_list,
                                       slab=False, zoom=True, only_sphere=False, center_on_sphere=False, 
-                                      annotate=True,  plot_particles=False,
+                                      annotate=False,  
+                                      plot_particles=False,
                                       grids=False, float_positions=True, monotonic=False, 
                                       verbose=True,
                                       path_only=False, 
                                       plot_y_tracks=False, plot_points=False,
-                                      derived=derived, zlim=[1e-3,1e3])
+                                      derived=derived)
                                #zoom=False, grids=False, particles=False, moving_center=True) #, frame_list=[1])
 #loop_apps.core_proj_multiple(this_looper,axis_list=[0], field='density', color_dict=color_dict, particles=True, fields=False, core_list )#, frame_list=[31])

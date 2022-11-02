@@ -199,7 +199,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
 
     if 1:
-        fig,ax=plt.subplots(1,1)
+        fig,ax=plt.subplots(1,1, figsize=(4,3.5))
         ax.plot( bcen1[ok1],vals1[ok1],'k',linewidth=2, label=PDF_LABEL)
         ax.plot( bcen2[ok2],vals2[ok2],'k--',linewidth=2, label=PDF_LABEL_C)
 
@@ -355,6 +355,8 @@ for nsim,this_simname in enumerate(sims_to_use):
             yloc = ax.get_ylim()[0]*1.2
             ax.text(xloc,yloc,lab)
         ax.legend(loc=3)
+        print('word')
+        fig.tight_layout()
         fig.savefig(outname)
         print(outname)
         plt.close(fig)

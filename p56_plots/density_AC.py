@@ -17,19 +17,20 @@ axis=0
 this_simname = 'u10'
 #this_simname = 'u05'
 class ac_thing():
-    def __init__(self,this_simname):
+    def __init__(self,this_looper, field='density'):
 
-        self.this_simname = this_simname
+        self.field=field
+        self.this_simname = this_looper.sim_name
         self.directory = dl.sims[self.this_simname]
         frame=0
-        self.ds = yt.load("%s/DD%04d/data%04d"%(self.directory,frame,frame))
+        self.ds = this_looper.load(frame)
         self.prefix="%s_n%04d"%(this_simname,frame)
 
         left=[0.0]*3
         resolution = self.ds['TopGridDimensions'] 
         self.cg=self.ds.covering_grid(0,left,resolution)#,num_ghost_zones=num_ghost_zones)
 
-        self.rho = self.cg['density'].v -1 #[:40,:40,:40]
+        self.rho = self.cg[field].v -1 #[:40,:40,:40]
 
         self.rhohat = np.fft.fftn(self.rho)
         self.rho2 = self.rhohat*np.conj(self.rhohat)
@@ -77,7 +78,7 @@ class ac_thing():
                yscale='linear',xscale='linear')
         a23.legend(loc=0)
 
-        fig2.savefig('plots_to_sort/%s_density_AC.pdf'%self.prefix)
+        fig2.savefig('plots_to_sort/%s_%s_AC.pdf'%(self.prefix, self.field))
         print('saved')
 
 #a1 = ac_thing('u05'); a1.plot()

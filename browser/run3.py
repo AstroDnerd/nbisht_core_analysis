@@ -33,10 +33,46 @@ for isim,this_simname in enumerate(sim_list):
     PROD.append(p_neighbor)
     PROD.append(p_mode)
 
+    NAMES.append("mountain top")
+    RE.append(r"/*mountain_tops/%s/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( this_simname, this_simname))
+
+    #context, zoomed to 8 root grid zones
+    NAMES.append("friends zoom8")
+    RE.append(r"/*friends_zoom8/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
+    #context, zoomed to 1 root grid zones
+    NAMES.append("friends zoom1")
+    RE.append(r"/*friends_zoom1/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
+
+
+    NAMES.append("Buddy centroids")
+    RE.append(r"/*buddy_centroids/u50%d/u50%d_buddies__centroid_xyz_c(\d{4}).png"%(nsim,nsim))
+
+    #hair
+    NAMES.append("Pathlines")
+    RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
+
+    #3 projections
+    NAMES.append('3 proj')
+    RE.append(r"/*3proj/u50%d/u50%d_c(\d{4}).mp4"%(nsim,nsim))
+
+
+    #anatomy.
     NAMES.append("Anatomy")
     RE.append(r"/*Anatomy3/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
     #NAMES.append("Anatomy")
     #RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+
+    #Why Bound
+    NAMES.append("GE/KE Radius Time")
+    RE.append("/*why2/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    #Why Bound
+    NAMES.append("GE/KE Radius Time")
+    RE.append("/*why2_centroid/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_%04d.png"%(nsim,nsim, frame))
+    NAMES.append('Otherones')
+
     #NAMES.append("Density Velocity")
     #RE.append(r"/*density_velocity/u50%d/u50%d_rho_vnorm_t_c(\d{4}).png"%(nsim,nsim))
 
@@ -59,16 +95,13 @@ for isim,this_simname in enumerate(sim_list):
     #RE.append(r"/*velocity_mean/u50%d/u50%d_v_t_c(\d\d\d\d).png"%(nsim,nsim))
 
 
-    #good movies
-    NAMES.append("GE/KE")
-    RE.append(r"/*GE_KE_zoom4/u50%d/u50%d_c(\d{4}).mp4"%(nsim,nsim))
 
-    #context, zoomed to 8 root grid zones
-    NAMES.append("friends zoom8")
-    RE.append(r"/*friends_zoom8/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
-    #context, zoomed to 1 root grid zones
-    NAMES.append("friends zoom1")
-    RE.append(r"/*friends_zoom1/u50%d/friends_u50%d_c(\d{4})_n%04d_Projection_x_density.png"%(nsim,nsim, frame))
+    if 1:
+        #good movies
+        #bulky
+        NAMES.append("GE/KE")
+        RE.append(r"/*GE_KE_zoom4/u50%d/u50%d_c(\d{4}).mp4"%(nsim,nsim))
+
 
     #nice mountain top image with the acceleration field
     NAMES.append("Gravity Density Ring")
@@ -82,15 +115,6 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append("Velocity Streamlines M1")
     RE.append(r"/*swirl_1/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity.png"%(nsim,nsim, frame))
 
-    #hair
-    NAMES.append("Pathlines")
-    RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
-
-
-
-
-    RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_0125.png"%(nsim,nsim))
-    NAMES.append('Otherones')
 
     NAMES.append('(Grad phi)^2')
     RE.append(r"/*BindingEnergy/u50%d/u50%d_c(\d\d\d\d)_potfit.png"%(nsim,nsim))
@@ -99,8 +123,6 @@ for isim,this_simname in enumerate(sim_list):
         NAMES.append('B and rho') #u503_b_and_rho_t_c0248
         RE.append(r"/*B_and_rho/u50%d/u50%d_b_and_rho_t_c(\d\d\d\d).png"%(nsim,nsim))
 
-    #NAMES.append("mountain top")
-    #RE.append(r"/*mountain_tops/%s/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( this_simname, this_simname))
 
 
     #NAMES.append("mountain rings")
@@ -110,8 +132,8 @@ for isim,this_simname in enumerate(sim_list):
     #NAMES.append('GE cuml')
     #RE.append(r"/*GEcuml/u60%d/u60%d_cuml_c(\d\d\d\d).png"%(nsim,nsim))
 
-    #NAMES.append("GE/KE")
-    #RE.append(r"/*GEKEmass/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t1.png"%(nsim,nsim,frame))
+    NAMES.append("GE/KE")
+    RE.append(r"/*GEKEmass/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t1.png"%(nsim,nsim,frame))
     #NAMES.append("Swirl M2")
     #RE.append(r"/*swirl_2/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity_whole_mean.png"%(nsim,nsim,frame))
     #NAMES.append("Swirl M3")

@@ -153,7 +153,8 @@ def plot(self,frame, my_sf2=None,longorno='', external_ax=None, external_norm=No
     xlim=self.rmin,self.rmax
     xlim=1./128,self.rmax
     ylim=self.vmin,self.vmax
-    axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$\sigma_{v,L}^2, S_{2,L}$',xlabel=r'$r$')
+    #axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$\sigma_{v,L}^2, S_{2,L}$',xlabel=r'$r$')
+    axbonk(ax,yscale=self.yscale,xscale=self.xscale, xlim=xlim, ylim=ylim, ylabel=r'$S_{2,L}/c_s$',xlabel=r'$r$')
     if external_ax is None:
         fig.colorbar(ploot,ax=ax)
     if my_sf2 is not None:
@@ -218,7 +219,7 @@ if 'R' not in dir():
 SCALE = 128**6
 SCALE = 1/128**3
 
-if 1:
+if 0:
     fig,ax=plt.subplots(1,1)
     for n in range(3):
         the_x = Things[n][0][1:]
@@ -240,7 +241,7 @@ if 1:
         ax.set_yscale('log')
         ax.set_xscale('log')
     fig.savefig('plots_to_sort/messup.png')
-if 0:
+if 1:
     import sf2
     reload( sf2)
     fig,ax=plt.subplots(1,3,figsize=(12,4))

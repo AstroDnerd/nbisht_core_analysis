@@ -132,6 +132,6 @@ for sim in sims:
             #ax.plot( obj.times/obj.tsing[ng], ge, c='k', linewidth=0.2)
             #ax.plot( obj.times/obj.tsing[ng], obj.rho_max[ng], c='r', linewidth=0.2)
             #ax.plot( obj.times/obj.tsing[ng], obj.rho_avg[ng], c='g', linewidth=0.2)
-        ax.set(yscale='log',xscale='linear',xlabel='t/tsing', ylim=[1e-2,100], ylabel=r'$E_G/E_K$')
+        ax.set(yscale='log',xscale='linear',xlabel='t/tsing', ylim=[1e-2,100], ylabel=r'$E_G/E_K$', xlim=[0,3])
         fig.savefig('plots_to_sort/gekehair_%s_%s.pdf'%(sim,mode))
 

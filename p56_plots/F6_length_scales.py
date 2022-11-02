@@ -78,15 +78,26 @@ if 'Lsonic' not in dir():
     ax.legend(loc=0)
     fig.savefig('plots_to_sort/velocity_ac.pdf')
 
-
+TL=TLM
 if 1:
     import p56_plots.density_AC as AC
     reload(AC)
     if 'a1' not in dir():
-        a1 = AC.ac_thing('u601'); a1.plot()
-        a2 = AC.ac_thing('u602'); a2.plot()
-        a3 = AC.ac_thing('u603'); a3.plot()
+        a1 = AC.ac_thing(TL.loops['u601']); a1.plot()
+        a2 = AC.ac_thing(TL.loops['u602']); a2.plot()
+        a3 = AC.ac_thing(TL.loops['u603']); a3.plot()
         acs={'u601':a1,'u602':a2,'u603':a3}
+
+do_energy_ac=False
+if 0:
+    do_energy_ac=True
+    import p56_plots.density_AC as AC
+    reload(AC)
+    if 'ega1' not in dir():
+        ega1 = AC.ac_thing(TL.loops['u601'],field=YT_grav_energy_2); ega1.plot()
+        ega2 = AC.ac_thing(TL.loops['u602'],field=YT_grav_energy_2); ega2.plot()
+        ega3 = AC.ac_thing(TL.loops['u603'],field=YT_grav_energy_2); ega3.plot()
+        eg_acs={'u601':ega1,'u602':ega2,'u603':ega3}
 
 if 1:
     #
@@ -95,7 +106,8 @@ if 1:
     L_vel={}
     L_rho={}
     L_jea={}
-    fig,ax=plt.subplots(1,1)
+    fig,ax_bottom=plt.subplots(1,1)
+    ax=ax_bottom.twiny()
     for nrun,ht in enumerate(ht_list):
         name =  ht.this_looper.out_prefix
         c=colors.color[name]
@@ -161,6 +173,18 @@ if 1:
         L_rho[name]=ac.L
         print('Rho AC', ac.L)
 
+        if do_energy_ac:
+            #
+            # Eg AC
+            #
+            if do_label:
+                lab = 'EG AC'
+            ac = eg_acs[ht.this_looper.out_prefix]
+            c='k'
+            ax.plot(ac.binned[1],ac.binned[2]/ac.binned[2][0], c=c,linestyle=':',label=lab)
+            #ax.plot([ac.L,ac.L],[0,0.6], c)
+            L_rho[name]=ac.L
+            print('Rho AC', ac.L)
 
 
         #rect=patches.Rectangle((0,0),ac.L,ac.ACb[0],facecolor=[0.8]*3)
@@ -181,7 +205,9 @@ if 1:
     ax.scatter([mean_Sonic],0.4,marker='*',c='k', label=r'$L_{\rm{sonic}}$')
 
 
-    axbonk(ax,xlabel=r'$\rm{Hull\ Length}$',ylabel=r'$\rm{N}$',ylim=[0,1.], xlim=[0,0.55])
+    axbonk(ax,xlabel=r'$\rm{Hull\ Length\ [code\ units]}$',ylabel=r'$\rm{N}$',ylim=[0,1.], xlim=[0,0.55])
+    axbonk(ax_bottom,xlabel=r'$\rm{Hull\ Length\ [pc]}$',ylabel=r'$\rm{N}$',ylim=[0,1.], xlim=[0,0.55])
+    ax_bottom.set_xlim( nar(ax.get_xlim())*4.6)
     ax.legend(loc=0)
     fig.savefig('plots_to_sort/hull_lengths.pdf')
     plt.close('fig')

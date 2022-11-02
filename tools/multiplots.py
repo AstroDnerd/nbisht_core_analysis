@@ -15,21 +15,27 @@ def four_on_the_floor():
     return fig, ax
 
 
-def three_way_bean():
+def three_way_bean(figsize=(8,8), left=None,width=None,bottom=None,height=None,histdepth=None):
     from matplotlib.ticker import NullFormatter
     nullfmt = NullFormatter()         # no labels
 
     # definitions for the axes
-    left, width = 0.1, 0.65
-    bottom, height = 0.1, 0.65
-    bottom_h = left_h = left + width + 0.02
+    if left is None: left = 0.15
+    if width is None: width = 0.62
+    if bottom is None: bottom = 0.11
+    if height is None: height = 0.62
+    if histdepth is None: histdepth = 0.2
+    #left, width = 0.15, 0.62
+    #.bottom, height = 0.11, 0.62
+    bottom_h = left_h = left + width + histdepth
 
     rect_scatter = [left, bottom, width, height]
     rect_histx = [left, bottom_h, width, 0.2]
     rect_histy = [left_h, bottom, 0.2, height]
 
     # start with a rectangular Figure
-    fig=plt.figure(1, figsize=(8, 8))
+    fig=plt.figure(1)
+    fig.set_size_inches(figsize)
 
     axScatter = plt.axes(rect_scatter)
     axHistx =   plt.axes(rect_histx)

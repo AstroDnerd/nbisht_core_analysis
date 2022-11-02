@@ -63,7 +63,7 @@ class hull_tool():
         hull_1 =  self.hulls[core_1]
         hull_2 =  self.hulls[core_2]
         if hull_1 is None or hull_2 is None:
-            return 0
+            return 0, 0
         vert_1 = self.points_3d[core_1][hull_1.vertices,:]
         vert_2 = self.points_3d[core_2][hull_2.vertices,:]
         points_1 = self.points_3d[core_1]
@@ -109,9 +109,14 @@ class hull_tool():
 
                 N_unique = min([np.unique(arr).size for arr in (this_x,this_y,this_z)])
                 if N_unique > 2:
-                    hull_3d = ConvexHull(self.points_3d[core_id])
-                    self.hulls[core_id]=hull_3d
-                    self.hull_volumes.append(hull_3d.volume)
+                    try:
+                        hull_3d = ConvexHull(self.points_3d[core_id])
+                        self.hulls[core_id]=hull_3d
+                        self.hull_volumes.append(hull_3d.volume)
+                    except:
+                        pdb.set_trace()
+                        self.hulls[core_id] = None
+                        self.hull_volumes.append(0)
                 else:
                     self.hulls[core_id] = None
                     self.hull_volumes.append(0)
