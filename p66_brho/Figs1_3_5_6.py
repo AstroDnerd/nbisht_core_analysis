@@ -586,16 +586,12 @@ print("GREETINGS")
 '''
 PREP YOUR FIGURE:
 FIGURE 1: type: 'scatter_plot' ;time: 'all_time'
-Turn on only: TWO PANEL SCATTER PLOTS; Fig 1.
 
 FIGURE 3: type: 'frame_scatters' ;time: 'per_frame'
-Turn on: n/a 
     
 FIGURE 5: type: 'box_plot' ;time: 'per_frame'
-Turn on only: CALL BOXPLOTS; Fig 5.
 
 FIGURE 6: type: 'vio_plot' ;time: 'per_frame'
-Turn on only: CALL VIOLINPLOTS; Fig 6. 
 '''
 
 for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
@@ -664,13 +660,13 @@ for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
              fig=None,ax1=None,ax2= None,ax3= None,ax4= None,ax5= None,ax7= None,ax8= None,
              lplots= None,core_list=None,core_val=corenum,simframes= None) 
 
-    if 0:  
+    if type == 'scatter_plot' and time == 'all_time' 
         # TWO PANEL SCATTER PLOTS; Fig 1.
         tool.twopanels(nt, simnames[nt],axnum,figu,corenum)
-    if 0: 
+    if type == 'box_plot' and time == 'per_frame': 
         # CALL BOXPLOTS; Fig 5. 
         tool.boxes(nt,simnames[nt],tff_labels)
-    if 0: 
+    if type == 'vio_plot' and time == 'per_frame': 
         # CALL VIOLINPLOTS; Fig 6.              
         tool.violins(nt,simnames[nt],tff_labels)
 

@@ -442,12 +442,7 @@ LEGNTHS ~ x:11, y:9, z:15 ; total: 35
 
 
 
-Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] 
-Sim 1 Bhigh_ratio_cores 128: [193, 278] 
-Sim 2 Bhigh_ratio_cores 128: [3, 91, 165] 
+Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289], which should be x,x,x,z; checked.
+Sim 1 Bhigh_ratio_cores 128: [193, 278] [54, 294], x & z 
+Sim 2 Bhigh_ratio_cores 128: [3, 91, 165] [3, 306, 348], x & z, z 
 
-
-
-Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289], which should be x,x,x,z 
-Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289] 
-Sim 0 Bhigh_ratio_cores 128: [67, 180, 286, 126] [34, 76, 104, 289] 
