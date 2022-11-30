@@ -345,9 +345,9 @@ def shift_4(arr):
 
         
 class mini_scrubber():
-    def __init__(self,trk,core_id,do_velocity=True):
+    def __init__(self,trk,core_id,do_velocity=True, do_magnetic=False):
         self.trk=trk
-        self.scrub(core_id,do_velocity=do_velocity)
+        self.scrub(core_id,do_velocity=do_velocity, do_magnetic=do_magnetic)
         self.axis=0
                 
     def compute_unique_mask(self,core_id, dx,frame):
@@ -366,7 +366,7 @@ class mini_scrubber():
         mask2 = mask[ rs]
         return mask2
 
-    def scrub(self,core_id, axis=0, do_velocity=True):
+    def scrub(self,core_id, axis=0, do_velocity=True, do_magnetic=False):
         if core_id not in self.trk.core_ids:
             print("Core %d not found in looper"%core_id)
             print("  (also please write a better error handler)")
@@ -451,6 +451,12 @@ class mini_scrubber():
         self.rmax = np.max(self.r,axis=0)
 
         self.rms = np.sqrt( np.mean(self.r2,axis=0))
+
+        if do_magnetic:
+            self.bx = self.trk.c([core_id],'magnetic_field_x')
+            self.by = self.trk.c([core_id],'magnetic_field_y')
+            self.bz = self.trk.c([core_id],'magnetic_field_z')
+            self.b2 = self.bx*self.bx+self.by*self.by+self.bz*self.bz
 
         if do_velocity:
             self.raw_vx = self.trk.c([core_id],'velocity_x')
