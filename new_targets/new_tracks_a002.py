@@ -12,7 +12,7 @@ reload(looper2)
 
 LOOPER2 = True
 looper_main = looper2.core_looper2
-this_simname  = 'a002'
+this_simname  = 'b002'
 other_simname = 'u302'
 mountain_top_fname = "datasets_small/%s_mountain_tops_take_9.h5"%other_simname
 outname = '%s_all_particles.h5'%this_simname
@@ -44,16 +44,16 @@ if 1:
     frame_list = list(range(0,target_frame,10)) + [target_frame]
 
 
-if 1:
-    fields = ['x','y','z','density', 'cell_volume']
-    derived=[]
 if 0:
     fields = ['x','y','z','density', 'cell_volume']
-    fields += ['velocity_magnitude','magnetic_field_strength', 'velocity_divergence']
-    fields += ['velocity_x','velocity_y','velocity_z']
-    fields += ['magnetic_field_%s'%s for s in 'xyz']
-    fields += ['PotentialField','grav_x','grav_y','grav_z' ]
-    fields += ['particle_pos_x', 'particle_pos_y', 'particle_pos_z', 'particle_index']
+    derived=[]
+if 1:
+    fields = [YT_x,YT_y,YT_z,YT_density, YT_cell_volume]
+    fields += [YT_velocity_magnitude,YT_magnetic_field_strength, YT_velocity_divergence]
+    fields += [YT_velocity_x,YT_velocity_y,YT_velocity_z]
+    fields += [('gas','magnetic_field_%s'%s) for s in 'xyz']
+    fields += [YT_potential_field,YT_acceleration_x, YT_acceleration_y, YT_acceleration_z]
+    fields += [YT_particle_pos_x, YT_particle_pos_y, YT_particle_pos_z]
     derived=[xtra_energy.add_force_terms]
 
 if target_frame not in frame_list:
