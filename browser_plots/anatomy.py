@@ -291,8 +291,8 @@ if 0:
             mt[sim]=mass_tools.mass_tool(TL.loops[sim])
             mt[sim].run()
 
-sims=[ 'u502','u503']
-sims=['u502']#, 'u501']
+sims=['u501', 'u502','u503']
+#sims=['u502']#, 'u501']
 for sim in sims:
     #core_list=[381]
     #core_list={'u501':[323], 'u502':[381]}[sim]
@@ -302,7 +302,7 @@ for sim in sims:
 
     core_list=None
     annotate_phases=False
-    core_list = [112]
+    #core_list = [112]
     #annotate_phases=True
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 
