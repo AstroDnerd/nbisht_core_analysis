@@ -13,7 +13,7 @@ class tracks():
         self.cores_used=[]
 
 
-    def run(self,core_list=None):
+    def run(self,core_list=None, output_suffix=''):
         dx=1./2048
         nx = 1./dx
         thtr = self.this_looper.tr
@@ -50,15 +50,17 @@ class tracks():
                 for nnn in range(3):
                     sl = slice(None)
                     axl[nnn].plot(tsorted,this_p[nnn][sl,:].transpose())
-                fig.savefig('plots_to_sort/%s_%s'%(self.this_looper.sim_name,label))
+                outname='plots_to_sort/%s_%s%s'%(self.this_looper.sim_name,label, output_suffix)
+                fig.savefig(outname)
+                print(outname)
                 plt.close(fig)
 
-import three_loopers_tenfour as TL4
+#import three_loopers_tenfour as TL4
 
 
-for simname in TL4.loops:
-    tr = tracks( TL4.loops[simname])
-    tr.run()
+#for simname in TL4.loops:
+#    tr = tracks( TL4.loops[simname])
+#    tr.run()
 
 
 #tr = tracks( new_looper)
