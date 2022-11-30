@@ -37,12 +37,16 @@ class box_of_rain():
         self.mass_other_ones =fptr['mass_other_ones'][()]
         fptr.close()
 
-def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
+def find_other_ones(new_name, hull_tool,big_loop=None,core_list=None,frame=0, superset=None, add_sphere=False):
     this_loop=hull_tool.this_looper
-    big_loop = this_loop.big_loop
+    if big_loop is None:
+        big_loop = this_loop.big_loop
     oms = big_loop.ms
-    big_density = big_loop.tr.c([0],'density')[:,frame]
-    big_cell_volume = big_loop.tr.c([0],'cell_volume')[:,frame]
+
+    this_nframe = np.where(this_loop.tr.frames==frame)[0][0]
+    big_frame = np.where(big_loop.tr.frames==frame)[0][0]
+    big_density = big_loop.tr.c([0],'density')[:,big_frame]
+    big_cell_volume = big_loop.tr.c([0],'cell_volume')[:,big_frame]
 
     if core_list is None:
         core_list = this_loop.core_list
@@ -66,7 +70,8 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         print('   ms done')
         this_hull_points = hull_tool.points_3d[core_id]
         all_particles = big_loop.target_indices
-        all_points = np.column_stack( [oms.this_x[:,frame], oms.this_y[:,frame], oms.this_z[:,frame]])
+        print("FRAME", frame)
+        all_points = np.column_stack( [oms.this_x[:,big_frame], oms.this_y[:,big_frame], oms.this_z[:,big_frame]])
 
         #cut out the region of interest.  Doesnt help that much.
         this_min = this_hull_points.min(axis=0)
@@ -113,17 +118,48 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
         # Since P1 may not be sorted, sort BB like P1 with R1
         # mask[mask] *= BB[S1][R1] first sort BB, then sort like P1.
 
-        this_particles = this_loop.target_indices[ core_id]
+        #this_particles = this_loop.target_indices[ core_id]
+        this_particles=this_loop.tr.particle_ids[ this_loop.tr.core_ids == core_id]
+
         if superset is not None:
             my_superset=superset.set_by_core[core_id]
             for other_core in superset.supersets[my_superset]:
-                this_particles = np.concatenate([this_particles,
-                                                 this_loop.target_indices[other_core]])
+                other_particles=this_loop.tr.particle_ids[ this_loop.tr.core_ids == other_core]
+                this_particles = np.concatenate([this_particles, other_particles])
+
+        if add_sphere:
+            t0=time.time()
+            print('sphere')
+            ds = big_loop.load(frame)
+            c = nar([ms.mean_x[this_nframe], ms.mean_y[this_nframe], ms.mean_z[this_nframe]])
+            sphere = ds.sphere(c, 1/128)
+            new_particles = sphere['particle_index'].v.astype('int')
+            all_set = set(all_particles)
+            new_set = set(new_particles)
+            others = all_set - new_set
+            sphere_mask = np.concatenate([np.ones( len(new_set), dtype='bool'),
+                                          np.zeros( len(others), dtype='bool')])
+            sphere_ids = np.concatenate([nar(list(new_set)),nar(list(others))])
+            sort_both = np.argsort(sphere_ids)
+            all_sort = np.argsort(all_particles)
+            all_back = np.argsort(all_sort)
+            keepers = sphere_mask[sort_both][all_back]
+            print(keepers.sum(), new_particles.size,"HEY YA")
+            print("HEY", mask.sum())
+            mask = mask | keepers
+            print("HEY", mask.sum())
+
+            found_particles = np.unique(np.concatenate( [found_particles, new_particles]))
+            
+
+            t1=time.time()
+            print('sphere done ', t1-t0)
 
         if 1:
             #Remove Core particles from Otherones
             this_set = set(this_particles)
             found_set = set(found_particles)
+            print("What we got: %d this %d found"%(len(this_set),len(found_set)))
             this_only = found_set.intersection(this_set)
             otherones = found_set - this_only
             otherones_mask = np.concatenate([np.ones(len(otherones),dtype='bool'), 
@@ -134,21 +170,24 @@ def find_other_ones(new_name, hull_tool,core_list=None,frame=0, superset=None):
             sort_back = np.argsort(sort1) 
             mask[ mask] *= otherones_mask[sort_both][sort_back]
 
-        box.mass_other_ones.append((big_density[mask]*big_cell_volume[mask]).sum())
-        otherone_particle_ids = all_particles[mask]
-        otherone_core_ids = np.ones_like(otherone_particle_ids,dtype='int')*core_id
-        otherone_field_values={}
-        for field in big_loop.tr.track_dict:
-            otherone_field_values[field]=big_loop.tr.track_dict[field][mask,:]
-        snap = small_snapshot(particle_ids=otherone_particle_ids,
-                              core_ids=otherone_core_ids,
-                              frames=big_loop.tr.frames,
-                              times = big_loop.tr.times,
-                              field_dict=otherone_field_values)
-        if new_looper.tr is None:
-            new_looper.tr = trackage.track_manager(new_looper)
-        new_looper.tr.ingest(snap)
-    box.mass_other_ones = nar(box.mass_other_ones)
-    box.mass_total_hull = nar(box.mass_total_hull)
-    new_looper.box = box
+        if mask.sum() > 0:
+            box.mass_other_ones.append((big_density[mask]*big_cell_volume[mask]).sum())
+            otherone_particle_ids = all_particles[mask]
+            otherone_core_ids = np.ones_like(otherone_particle_ids,dtype='int')*core_id
+            otherone_field_values={}
+            for field in big_loop.tr.track_dict:
+                otherone_field_values[field]=big_loop.tr.track_dict[field][mask,:]
+            snap = small_snapshot(particle_ids=otherone_particle_ids,
+                                  core_ids=otherone_core_ids,
+                                  frames=big_loop.tr.frames,
+                                  times = big_loop.tr.times,
+                                  field_dict=otherone_field_values)
+            if new_looper.tr is None:
+                new_looper.tr = trackage.track_manager(new_looper)
+            new_looper.tr.ingest(snap)
+        else:
+            new_looper=None
+    #box.mass_other_ones = nar(box.mass_other_ones)
+    #box.mass_total_hull = nar(box.mass_total_hull)
+    #new_looper.box = box
     return new_looper
