@@ -61,15 +61,15 @@ if machine == 'Nazare':
     u201_every_ten = None
     u202_every_ten = None
     u203_every_ten = None
-    mountain_top = {'u301':"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u301_new_tracks_take_9c.h5",
-                    "u302":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u302_new_tracks_take_9b.h5",
-                    "u303":"/scratch1/dcollins/Paper19/Datasets/mountain_tops/u303_new_tracks_take_9b.h5"}
-    u500 = {'u501':"/scratch1/dcollins/Paper19/Datasets/u500/u501_all_frame_all_prim.h5",
-            "u502":"/scratch1/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
-            "u503":"/scratch1/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
-    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
+    mountain_top = {'u301':"/scratch3/dcollins/Paper19/Datasets/mountain_tops/u301_new_tracks_take_9c.h5",
+                    "u302":"/scratch3/dcollins/Paper19/Datasets/mountain_tops/u302_new_tracks_take_9b.h5",
+                    "u303":"/scratch3/dcollins/Paper19/Datasets/mountain_tops/u303_new_tracks_take_9b.h5"}
+    u500 = {'u501':"/scratch3/dcollins/Paper19/Datasets/u500/u501_all_frame_all_prim.h5",
+            "u502":"/scratch3/dcollins/Paper19/Datasets/u500/u502_all_frame_all_prim.h5",
+            "u503":"/scratch3/dcollins/Paper19/Datasets/u500/u503_all_frame_all_prim.h5"}
+    sf_path = "/scratch3/dcollins/Paper19/Datasets/VelocitySF/"
 
-    coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}  #ADDED here even though it should work in the place of the last 'else'
+    coresets = {'ourset':'/scratch3/dcollins/Paper19/Datasets/'}  #ADDED here even though it should work in the place of the last 'else'
 
 elif machine == 'cloudbreak':
     sim_u05 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
@@ -114,8 +114,8 @@ elif machine == 'cloudbreak':
     sf_path = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/VelocitySF"
     coresets = {'ourset':'/data/cb1/Projects/P19_CoreSimulations/CoreSets/'}
 else:
-    sf_path = "/scratch1/dcollins/Paper19/Datasets/VelocitySF/"
-    coresets = {'ourset':'/scratch1/dcollins/Paper19/Datasets/'}
+    sf_path = "/scratch3/dcollins/Paper19/Datasets/VelocitySF/"
+    coresets = {'ourset':'/scratch3/dcollins/Paper19/Datasets/'}
     sim_u05 = None
     sim_u10 = None
     sim_u11 = None
@@ -157,6 +157,7 @@ sims.update({'u301':sim_u201,'u302':sim_u202,'u303':sim_u203})
 sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
 sims.update({'u601':sim_u501,'u602':sim_u502,'u603':sim_u503})
 sims.update({'u701':sim_u501,'u702':sim_u502,'u703':sim_u503})
+sims.update({'u901':sim_u501,'u902':sim_u502,'u903':sim_u503})
 sims['u14']=sim_u14
 
 

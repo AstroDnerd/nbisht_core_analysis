@@ -24,6 +24,35 @@ def grad(data,fieldname,direction):
     out[all_all] = (data[fieldname][ Right ]- data[fieldname][ Left]) *dxi[direction]
     return out
 
+def add_v_grad(obj):
+    def dxvx(field,data):
+        return grad( data, 'velocity_x',0)
+    def dxvy(field,data):
+        return grad( data, 'velocity_y',0)
+    def dxvz(field,data):
+        return grad( data, 'velocity_z',0)
+    def dyvx(field,data):
+        return grad( data, 'velocity_x',1)
+    def dyvy(field,data):
+        return grad( data, 'velocity_y',1)
+    def dyvz(field,data):
+        return grad( data, 'velocity_z',1)
+    def dzvx(field,data):
+        return grad( data, 'velocity_x',2)
+    def dzvy(field,data):
+        return grad( data, 'velocity_y',2)
+    def dzvz(field,data):
+        return grad( data, 'velocity_z',2)
+    obj.add_field(YT_dxvx, dxvx, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dxvy, dxvy, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dxvz, dxvz, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dyvx, dyvx, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dyvy, dyvy, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dyvz, dyvz, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dzvx, dzvx, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dzvy, dzvy, units='1/s', sampling_type='cell', validators=std_validators_2)
+    obj.add_field(YT_dzvz, dzvz, units='1/s', sampling_type='cell', validators=std_validators_2)
+
 def add_b_over_rho(obj):
     def bx_hat(field,data):
         return data['magnetic_field_x']/data['magnetic_field_strength']
