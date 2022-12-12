@@ -96,10 +96,10 @@ simnames = [simname1, simname2, simname3]
 TURN ON WHICH FIGURE?
 '''
 # IF FIGURE 2 
-if 0:
+if 1:
     time = 'all_time'
 # IF FIGURE 4
-if 1:
+if 0:
     time = 'per_frame'
 
 
@@ -249,7 +249,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
         XX = 10 ** X
         Y = 10 ** (pfit[0]*X + pfit[1])                
         
-        ax1.plot(XX,Y,c='m',linewidth=1.0)
+        ax1.plot(XX,Y,c='grey',linewidth=2.0, linestyle='dotted')
         xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
         ylabels = r'$\left\langle\mid B \mid\right\rangle (\mu G)$'
         xlims = 1e-1,1e8

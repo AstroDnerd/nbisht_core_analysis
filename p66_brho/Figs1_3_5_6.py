@@ -146,7 +146,7 @@ class BRho_tool():
                 ylims = 10e-2,10e3      
                 if n_time == asort[-1]: 
                     ax1.plot(xx2,yy,c='k',linewidth=1.0)
-                    ax1.plot(xx2,yym,'--',c='m',linewidth=1.0)
+                    ax1.plot(xx2,yym,'--',c='grey',linewidth=1.0)
                     BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu G)$',
                                        xlim=xlims, ylim=ylims)
             # FIG 3. 
@@ -421,6 +421,7 @@ class BRho_tool():
 
 
     def twopanels(self,num,name,ax2,fig,coreval):
+        print('inside two panels')
         # this panel needs to run ALL CORES
         the_min = self.betarr.min()
         the_max = self.betarr.max()
@@ -430,7 +431,7 @@ class BRho_tool():
         #the_ATF = atf[num]  
         the_bins = np.linspace(the_min,the_max,num=the_bins)  #'original': 64
         ax2.hist(self.betarr, bins=the_bins, density=True, histtype='step', color='k')
-        ax2.axvline(the_FTA, color='m', linestyle='dashed')
+        ax2.axvline(the_FTA, color='grey', linestyle='dashed')
         #ax2.axvline(the_ATF, color='m')
 
         ax2.yaxis.tick_right()
@@ -596,9 +597,9 @@ FIGURE 6: type: 'vio_plot' ;time: 'per_frame'
 
 for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
     # TYPE: 
-    which_plot = 'vio_plot' 
+    which_plot = 'scatter_plot' 
     # TIME:
-    which_time = 'per_frame'
+    which_time = 'all_time'
 
     # GLOBAL TFF 
     G = 1620/(4*np.pi)
@@ -660,13 +661,13 @@ for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
              fig=None,ax1=None,ax2= None,ax3= None,ax4= None,ax5= None,ax7= None,ax8= None,
              lplots= None,core_list=None,core_val=corenum,simframes= None) 
 
-    if type == 'scatter_plot' and time == 'all_time' 
+    if which_plot == 'scatter_plot' and which_time == 'all_time': 
         # TWO PANEL SCATTER PLOTS; Fig 1.
         tool.twopanels(nt, simnames[nt],axnum,figu,corenum)
-    if type == 'box_plot' and time == 'per_frame': 
+    if which_plot == 'box_plot' and which_time == 'per_frame': 
         # CALL BOXPLOTS; Fig 5. 
         tool.boxes(nt,simnames[nt],tff_labels)
-    if type == 'vio_plot' and time == 'per_frame': 
+    if which_plot == 'vio_plot' and which_time == 'per_frame': 
         # CALL VIOLINPLOTS; Fig 6.              
         tool.violins(nt,simnames[nt],tff_labels)
 

@@ -651,10 +651,10 @@ class BRho_tool():
             iqr = q3 - q1 #Interquartile range
             fence_low = q1 - (1.5*iqr)
             fence_high = q3 + (1.5*iqr)
-        if 0:
+        if 1:
             means = [item.get_ydata()[0] for item in bparts['means']] 
             print(means,name) 
-            if 0:
+            if 1:
                 alphaFile = open("alphaRecords.txt",'a')
                 alphaFile.write("Sim %s meanAlphas %s \n"%(name,f'Means:{means}'))
                 alphaFile.close()
@@ -843,9 +843,9 @@ def axisforbox(theAx=None):
 
         # TYPE OF PLOT: 'scatter_plot' OR 'frame_scatters' 
         # OR 'box_plot' OR 'vio_plot'? OR 'rms_plot' OR 'histogram'
-        which_plot = 'scatter_plot' 
+        which_plot = 'box_plot' 
         # ALL TIME: 'all_time', OR PER FRAME: 'per_frame'?
-        which_time = 'all_time'
+        which_time = 'per_frame'
 
         # GLOBAL TFF 
         G = 1620/(4*np.pi)
@@ -911,13 +911,13 @@ def axisforbox(theAx=None):
             # CALL HISTOGRAM FOR ALL CORES FOR ALL TIME or as in box-vios
             fig, ax = plt.subplots(1,1) 
             tool.histograms(nt,fig,ax)
-        if 0: 
+        if 1: 
             # CALL BOXPLOTS  
             tool.boxes(nt,simnames[nt],tff_labels,theAx)
         if 0: 
             # CALL VIOLINPLOTS              
             tool.violins(nt,simnames[nt],tff_labels,theAx)
-        if 1: 
+        if 0: 
             # TWO PANEL SCATTER PLOTS!
             tool.twopanels(nt, simnames[nt],axnum,figu,corenum) # EDIT
 
