@@ -76,6 +76,14 @@ def add_b_over_rho(obj):
         return output
     obj.add_field(YT_bz_over_rho,bz_over_rho, units='1/s',sampling_type='cell',validators=std_validators_2)
 
+def add_gdotgradrho(obj):
+    def gdotgradrho(field,data):
+        drho_dx = xo.grad(data,YT_density,0)
+        drho_dy = xo.grad(data,YT_density,1)
+        drho_dz = xo.grad(data,YT_density,2)
+        output = data[YT_acceleration_x]*drho_dx+ data[YT_acceleration_y]*drho_dy+ data[YT_acceleration_z]*drho_dz
+        return data.ds.arr(output,'g/(cm**3*s**2)')
+    obj.add_field(YT_gdotgradrho,gdotgradrho,units='g/(cm**3*s**2)', validators=[yt.ValidateSpatial(1,YT_density)], sampling_type='cell')
 
 def add_energies(obj):
     if obj.parameters['SelfGravity']:
