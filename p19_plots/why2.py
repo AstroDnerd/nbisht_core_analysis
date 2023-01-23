@@ -18,7 +18,7 @@ def why(this_looper,core_list=None, do_plots=True, r_inflection=None, frame_list
         mask = movie_frames.quantized_mask(this_looper).flatten()
         ok = np.zeros_like(mask)
         ok[::10] = mask[::10]
-        #mask=ok
+        mask=ok ;print('why kludge mask')
         times=thtr.times[mask]+0 #the zero makes a copy
         times.shape=times.size,1
         times=times/colors.tff
@@ -33,8 +33,12 @@ def why(this_looper,core_list=None, do_plots=True, r_inflection=None, frame_list
         
         r_bins = np.geomspace( 2e-4, 32/128, 32)
         RV = np.zeros( [len(r_bins)-1, len(frame_list)])
+        frame_rmap=rainbow_map(len(frame_list))
+        fig6,ax6=plt.subplots(1,1)
+        ax6.axhline(0.5, c=[0.5]*4)
+        ax6.axhline(2, c=[0.5]*4)
         for nframe,frame in enumerate(frame_list):
-            print("%s c%04d n%04d"%(this_looper.sim_name, core_id, frame))
+            print("GEKE on %s c%04d n%04d"%(this_looper.sim_name, core_id, frame))
             ds = this_looper.load(frame)
             nf = np.where( this_looper.tr.frames == frame)[0][0]
             xtra_energy.add_energies(ds)
@@ -90,6 +94,10 @@ def why(this_looper,core_list=None, do_plots=True, r_inflection=None, frame_list
             
             ok = EKmeans>0
             RV[ok,nframe]=(EGmeans/EKmeans)[ok]
+            r_bins_c = 0.5*(r_bins[1:]+r_bins[:-1])
+            ax6.plot(r_bins_c, EGmeans/EKmeans, c = frame_rmap(nframe))
+        ax6.set(xlabel='R',xscale='log',ylabel='EGmean/EKmean',yscale='log')
+        fig6.savefig('plots_to_sort/eg_to_ek_vs_radius_%s_c%04d.png'%(this_looper.sim_name, core_id))
 
 
         fig,axes=plt.subplots(1,2)
@@ -99,13 +107,25 @@ def why(this_looper,core_list=None, do_plots=True, r_inflection=None, frame_list
         ax=axes[0]
         ax1=axes[1]
 
+        #Set up gnarly colormap.  
+        norm = mpl.colors.LogNorm( vmin=0.01,vmax=100)
+
+        newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
+                                             [(0,         '#0000ff'),
+                                              (norm(0.5), '#dddddd'),
+                                              (norm(2.0), '#00ffff'),
+                                              (1,         '#ff0000')], N=256)
+
+
+
         #norm = mpl.colors.LogNorm( vmin=RV['RV'][RV['RV']>0].min(), vmax=RV['RV'].max())
-        norm = mpl.colors.LogNorm( vmin=1e-3, vmax=1e3)
-        plot=ax.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap='seismic')
-        plot=ax1.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap='seismic')
-        fig.colorbar(plot)
-        ax.set(yscale='log')
-        ax1.set(yscale='log')
+        #norm = mpl.colors.LogNorm( vmin=1e-3, vmax=1e3)
+        #plot=ax.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap='seismic')
+        plot=ax.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap=newcmp)
+        plot=ax1.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap=newcmp)
+        fig.colorbar(plot, label='EG/EK')
+        ax.set(yscale='log', xlabel='t/tff', ylabel='R [code units]')
+        ax1.set(yscale='log', xlabel='t/tff')
         ax1.set(yticks=[])
 
         
@@ -153,6 +173,7 @@ if 'RV' not in dir() or True:
         core_list=[323]
         core_list=[25]
         core_list = TL.loops[sim].core_by_mode['Alone']
+        #core_list = [114]
         #core_list=[361]
         #core_list=[8]
         #core_list=[381]
