@@ -1,44 +1,33 @@
 from starter2 import *
 
 class scrubber():
-    def __init__(self,obj,center=None,reference_velocity=None,do_velocity=True, do_magnetic=False):
+    def __init__(self,obj,reference_velocity=None,do_velocity=True, do_magnetic=False):
         self.obj=obj
-        self.scrub(center,reference_velocity,do_velocity=do_velocity, do_magnetic=do_magnetic)
+        self.scrub(reference_velocity,do_velocity=do_velocity, do_magnetic=do_magnetic)
                 
 
-    def scrub(self,center=None, reference_velocity=None, axis=0, do_velocity=True, do_magnetic=False):
+    def scrub(self, reference_velocity=None, axis=0, do_velocity=True, do_magnetic=False):
 
-        self.this_x = self.obj[YT_x]
-        self.this_y = self.obj[YT_y]
-        self.this_z = self.obj[YT_z]
+        self.reference_velocity=reference_velocity
+
+        #this_x has had the center and periodic wrap removed
+        self.this_x = self.obj['periodic_x']
+        self.this_y = self.obj['periodic_y']
+        self.this_z = self.obj['periodic_z']
 
         self.density = self.obj[YT_density]
         self.cell_volume = self.obj[YT_cell_volume]
         self.mass = self.density*self.cell_volume
         self.mass_total=self.mass.sum(axis=0)
 
-        self.mean_x = np.mean(self.this_x,axis=0)
-        self.mean_y = np.mean(self.this_y,axis=0)
-        self.mean_z = np.mean(self.this_z,axis=0)
-        self.mean_center=nar([self.mean_x,self.mean_y,self.mean_z])
-        self.mean_xc= np.sum(self.this_x*self.mass,axis=0)/self.mass_total
-        self.mean_yc= np.sum(self.this_y*self.mass,axis=0)/self.mass_total
-        self.mean_zc= np.sum(self.this_z*self.mass,axis=0)/self.mass_total
-        self.mean_center_density=nar([self.mean_xc,self.mean_yc,self.mean_zc])
 
-        self.rx_rel=self.this_x-self.mean_x
-        self.ry_rel=self.this_y-self.mean_y
-        self.rz_rel=self.this_z-self.mean_z
 
-        self.rx_relc=self.this_x-self.mean_xc
-        self.ry_relc=self.this_y-self.mean_yc
-        self.rz_relc=self.this_z-self.mean_zc
+        #alias.  Lazy coding, we've already removed the mean.
+        self.rx_rel=self.this_x
+        self.ry_rel=self.this_y
+        self.rz_rel=self.this_z
 
-        self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
-        self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
-
-        self.r=np.sqrt(self.r2)
-        self.rc=np.sqrt(self.r2c)
+        self.r = self.obj['radius']
 
         if do_magnetic:
             self.bx = self.obj[YT_magnetix_x]
@@ -57,9 +46,15 @@ class scrubber():
 
             self.raw_v2 = self.raw_vx**2+self.raw_vy**2+self.raw_vz**2
             #print("KLUDGE: using raw mean for velocity")
-            self.mean_vx = self.raw_vx.mean()
-            self.mean_vy = self.raw_vy.mean()
-            self.mean_vz = self.raw_vz.mean()
+
+            if self.reference_velocity is None:
+                self.mean_vx = self.raw_vx.mean()
+                self.mean_vy = self.raw_vy.mean()
+                self.mean_vz = self.raw_vz.mean()
+            else:
+                self.mean_vx = self.reference_velocity[0]
+                self.mean_vy = self.reference_velocity[1]
+                self.mean_vz = self.reference_velocity[2]
 
             self.mass_mean_vx = self.raw_vx*self.mass/self.mass_total
             self.mass_mean_vy = self.raw_vy*self.mass/self.mass_total
@@ -94,15 +89,16 @@ class scrubber():
             self.vt_x = self.rel_vx-self.vr_rel*self.rx_hat
             self.vt_y = self.rel_vy-self.vr_rel*self.ry_hat
             self.vt_z = self.rel_vz-self.vr_rel*self.rz_hat
+            self.vt_rel=np.sqrt(self.vt2_rel)
 
     def compute_ge(self):
         self.gx = self.obj[YT_grav_x]
         self.gy = self.obj[YT_grav_y]
         self.gz = self.obj[YT_grav_z]
         self.ge = -1/(np.pi*8*colors.G)*(self.gx**2+self.gy**2+self.gz**2)
-    def compute_ke(self,core_id):
+    def compute_ke(self):
         self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
-    def compute_ke_rel(self,core_id):
+    def compute_ke_rel(self):
         self.ke_rel = 0.5*self.density*(self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)
 
 
