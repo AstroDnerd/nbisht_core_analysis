@@ -62,13 +62,36 @@ for isim,this_simname in enumerate(sim_list):
     #NAMES.append("Anatomy")
     #RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
 
-    #Why Bound
-    NAMES.append("GE/KE Radius Time")
-    RE.append("/*why2/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+    #with density plots
+    #NAMES.append("Anatomy 4")
+    #RE.append(r"/*Anatomy_density/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+    NAMES.append("Anatomy play")
+    RE.append(r"/*Anatomy_play/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
+    print(RE[-1])
+
+    NAMES.append("EG to EK")
+    RE.append(r"/*Anatomy_play/u50%d/eg_to_ek_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    ##Why Bound
+    ##Not the right version
+    #NAMES.append("GE/KE Radius Time")
+    #RE.append("/*why2/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
 
     #Why Bound
+    #good version, seismic colormap
+    #NAMES.append("GE/KE Radius Time")
+    #RE.append("/*why2_centroid/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
     NAMES.append("GE/KE Radius Time")
-    RE.append("/*why2_centroid/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+    RE.append("/*Anatomy_play/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    NAMES.append("Avg interior mass")
+    RE.append("/*MassInterior/u50%d/mass_interior_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    NAMES.append("Radial/Tangential Velocity")
+    RE.append("/*velocity_spheres/u50%d/velocity_color_u50%d_c(\d{4}).png"%(nsim,nsim))
+
+    NAMES.append("Radial/Tangential Velocity")
+    RE.append("/*velocity_spheres/u50%d/velocity_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
 
     RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_%04d.png"%(nsim,nsim, frame))
     NAMES.append('Otherones')
