@@ -450,3 +450,21 @@ Sim 1 Bhigh_ratio_cores 128: [193, 278] [54, 294], x & z
 Sim 2 Bhigh_ratio_cores 128: [3, 91, 165] [3, 306, 348], x & z, z 
 
 
+Ratios of Int( |Bx| rho dx)/int( Bx rho dx):
+SIM 0
+ratio long max 362.2935858194476
+ratio long min -6970.324341461978
+ratio short max 57.820117804737365
+ratio short min -58.3653070776803
+
+SIM 1
+ratio long max 9024.027726721679
+ratio long min -74.4100074850738
+ratio short max 652.1307023360221
+ratio short min -158.8127440413542
+
+SIM 2
+ratio long max 82.81511044959167
+ratio long min -195.13202969788827
+ratio short max 64.81176510380861
+ratio short min -92.341689090119
