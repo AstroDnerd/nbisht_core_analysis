@@ -40,7 +40,9 @@ def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,tra
     if ax is not None:
 
         ploot=ax.pcolormesh( TheX, TheY, h, **pcolormesh_args)
-    output = {'TheX':TheX, 'TheY':TheY, 'norm':norm,'cmap':cmap}
+
+    output = {'TheX':TheX, 'TheY':TheY, 'norm':norm,'cmap':cmap, 'plot':ploot}
+    return output
 
 
 
