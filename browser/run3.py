@@ -26,12 +26,15 @@ for isim,this_simname in enumerate(sim_list):
                                      field='n_particles',style='value')
     p_neighbor = product.product('Neighborhood',fname="browser_data/neighborhood_by_core_u50%d.h5"%nsim,
                                      field='neighborhood',style='value',number_format='%d')
-    p_mode = product.product('mode',fname="browser_data/core_formation_mode_u50%d.h5"%nsim,
+    p_mode = product.product('mode',fname="browser_data/core_formation_mode_old_u50%d.h5"%nsim,
+                                     field='modes',style='value',number_format='%s')
+    p_mode_new = product.product('mode',fname="browser_data/core_formation_mode_new_u60%d.h5"%nsim,
                                      field='modes',style='value',number_format='%s')
     PROD.append(p_peak_density)
     PROD.append(p_nparticles)
     PROD.append(p_neighbor)
     PROD.append(p_mode)
+    PROD.append(p_mode_new)
 
     NAMES.append("mountain top")
     RE.append(r"/*mountain_tops/%s/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( this_simname, this_simname))
