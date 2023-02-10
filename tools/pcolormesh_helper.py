@@ -1,13 +1,13 @@
 from starter1 import *
 import davetools
-def simple_phase(field1,field2,log=False,ax=None):
+def simple_phase(field1,field2,log=False,ax=None,nBins=64):
     ext=davetools.extents()
     ext(field1)
     ext(field2)
     if log:
-        bins=np.geomspace(ext.minmax[0],ext.minmax[1],64)
+        bins=np.geomspace(ext.minmax[0],ext.minmax[1],nBins)
     else:
-        bins=np.linspace(ext.minmax[0],ext.minmax[1],64)
+        bins=np.linspace(ext.minmax[0],ext.minmax[1],nBins)
     hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins,bins])
     helper( hist, xbins, ybins,ax=ax)
 def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=False, **pcolormesh_args):
