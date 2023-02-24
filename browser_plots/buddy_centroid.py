@@ -35,6 +35,7 @@ for sim in sim_list:
     main_core_list.sort()
     #main_core_list = [191, 74, 112, 368]
     #main_core_list=[368]
+    #main_core_list=[74]
     other_cores, shift = find_other_cores.get_other_cores( this_looper, main_core_list, mini_scrubbers[sim])
     for main_core in main_core_list:
         oc = other_cores[main_core]

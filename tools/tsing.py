@@ -16,6 +16,8 @@ class te_tc:
         self.tend_core={}
         self.fsung=[]
         self.mode=[]
+        self.tsing_frame={}
+        self.tend_frame={}
 
 
         
@@ -29,6 +31,7 @@ class te_tc:
         thtr=this_looper.tr
         mask = movie_frames.quantized_mask(this_looper).flatten()
         times=thtr.times[mask]+0 #the zero makes a copy
+        frames=thtr.frames[mask]+0
         times.shape=times.size,1
         times=times/colors.tff
         rho_all = thtr.track_dict['density']
@@ -68,6 +71,8 @@ class te_tc:
                 collapse_done += singularity
             else:
                 collapse_done=-1
+            self.tsing_frame[core_id]=frames[singularity]
+            self.tend_frame[core_id]=frames[collapse_done]
             this_tsing = times[singularity][0]  #the extra [0] is for the plottable shape of times.
             this_tend = times[collapse_done][0]
             self.tsing_core[core_id]=this_tsing

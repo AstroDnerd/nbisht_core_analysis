@@ -132,6 +132,64 @@ def get_other_cores(this_looper,core_list=None, mini_scrubbers=None, thresh=0.05
                 shift[main_core][ocore] = shifter[:,-1]
     return other_cores, shift
 
+def get_all_distances(this_looper,core_list=None, mini_scrubbers=None, thresh=0.05):
+
+    if core_list is None:
+        core_list = np.unique(this_looper.tr.core_ids)
+    all_cores=np.unique(this_looper.tr.core_ids)
+
+    distance=np.zeros( [len(core_list), len(all_cores),len(this_looper.tr.times)])
+    min_d = np.zeros([len(core_list),len(all_cores)])-1
+    if mini_scrubbers is None:
+
+        mini_scrubbers={}
+        for core_id in all_cores:
+            print('ms',core_id)
+            ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
+            ms.particle_pos(core_id)
+
+            mini_scrubbers[core_id]=ms
+
+    other_cores={}
+    shift={}
+    for nc1,main_core in enumerate(core_list):
+
+        other_cores[main_core]=[]
+        ms = mini_scrubbers[main_core]
+        for nc2, ocore in enumerate(all_cores):
+            if ocore==main_core:
+                continue
+            oms = mini_scrubbers[ocore]
+            P1 = np.stack( [ms.mean_x, ms.mean_y, ms.mean_z])
+            P2 = np.stack( [oms.mean_x, oms.mean_y, oms.mean_z])
+            delta = P1-P2
+            DDD= np.sqrt(((delta)**2).sum(axis=0))
+            distance[nc1,nc2,:]=DDD
+
+            #ok = ( ((delta)**2).sum(axis=0) < thresh**2).any()
+            #distance[nc1,nc2,:]=((delta)**2).sum(axis=0)
+            min_d[nc1,nc2]=DDD[DDD>0].min()
+
+            no="""
+            #look for periodic shifts
+            #Anything that's further than 1-delta,  shift it back.
+            a_delta = np.abs( P1-P2)
+            thresh_inv = 1-thresh
+            if ( a_delta >= thresh_inv).any() and False: #kludge
+                if main_core not in shift:
+                    shift[main_core]={}
+                shifter = delta+0
+                lookit= a_delta >= thresh_inv
+                shifter[~lookit] = 0
+                shifter = np.sign(shifter)
+                min_d[nc1,nc2] = min([(( P1-(P2+shifter))**2).sum(axis=0).min(), min_d[nc1,nc2]])
+                #ok2 = ((( P1-(P2+shifter))**2).sum(axis=0) < thresh**2).any()
+                #if ok2:
+                #    other_cores[main_core].append(ocore)
+                #shift[main_core][ocore] = shifter[:,-1]
+                """
+    return min_d, all_cores, distance
+
 if 0:
     #Testing
     import three_loopers_u500 as TL

@@ -26,15 +26,12 @@ for isim,this_simname in enumerate(sim_list):
                                      field='n_particles',style='value')
     p_neighbor = product.product('Neighborhood',fname="browser_data/neighborhood_by_core_u50%d.h5"%nsim,
                                      field='neighborhood',style='value',number_format='%d')
-    p_mode = product.product('mode',fname="browser_data/core_formation_mode_old_u50%d.h5"%nsim,
-                                     field='modes',style='value',number_format='%s')
-    p_mode_new = product.product('mode',fname="browser_data/core_formation_mode_new_u60%d.h5"%nsim,
+    p_mode = product.product('mode',fname="browser_data/core_formation_mode_u50%d.h5"%nsim,
                                      field='modes',style='value',number_format='%s')
     PROD.append(p_peak_density)
     PROD.append(p_nparticles)
     PROD.append(p_neighbor)
     PROD.append(p_mode)
-    PROD.append(p_mode_new)
 
     NAMES.append("mountain top")
     RE.append(r"/*mountain_tops/%s/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( this_simname, this_simname))
@@ -50,9 +47,9 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append("Buddy centroids")
     RE.append(r"/*buddy_centroids/u50%d/u50%d_buddies__centroid_xyz_c(\d{4}).png"%(nsim,nsim))
 
-    #hair
-    NAMES.append("Pathlines")
-    RE.append(r"/*blowing_hair_u500/u50%d/u50%d_hair_x_c(\d\d\d\d).png"%(nsim  ,nsim))
+    NAMES.append("Buddy hair")
+    RE.append(r"/*buddy_hair/u50%d/u50%d_buddies__xyzt_xyz_c(\d{4}).png"%(nsim,nsim))
+
 
     #3 projections
     NAMES.append('3 proj')
@@ -65,39 +62,15 @@ for isim,this_simname in enumerate(sim_list):
     #NAMES.append("Anatomy")
     #RE.append(r"/*Anatomy/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
 
-    #with density plots
-    #NAMES.append("Anatomy 4")
-    #RE.append(r"/*Anatomy_density/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
-    NAMES.append("Anatomy play")
-    RE.append(r"/*Anatomy_play/u50%d/u50%d_rho_vel_hist_t_c(\d{4}).png"%(nsim,nsim))
-    print(RE[-1])
-
-    NAMES.append("EG to EK")
-    RE.append(r"/*Anatomy_play/u50%d/eg_to_ek_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
-
-    ##Why Bound
-    ##Not the right version
-    #NAMES.append("GE/KE Radius Time")
-    #RE.append("/*why2/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
 
     #Why Bound
-    #good version, seismic colormap
-    #NAMES.append("GE/KE Radius Time")
-    #RE.append("/*why2_centroid/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
     NAMES.append("GE/KE Radius Time")
-    RE.append("/*Anatomy_play/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
+    RE.append("/*why2/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
 
-    NAMES.append("Avg interior mass")
-    RE.append("/*MassInterior/u50%d/mass_interior_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
+    #Why Bound
+    NAMES.append("GE/KE Radius Time")
+    RE.append("/*why2_centroid/u50%d/why2_u50%d_c(\d{4}).png"%(nsim,nsim))
 
-    NAMES.append("Radial/Tangential Velocity")
-    RE.append("/*velocity_spheres/u50%d/velocity_color_u50%d_c(\d{4}).png"%(nsim,nsim))
-
-    NAMES.append("Radial/Tangential Velocity")
-    RE.append("/*velocity_spheres/u50%d/velocity_vs_radius_u50%d_c(\d{4}).png"%(nsim,nsim))
-
-    RE.append(r"/*otherones/u40%d/otherones_u40%d_c(\d\d\d\d)__0000_%04d.png"%(nsim,nsim, frame))
-    NAMES.append('Otherones')
 
     #NAMES.append("Density Velocity")
     #RE.append(r"/*density_velocity/u50%d/u50%d_rho_vnorm_t_c(\d{4}).png"%(nsim,nsim))
@@ -132,22 +105,6 @@ for isim,this_simname in enumerate(sim_list):
     #nice mountain top image with the acceleration field
     NAMES.append("Gravity Density Ring")
     RE.append(r"/*proj_grav/u60%d/mountain_top_u60%d_c(\d\d\d\d)_acceleration_Projection_x_density.png"%(nsim,nsim))
-
-    #energies.
-    NAMES.append("GE/KE 2/128")
-    RE.append(r"/*GEKEmass_larger/u60%d/eng_x_u60%d_c(\d\d\d\d)_n%04d_ge_ke_t2.png"%(nsim,nsim,frame))
-
-    #velocity streamlines, v=v-v_mean_particles
-    NAMES.append("Velocity Streamlines M1")
-    RE.append(r"/*swirl_1/u60%d/proj_x_u60%d_c(\d\d\d\d)_n%04d_density_velocity.png"%(nsim,nsim, frame))
-
-
-    NAMES.append('(Grad phi)^2')
-    RE.append(r"/*BindingEnergy/u50%d/u50%d_c(\d\d\d\d)_potfit.png"%(nsim,nsim))
-
-    if 0:
-        NAMES.append('B and rho') #u503_b_and_rho_t_c0248
-        RE.append(r"/*B_and_rho/u50%d/u50%d_b_and_rho_t_c(\d\d\d\d).png"%(nsim,nsim))
 
 
 
@@ -204,6 +161,6 @@ for isim,this_simname in enumerate(sim_list):
     #product_list=[p_nparticles,p_peak_density,p_mountain,p_hair, p_other,p_rho_hair, p_rho_heat]
     product_list=PROD
 
-    cl=make_page.make_page(product_list, core_list=None,htmlname='%s/output_%s.html'%(basedir,this_simname))
+    cl=make_page.make_page(product_list, core_list=None,htmlname='%s/mode_grader_%s.html'%(basedir,this_simname))
 
 

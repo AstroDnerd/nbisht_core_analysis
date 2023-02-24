@@ -12,7 +12,7 @@ import convex_hull_tools as CHT
 def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, label_cores=[],prefix="",
             color_dict=None,axis_to_plot=[0], plot_square=True, external_axis=None,
                 plotstyle='xyz',
-                add_jitter=True, center_image=True
+                add_jitter=True, center_image=True, plot_particles=True
            ):
 
 
@@ -31,7 +31,7 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
         else:
             fig_many, ax = plt.subplots(1,1)#,figsize=(4,4))
             ax=[ax] #because we need to refer to the first one.
-            ax[0].set_aspect('equal')
+            #ax[0].set_aspect('equal')
     else:
         ax=external_axis
     if -1 in axis_to_plot:
@@ -62,8 +62,8 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
 
     for it,frame in enumerate(frames):#asort):
         nt= np.where( nar(thtr.frames) == frame)[0][0]
-        for aaa in ax:
-            aaa.clear()
+        #for aaa in ax:
+        #    aaa.clear()
         for ncore,core_id in enumerate(core_list):
             ms = ms_dict[core_id]
             if ms.r.shape[0] <= 4:
@@ -139,8 +139,9 @@ def plot_2d(htool,core_list=None,accumulate=False,frames=[0],all_plots=False, la
                 if center_image:
                     plot_x_ext( this_p[x]+dx)
                     plot_y_ext( this_p[y]+dy)
-                this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=size, c=[color_dict[core_id]]*n_particles,
-                                marker=marker, edgecolor='None')
+                if plot_particles:
+                    this_ax.scatter(this_p[x]+dx, this_p[y]+dy,s=size, c=[color_dict[core_id]]*n_particles,
+                                    marker=marker, edgecolor='None')
                     
 
                 #streaks.  Use with caution.

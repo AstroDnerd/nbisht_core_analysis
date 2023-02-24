@@ -1,3 +1,4 @@
+YT_gdotgradrho=('gas','gdotgradrho')
 YT_bx_hat=('gas','bx_hat')
 YT_by_hat=('gas','by_hat')
 YT_bz_hat=('gas','bz_hat')

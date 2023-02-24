@@ -26,6 +26,7 @@ def make_page(product_list,core_list=None, htmlname="./output.html", captions=No
         core_list=np.unique(np.array(sorted(core_list)))
 
     fptr = open(htmlname,'w')
+    print("Writing",htmlname)
     fptr.write(head_dumb)
     #loader=jinja2.FileSystemLoader('.')
     #env = jinja2.Environment(loader=loader)

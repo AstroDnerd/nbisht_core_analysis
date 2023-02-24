@@ -22,7 +22,7 @@ if 'ht' not in dir():
     ht = {}
 def make_hulls():
     for this_simname in sim_list:
-        if sim in ht:
+        if this_simname in ht:
             continue
         print("Analysis: Hulls")
         ht[this_simname] = CHT.hull_tool(TL.loops[this_simname])

@@ -35,6 +35,7 @@ if 1:
 
 if 'overlaps' not in dir():
     overlaps={}
+    ratios={}
 
 for sim in sim_list:
     ht0=hull_by_frame[sim][0]
@@ -46,6 +47,7 @@ for sim in sim_list:
 
     if sim not in overlaps:
         overlaps[sim] = np.zeros([ncores,ncores,nframes])
+        ratios[sim] = np.zeros([ncores,ncores,nframes])
         for nframe, frame in enumerate(frame_list):
             htool = hull_by_frame[sim][frame]
             for nc1, core_id_1 in enumerate(htool.cores_used):
@@ -55,15 +57,124 @@ for sim in sim_list:
                     a,b=htool.overlaps[core_id_1][nc2], htool.overlaps[core_id_2][nc1] 
                     #please come back to think about this logic.
                     #david, 2022-09-22
+                    #2023-01-06 I think it should be zero of either is zero.
+                    #The only issue is full containment and zero volume.
                     ratio = max([a,b])
                     rat= sorted( [a,b])
                     if rat[1] == 0:
-                        ratio = max([a,b])
+                        #ratio = max([a,b])
+                        ratio = 0
                     else:
                         ratio=rat[0]/rat[1]
-                    overlaps[sim][nc1,nc2,nframe] = ratio
+                    ratios[sim][nc1,nc2,nframe] = ratio
+                    overlaps[sim][nc1,nc2,nframe] = a
 
-if 1:
+if 0:
+    import convex_hull_plot2d as CHP
+    reload(CHP)
+    import tsing
+    reload(tsing)
+    if 'tsing_tool' not in dir():
+        tsing_tool={}
+        for ns,sim in enumerate(sim_list):
+            obj=tsing.te_tc(TL.loops[sim])
+            tsing_tool[sim]=obj
+            tsing_tool[sim].run()
+if 0:
+    #numbers
+    for sim in sim_list:
+        loop=TL.loops[sim]
+        times=loop.tr.times/colors.tff
+        OOO = overlaps[sim]
+        Tot = (OOO>0).sum(axis=0)
+        for mode in ['Cluster']:
+            core_list=loop.core_by_mode[mode]
+            tool0 = hull_by_frame[sim][0]
+            cores_used = nar(tool0.cores_used)
+            times=loop.tr.times/colors.tff
+            fig,ax=plt.subplots(1,1)
+            for nc1,core_id in enumerate(core_list):
+                index = np.where( cores_used == core_id)[0][0]
+                any_overlap = OOO[index,:,:] > 0
+                line = any_overlap.sum(axis=0)
+                ax.plot(times, line)
+                print(line)
+            fig.savefig('plots_to_sort/Counts_%s_mode_%s'%(loop.sim_name,mode))
+            plt.close(fig)
+if 0:
+    #fractions 
+    for sim in sim_list:
+        loop=TL.loops[sim]
+        times=loop.tr.times/colors.tff
+        OOO = overlaps[sim]
+        Tot = (OOO>0).sum(axis=0)
+        for mode in ['Binary']:
+            core_list=loop.core_by_mode[mode]
+            #core_list=core_list[:2]
+            #core_list=[76]
+            tool0 = hull_by_frame[sim][0]
+            cores_used = nar(tool0.cores_used)
+            times=loop.tr.times/colors.tff
+            fig,ax=plt.subplots(1,1)
+            for nc1,core_id in enumerate(core_list):
+                index = np.where( cores_used == core_id)[0][0]
+                my_buddies = OOO[index,:,:].sum(axis=1) > 0
+                #my_buddies[index]=True
+                other_core_id_list = cores_used[my_buddies]
+                print(other_core_id_list)
+
+                for other_core_id in other_core_id_list:
+                    other_index = np.where( cores_used == other_core_id)[0][0]
+                    line=OOO[index,other_index,:]
+                    tnorm = tsing_tool[name].tsing_core[core_id]
+                    ax.plot( times, line)
+                #print(other_core_id_list)
+                for nf,frame in enumerate(loop.tr.frames):
+                    continue
+                    if nf%10:
+                        continue
+                    this_over = OOO[index,:,nf] > 0
+                    #if frame%10==0:
+                    #    print(frame)
+                    #    print(cores_used[this_over])
+
+                    CHP.plot_2d(hull_by_frame[sim][frame], core_list=other_core_id_list, 
+                                prefix="n%04d_"%frame, axis_to_plot=[-1],accumulate=True,all_plots=False,
+                                label_cores=[-1], frames=[frame])
+                #fig.savefig('plots_to_sort/Overlaps_%s_c%04d_mode_%s'%(loop.sim_name,core_id,mode))
+                #plt.close(fig)
+            fig.savefig('plots_to_sort/Overlaps_%s_mode_%s'%(loop.sim_name,mode))
+            plt.close(fig)
+
+
+if 0:
+    for sim in sim_list:
+        loop=TL.loops[sim]
+        times=loop.tr.times/colors.tff
+        OOO = overlaps[sim]
+        Tot = (OOO>0).sum(axis=0)
+        for mode in ['Alone']:
+            core_list=loop.core_by_mode['Alone']
+            core_list=core_list[:2]
+            tool0 = hull_by_frame[sim][0]
+            cores_used = nar(tool0.cores_used)
+            times=loop.tr.times/colors.tff
+            for nc1,core_id in enumerate(core_list):
+                fig,ax=plt.subplots(1,1)
+                index = np.where( cores_used == core_id)[0][0]
+                my_buddies = OOO[index,:,:].sum(axis=1) > 0
+                other_core_id_list = cores_used[my_buddies]
+                for other_core_id in other_core_id_list:
+                    other_index = np.where( cores_used == other_core_id)[0][0]
+                    ax.plot( times, OOO[nc1,other_index,:])
+                fig.savefig('plots_to_sort/Overlaps_%s_c%04d_mode_%s'%(loop.sim_name,core_id,mode))
+                plt.close(fig)
+
+            
+
+
+
+if 0:
     for sim in sim_list:
         loop=TL.loops[sim]
         times=loop.tr.times/colors.tff
@@ -99,10 +210,7 @@ if 1:
 
 
         fig.savefig('plots_to_sort/derp_%s.png'%sim)
-
-
-
-if 1:
+if 0:
     for sim in sim_list:
         loop=TL.loops[sim]
         times=loop.tr.times/colors.tff
@@ -134,9 +242,6 @@ if 1:
             use_these=Tot[:,0] == startswith
             ax.plot( times, Tot[use_these,:].transpose())
             ax.set_title("startswith %d (%d)"%(startswith, use_these.sum()))
-
-
-
 
             fig.savefig('plots_to_sort/derp_%s_startswith_%03d.png'%(sim,startswith))
 
