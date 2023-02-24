@@ -4,12 +4,28 @@ from collections import defaultdict
 
 def read(sim_name):
 
-    sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-    fname = "browser_data/core_formation_mode_u50%d.h5"%sim_id
-    fptr=h5py.File(fname,'r')
-    core_ids = fptr['core_ids'][()]
-    modes_str = fptr['modes'][()].astype(str)
-    modes_tmp = [sss.split(',') for sss in modes_str]
+    if 0:
+        sim_id = int(sim_name[-1]) #last character is all we need. 501=601
+        fname = "browser_data/core_formation_mode_u50%d.h5"%sim_id
+        fptr=h5py.File(fname,'r')
+        core_ids = fptr['core_ids'][()]
+        modes_str = fptr['modes'][()].astype(str)
+        modes_tmp = [sss.split(',') for sss in modes_str]
+    else:
+        sim_id = int(sim_name[-1]) #last character is all we need. 501=601
+        fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
+        fptr = open(fname)
+        lines = fptr.readlines()
+        fptr.close()
+        core_ids=[]
+        modes_str=[]
+        for nc,line in enumerate(lines[1:]):
+            stuff = line.split('\t')
+            core_name = stuff[0]
+            core_id = int( core_name.split("c")[1])
+            core_ids.append(core_id)
+            modes_str.append( stuff[1])
+        modes_tmp = [sss.split(',') for sss in modes_str]
     modes=[]
     unique_modes=[]
 
