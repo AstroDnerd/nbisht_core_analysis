@@ -68,8 +68,9 @@ class dq_dt2():
             rho = ms.density[sl].transpose()
             dv = ms.cell_volume[sl].transpose()[mask,:]
             rho = rho[mask,:]
-            B=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
-            B = B**2/2
+            Bmag=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
+            BP = Bmag**2/2
+            B2 = Bmag**2
             divv=thtr.c([core_id],'velocity_divergence')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
 
             fig, ax=plt.subplots(3,6,figsize=(20,12))
@@ -130,7 +131,7 @@ class dq_dt2():
                 #plot dbdt
                 #
                 THIS_AX=ax0
-                smooth_b=ndimage.gaussian_filter1d(B, 2, 0)
+                smooth_b=ndimage.gaussian_filter1d(B2, 2, 0)
                 db_dt = (smooth_b[1:,:]-smooth_b[:-1,:])/dt_square
                 db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( db_dt.transpose(), tcenter, bins=bins, ax=THIS_AX)
                 THIS_AX.set_yscale('symlog',linthresh=100)
@@ -142,7 +143,7 @@ class dq_dt2():
                 #plot stretch, squish.
                 #
                 Pstretch=splat(Stretch,tcenter,ax1,'Stretch',bins)
-                Psquish=splat(-B*divv,tcenter,ax2,'Squish',bins)
+                Psquish=splat(-B2*divv,tcenter,ax2,'Squish',bins)
 
                 RedChan = np.log10(db_h.transpose())
                 GreenChan = np.log10(Psquish[2].transpose())
@@ -186,7 +187,8 @@ class dq_dt2():
             if 1:
                 #R take 1
                 THE_AX=ax6
-                RB=Stretch/(B*divv)
+                #shoot, why is this BP?  Should be B2.
+                RB=Stretch/(BP*divv)
                 print(RB.min(),RB.max())
                 if 0:
                     #dumb, use bins from above.
@@ -206,8 +208,9 @@ class dq_dt2():
                 PRB = splat(1-RB,tcenter,THE_AX,'1-RB',bins)
                 THE_AX.set_yscale('linear')
 
-            if 1:
+            if 0:
                 #the full range of RB, just in case.
+                #cumulative
                 THE_AX=ax7
                 QQ = (RB+0).flatten()
                 QQ.sort()
@@ -222,11 +225,10 @@ class dq_dt2():
 
             if 1:
                 #
-                # d log B / d rho
+                # d log B / d ln rho
                 #
-                THIS_AX=ax8
-                #already have this.
-                smooth_log_b=ndimage.gaussian_filter1d(np.log(B), 2, 0)/2
+                THIS_AX=ax7
+                smooth_log_b=ndimage.gaussian_filter1d(np.log(B2), 2, 0)
                 dlogb_dt = (smooth_log_b[2:,:]-smooth_log_b[:-2,:])/dt2
                 smooth_rho=ndimage.gaussian_filter1d(np.log(rho), 2, 0)
                 drho_dt = (smooth_rho[2:,:]-smooth_rho[:-2,:])/dt2
@@ -249,6 +251,8 @@ class dq_dt2():
                 THIS_AX.set_yscale('linear')
 
 
+            if 0:
+                #cumulative
                 QQQ = dLogs.flatten()
                 QQQ.sort()
                 ax9.plot(QQQ)
@@ -259,7 +263,8 @@ class dq_dt2():
                 ax9.set_yscale('symlog',linthresh=1)
                 ax9.set_title('dlnb/dlnrho')
 
-            if 1:
+            if 0:
+                #cumulative
                 Q = dlogb_dt.flatten()+0
                 Q.sort()
                 ax10.plot(Q)
@@ -269,63 +274,68 @@ class dq_dt2():
                 ax10.set_title('dlnb and dlnrho')
 
             if 1:
+                #phase diagram to see how right I am.
+                THIS_AX = ax8
                 x = dLogs.flatten()
                 y = 1-RB[1:-1,:].flatten()
                 bins = np.linspace(-5,5,128)
                 print(x.shape,y.shape)
-                pch.simple_phase(x,y,ax=ax11, bins=[bins,bins])
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
                 arr=[-2,2]
-                ax11.plot(arr,arr,c=[0.5]*4)
-                ax11.set(ylabel='1-R',xlabel=r'$\frac{d_t \ln |B|}{d_t \ln \rho}$')
+                THIS_AX.plot(arr,arr,c=[0.5]*4)
+                THIS_AX.set(ylabel='1-R',xlabel=r'$\frac{d_t \ln |B|}{d_t \ln \rho}$')
 
-            #
-            # histograms
-            #
+            if 0:
+                #
+                # histograms
+                #
 
-            Hsquish = Psquish[2]
-            b0=np.arange(0,5,5/16)
-            b1=np.geomspace(5,10000,32)
-            b2=np.concatenate([b0,b1])
-            b3 = np.concatenate([-b2[::-1],b2])
+                Hsquish = Psquish[2]
+                b0=np.arange(0,5,5/16)
+                b1=np.geomspace(5,10000,32)
+                b2=np.concatenate([b0,b1])
+                b3 = np.concatenate([-b2[::-1],b2])
 
-            #ax12.plot(b3)
+                #ax12.plot(b3)
 
-            rmap = rainbow_map( RB.shape[0])
-            print('WAAAAAAAAA',RB.mean())
-            for n in [0,50,-1]:
-                #if n%10:
-                #    continue
-                H=1-RB[n,:]
-                print(H.mean())
-                #ax12.hist(H, bins=np.linspace(-10,10,64), histtype='step',color=rmap(n))
-                ax12.hist(H, bins=np.linspace(-5,5,64), histtype='step',color=rmap(n))
-                #H.sort()
-                #v = np.arange(H.size)/H.size
-                #ax12.plot(H,v)
-                #break
-            ax12.set(yscale='linear',xscale='linear',title='1-RB')
+                rmap = rainbow_map( RB.shape[0])
+                print('WAAAAAAAAA',RB.mean())
+                for n in [0,50,-1]:
+                    #if n%10:
+                    #    continue
+                    H=1-RB[n,:]
+                    print(H.mean())
+                    #ax12.hist(H, bins=np.linspace(-10,10,64), histtype='step',color=rmap(n))
+                    ax12.hist(H, bins=np.linspace(-5,5,64), histtype='step',color=rmap(n))
+                    #H.sort()
+                    #v = np.arange(H.size)/H.size
+                    #ax12.plot(H,v)
+                    #break
+                ax12.set(yscale='linear',xscale='linear',title='1-RB')
 
 
             if 1:
                 #
                 # B and rho
                 #
+                THIS_AX = ax12
                 rho_0=rho[0,:].mean()
-                b_0=B[0,:].mean()
+                b_0=BP[0,:].mean()
 
-                ax13.plot(times, rho/rho_0, c=[0.5]*4, linewidth=0.1)
-                ax13.plot(times, B/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
-                ax13.set(yscale='log',title='B/B0,rho/rho_0')
+                THIS_AX.plot(times, rho/rho_0, c=[0.5]*4, linewidth=0.1)
+                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
             if 1:
+                THIS_AX = ax13
                 rho_0=rho[0,:]#.mean()
-                b_0=B[0,:]#.mean()
+                b_0=BP[0,:]#.mean()
                 #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
                 RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
                 print("ONE MINUS RB MEAN",1-RB_Mean)
 
-                ax14.plot(times, (rho/rho_0)**np.abs((1-RB_Mean)), c=[0.5]*4, linewidth=0.1)
-                ax14.plot(times, B/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
-                ax14.set(yscale='log',title='goods')
+                THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_Mean)), c=[0.5]*4, linewidth=0.1)
+                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
 
 
 
