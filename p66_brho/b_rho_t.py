@@ -55,8 +55,9 @@ class dq_dt():
                 c=[0.1]*4
             rho = ms.density[sl].transpose()
             rho = rho[mask,:]
-            B=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
-            B = B**2/2
+            Bmag=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
+            BP = B**2/2
+            B2 = B**2
             divv=thtr.c([core_id],'velocity_divergence')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
 
             fig, ax=plt.subplots(3,6,figsize=(20,12))
@@ -128,7 +129,7 @@ class dq_dt():
             ax0.set_yscale('symlog',linthresh=100)
             ax0.set_title('db/dt')
 
-            Pdb1=splat( -B*divv, ax2, '-B^2 divV')
+            Pdb1=splat( -B2*divv, ax2, '-B^2 divV')
             splat( Sx, ax1, 'Sx')
             splat( Sy, ax3, 'Sy')
             splat( Sz, ax5, 'Sz')
@@ -153,18 +154,8 @@ class dq_dt():
             #aaa10.set_xscale('symlog',linthresh=100)
 
 
-
-
             fig7.savefig('plots_to_sort/derp.png')
 
-            #fig.savefig('plots_to_sort/b_and_rho_3_c%04d.pdf'%(core_id))
-            fig2,aaax=plt.subplots(1,2)
-            moo = np.log10(db_h.transpose())
-            dumb = np.zeros_like(moo)
-            mork = np.log10(Pdb1[2].transpose())
-            pork = np.log10(Pdb2[2].transpose())
-            oot=np.stack([moo,mork,pork],axis=2)
-            aaax[0].imshow(oot, origin='lower', extent=[0,1,0,1])
             def not_dumb_ticks(qaxis, labs, nticks, format="%0.1f"):
                 ticks = qaxis.get_ticklocs()
                 points = np.linspace( ticks.min(), ticks.max(), nticks)
@@ -174,12 +165,27 @@ class dq_dt():
                 qaxis.set_ticklabels([format%num for num in new_ticks])
 
 
+            fig.savefig('plots_to_sort/b_and_rho_3_c%04d.pdf'%(core_id))
+            fig2,aaax=plt.subplots(1,3)
+            moo = np.log10(db_h.transpose())
+            dumb = np.zeros_like(moo)
+            mork = np.log10(Pdb1[2].transpose())
+            pork = np.log10(Pdb2[2].transpose())
+            oot=np.stack([moo,mork,pork],axis=2)
+            #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
+            aaax[0].imshow(oot, origin='lower', extent=[0,1,0,1])
+
+
+
                 
             not_dumb_ticks(aaax[0].xaxis, times, 5, format="%0.3f")
             not_dumb_ticks(aaax[0].yaxis, nar([-1e9,-1e4,0,1e4,1e9]), 5, format="%0.1e")
             #aaax[0].xaxis.set_ticklabels(['arse','barse','carse'])
             aaax[0].set_title('dB, db1')
 
+            oot=np.stack([moo,mork+pork, mork+pork],axis=2)
+            #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
+            aaax[1].imshow(oot, origin='lower', extent=[0,1,0,1])
 
             venn1 = np.zeros([800,800])
             venn2 = np.zeros([800,800])
@@ -197,10 +203,10 @@ class dq_dt():
             ok = (x-x3)**2 + (y-y3)**2 < 1.2*r**2
             venn3[ok] = 1
             venn = np.stack([venn1,venn2,venn3],axis=2)
-            aaax[1].imshow(venn,origin='lower', extent=[-0.5,0.5,-0.5,0.5])
-            aaax[1].text( y1,x1, 'dBdt', color='white')
-            aaax[1].text( y2,x2, 'B2', color='white')
-            aaax[1].text( y3,x3, 'Stretch', color='white')
+            aaax[2].imshow(venn,origin='lower', extent=[-0.5,0.5,-0.5,0.5])
+            aaax[2].text( y1,x1, 'dBdt', color='white')
+            aaax[2].text( y2,x2, 'B2', color='white')
+            aaax[2].text( y3,x3, 'Stretch', color='white')
             fig2.savefig('plots_to_sort/db_dt_c%04d.png'%core_id)
             return Pdb1
 
