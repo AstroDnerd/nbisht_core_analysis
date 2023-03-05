@@ -55,9 +55,6 @@ class dq_dt2():
             ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             ms.particle_pos(core_id)
 
-            fig,ax_square=plt.subplots(2,2)
-            ax=ax_square.flatten()
-
             if ms.nparticles < 1000:
                 sl=slice(None)
                 c=[0.5]*4
@@ -72,7 +69,7 @@ class dq_dt2():
             B2 = Bmag**2
             divv=thtr.c([core_id],'velocity_divergence')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
 
-            fig, ax=plt.subplots(3,3,figsize=(20,12))
+            fig, ax=plt.subplots(3,4,figsize=(20,12))
             ax0=ax[0][0]
             ax1=ax[0][1]
             ax2=ax[0][2]
@@ -150,6 +147,9 @@ class dq_dt2():
             Bp1 = np.zeros_like(R)
             Bp2 = np.zeros_like(R)
 
+            B1dotV1 = np.zeros_like(R)
+            B2dotV1 = np.zeros_like(R)
+
             collector=[]
             for nf,frame in enumerate(frames):
                 print('frame',frame)
@@ -185,15 +185,26 @@ class dq_dt2():
                     Bp0[nf,ip]=b_rot_new[Isrt[0]] #kludge
                     Bp1[nf,ip]=b_rot_new[Isrt[1]]
                     Bp2[nf,ip]=b_rot_new[Isrt[2]]
+
+
+                    E1 = E[:,0]
+                    B1dotV1[nf,ip] = (E1*b_rot).sum()
+                    B2dotV1[nf,ip] = (E1*b_rot_new).sum()
+                    #print('----')
+                    #kprint( np.abs((H@E1/A[0]).real-E1).sum())
+
+
+
+
                     #print( "Brot", (b_rot**2).sum())
                     #print( "BrotN", (b_rot_new**2).sum())
                     #collector.append( A.sum())
-                    collector.append(R[nf,ip]/r_new_basis)
+                    #collector.append(R[nf,ip]/r_new_basis)
             #collector=nar(collector)
             #return collector
-            print(collector.imag)
-            print(collector.real.mean(), (collector.real-collector.real.mean()).sum())
-            pdb.set_trace()
+            #print(collector.imag)
+            #print(collector.real.mean(), (collector.real-collector.real.mean()).sum())
+            #pdb.set_trace()
             ext=extents()
             #ext(A0);ext(A1);ext(A2)
             ext(A0[A0>0]);ext(A1[A1>0]);ext(A2[A2>0])
@@ -227,7 +238,8 @@ class dq_dt2():
 
             #sp3(Br0,tcenter,ax3,'Bp0')
             #sp2(Bp0,tcenter,ax3,'Bp0')
-            if 1:
+            if 0:
+                #B vs B phases.  Makes circles.
                 #pch.simple_phase( np.log10((Bp0**2).flatten()), np.log10((Bp1**2).flatten()), ax=ax3)
                 pch.simple_phase( ((Bp0).flatten()), ((Bp1).flatten()), ax=ax3)
                 ax3.set_aspect('equal')
@@ -237,27 +249,21 @@ class dq_dt2():
                 ax6.set_aspect('equal')
                 pch.simple_phase( Br0.flatten(), Br2.flatten(), ax=ax7)
                 ax7.set_aspect('equal')
-            if 0:
-                #bins = np.geomspace(1e-4,1,64)
-                #bins = np.concatenate( [-bins[::-1],bins])
-                bins=np.linspace(-1,1,128)
+            if 1:
+
                 ext=extents()
-                ext(Bp0);ext(Bp1/Bp0);ext(Bp2/Bp0)
-                #bins=np.linspace(ext.minmax[0],ext.minmax[1],64)
-                bins=np.linspace(1e-3,1e3,64)
+                ext(Br0);ext(Br1);ext(Br2)
+                bins=np.linspace(ext.minmax[0],ext.minmax[1],64)
 
                 splat(Bp0, tcenter, ax3, 'B_r_n 0',bins=bins)
-                splat(Bp1/Bp0, tcenter, ax4, 'B_r_n 1',bins=bins)
-                splat(Bp2/Bp0, tcenter, ax5, 'B_r_n 2',bins=bins)
+                splat(Bp1, tcenter, ax4, 'B_r_n 1',bins=bins)
+                splat(Bp2, tcenter, ax5, 'B_r_n 2',bins=bins)
                 #ax3.set(yscale='linear',ylim=ext.minmax)
                 #ax3.set_yscale('symlog',linthresh=1e-2)
                 ax3.set(yscale='linear',ylim=ext.minmax)
                 ax4.set(yscale='linear',ylim=ext.minmax)
                 ax5.set(yscale='linear',ylim=ext.minmax)
 
-                ext=extents()
-                ext(Br0);ext(Br1);ext(Br2)
-                bins=np.linspace(ext.minmax[0],ext.minmax[1],64)
                 splat(Br0, tcenter, ax6, 'B_n 0',bins=bins)
                 splat(Br1, tcenter, ax7, 'B_n 1',bins=bins)
                 splat(Br2, tcenter, ax8, 'B_n 2',bins=bins)
