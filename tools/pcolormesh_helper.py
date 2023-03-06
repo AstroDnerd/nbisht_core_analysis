@@ -1,15 +1,19 @@
 from starter1 import *
 import davetools
 def simple_phase(field1,field2,log=False,ax=None,nBins=64):
-    ext=davetools.extents()
-    ext(field1)
-    ext(field2)
+    ext1=davetools.extents()
+    ext2=davetools.extents()
+    ext1(field1)
+    ext2(field2)
     if log:
-        bins=np.geomspace(ext.minmax[0],ext.minmax[1],nBins)
+        bins1=np.geomspace(ext1.minmax[0],ext1.minmax[1],nBins)
+        bins2=np.geomspace(ext2.minmax[0],ext2.minmax[1],nBins)
     else:
-        bins=np.linspace(ext.minmax[0],ext.minmax[1],nBins)
-    hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins,bins])
-    helper( hist, xbins, ybins,ax=ax)
+        bins1=np.linspace(ext1.minmax[0],ext1.minmax[1],nBins)
+        bins2=np.linspace(ext2.minmax[0],ext2.minmax[1],nBins)
+    hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins1,bins2])
+    output = helper( hist, xbins, ybins,ax=ax)
+    return output
 def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=False, **pcolormesh_args):
     #takes the output of np.histogram2d (or any other 2d histogram)
     #xbins is 1 larger than h.size[0].
@@ -39,7 +43,7 @@ def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,tra
     else:
         zmin = zlim[0]
         zmax = zlim[1]
-    norm = mpl.colors.LogNorm( vmin =zmin, vmax=zmax)
+    norm = mpl.colors.Normalize( vmin =zmin, vmax=zmax)
     cmap = copy.copy(mpl.cm.get_cmap(cmap_name))
     cmap.set_under('w')
     if 'shading' not in pcolormesh_args:
@@ -50,7 +54,7 @@ def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,tra
 
         ploot=ax.pcolormesh( TheX, TheY, h, **pcolormesh_args)
 
-    output = {'TheX':TheX, 'TheY':TheY, 'norm':norm,'cmap':cmap, 'plot':ploot}
+    output = {'TheX':TheX, 'TheY':TheY, 'norm':norm,'cmap':cmap, 'plot':ploot, 'h':h}
     return output
 
 

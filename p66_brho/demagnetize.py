@@ -19,6 +19,7 @@ from matplotlib.ticker import PercentFormatter
 
 np.set_printoptions(threshold=sys.maxsize)
 from icecream import ic
+# --- --- --- --- --- --- ---
 
 class telescope(): 
     def __init__(self,the_loop):
