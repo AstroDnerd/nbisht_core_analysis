@@ -131,7 +131,7 @@ class dq_dt2():
                 #plot dbdt
                 #
                 THIS_AX=ax0
-                smooth_b=ndimage.gaussian_filter1d(B2, 2, 0)
+                smooth_b=ndimage.gaussian_filter1d(B2, 2, 0)/2
                 db_dt = (smooth_b[1:,:]-smooth_b[:-1,:])/dt_square
                 db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( db_dt.transpose(), tcenter, bins=bins, ax=THIS_AX)
                 THIS_AX.set_yscale('symlog',linthresh=100)
@@ -143,7 +143,7 @@ class dq_dt2():
                 #plot stretch, squish.
                 #
                 Pstretch=splat(Stretch,tcenter,ax1,'Stretch',bins)
-                Psquish=splat(-B2*divv,tcenter,ax2,'Squish',bins)
+                Psquish=splat(-B2/2*divv,tcenter,ax2,'Squish',bins)
 
                 RedChan = np.log10(db_h.transpose())
                 GreenChan = np.log10(Psquish[2].transpose())
@@ -228,7 +228,7 @@ class dq_dt2():
                 # d log B / d ln rho
                 #
                 THIS_AX=ax7
-                smooth_log_b=ndimage.gaussian_filter1d(np.log(B2), 2, 0)
+                smooth_log_b=ndimage.gaussian_filter1d(np.log(B2), 2, 0)/2
                 dlogb_dt = (smooth_log_b[2:,:]-smooth_log_b[:-2,:])/dt2
                 smooth_rho=ndimage.gaussian_filter1d(np.log(rho), 2, 0)
                 drho_dt = (smooth_rho[2:,:]-smooth_rho[:-2,:])/dt2
@@ -327,8 +327,8 @@ class dq_dt2():
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
             if 1:
                 THIS_AX = ax13
-                rho_0=rho[0,:]#.mean()
-                b_0=BP[0,:]#.mean()
+                rho_0=rho[0,:].mean()
+                b_0=BP[0,:].mean()
                 #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
                 RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
                 print("ONE MINUS RB MEAN",1-RB_Mean)
@@ -337,6 +337,38 @@ class dq_dt2():
                 THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
 
+            if 1:
+                #B rho phase
+                THIS_AX=ax14
+                ext=extents()
+                rho_0=rho[0,:].mean()
+                b_0=B2[0,:].mean()
+
+                x = (rho/rho_0).flatten()
+                y = (B2/b_0).flatten()
+                ext(x);ext(y)
+                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                THIS_AX.set(xscale='log',yscale='log',xlabel='rho',ylabel='B')
+                THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+            if 1:
+                #B rho phase
+                THIS_AX=ax15
+                ext=extents()
+                rho_0=rho[0,:].mean()
+                b_0=B2[0,:].mean()
+
+                x = ((rho/rho_0)**np.abs(1-RB_Mean)).flatten()
+                y = (B2/b_0).flatten()
+                ext(x);ext(y)
+                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                THIS_AX.set(xscale='log',yscale='log',xlabel='rho',ylabel='B')
+                THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+
+            if 0:
+                THIS_AX=ax16
+                THIS_AX.plot( times, rho)
 
 
 
@@ -431,7 +463,9 @@ for sim in sim_list:
     core_list=None
     #core_list=[7]
     core_list=[74, 112]
+    #core_list=[74]
     #core_list=[112]
+    #core_list=TL.loops[sim].core_by_mode['Alone']
     P=ddd.run(core_list=core_list)
 
 
