@@ -82,11 +82,11 @@ class brho():
                 self.alpha_FTA[core_id].append(popt[0])
 
                 if plot:
-
                     ax.scatter(10**DDD , 10**BBB, c=[rm(nframe)]*density.shape[0])
                     #ax.scatter(DDD , BBB, c=[rm(nframe)]*density.shape[0])
                     #ax.plot(DDD, DDD*pfit[1]+pfit[0])
                     ax.plot( 10**DDD, 10**b_from_rho(DDD,*popt),c='k')
+
             if np.isnan(self.alpha_FTA[core_id]).any():
                 pdb.set_trace()
             self.a_array[nc,:-1]=self.alpha_FTA[core_id]
@@ -102,15 +102,18 @@ if 0:
     core_list=[76]
     thing.run(core_list=core_list)
 
-if 'brthings' not in dir():
+if 'brthings' not in dir() or True:
     import three_loopers_u500 as TL5
     simlist = ['u501','u502','u503']
+    simlist = ['u502']
     brthings={}
     for sim in simlist:
+        core_list= TL5.loops[sim].core_by_mode['Alone']
+
         brthings[sim]= brho(TL5.loops[sim])
         #brthings[sim].run(core_list=[32],plot=True)
         #brthings[sim].run(plot=True)
-        brthings[sim].run(plot=False)
+        brthings[sim].run(plot=True, core_list=core_list)
 
 if 1:
     nf=0
@@ -166,7 +169,7 @@ if 0:
     brthing = brho(TL6.loops['u603'])
     brthing.run()
 
-if 0:
+if 1:
     #make ATF
     for sim_name in brthings:
         brthing = brthings[sim_name]
