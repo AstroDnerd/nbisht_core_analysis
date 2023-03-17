@@ -32,6 +32,7 @@ if python_version == 3:
 import numpy as np
 import math
 nar = np.array
+import scipy
 from scipy.stats import kurtosis
 from scipy.stats import skew
 from collections import defaultdict
