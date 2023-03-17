@@ -58,6 +58,9 @@ for isim,this_simname in enumerate(sim_list):
     NAMES.append('3 proj')
     RE.append(r"/*3proj/u50%d/u50%d_c(\d{4}).mp4"%(nsim,nsim))
 
+    NAMES.append('gr/gtotal')
+    RE.append(r"/*gr_by_g/u50%d/anatomy_g_u50%d_c(\d{4}).png"%(nsim,nsim))
+
 
     #anatomy.
     NAMES.append("Anatomy")
