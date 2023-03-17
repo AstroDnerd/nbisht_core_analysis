@@ -85,6 +85,21 @@ def add_gdotgradrho(obj):
         return data.ds.arr(output,'g/(cm**3*s**2)')
     obj.add_field(YT_gdotgradrho,gdotgradrho,units='g/(cm**3*s**2)', validators=[yt.ValidateSpatial(1,YT_density)], sampling_type='cell')
 
+def add_grav_test(obj):
+    def also_rho(field,data):
+        #gx =data.ds.arr(data[YT_acceleration_x],'code_length/code_time**2')
+        #gy =data.ds.arr(data[YT_acceleration_y],'code_length/code_time**2')
+        #gz =data.ds.arr(data[YT_acceleration_z],'code_length/code_time**2')
+        dgxdx = xo.grad(data,YT_acceleration_x,0)
+        dgydy = xo.grad(data,YT_acceleration_y,1)
+        dgzdz = xo.grad(data,YT_acceleration_z,2)
+        four_pi_G = data.ds['GravitationalConstant']
+        rho = -(dgxdx+dgydy+dgzdz)/(four_pi_G)
+        rho = data.ds.arr(rho,'code_density')
+        return rho
+    obj.add_field(YT_also_rho,also_rho, units='code_density', sampling_type='cell', 
+                  validators=[yt.ValidateSpatial(1,[YT_acceleration_x,YT_acceleration_y,YT_acceleration_z])])
+
 def add_energies(obj):
     if obj.parameters['SelfGravity']:
         def grav_energy2(field,data):
