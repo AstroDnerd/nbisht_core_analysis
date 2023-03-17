@@ -149,9 +149,14 @@ def energy_plots(this_looper, core_list=None, r_inflection=None, r_mass=None):
             #This should be perfect.
             rho = cg[YT_density]
             phi = cg[YT_potential_field]
-            import gravity
-            ggg = gravity.gravity_real(rho, ds.parameters['GravitationalConstant'])
+            ggg = gravity.gravity_complex(rho, ds.parameters['GravitationalConstant'])
+            gggR = gravity.gravity_real(rho, ds.parameters['GravitationalConstant'])
+            gggR.solve(); gggR.get_g()
+            #ggg = gravity.gravity_real(rho, ds.parameters['GravitationalConstant'])
             ggg.solve()
+            ggg.get_g()
+
+        if 0:
             ext=extents()
             ext(phi); ext(ggg.phi)
             fig,ax=plt.subplots(1,1)
@@ -160,28 +165,163 @@ def energy_plots(this_looper, core_list=None, r_inflection=None, r_mass=None):
             ax.plot( ext.minmax,ext.minmax)
             fig.savefig('plots_to_sort/potential_test_%s_c%04d_n%04d'%(sim_name,core_id,frame))
             plt.close(fig)
-            return -1
+
+            fig,axes=plt.subplots(1,2)
+            P1 = phi.v.sum(axis=0)
+            P2 = ggg.phi.sum(axis=0)
+            ext=extents();ext(P1);vmin,vmax=ext.minmax
+            cmap='viridis'
+            norm = mpl.colors.Normalize( vmin=vmin, vmax=vmax)
+
+            ploot=axes[0].pcolormesh( X_to_plot_f,Y_to_plot_f, P1, norm=norm, shading='nearest', cmap=cmap)
+            ploot=axes[1].pcolormesh( X_to_plot_f,Y_to_plot_f, P2.real, norm=norm, shading='nearest', cmap=cmap)
+            #pdb.set_trace()
+            axes[0].set(title='enzo')
+            axes[1].set(title='fft')
+            fig.savefig('plots_to_sort/potential_image')
 
         if 1:
-            ggg.get_g()
             #check spectral gravity vs density.
-            Np = -(ggg.dxgx+ggg.dygy+ggg.dzgz)/(4*np.pi*colors.G)
             ext=extents()
-            P1 = proj(rho)
-            P2 = proj(Np).real
-            ext(P1)
+            if 1:
+                fac=4*np.pi*colors.G
+                rho_R = -(gggR.dxgx+gggR.dygy+gggR.dzgz)/(fac)
+                rho_C = -(ggg.dxgx+ggg.dygy+ggg.dzgz)/(fac)
+                rho_A = rho.v
+                rho_Rx = -gggR.dxgx/fac
+                rho_Cx =  -ggg.dxgx/fac
+                rho_GxR = gggR.gy
+                rho_GxC = ggg.gy
+                Q1 = rho_GxC
+                Q2 = rho_GxR
+                #Q1 = rho_Rx
+                #Q2 = rho_Cx
+                #Q1 = gggR.khat[0]
+                #Q2 = ggg.khat[0]
+                P1 = proj(Q1.real)
+                P2 = proj(Q2.real)
+                P1 = Q1[32,:,:].real
+                P2 = Q2[32,:,:].real
+                ext(P1)
+                #pdb.set_trace()
+                #PA = proj(rho_A)
+                #ext(PA)
+                print('word')
+                figx,axx=plt.subplots(1,1)
+                print('wtf')
+                axx.scatter( P1.flatten(),P2.flatten())
+                figx.savefig('plots_to_sort/wtf')
+
+
+            if 0:
+                #what I want
+                Np = -(gggR.dxgx+gggR.dygy+gggR.dzgz)/(4*np.pi*colors.G)
+                #Np = -(ggg.dxgx+ggg.dygy+ggg.dzgz)/(4*np.pi*colors.G)
+                ext=extents()
+                Q1=rho.v
+                Q2=Np.real
+                P1 = proj(Q1)
+                P2 = proj(Q2)
+            if 0:
+                #kludge
+                NpR = -(gggR.dxgx+gggR.dygy+gggR.dzgz)/(4*np.pi*colors.G)
+                NpC = -(ggg.dxgx+ggg.dygy+ggg.dzgz)/(4*np.pi*colors.G)
+                #more kludge
+                NpR = np.abs(gggR.dxgx)
+                NpC = np.abs( ggg.dxgx)
+                ext=extents()
+                Q1=NpR
+                Q2=NpC
+                P1 = proj(Q1).real
+                P2 = proj(Q2).real
+            if 0:
+                #even more kludge
+                Np = -(gggR.dzgz)/(4*np.pi*colors.G)
+                ext=extents()
+                Q1=rho.v
+                Q2=Np
+                P1 = proj(Q1)
+                P2 = proj(Q2).real
+            #ext(P1)
             #ext(P2)
+            print('------------',(P1-P2)/np.abs(P1))
+            print('Density Error', np.abs(Q1-Q2).sum())
             vmin,vmax = ext.minmax
+
             cmap = 'viridis'
-            norm = mpl.colors.LogNorm( vmin=vmin, vmax=vmax)
+            #norm = mpl.colors.LogNorm( vmin=vmin, vmax=vmax)
+            norm = mpl.colors.Normalize( vmin=vmin, vmax=vmax)
             fig,axes=plt.subplots(1,2)
             ploot=axes[0].pcolormesh( X_to_plot_f,Y_to_plot_f, P1, norm=norm, shading='nearest', cmap=cmap)
             ploot=axes[1].pcolormesh( X_to_plot_f,Y_to_plot_f, P2, norm=norm, shading='nearest', cmap=cmap)
             axes[0].set(title='rho')
-            axes[1].set(title='div g')
+            axes[1].set(title='div g R')
             fig.savefig('plots_to_sort/density_divg')
+            plt.close(fig)
+
+            fig,ax=plt.subplots(1,1)
+            #kludge
+            pch.simple_phase( Q1.flatten(), Q2.flatten(), ax=ax)
+            ax.plot( ext.minmax,ext.minmax)
+            fig.savefig('plots_to_sort/density_divg_phase_%s_c%04d_n%04d'%(sim_name,core_id,frame))
+            plt.close(fig)
 
         if 1:
+            return ggg, gggR
+
+        if 1:
+            #Check accelerations.  Not perfect.
+            fig,ax=plt.subplots(1,1)
+
+            def do(arr):
+                return np.log10(np.abs(arr).flatten())
+            xxx,yyy=do(gggR.gx), do(ggg.gx)
+            ext=extents()
+            ext(xxx);ext(yyy)
+
+            pch.simple_phase(xxx,yyy ,ax=ax)
+            ax.plot(ext.minmax,ext.minmax)
+            fig.savefig('plots_to_sort/gx_test_%s_c%04d_n%04d'%(sim_name,core_id,frame))
+
+            fig2,ax2=plt.subplots(1,2)
+            cmap='viridis'
+            ext=extents()
+            #ext(gx)
+            Sx = 64
+            Sy = slice(None)
+            Sz = slice(None)
+            Q1 = ggg.dxgx.real
+            Q2 = gggR.dxgx.real
+            print(Q1[:2,:2,:2])
+            print(Q2[:2,:2,:2])
+            PPP_to_plot = Q1[Sx,Sy,Sz].transpose()
+            PPP2 = Q2[Sx,Sy,Sz].transpose()
+
+            ext(PPP_to_plot)
+            #ext(PPP2)
+            norm = mpl.colors.Normalize( vmin=ext.minmax[0],vmax=ext.minmax[1])
+
+            ax2[0].pcolormesh( X_to_plot_f, Y_to_plot_f, PPP_to_plot, norm=norm, shading='nearest', cmap=cmap)
+            ext=extents(PPP2)
+            norm = mpl.colors.Normalize( vmin=ext.minmax[0],vmax=ext.minmax[1])
+            #ext(PPP2)
+            #norm = mpl.colors.Normalize( vmin=ext.minmax[0],vmax=ext.minmax[1])
+            ax2[1].pcolormesh( X_to_plot_f, Y_to_plot_f, PPP2, norm=norm, shading='nearest', cmap=cmap)
+            #pdb.set_trace()
+
+
+            fig2.savefig('plots_to_sort/gx_image_%s_c%04d_n%04d'%(sim_name,core_id,frame))
+
+            fig3,ax3=plt.subplots(1,3,figsize=(12,8))
+            for DDD in [0,1,2]:
+                ax3[DDD].hist( [gx,gy,gz][DDD].flatten(), histtype='step')
+                ax3[DDD].hist( [ggg.gx,ggg.gy,ggg.gz][DDD].flatten().real, histtype='step')
+            fig3.savefig('plots_to_sort/g_hist_%s_c%04d_n%04d'%(sim_name,core_id,frame))
+
+            
+            return ggg
+            #pch.simple_phase( 
+        if 0:
             #ggg.get_g()
             #check spectral gravity vs density.
             Np = -(ggg.dxgx+ggg.dygy+ggg.dzgz)/(4*np.pi*colors.G)
@@ -202,6 +342,7 @@ def energy_plots(this_looper, core_list=None, r_inflection=None, r_mass=None):
             dgzdz_fft =ggg.dxgx[1:-1,1:-1,1:-1]
 
             grad_code = [dgxdx_code,dgydy_code,dgzdz_code]
+            #grad_fft = [dgxdx_fft,dgydy_fft,dgzdz_fft]
             grad_fft = [dgxdx_fft,dgydy_fft,dgzdz_fft]
 
             n=-1
@@ -233,56 +374,6 @@ def energy_plots(this_looper, core_list=None, r_inflection=None, r_mass=None):
             fig.savefig('plots_to_sort/g_code_fft_image')
             
 
-        if 0:
-            #Check accelerations.  Not perfect.
-            fig,ax=plt.subplots(1,1)
-
-            ggg.get_g()
-            def do(arr):
-                return np.log10(np.abs(arr).flatten())
-            xxx,yyy=do(gx), do(ggg.gx)
-            ext=extents()
-            ext(xxx);ext(yyy)
-
-            pch.simple_phase(xxx,yyy ,ax=ax)
-            ax.plot(ext.minmax,ext.minmax)
-            fig.savefig('plots_to_sort/gx_test_%s_c%04d_n%04d'%(sim_name,core_id,frame))
-
-            fig2,ax2=plt.subplots(1,2)
-            cmap='viridis'
-            ext=extents()
-            #ext(gx)
-            Sx = 64
-            Sy = slice(None)
-            Sz = slice(None)
-            Q1 = gy
-            Q2 = ggg.gy
-            print(Q1[:2,:2,:2])
-            print(Q2[:2,:2,:2])
-            PPP_to_plot = Q1[Sx,Sy,Sz].transpose()
-            PPP2 = Q2[Sx,Sy,Sz].transpose()
-
-            ext(PPP_to_plot)
-            #ext(PPP2)
-            norm = mpl.colors.Normalize( vmin=ext.minmax[0],vmax=ext.minmax[1])
-
-            ax2[0].pcolormesh( X_to_plot_f, Y_to_plot_f, PPP_to_plot, norm=norm, shading='nearest', cmap=cmap)
-            #ext(PPP2)
-            #norm = mpl.colors.Normalize( vmin=ext.minmax[0],vmax=ext.minmax[1])
-            ax2[1].pcolormesh( X_to_plot_f, Y_to_plot_f, PPP2, norm=norm, shading='nearest', cmap=cmap)
-            #pdb.set_trace()
-
-
-            fig2.savefig('plots_to_sort/gx_image_%s_c%04d_n%04d'%(sim_name,core_id,frame))
-
-            fig3,ax3=plt.subplots(1,3,figsize=(12,8))
-            for DDD in [0,1,2]:
-                ax3[DDD].hist( [gx,gy,gz][DDD].flatten(), histtype='step')
-                ax3[DDD].hist( [ggg.gx,ggg.gy,ggg.gz][DDD].flatten(), histtype='step')
-            fig3.savefig('plots_to_sort/g_hist_%s_c%04d_n%04d'%(sim_name,core_id,frame))
-
-            
-            #pch.simple_phase( 
 
 
     return cg
@@ -323,7 +414,7 @@ if 1:
 
         core_list=[74]
         
-        output=energy_plots(this_looper,core_list=core_list,
+        this=energy_plots(this_looper,core_list=core_list,
                           r_inflection=infl)
                           #r_mass=massedge)
 
