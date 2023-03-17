@@ -21,6 +21,45 @@ def splat(array, tcenter, ax, title,bins):
     ax.set_title(title)
     return ds_x,ds_y,ds_h,ds_dv,ds_p
 
+def plot_monster4(TTT):
+
+    core_id=TTT.core_id
+    which = np.where( nar(TTT.collector['cores_used'])==core_id)[0][0]
+    fig,ax=plt.subplots(1,2)
+    ax0=ax[0];ax1=ax[1]
+    ybins = np.geomspace(TTT.rho.min(),TTT.rho.max(),64)/TTT.collector['rho_0'][which]
+    Q = TTT.bmag**2/(TTT.collector['B_0'][which])
+    #ybins = np.geomspace((TTT.bmag**2).min(),(TTT.bmag**2).max(),64)/TTT.collector['B_0'][which]
+    xbins = np.geomspace(Q.min(),Q.max(),64)
+
+    y=TTT.rho.flatten()
+    x=Q.flatten()
+
+    pch.simple_phase( x, y, bins=[xbins,ybins],ax=ax0)
+    p0=TTT.collector['pfit0'][which]
+    p1=TTT.collector['pfit1'][which]
+    ax0.set(xscale='log',yscale='log')
+    ax0.plot(xbins,xbins, 'k')
+    ax0.plot( xbins, 10**(p0*np.log10(xbins)+p1), 'k--')
+
+
+    y=TTT.rho.flatten()**(1-TTT.collector['RB_mean'][which])
+    x=Q.flatten()
+
+    THISAX=ax1  
+    pch.simple_phase( x, y, bins=[xbins,ybins],ax=THISAX)
+    p0=TTT.collector['pfit0'][which]
+    p1=TTT.collector['pfit1'][which]
+    THISAX.set(xscale='log',yscale='log', xlabel='B',ylabel='rho',title='1-RB %0.1e'%(1-TTT.collector['RB_mean'][which]))
+    THISAX.plot(xbins,xbins, 'k')
+    THISAX.plot( xbins, 10**(p0*np.log10(xbins)+p1), 'k--')
+
+
+    fig.savefig('plots_to_sort/more_test_%s_c%04d'%(TTT.this_looper.sim_name,core_id))
+
+
+
+
 def plot_monster3(TTT):
     print('burp')
     core_id=TTT.core_id
@@ -41,6 +80,76 @@ def plot_monster3(TTT):
     ext = extents()
     ext( np.abs(T0));ext(np.abs(T1));ext(np.abs(T2))
     big_bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+    bins = np.linspace(-2,2,128)
+    if 1:
+        THIS_AX=ax0
+        x = R.flatten()
+        y = T0.flatten()
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
+        THIS_AX.set(title = 'T0 vs R')
+    if 1:
+        THIS_AX=ax1
+        x = R.flatten()
+        y = T1.flatten()
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
+        THIS_AX.set(title = 'T1 vs R')
+        #THIS_AX.set_xscale('symlog',linthresh=10)
+        #THIS_AX.set_yscale('symlog',linthresh=10)
+    if 1:
+        THIS_AX=ax2
+        x = R.flatten()
+        y = T2.flatten()
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
+        THIS_AX.set(title = 'T2 vs R')
+        #THIS_AX.set_xscale('symlog',linthresh=10)
+        #THIS_AX.set_yscale('symlog',linthresh=10)
+
+    TheMin=1e-2
+    TheMax=1e3
+    binsa = np.geomspace(TheMin,TheMax,16)
+    if 1:
+        THIS_AX=ax3
+        x = TTT.rho.flatten()
+        y = T0.flatten()
+        binsx = np.geomspace(x.min(),x.max(),128)
+        print(binsa)
+        print(T0[T0>0].min())
+        binsy = np.concatenate([-binsa[::-1],binsa])
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[binsx,binsy])
+        THIS_AX.set(title = 'T0 vs rho', xscale='log')
+        THIS_AX.set_yscale('symlog', linthresh=0.1)
+        MEAN_T0=(TTT.rho*T0*TTT.dv).sum()/(TTT.rho*TTT.dv).sum()
+        THIS_AX.axhline(MEAN_T0)
+        print(MEAN_T0)
+    if 1:
+        THIS_AX=ax4
+        x = TTT.rho.flatten()
+        y = T1.flatten()
+        binsx = np.geomspace(x.min(),x.max(),128)
+        print(binsa)
+        print(T0[T0>0].min())
+        binsy = np.concatenate([-binsa[::-1],binsa])
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[binsx,binsy])
+        THIS_AX.set(title = 'T0 vs rho', xscale='log')
+        THIS_AX.set_yscale('symlog', linthresh=0.1)
+        MEAN_T1=(TTT.rho*T1*TTT.dv).sum()/(TTT.rho*TTT.dv).sum()
+        THIS_AX.axhline(MEAN_T1)
+        print(MEAN_T1)
+    if 1:
+        THIS_AX=ax5
+        x = TTT.rho.flatten()
+        y = T2.flatten()
+        binsx = np.geomspace(x.min(),x.max(),128)
+        print(binsa)
+        print(T0[T0>0].min())
+        binsy = np.concatenate([-binsa[::-1],binsa])
+        pch.simple_phase(x,y,ax=THIS_AX,bins=[binsx,binsy])
+        THIS_AX.set(title = 'T0 vs rho', xscale='log')
+        THIS_AX.set_yscale('symlog', linthresh=0.1)
+        MEAN_T2=(TTT.rho*T2*TTT.dv).sum()/(TTT.rho*TTT.dv).sum()
+        THIS_AX.axhline(MEAN_T2)
+        print(MEAN_T2)
+
     if 0:
         THIS_AX=ax0
         srt=np.abs(T0.flatten())
@@ -56,31 +165,6 @@ def plot_monster3(TTT):
         pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
         THIS_AX.set_xscale('symlog')
         THIS_AX.set_yscale('symlog')
-    if 1:
-        THIS_AX=ax0
-        bins = np.linspace(-1,1,128)
-        x = R.flatten()
-        y = T0.flatten()
-        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
-        THIS_AX.set(title = 'T0 vs R')
-    if 1:
-        THIS_AX=ax1
-        bins = np.linspace(-1,1,128)
-        x = R.flatten()
-        y = T1.flatten()
-        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
-        THIS_AX.set(title = 'T1 vs R')
-        #THIS_AX.set_xscale('symlog',linthresh=10)
-        #THIS_AX.set_yscale('symlog',linthresh=10)
-    if 1:
-        THIS_AX=ax2
-        bins = np.linspace(-1,1,128)
-        x = R.flatten()
-        y = T2.flatten()
-        pch.simple_phase(x,y,ax=THIS_AX,bins=[bins,bins])
-        THIS_AX.set(title = 'T2 vs R')
-        #THIS_AX.set_xscale('symlog',linthresh=10)
-        #THIS_AX.set_yscale('symlog',linthresh=10)
     if 0:
         THIS_AX=ax4
         bins = np.linspace(-1,1,128)
@@ -448,6 +532,7 @@ def plot_monster1(TTT):
 class dq_dt2():
     def __init__(self,this_looper):
         self.this_looper=this_looper
+        self.collector=defaultdict(list)
     def run(self,core_list=None,frame_list=None):
         this_looper=self.this_looper
         thtr = this_looper.tr
@@ -480,8 +565,9 @@ class dq_dt2():
             print('go',core_id)
             ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
             ms.particle_pos(core_id)
+            self.collector['cores_used'].append(core_id)
 
-            if ms.nparticles < 1000:
+            if True: #ms.nparticles < 1000:
                 sl=slice(None)
                 c=[0.5]*4
             else:
@@ -489,6 +575,7 @@ class dq_dt2():
                 #c=[0,0,0,0.1]
                 c=[0.1]*4
             rho = ms.density[sl].transpose()
+            dv = ms.cell_volume[sl].transpose()[mask,:]
             rho = rho[mask,:]
             Bmag=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
             BP = Bmag**2/2
@@ -543,10 +630,14 @@ class dq_dt2():
             self.Bp1 = np.zeros_like(R)
             self.Bp2 = np.zeros_like(R)
 
+            self.rho = rho
+            self.dv = dv
+            self.bmag = Bmag
+            self.B2=B2
+
             self.B1dotV1 = np.zeros_like(R)
             self.B2dotV1 = np.zeros_like(R)
             self.dumb_test=np.zeros_like(R)
-            collector=[]
             bar = progressbar.ProgressBar(maxval=len(frames))
             bar.start()
 
@@ -577,9 +668,9 @@ class dq_dt2():
                     r_new_basis=np.dot(b_new,s_new)
                     #print(R[nf,ip]/r_new_basis)
                     Isrt = np.argsort(A)[::-1]
-                    self.A0[nf,ip]=A[Isrt[0]]
-                    self.A1[nf,ip]=A[Isrt[1]]
-                    self.A2[nf,ip]=A[Isrt[2]]
+                    self.A0[nf,ip]=A[Isrt[0]].real
+                    self.A1[nf,ip]=A[Isrt[1]].real
+                    self.A2[nf,ip]=A[Isrt[2]].real
                     self.Br0[nf,ip]=b_new[Isrt[0]]
                     self.Br1[nf,ip]=b_new[Isrt[1]]
                     self.Br2[nf,ip]=b_new[Isrt[2]]
@@ -597,17 +688,31 @@ class dq_dt2():
                     #print(R[nf,ip]/r_eig)
                     #self.arf.append(R[nf,ip]/r_eig)
                     #self.arf.append(r_eig)
-                    self.dumb_test[nf,ip]=r_eig
+                    self.dumb_test[nf,ip]=r_eig.real
 
 
 
                     E1 = E[:,0]
                     self.B1dotV1[nf,ip] = (E1*b_rot).sum()
                     self.B2dotV1[nf,ip] = (E1*b_rot_new).sum()
+
+            #rho_0 = (self.dv*self.rho)[0,:].sum()/self.dv[0,:].sum()
+            #B_0 = (self.dv*self.bmag)[0,:].sum()/self.dv[0,:].sum()
+            rho_0=rho[0,:].mean()
+            B_0=B2[0,:].mean()
+            pfit = np.polyfit( np.log10(self.B2/B_0).flatten(), np.log10(self.rho/rho_0).flatten(),1)
+            self.collector['pfit0'].append(pfit[0])
+            self.collector['pfit1'].append(pfit[1])
+            self.collector['rho_0'].append(rho_0)
+            self.collector['B_0'].append(B_0)
+            RB_Mean = (rho*R*dv).sum()/(rho*dv).sum()
+            self.collector['RB_mean'].append(RB_Mean)
+
             self.core_id=core_id
-            plot_monster1(self)
-            plot_monster2(self)
-            plot_monster3(self)
+            #plot_monster1(self)
+            #plot_monster2(self)
+            #plot_monster3(self)
+            plot_monster4(self)
 
 
 
@@ -624,6 +729,8 @@ if 'ddd' not in dir() or clobber:
         core_list=[74]#, 112]
         #core_list=[112]
         #core_list=[74, 112]
+        #core_list=[112]
+        core_list=[74]
         core_list=TL.loops[sim].core_by_mode['Alone']
         #core_list=core_list[8:9]
         P=ddd.run(core_list=core_list)
@@ -634,7 +741,8 @@ if not new_ddd:
         TTT = ddd
         if 1:
             if 1:
-                plot_monster1(TTT)
-                plot_monster2(TTT)
-                plot_monster3(TTT)
+                #plot_monster1(TTT)
+                #plot_monster2(TTT)
+                #plot_monster3(TTT)
+                plot_monster4(TTT)
 

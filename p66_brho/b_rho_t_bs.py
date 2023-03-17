@@ -188,7 +188,7 @@ class dq_dt2():
                 #R take 1
                 THE_AX=ax6
                 #shoot, why is this BP?  Should be B2.
-                RB=Stretch/(BP*divv)
+                RB=Stretch/(B2*divv)
                 print(RB.min(),RB.max())
                 if 0:
                     #dumb, use bins from above.
@@ -330,12 +330,17 @@ class dq_dt2():
                 rho_0=rho[0,:].mean()
                 b_0=BP[0,:].mean()
                 #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
+                print(rho.shape,"=============")
+                #RB_Mean = (rho*RB*dv)[-1,:].sum()/(rho*dv)[-1,:].sum()
                 RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
-                print("ONE MINUS RB MEAN",1-RB_Mean)
+                #RB_Mean = 0.25 #kludge.  
+                RB_Mean = (RB*dv).sum()/(dv).sum()
+                print("ONE MINUS RB MEAN",1-RB_Mean, "rho 0 %0.1e B0 %0.1e"%(rho_0, b_0))
 
                 THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_Mean)), c=[0.5]*4, linewidth=0.1)
                 THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
+
 
             if 1:
                 #B rho phase
@@ -344,12 +349,12 @@ class dq_dt2():
                 rho_0=rho[0,:].mean()
                 b_0=B2[0,:].mean()
 
-                x = (rho/rho_0).flatten()
-                y = (B2/b_0).flatten()
+                y = (rho/rho_0).flatten()
+                x = (B2/b_0).flatten()
                 ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
                 pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
-                THIS_AX.set(xscale='log',yscale='log',xlabel='rho',ylabel='B')
+                THIS_AX.set(xscale='log',yscale='log',xlabel='B',ylabel='rho')
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
             if 1:
                 #B rho phase
@@ -358,12 +363,34 @@ class dq_dt2():
                 rho_0=rho[0,:].mean()
                 b_0=B2[0,:].mean()
 
-                x = ((rho/rho_0)**np.abs(1-RB_Mean)).flatten()
-                y = (B2/b_0).flatten()
+                y = ((rho/rho_0)**np.abs(1-RB_Mean)).flatten()
+                x = (B2/b_0).flatten()
                 ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
                 pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
-                THIS_AX.set(xscale='log',yscale='log',xlabel='rho',ylabel='B')
+                THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='1-R %0.2e R0 %0.1e B0 %01e'%(1-RB_Mean, rho_0, b_0))
+                THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+
+            if 1:
+                #counter factual
+                THIS_AX = ax16
+                RB_check = 1-(dLogs*dv[1:-1,:]*rho[1:-1,:]).sum()/(rho*dv)[1:-1,:].sum()
+                THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_check)), c=[0.5]*4, linewidth=0.1)
+                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='B/B0,rho/rho_0 RB=1-dlog')
+            if 1:
+                #B rho phase
+                THIS_AX=ax17
+                ext=extents()
+                rho_0=rho[0,:].mean()
+                b_0=B2[0,:].mean()
+
+                y = ((rho/rho_0)**np.abs(1-RB_check)).flatten()
+                x = (B2/b_0).flatten()
+                ext(x);ext(y)
+                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='1-R %0.2e R0 %0.1e B0 %01e'%(1-RB_Mean, rho_0, b_0))
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
 
             if 0:
@@ -465,7 +492,8 @@ for sim in sim_list:
     core_list=[74, 112]
     #core_list=[74]
     #core_list=[112]
-    #core_list=TL.loops[sim].core_by_mode['Alone']
+    core_list=TL.loops[sim].core_by_mode['Alone']
+    #core_list=[214]
     P=ddd.run(core_list=core_list)
 
 
