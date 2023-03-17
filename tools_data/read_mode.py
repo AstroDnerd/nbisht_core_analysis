@@ -26,6 +26,13 @@ def read(sim_name):
             core_ids.append(core_id)
             modes_str.append( stuff[1])
         modes_tmp = [sss.split(',') for sss in modes_str]
+        #trim off whitespace. 
+        modes_tmp_2 = []
+        for core_modes in modes_tmp:
+            clean_modes = [mmm.strip() for mmm in core_modes]
+            modes_tmp_2.append(clean_modes)
+        modes_tmp = modes_tmp_2 
+
     modes=[]
     unique_modes=[]
 
