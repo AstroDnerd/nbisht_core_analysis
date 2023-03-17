@@ -53,12 +53,17 @@ class proj_and_profile():
                 xtra_energy.add_gdotgradrho(ds)
                 nf = np.where( this_looper.tr.frames == frame)[0][0]
 
-                center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
-                msR = ms.rc
+                #center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
+                center = nar([ms.mean_xm[nf], ms.mean_ym[nf],ms.mean_zm[nf]])
+                #center = nar([ms.mean_x[nf], ms.mean_y[nf],ms.mean_z[nf]])
+                #msR = ms.rc
+                msR = ms.rm
                 msR[ msR<1/2048]=1/2048
                 
                 MaxRadius=msR[:,nf].max()
-                Radius = max([8.0/128, MaxRadius])
+                Radius = max([1.0/128, MaxRadius])
+                print(Radius*128)
+                #Radius=1/128
                 rsph = ds.arr(Radius,'code_length')
                 sph = ds.sphere(center,rsph)
 

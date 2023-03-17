@@ -51,7 +51,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             #c=[0,0,0,0.1]
             c=[0.1]*4
 
-        rho = ms.density[sl].transpose()
+        rho = ms.density[sl].transpose()#*colors.density_units
         rho = rho[mask,:]
 
         dv = ms.cell_volume[sl].transpose()[mask,:]
@@ -145,15 +145,18 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax3 = outer_grid[2,0].subgridspec(1,nx,wspace=0).subplots()
 
         #density plot
-        ax.plot(times , rho, c=c, linewidth=0.1)
-        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
+        UN = colors.density_units
+        ax.plot(times , rho*UN, c=c, linewidth=0.1)
+        ylim=[10,5e9]
+        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho \rm{[cm^{-3}]}$',yscale='log',
+               ylim=ylim)
         ax2.set(xlabel=r'$t/t_{ff}$')
 
         if annotate_phases:
-            ax2.text( 0.0, 8, "collection")
-            ax2.text( 0.4, 8, "hardening")
-            ax2.text( 0.6, 8, "singularity")
-            ax2.text( 0.8, 8, "accretion+mosh")
+            ax2.text( 0.0, 9, "collection")
+            ax2.text( 0.4, 9, "hardening")
+            ax2.text( 0.6, 9, "singularity")
+            ax2.text( 0.8, 9, "mosh")
 
 
         #velocity plots
@@ -164,20 +167,21 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
         ax2.plot( times, times*0+1, c=[0.5]*4)
-        ax2.set( ylim=[0,10], ylabel=r'$velocity$')
+        ax2.set( ylim=[0,10], ylabel=r'$velocity/c_s$')
 
-        #density CDF
-        scale = [ms.density.min(),ms.density.max()]
-        bins=np.geomspace( scale[0],scale[1],64)
-        for nnn,frame in enumerate(frame_index):
-            nf = np.where( this_looper.tr.frames == frame)[0][0]
+        if 1:
+            #density CDF
+            scale = [colors.density_units*ms.density.min(),colors.density_units*ms.density.max()]
+            bins=np.geomspace( scale[0],scale[1],64)
+            for nnn,frame in enumerate(frame_index):
+                nf = np.where( this_looper.tr.frames == frame)[0][0]
 
-            ax.axvline( all_times[nf]/colors.tff, c=color_list[nnn], linewidth=line_list.get(frame,1))
-            rho_to_hist = ms.density[:,nf].flatten()
-            cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
-            #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
-            ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
-        axbonk(ax1,xlabel='Density', yscale='linear',xscale='log', xlim=scale, ylabel='Cumulative Density')
+                ax.axvline( all_times[nf]/colors.tff, c=color_list[nnn], linewidth=line_list.get(frame,1))
+                rho_to_hist = ms.density[:,nf].flatten()*colors.density_units
+                cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
+                #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
+                ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
+            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]$', yscale='linear',xscale='log', xlim=scale, ylabel='Cumulative Density')
 
         #
         # Binding Energy
@@ -185,7 +189,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         camera = camera_path.camera_1(this_looper, 'sphere')
         camera.run([core_id], frames, mini_scrubbers)
         y_ext = extents(nar([.5,2e5]))
-        r_ext = extents(nar([1./2048, 0.3]))
+        r_ext = extents(colors.length_units_au*nar([1./2048, 0.3]))
         if 1:
             nnn=-1
             for frame in frame_index:
@@ -196,8 +200,18 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 xtra_energy.add_energies(ds)
                 nf = np.where( this_looper.tr.frames == frame)[0][0]
                 #rsph = ds.arr(8.0/128,'code_length')
-                rsph = max([camera.max_radius[nf], 1/128])
-                center = nar([ms.mean_x[nf], ms.mean_y[nf],ms.mean_z[nf]])
+                if 0:
+                    rsph = max([camera.max_radius[nf], 1/128])
+                    center = nar([ms.mean_x[nf], ms.mean_y[nf],ms.mean_z[nf]])
+                if 1:
+                    ms=mini_scrubbers[core_id]
+                    msR = ms.rc
+                    msR[ msR<1/2048]=1/2048
+                    
+                    MaxRadius=msR[:,nf].max()
+                    Radius = max([8.0/128, MaxRadius])
+                    rsph = ds.arr(Radius,'code_length')
+                    center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
                 sp = ds.sphere(center,rsph)
 
 
@@ -216,6 +230,17 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 EK = 0.5*DD*(vx*vx+vy*vy+vz*vz)
                 print('1')
 
+                if 0:
+                    #gas density cdf
+                    rho_to_hist=DD.flatten()+0
+                    rho_to_hist.sort()
+                    cdf = np.arange( rho_to_hist.size)/rho_to_hist.size
+                    ax1.plot( rho_to_hist, cdf, color=color_list[nnn],
+                             linewidth=line_list.get(frame,1), linestyle='--')
+                    ax1.set(xlabel='rho',yscale='linear',xscale='log',
+                            ylabel='cuml')
+
+
                 if 1:
                     #RADIAL PLOTS
                     ORDER = np.argsort( RR)
@@ -231,16 +256,16 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     if nnn==0:
                         label_g=r'$E_G$'
                         label_k=r'$E_K$'
-                    ax3[nnn].plot(  RR_cuml, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line,
+                    ax3[nnn].plot(  RR_cuml*colors.length_units_au, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line,
                                   label=label_g)
-                    ax3[nnn].plot( RR_cuml, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line,
+                    ax3[nnn].plot( RR_cuml*colors.length_units_au, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line,
                                  label=label_k)
                     if nnn==0:
                         ax3[nnn].legend(loc=2)
                     y_ext(EG_cuml)
                     y_ext(EK_cuml)
-                    r_ext(RR_cuml)
-                    ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r$', ylabel='')
+                    r_ext(RR_cuml*colors.length_units_au)
+                    ax3[nnn].set( xscale='log',yscale='log',xlabel=r'$r\ [\rm{AU}]$', ylabel='')
                     print('2')
 
                 if 0:
@@ -301,8 +326,8 @@ for sim in sims:
     #core_list=[114]
 
     core_list=None
-    annotate_phases=False
+    #annotate_phases=False
+    annotate_phases=True
     core_list = [114]
-    #annotate_phases=True
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 

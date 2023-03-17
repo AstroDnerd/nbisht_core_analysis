@@ -1,0 +1,12 @@
+\begin{table}[h] \begin{center} \input{table2_caption} \label{table2}                                                                                       
+\begin{tabular}{ r l  }
+    \hline
+
+\hline
+{% for quan in quan_list %}
+{{quan_tex[quan]}} & {{R[quan]}}   \\
+{% endfor %}
+\hline
+\end{tabular}                                                                                       
+\end{center}                                                                                       
+\end{table}       

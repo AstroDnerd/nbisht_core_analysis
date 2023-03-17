@@ -45,8 +45,8 @@ class multi_profile():
             self.cores_used.append(core_id)
 
             frame_mask = np.zeros_like(thtr.times, dtype='bool')
-            frame_mask[0]=True
-            frame_mask[get_time_index(0.9*tsing.tsing_core[core_id])]=True
+            #frame_mask[0]=True
+            #frame_mask[get_time_index(0.9*tsing.tsing_core[core_id])]=True
             frame_mask[get_time_index(tsing.tsing_core[core_id])]=True
             frame_mask[get_time_index(tsing.tend_core[core_id])]=True
             frame_list=thtr.frames[frame_mask]
@@ -86,10 +86,10 @@ class multi_profile():
                 if 1:
                     vel = []
                     for axis in 'xyz':
-                        #vel.append( sp['velocity_%s'%axis][ORDER][:10].mean())
+                        vel.append( sph['velocity_%s'%axis][ORDER][:10].mean())
                         #vel.append( sp['velocity_%s'%axis][ORDER].mean())
                         #vel.append( (rho_sort*sp['velocity_%s'%axis][ORDER]*dv_sort)[:30].sum()/M_cuml)
-                        vel.append( (rho_sort*sph['velocity_%s'%axis][ORDER]*dv_sort)[:30].sum()/(rho_sort*dv_sort)[:30].sum())
+                        #vel.append( (rho_sort*sph['velocity_%s'%axis][ORDER]*dv_sort)[:30].sum()/(rho_sort*dv_sort)[:30].sum())
                         #vel.append(0)
                     scrub = other_scrubber.scrubber(sph, reference_velocity = vel)
                     #scrub0 = other_scrubber.scrubber(sp, reference_velocity = [0.0]*3)
@@ -132,6 +132,11 @@ class multi_profile():
                     cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
                     #axes[4][0].plot( rho_to_hist, cuml)
                     axes[4][nframe].hist( DD.v, weights=dv.v, histtype='step', bins=bins, density=True)
+                if 'hru' not in dir():
+                    hru=0
+            #ooo='plots_to_sort/incremental_c%04d'%core_id
+            #fig.savefig(ooo)
+            #print(ooo)
 
         for ax in axes[0]:
             ax.set(xscale='log',yscale='log',ylim=ext[0].minmax, ylabel=r'$<\rho>(<r)$', xlim=ext[-1].minmax)
@@ -175,7 +180,9 @@ if 'multi_proj' not in dir() or True :
         core_list=[74]
         core_list = TL.loops[sim].core_by_mode['Alone']
         #core_list=core_list[:3]
-        core_list=core_list[:10]
+        #core_list=core_list[:10]
+        core_list=[68]
+        #core_list
         #core_list=core_list[10:]
         #core_list=[114]
 

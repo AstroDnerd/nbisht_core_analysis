@@ -10,7 +10,7 @@ reload(hair_dryer)
 import three_loopers_u500 as TL
 import movie_frames 
 
-def simple_rho(this_looper,core_list=None, thicker=False):
+def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -55,22 +55,34 @@ def simple_rho(this_looper,core_list=None, thicker=False):
         sim_number=int(this_looper.sim_name[-1])
         ax.text(0,1e6,'sim%d core %d %s'%(sim_number, core_id, this_looper.mode_dict[core_id][-1]))
         ax.plot(times , rho, c=c, linewidth=0.1)
+        if tsing is not None:
+            ax.axvline( tsing.tsing_core[core_id], c=[0.5]*3,linewidth=1)
+            ax.axvline( tsing.tend_core[core_id], c=[0.5]*3,linewidth=1)
         axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
 
     for na,aa in enumerate(axes):
         if na < len(axes)-1:
             aa.set(xticks=[])
 
-    outname='plots_to_sort/%s_rho_t_several.png'%(this_looper.sim_name)
+    outname='plots_to_sort/%s_rho_t_several.pdf'%(this_looper.sim_name)
     print(outname)
     fig.savefig(outname, bbox_inches='tight')
 
 
+
+import tsing
+reload(tsing)
+if 'tsing_tool' not in dir():
+    tsing_tool={}
+    for ns,sim in enumerate(sim_list):
+        obj=tsing.te_tc(TL.loops[sim])
+        tsing_tool[sim]=obj
+        tsing_tool[sim].run()
 
 
 #sims=['u501', 'u502','u503']
 sims=['u502']
 for sim in sims:
     core_list = [193, 74, 112,113, 368]
-    simple_rho(TL.loops[sim],core_list=core_list, thicker=True)
+    simple_rho(TL.loops[sim],core_list=core_list, thicker=True,tsing=tsing_tool[sim])
 

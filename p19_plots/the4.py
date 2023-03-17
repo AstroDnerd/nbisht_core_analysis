@@ -69,7 +69,7 @@ for sim in sim_list:
                                           velocity=False,
                                           mean_velocity=False,
                                      core_list=core_list,
-                                     slab=False, zoom=8, only_sphere=True, 
+                                     slab=False, zoom=16, only_sphere=True, 
                                      annotate=True,  plot_particles=False,
                                      grids=False, float_positions=True, monotonic=False, 
                                           verbose=True, no_margin=True,

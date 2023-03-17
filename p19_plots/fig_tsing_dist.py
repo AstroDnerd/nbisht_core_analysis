@@ -25,7 +25,7 @@ for sim in sims:
     core_list=None
 if 1:
     objects={}
-    fig,axes=plt.subplots(3,3)
+    fig,axes=plt.subplots(3,2)
     fig.subplots_adjust(wspace=0,hspace=0)
     fsung_ext=extents()
     fsung_d={}
@@ -33,7 +33,7 @@ if 1:
         obj=tsing.te_tc(TL.loops[sim])
         objects[sim]=obj
         obj.run()
-        for nq,Q in enumerate(['One','Binary','Cluster']):
+        for nq,Q in enumerate(['Alone','Binary','Cluster']):
             color = 'rgb'[nq]
             cuml( axes[ns][0], obj.tsing[Q], color=color,label=Q)
             cuml( axes[ns][1], nar(obj.tend[Q])-nar(obj.tsing[Q]), color=color, label=Q)
@@ -53,20 +53,21 @@ if 1:
 
     for ns,sim in enumerate(sims):
         obj = objects[sim]
-        for nq,Q in enumerate(['One','Binary','Cluster']):
-            color = 'rgb'[nq]
-            mask = nar(obj.mode) == (nq+1)
-            bins = np.geomspace( fsung_ext.minmax[0]*(1+1*nq), 1, 16)
-            bins = np.linspace( -0.01*nq, 1, 16)
-            fsung = nar(obj.fsung)[mask]
-            cuml(axes[ns][2],fsung, color=color, label=None)
+        if 0:
+            for nq,Q in enumerate(['One','Binary','Cluster']):
+                color = 'rgb'[nq]
+                mask = nar(obj.mode) == (nq+1)
+                bins = np.geomspace( fsung_ext.minmax[0]*(1+1*nq), 1, 16)
+                bins = np.linspace( -0.01*nq, 1, 16)
+                fsung = nar(obj.fsung)[mask]
+                cuml(axes[ns][2],fsung, color=color, label=None)
 
-            #axes[ns][2].hist( fsung[fsung>0], bins=bins,histtype='step', color=color)
-        axes[ns][2].set(xscale='linear', yticks=[], xlabel=r'$f_{sing}$', xticks=[0.1,0.3,0.5, 0.7, 0.9])
+                #axes[ns][2].hist( fsung[fsung>0], bins=bins,histtype='step', color=color)
+            axes[ns][2].set(xscale='linear', yticks=[], xlabel=r'$f_{sing}$', xticks=[0.1,0.3,0.5, 0.7, 0.9])
         if ns<2:
             axes[ns][0].set(xticks=[])
             axes[ns][1].set(xticks=[])
-            axes[ns][2].set(xticks=[])
+            #axes[ns][2].set(xticks=[])
         if ns==0:
             axes[ns][0].legend(loc=2)
     fig.savefig('plots_to_sort/tsing.pdf')
