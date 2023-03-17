@@ -1,18 +1,21 @@
 from starter1 import *
 import davetools
-def simple_phase(field1,field2,log=False,ax=None,nBins=64):
+def simple_phase(field1,field2,log=False,ax=None,nbins=64, weights=None,bins=None ):
     ext1=davetools.extents()
     ext2=davetools.extents()
     ext1(field1)
     ext2(field2)
     if log:
-        bins1=np.geomspace(ext1.minmax[0],ext1.minmax[1],nBins)
-        bins2=np.geomspace(ext2.minmax[0],ext2.minmax[1],nBins)
+        bins1=np.geomspace(ext1.minmax[0],ext1.minmax[1],nbins)
+        bins2=np.geomspace(ext2.minmax[0],ext2.minmax[1],nbins)
     else:
-        bins1=np.linspace(ext1.minmax[0],ext1.minmax[1],nBins)
-        bins2=np.linspace(ext2.minmax[0],ext2.minmax[1],nBins)
-    hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins1,bins2])
-    output = helper( hist, xbins, ybins,ax=ax)
+        bins1=np.linspace(ext1.minmax[0],ext1.minmax[1],nbins)
+        bins2=np.linspace(ext2.minmax[0],ext2.minmax[1],nbins)
+    if bins is not None:
+        bins1=bins[0]
+        bins2=bins[1]
+    hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins1,bins2],weights=weights)
+    output=helper( hist, xbins, ybins,ax=ax)
     return output
 def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=False, **pcolormesh_args):
     #takes the output of np.histogram2d (or any other 2d histogram)
