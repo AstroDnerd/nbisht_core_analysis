@@ -443,6 +443,18 @@ class mini_scrubber():
         self.ry_relc=self.this_y-self.meany2c
         self.rz_relc=self.this_z-self.meanz2c
 
+        self.mean_xm = np.sum(self.this_x*self.density*self.cell_volume,axis=0)/self.mass_total
+        self.mean_ym = np.sum(self.this_y*self.density*self.cell_volume,axis=0)/self.mass_total
+        self.mean_zm = np.sum(self.this_z*self.density*self.cell_volume,axis=0)/self.mass_total
+        self.mean_xmt = np.tile(self.mean_xm,(self.raw_x.shape[0],1))
+        self.mean_ymt = np.tile(self.mean_ym,(self.raw_x.shape[0],1))
+        self.mean_zmt = np.tile(self.mean_zm,(self.raw_z.shape[0],1))
+        self.rx_relm=self.this_x-self.mean_xmt
+        self.ry_relm=self.this_y-self.mean_ymt
+        self.rz_relm=self.this_z-self.mean_zmt
+        self.r2m = self.rx_relm**2+self.ry_relm**2+self.rz_relm**2
+        self.rm = np.sqrt(self.r2m)
+
         self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
         self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
 
