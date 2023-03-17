@@ -79,8 +79,8 @@ class te_tc:
             self.tend_core[core_id]=this_tend
             if core_id in this_looper.core_by_mode['Alone']:
                 self.mode.append(1)
-                self.tsing['One'].append( this_tsing)
-                self.tend['One'].append( this_tend)
+                self.tsing['Alone'].append( this_tsing)
+                self.tend['Alone'].append( this_tend)
             elif core_id in this_looper.core_by_mode['Binary']: 
                 self.mode.append(2)
                 self.tsing['Binary'].append( this_tsing)
