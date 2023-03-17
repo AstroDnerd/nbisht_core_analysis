@@ -27,7 +27,12 @@ class scrubber():
         self.ry_rel=self.this_y
         self.rz_rel=self.this_z
 
+
         self.r = self.obj['radius']
+
+        self.rx_hat= self.rx_rel/self.r
+        self.ry_hat= self.ry_rel/self.r
+        self.rz_hat= self.rz_rel/self.r
 
         if do_magnetic:
             self.bx = self.obj[YT_magnetix_x]
@@ -65,9 +70,6 @@ class scrubber():
             self.rel_vz = self.raw_vz-self.mean_vz
             self.rel_vmag = (self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)**(0.5)
 
-            self.rx_hat= self.rx_rel/self.r
-            self.ry_hat= self.ry_rel/self.r
-            self.rz_hat= self.rz_rel/self.r
 
             self.norm_r = (self.rx_hat**2+self.ry_hat**2+self.rz_hat**2)**(0.5)
 
@@ -92,10 +94,21 @@ class scrubber():
             self.vt_rel=np.sqrt(self.vt2_rel)
 
     def compute_ge(self):
-        self.gx = self.obj[YT_grav_x]
-        self.gy = self.obj[YT_grav_y]
-        self.gz = self.obj[YT_grav_z]
+        #self.gx = self.obj[YT_grav_x]
+        #self.gy = self.obj[YT_grav_y]
+        #self.gz = self.obj[YT_grav_z]
+        self.gx = self.obj[YT_acceleration_x]
+        self.gy = self.obj[YT_acceleration_y]
+        self.gz = self.obj[YT_acceleration_z]
         self.ge = -1/(np.pi*8*colors.G)*(self.gx**2+self.gy**2+self.gz**2)
+    def compute_g_radial(self):
+        #self.gx = self.obj[YT_grav_x]
+        #self.gy = self.obj[YT_grav_y]
+        #self.gz = self.obj[YT_grav_z]
+        self.gx = self.obj[YT_acceleration_x]
+        self.gy = self.obj[YT_acceleration_y]
+        self.gz = self.obj[YT_acceleration_z]
+        self.gr = self.rx_rel*self.gx+self.ry_rel*self.gy+self.rz_rel*self.gz
     def compute_ke(self):
         self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
     def compute_ke_rel(self):
