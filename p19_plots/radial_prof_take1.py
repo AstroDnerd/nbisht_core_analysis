@@ -45,8 +45,8 @@ class multi_profile():
             self.cores_used.append(core_id)
 
             frame_mask = np.zeros_like(thtr.times, dtype='bool')
-            #frame_mask[0]=True
-            #frame_mask[get_time_index(0.9*tsing.tsing_core[core_id])]=True
+            frame_mask[0]=True
+            frame_mask[get_time_index(0.9*tsing.tsing_core[core_id])]=True
             frame_mask[get_time_index(tsing.tsing_core[core_id])]=True
             frame_mask[get_time_index(tsing.tend_core[core_id])]=True
             frame_list=thtr.frames[frame_mask]
@@ -180,8 +180,8 @@ if 'multi_proj' not in dir() or True :
         core_list=[74]
         core_list = TL.loops[sim].core_by_mode['Alone']
         #core_list=core_list[:3]
-        #core_list=core_list[:10]
-        core_list=[68]
+        core_list=core_list[:10]
+        #core_list=[68]
         #core_list
         #core_list=core_list[10:]
         #core_list=[114]
