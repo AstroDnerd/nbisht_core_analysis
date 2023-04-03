@@ -25,6 +25,7 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
     mini_scrubbers={}
     times = thtr.times
     times.shape = times.size,1
+    dont_axbonk=False
     for core_id in core_list:
         ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
         ms.particle_pos(core_id)
@@ -55,7 +56,6 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
             pmean = [ms.mean_x, ms.mean_y, ms.mean_z]
             nparticles = p[0][0,:].size
 
-            dont_axbonk=False
             if what_to_do == 'hair':
                 ax.scatter( p[x][0,:].flatten(),p[y][0,:].flatten(),c=[color_base]*nparticles,s=0.1)
                 ax.scatter( p[x][-1,:].flatten(),p[y][-1,:].flatten(),c='r',s=0.1)
@@ -96,8 +96,8 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
                 text_height=0.02
 
 
-        if not dont_axbonk:
-            axbonk(ax,xlabel='xyz [code length]'[x], ylabel='xyz [code length]'[y], xlim=[xmin,xmax],ylim=[ymin,ymax])
+            if not dont_axbonk:
+                axbonk(ax,xlabel='xyz [code length]'[x], ylabel='xyz [code length]'[y], xlim=[xmin,xmax],ylim=[ymin,ymax])
 
         outname='plots_to_sort/%s_buddies_%s_%s.pdf'%(this_looper.sim_name,'xyz'[LOS],suffix)
         if external_ax is None:
@@ -131,18 +131,23 @@ S5 = [128, 146, 127, 144, 142, 126, 104, 103]
 S6 = [93,94,95,96,97,98,99]
 
 sims=['u502']
+import find_other_cores
 for sim in sims:
-        subsets = [[193], [74], [112,113], [369]]
+        subsets = [[214], [74], [112,113], [369]]
+        dothis = [0,0,1,2]
+        #subsets = [[369]]
+        #dothis = [2]
         fig,axes=plt.subplots(2,2)
+        this_looper=TL.loops[sim]
 
         for ns, core_list in enumerate(subsets):
             ax=axes.flatten()[ns]
             these_cores=core_list
             what_to_plot='hair'
-            if ns in [0,1]:
+            if dothis[ns] in [0]:
                 color_dict={core_list[0]:[0.5]*4}
                 suffix='c%04d'%core_list[0]
-            elif ns in [2]:
+            elif dothis[ns] in [1]:
                 b = [0, 90/256, 181/256, 0.5]
                 r = [220/256, 50/256, 32/256, 0.5]
 
@@ -150,9 +155,14 @@ for sim in sims:
                 suffix='c%04d_c%04d'%tuple(core_list)
             else:
                 what_to_plot='centroid'
-                these_cores=TL.loops[sim].core_by_mode['S2']
+                #these_cores=TL.loops[sim].core_by_mode['S2']
+                #thtr=this_looper.tr
+                #ms = trackage.mini_scrubber(thtr,369, do_velocity=False)
+                #these_cores, shift = find_other_cores.get_other_cores( this_looper, [369], {369:ms})
+                these_cores=[367,368,369,370,371]
                 color_dict = colors.make_core_cmap(these_cores, cmap = 'autumn', seed = -1)
-                suffix='S2'
+                #print(these_cores)
+                #suffix='S2'
             buddy_hair(TL.loops[sim], core_list=these_cores,suffix=suffix,color_dict=color_dict, external_ax=ax, what_to_do=what_to_plot)
         fig.savefig('plots_to_sort/F1_hair.pdf', bbox_inches='tight')
 

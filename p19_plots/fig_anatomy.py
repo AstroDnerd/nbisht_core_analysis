@@ -43,7 +43,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ms.compute_ke_rel(core_id)
         mini_scrubbers[core_id]=ms
 
-        if ms.nparticles < 1000:
+        if ms.nparticles < 1000 or True:
             sl=slice(None)
             c=[0.5]*4
         else:
@@ -329,5 +329,7 @@ for sim in sims:
     #annotate_phases=False
     annotate_phases=True
     core_list = [114]
+    core_list=[74]
+    core_list = TL.loops[sim].core_by_mode['Alone']
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 

@@ -21,7 +21,7 @@ class te_tc:
 
 
         
-    def run(self,core_list=None, suffix=''):
+    def run(self,core_list=None, suffix='',make_plots=False):
         this_looper=self.this_looper
         print('Do',this_looper.sim_name)
 
@@ -34,13 +34,7 @@ class te_tc:
         frames=thtr.frames[mask]+0
         times.shape=times.size,1
         times=times/colors.tff
-        rho_all = thtr.track_dict['density']
-        rho_min=rho_all.min()
-        rho_max=rho_all.max()
-        fig,axes=plt.subplots(3,1)
-        fig.subplots_adjust(hspace=0)
         self.core_list=core_list
-        ax=axes[0]; ax1=axes[1]; ax2=axes[2]
         for core_id in core_list:
 
                 
@@ -52,10 +46,14 @@ class te_tc:
             c='k'
 
             #rho = ms.density[sl].transpose()
-            rho = thtr.c([core_id], 'density').transpose()[mask,:]
+            rho = thtr.c([core_id], 'density').transpose()[mask,:]+0
+            rho_sorted=rho+0
+            rho_sorted.sort(axis=1)
+            rho_max = rho_sorted[:,-5]
             #rho = rho[mask,:]
+            #rho_max=rho.max(axis=1)
 
-            UB = gaussian_filter(rho.max(axis=1),1)
+            UB = gaussian_filter(rho_max,1)
             tf = times.flatten()
             dt = tf[1:]-tf[:-1]
             dU = UB[1:]-UB[:-1]
@@ -94,3 +92,18 @@ class te_tc:
                 print("You broke something.")
                 raise
             self.fsung.append( (rho[collapse_done,:] > 5e3).sum()/rho[collapse_done,:].size)
+
+
+            if make_plots:
+                print('save',core_id)
+
+                plt.close('all')
+                fig,ax=plt.subplots(2,1)
+                ax0=ax[0];ax1=ax[1]
+                ax[0].plot( times, rho, color=[0.5]*4, linewidth=0.1)
+                ax[0].set(yscale='log',xlabel='t/tff',ylabel='rho')
+                ax[0].axvline(self.tsing_core[core_id])
+                ax[0].axvline(self.tend_core[core_id])
+                ax[0].plot(times,rho_max,c='r')
+                #ax[1].plot(
+                fig.savefig('plots_to_sort/tsing_%s_c%04d'%(this_looper.sim_name,core_id))

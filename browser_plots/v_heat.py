@@ -14,17 +14,16 @@ def simple_v(this_looper,core_list=None, symlog=False):
     mask = movie_frames.quantized_mask(this_looper).flatten()
     times=thtr.times[mask]+0 #the zero makes a copy
     times=times/colors.tff
-    vr_extents=extents()
-    fig,ax=plt.subplots(2,2,figsize=(12,12))
+    fig,ax=plt.subplots(2,3,figsize=(12,12))
     fig.subplots_adjust(wspace=0, hspace=0)
     ax[0][0].xaxis.tick_top()
-    ax[0][1].xaxis.tick_top()
-    ax[0][1].xaxis.set_label_position('top')
+    ax[0][2].xaxis.tick_top()
+    ax[0][2].xaxis.set_label_position('top')
     ax[0][0].xaxis.set_label_position('top')
-    ax[1][1].yaxis.tick_right()
-    ax[0][1].yaxis.tick_right()
-    ax[1][1].yaxis.set_label_position('right')
-    ax[0][1].yaxis.set_label_position('right')
+    ax[1][2].yaxis.tick_right()
+    ax[0][2].yaxis.tick_right()
+    ax[1][2].yaxis.set_label_position('right')
+    ax[0][2].yaxis.set_label_position('right')
     for core_id in core_list:
         axlist=ax.flatten()
         for aaa in axlist:
@@ -34,9 +33,10 @@ def simple_v(this_looper,core_list=None, symlog=False):
         vx = ms.raw_vx[:,mask]
         vy = ms.raw_vx[:,mask]
         vz = ms.raw_vx[:,mask]
-        vr = ms.rel_vmag[:,mask]
-        vr_extents(vr)
-        vvv = [vx,vy,vz,vr]
+        v3 = ms.rel_vmag[:,mask]
+        vr = ms.vr_rel[:,mask]
+        vt = ms.vt2_rel[:,mask]**0.5
+        vvv = [vx,vy,vz,v3,vr,vt]
         Nlin = 32
         Nlog = 32
         if symlog:
@@ -50,7 +50,7 @@ def simple_v(this_looper,core_list=None, symlog=False):
         #fig2.savefig('/home/dccollins/PigPen/bins.png')
 
         for nv,v in enumerate(vvv):
-            label = [r'$v_x$',r'$v_y$',r'$v_z$',r'$v_r$'][nv]
+            label = [r'$v_x$',r'$v_y$',r'$v_z$',r'$v_{3d}$',r'$v_r$',r'$v_t$'][nv]
 
 
 
@@ -58,7 +58,8 @@ def simple_v(this_looper,core_list=None, symlog=False):
             axlist[nv].plot(times, times*0, c='k')
             axlist[nv].plot(times, times*0+1, c='k')
             axlist[nv].plot(times, times*0-1, c='k')
-            axbonk(axlist[nv],xlabel=r'$t/t_{ff}$', ylabel=label)
+            axlist[nv].text(0,5,label)
+            axbonk(axlist[nv],xlabel=r'$t/t_{ff}$')#, ylabel=label)
             if symlog:
                 axlist[nv].set_yscale('symlog',linthresh=1)
 
@@ -71,10 +72,10 @@ def simple_v(this_looper,core_list=None, symlog=False):
         outname='plots_to_sort/%s_v_t_heat_c%04d%s.png'%(this_looper.sim_name,core_id,logornot)
         fig.savefig(outname)
         print(outname)
-    print("VR extents",vr_extents.minmax)
 
 sims=['u501', 'u502','u503']
+sims=['u502']
 for sim in sims:
-    simple_v(TL.loops[sim],symlog=False)#, core_list=[149,323])
+    simple_v(TL.loops[sim],symlog=False, core_list=[114,74])
     #break
 

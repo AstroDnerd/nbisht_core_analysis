@@ -26,7 +26,7 @@ def vel_color(this_looper,core_list=None, do_plots=True, r_inflection=None, fram
 
     rm = rainbow_map(len(frame_list))
     for core_id in core_list:
-        ms = trackage.mini_scrubber(this_looper.tr,core_id)
+        ms = trackage.mini_scrubber(this_looper.tr,core_id,do_velocity=True)
         
         r_bins = np.geomspace( 2e-4, 32/128, 32)
         r_cen = 0.5*(r_bins[1:]+r_bins[:-1])
@@ -56,21 +56,30 @@ def vel_color(this_looper,core_list=None, do_plots=True, r_inflection=None, fram
             reload(other_scrubber)
 
 
-            R1 = sp['radius']
-            order = np.argsort(R1)
-            vel = []
-            for axis in 'xyz':
-                vel.append( sp['velocity_%s'%axis][order][:10].mean())
-            scrub = other_scrubber.scrubber(sp, reference_velocity = vel)
+            if 0:
+                R1 = sp['radius']
+                order = np.argsort(R1)
+                vel = []
+                for axis in 'xyz':
+                    vel.append( sp['velocity_%s'%axis][order][:10].mean())
+                scrub = other_scrubber.scrubber(sp, reference_velocity = vel)
 
-            #Get data arrays
+                #Get data arrays
 
-            dv = scrub.cell_volume
-            RR = scrub.r
-            DD = scrub.density
-            #dv = np.abs(sp[YT_cell_volume])
-            #RR =sp[YT_radius]
-            #DD = sp[YT_density]
+                dv = scrub.cell_volume
+                RR = scrub.r
+                DD = scrub.density
+                #dv = np.abs(sp[YT_cell_volume])
+                #RR =sp[YT_radius]
+                #DD = sp[YT_density]
+                vr = scrub.vr_rel
+                vt = scrub.vt_rel
+            else:
+                dv = ms.cell_volume[:,nf]
+                RR = ms.r[:,nf]
+                DD = ms.density[:,nf]
+                vr = ms.vr_rel[:,nf]
+                vt = ms.vt2_rel[:,nf]**0.5
 
             ORDER = np.argsort( RR)
             RR_cuml = RR[ORDER]
@@ -80,9 +89,7 @@ def vel_color(this_looper,core_list=None, do_plots=True, r_inflection=None, fram
             V_local = dv[ORDER]
 
             #vr_cuml = np.cumsum( scrub.vr_rel[ORDER]*dv[ORDER])
-            vr = scrub.vr_rel
             vr_cumsum = np.cumsum( vr[ORDER]*dv[ORDER])/np.cumsum(dv[ORDER])
-            vt = scrub.vt_rel
             vt_cumsum = np.cumsum( vt[ORDER]*dv[ORDER])/np.cumsum(dv[ORDER])
 
 
@@ -94,6 +101,8 @@ def vel_color(this_looper,core_list=None, do_plots=True, r_inflection=None, fram
             ok = ~np.isnan(vr_mean)
             RV[ok,nframe]=vr_mean[ok]
             RV[~ok,nframe]=np.nan
+            RVt[ok,nframe]=vt_mean[ok]
+            RVt[~ok,nframe]=np.nan
             r_bins_c = 0.5*(r_bins[1:]+r_bins[:-1])
             #ax6.plot(r_bins_c, vr_mean, c = frame_rmap(nframe))
             linewidth=0.3
@@ -145,7 +154,6 @@ def vel_color(this_looper,core_list=None, do_plots=True, r_inflection=None, fram
         maxmax = np.abs(RV[ok]).max()
         maxmax=max([maxmax, RVt[ok].max()])
         norm = mpl.colors.Normalize( -maxmax,maxmax)
-        #pdb.set_trace()
         cmap=copy.copy(mpl.cm.get_cmap("seismic"))
         cmap.set_bad([0.9]*3)
 
@@ -201,7 +209,8 @@ if 'RV' not in dir() or True:
         core_list=[323]
         core_list=[25]
         core_list=[74]
-        core_list = TL.loops[sim].core_by_mode['Alone']
+        core_list=[114]
+        #core_list = TL.loops[sim].core_by_mode['Alone']
         #core_list=core_list[2:3]
 
         #core_list = [114]

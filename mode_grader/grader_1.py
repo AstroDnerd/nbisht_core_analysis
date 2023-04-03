@@ -110,7 +110,7 @@ if 1:
         A_cores = copy.copy(new_mode[sim]['Alone'])
         #B_cores = copy.copy(new_mode[sim]['Binary'])
         C_cores = set(new_mode[sim]['Cluster'])
-        fptr=open('browser_data/CoreMode_%s.tsv'%sim, 'w')
+        #fptr=open('browser_data/CoreMode_%s.tsv'%sim, 'w')
         groups={}
         group_id=0
         new_modes = []

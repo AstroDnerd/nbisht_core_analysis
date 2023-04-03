@@ -72,7 +72,8 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
 
 import tsing
 reload(tsing)
-if 'tsing_tool' not in dir():
+sim_list = ['u501','u502','u503']
+if 'tsing_tool' not in dir() or True:
     tsing_tool={}
     for ns,sim in enumerate(sim_list):
         obj=tsing.te_tc(TL.loops[sim])
@@ -83,6 +84,6 @@ if 'tsing_tool' not in dir():
 #sims=['u501', 'u502','u503']
 sims=['u502']
 for sim in sims:
-    core_list = [193, 74, 112,113, 368]
+    core_list = [214, 74, 112,113, 368]
     simple_rho(TL.loops[sim],core_list=core_list, thicker=True,tsing=tsing_tool[sim])
 

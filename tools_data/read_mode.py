@@ -4,9 +4,9 @@ from collections import defaultdict
 
 def read(sim_name):
 
-    if 0:
+    if 1:
         sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-        fname = "browser_data/core_formation_mode_u50%d.h5"%sim_id
+        fname = "browser_data/core_formation_mode_new_u60%d.h5"%sim_id
         fptr=h5py.File(fname,'r')
         core_ids = fptr['core_ids'][()]
         modes_str = fptr['modes'][()].astype(str)

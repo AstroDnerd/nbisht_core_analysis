@@ -8,6 +8,113 @@ import pcolormesh_helper as pch
 import colors
 import movie_frames 
 G = colors.G
+def plotmancer(obj, tsing):
+        core_id=obj.core_id
+        #ax6.set(xlabel='R',xscale='log',ylabel='|V_r|',yscale='log')
+        #ax6.set_title('Slope at tend: %0.2f'%pfit[0])
+        #ax6.plot( r_bins[1:], 4*np.pi/3*r_bins[1:]**3,'k')
+        RV = obj.RV+0
+        RVt = obj.RVt+0
+        ok = ~np.isnan(RV)
+        ext = extents(RV[ok])
+        #okt = ~np.isnan(RVt)
+        #extt = extents(RVt[ok])
+        #for i in range(3):
+        #    ax6[i][0].set(ylim=ext.minmax)
+        #    ax6[i][1].set(ylim=extt.minmax)
+        #fig6.savefig('plots_to_sort/velocity_vs_radius_%s_c%04d.png'%(this_looper.sim_name, core_id))
+
+
+
+        #fig,axes=plt.subplots(1,3,figsize=(12,3))
+        fig,axes=plt.subplots(2,2,figsize=(12,12))
+        ax0=axes[0][1]; ax1=axes[0][0]
+        ax2=axes[1][0]; ax3=axes[1][1]
+        #ax0=axes[1];ax1=axes[0];ax2=axes[2]
+        #fig.subplots_adjust(wspace=0)
+        rcen = 0.5*(obj.r_bins[1:]+obj.r_bins[:-1])
+
+        #
+        # UNITS.  THERES BETTER PLACES FOR THIS.
+        #
+        #4.9 pc in AU
+        rcen *= colors.length_units_au
+        #5900 solar masses
+        RVt *= colors.mass_units_msun
+
+        XXX,YYY = np.meshgrid( obj.times.flatten(),rcen)
+        ax=axes
+        #norm = mpl.colors.LogNorm( RV[RV>0].min(), RV.mean())
+        ok = ~np.isnan(RV)
+        maxmax = np.abs(RV[ok]).max()
+        norm = mpl.colors.Normalize( -maxmax,maxmax)
+        #pdb.set_trace()
+        cmap=copy.copy(mpl.cm.get_cmap("seismic"))
+        cmap.set_bad([0.9]*3)
+
+        ok = ~np.isnan(RVt)
+        radius_to_cut_off = 1000
+        index = np.where( rcen < radius_to_cut_off)[0].max()
+        mass_at_the_end = RVt[index,-1]
+        fiducial=mass_at_the_end
+        Max=RVt[ok].max()
+        minner_chicken_dinner = fiducial**2/Max
+        norm_mass = mpl.colors.LogNorm(vmin=minner_chicken_dinner,vmax=Max)
+
+        plot=ax0.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap=cmap)
+        plot2=ax1.pcolormesh( XXX,YYY, RVt,  norm=norm_mass, shading='nearest', cmap=cmap)
+        fig.colorbar(plot, label=r'$\frac{\dot{M}}{M/ t_{ff}}$',ax=ax0)
+        fig.colorbar(plot2, label=r'$M(<r) [M_\odot]$',ax=ax1)
+        ax0.set(yscale='log', xlabel='t/tff')
+        ax1.set(yscale='log', xlabel='t/tff', ylabel='R [AU]')
+
+        thalf = 0.5*(obj.times[1:]+obj.times[:-1])
+        dt    =     (obj.times[1:]-obj.times[:-1])
+        #print(thalf.shape)
+        #print(obj.times.shape)
+        #print(RVt.shape)
+        dt.shape=1,dt.size
+        dMass = RVt[:,1:]-RVt[:,:-1]
+        Mcen  = 0.5*(RVt[:,1:]+RVt[:,:-1])
+        dMdt = dMass/dt/Mcen*colors.tff
+        ok = ~np.isnan(dMdt)
+        maxmax=np.abs(dMdt[ok]).max()
+        maxmax=1
+        norm2 = mpl.colors.Normalize(-maxmax,maxmax)
+        X2,Y2=np.meshgrid(thalf.flatten(),rcen)
+        plot3=ax3.pcolormesh(X2 ,Y2, dMdt,  norm=norm2, shading='nearest', cmap=cmap)
+        ax3.set(yscale='log',xlabel='t/tff')
+        fig.colorbar(plot3,label='Also Q', ax=ax3 )
+
+
+        newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
+                                             [(0,         '#0000ff'),
+                                              (norm(0.5), '#dddddd'),
+                                              (norm(2.0), '#00ffff'),
+                                              (1,         '#ff0000')], N=256)
+
+        norm_grav = mpl.colors.LogNorm( vmin=0.01,vmax=100)
+        ok = ~np.isnan(obj.RVg)
+        plot=ax2.pcolormesh( XXX,YYY, np.abs(obj.RVg),  norm=norm_grav, shading='nearest', cmap=cmap)
+        fig.colorbar(plot,label='EG/EK', ax=ax2 )
+        ax2.set(yscale='log',xlabel='t/tff')#,ylabel='R[AU]')
+        #pdb.set_trace()
+        
+        if 0:
+            rrrr = msR.transpose()
+            rrrr = rrrr[mask,:]
+
+            ax.plot(times , rrrr, c=[0.5]*3, linewidth=0.1, alpha=0.5)
+        if tsing:
+            for aaa in axes.flatten():
+                aaa.axvline(  tsing.tsing_core[core_id],c='k')
+                #ax1.axvline( tsing.tsing_core[core_id],c='k')
+                aaa.axvline(  tsing.tend_core[core_id],c='k')
+                #ax1.axvline( tsing.tend_core[core_id],c='k')
+
+
+        fig.tight_layout()
+        fig.savefig('plots_to_sort/mass_flux_color_%s_c%04d.pdf'%(obj.this_looper.sim_name, core_id))
 class Relaxor():
     def __init__(self,this_looper):
         self.this_looper=this_looper
@@ -149,96 +256,7 @@ class Relaxor():
                     ax6[ax_index][0].plot( r_cen[ok], vr_mean[ok], c=c, linewidth=linewidth)
                     ax6[ax_index][1].plot( r_cen[ok], vt_mean[ok], c=c, linewidth=linewidth)
                     #ax6[0].hist( RR_cuml.v, histtype='step', color=c)
-def plotmancer(obj, tsing):
-        core_id=obj.core_id
-        #ax6.set(xlabel='R',xscale='log',ylabel='|V_r|',yscale='log')
-        #ax6.set_title('Slope at tend: %0.2f'%pfit[0])
-        #ax6.plot( r_bins[1:], 4*np.pi/3*r_bins[1:]**3,'k')
-        RV = obj.RV+0
-        RVt = obj.RVt+0
-        ok = ~np.isnan(RV)
-        ext = extents(RV[ok])
-        #okt = ~np.isnan(RVt)
-        #extt = extents(RVt[ok])
-        #for i in range(3):
-        #    ax6[i][0].set(ylim=ext.minmax)
-        #    ax6[i][1].set(ylim=extt.minmax)
-        #fig6.savefig('plots_to_sort/velocity_vs_radius_%s_c%04d.png'%(this_looper.sim_name, core_id))
-
-
-
-        fig,axes=plt.subplots(1,3,figsize=(12,3))
-        #ax0=axes[0][0]; ax1=axes[0][1]
-        #ax2=axes[1][0]; ax3=axes[1][1]
-        ax0=axes[1];ax1=axes[0];ax2=axes[2]
-        #fig.subplots_adjust(wspace=0)
-        rcen = 0.5*(obj.r_bins[1:]+obj.r_bins[:-1])
-
-        #
-        # UNITS.  THERES BETTER PLACES FOR THIS.
-        #
-        #4.9 pc in AU
-        rcen *= colors.length_units_au
-        #5900 solar masses
-        RVt *= colors.mass_units_msun
-
-        XXX,YYY = np.meshgrid( obj.times.flatten(),rcen)
-        ax=axes
-        #norm = mpl.colors.LogNorm( RV[RV>0].min(), RV.mean())
-        ok = ~np.isnan(RV)
-        maxmax = np.abs(RV[ok]).max()
-        norm = mpl.colors.Normalize( -maxmax,maxmax)
-        #pdb.set_trace()
-        cmap=copy.copy(mpl.cm.get_cmap("seismic"))
-        cmap.set_bad([0.9]*3)
-
-        ok = ~np.isnan(RVt)
-        radius_to_cut_off = 1000
-        index = np.where( rcen < radius_to_cut_off)[0].max()
-        mass_at_the_end = RVt[index,-1]
-        fiducial=mass_at_the_end
-        Max=RVt[ok].max()
-        minner_chicken_dinner = fiducial**2/Max
-        norm_mass = mpl.colors.LogNorm(vmin=minner_chicken_dinner,vmax=Max)
-
-        plot=ax0.pcolormesh( XXX,YYY, RV,  norm=norm, shading='nearest', cmap=cmap)
-        plot2=ax1.pcolormesh( XXX,YYY, RVt,  norm=norm_mass, shading='nearest', cmap=cmap)
-        fig.colorbar(plot, label=r'$\frac{\dot{M}}{M/ t_{ff}}$',ax=ax0)
-        fig.colorbar(plot2, label=r'$M(<r) [M_\odot]$',ax=ax1)
-        ax0.set(yscale='log', xlabel='t/tff')
-        ax1.set(yscale='log', xlabel='t/tff', ylabel='R [AU]')
-
-
-
-        newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
-                                             [(0,         '#0000ff'),
-                                              (norm(0.5), '#dddddd'),
-                                              (norm(2.0), '#00ffff'),
-                                              (1,         '#ff0000')], N=256)
-
-        norm_grav = mpl.colors.LogNorm( vmin=0.01,vmax=100)
-        ok = ~np.isnan(obj.RVg)
-        print(obj.RVg[ok])
-        plot=ax2.pcolormesh( XXX,YYY, np.abs(obj.RVg),  norm=norm_grav, shading='nearest', cmap=cmap)
-        fig.colorbar(plot,label='EG/EK', ax=ax2 )
-        ax2.set(yscale='log',xlabel='t/tff')#,ylabel='R[AU]')
-        #pdb.set_trace()
-        
-        if 0:
-            rrrr = msR.transpose()
-            rrrr = rrrr[mask,:]
-
-            ax.plot(times , rrrr, c=[0.5]*3, linewidth=0.1, alpha=0.5)
-        if tsing:
-            for aaa in axes.flatten():
-                aaa.axvline(  tsing.tsing_core[core_id],c='k')
-                #ax1.axvline( tsing.tsing_core[core_id],c='k')
-                aaa.axvline(  tsing.tend_core[core_id],c='k')
-                #ax1.axvline( tsing.tend_core[core_id],c='k')
-
-
-        fig.tight_layout()
-        fig.savefig('plots_to_sort/mass_flux_color_%s_c%04d.pdf'%(obj.this_looper.sim_name, core_id))
+            plotmancer(self,tsing)
 
 
 
@@ -248,7 +266,7 @@ if 0:
     sim_list=['u602']
 import three_loopers_u500 as TL
 sim_list=['u501','u502','u503']
-sim_list=['u502']
+#sim_list=['u502']
 
 import tsing
 reload(tsing)
@@ -271,6 +289,7 @@ if 'thing' not in dir():
         core_list=[25]
         core_list=[74]
         core_list=[114]
+        core_list=[195]
         #core_list = TL.loops[sim].core_by_mode['Alone']
         #core_list=core_list[2:3]
 
@@ -279,8 +298,9 @@ if 'thing' not in dir():
         #core_list=[8]
         #core_list=[381]
         #core_list=[323]
+        core_list=None
 
         thing = Relaxor( TL.loops[sim])
         thing.run(core_list=core_list, do_plots=True, frame_list=None, tsing=tsing_tool[sim])#, r_inflection=anne.inflection[sim])
 
-plotmancer(thing, tsing_tool[sim])
+        plotmancer(thing, tsing_tool[sim])
