@@ -239,7 +239,7 @@ def replotter(obj,suffix=''):
         #extra plots for learning
         profs=['rho','vr_cumsum','vt_cumsum','energy','M/r']
         row_dict={'rho':0,'vr_cumsum':2,'vt_cumsum':3,'energy':4, 'M/r':1}
-    if 0:
+    if 1:
         #the paper version
         row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
         profs=['rho','vr_cumsum','vt_cumsum','energy']
@@ -247,7 +247,7 @@ def replotter(obj,suffix=''):
         #kludge for dev
         row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
         profs=['vr_cumsum','vt_cumsum']#,'vt_cumsum','energy'
-    if 1:
+    if 0:
         #kludge for dev
         row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
         profs=['energy']
@@ -293,7 +293,7 @@ def replotter(obj,suffix=''):
                 rcen = 0.5*(rbins[1:]+rbins[:-1])
                 digitized = np.digitize( AllR, rbins)
                 quan = nar([Q[digitized==i].mean() if (digitized==i).any() else np.nan for i in range(1,len(rbins))])
-                ok = ~np.isnan(quan)*(quan>0)
+                ok = ~np.isnan(quan)
                 y = quan[ok]
                 R = rcen[ok]
                 ext[-1](R)
@@ -303,6 +303,9 @@ def replotter(obj,suffix=''):
                 if profile=='energy':
                     #def fun(R,A,P):
                     #    return nar(A/(R/1e-3)**2)+P
+                    ok = y>0
+                    y = y[ok]
+                    R = R[ok]
                     y=1/y
                     if np.isnan(y).any() or np.isinf(y).any():
                         pdb.set_trace()
@@ -394,8 +397,8 @@ def replotter(obj,suffix=''):
 
 
 
-    print(fit_y_r_eng)
-    print(nar(fit_y_r_eng).mean())
+    #print(fit_y_r_eng)
+    #print(nar(fit_y_r_eng).mean())
     print('set')
     row = row_dict['rho']
     if 'rho' in profs:
@@ -525,21 +528,20 @@ if 1:
     if 'stuff' not in dir():
         stuff = {}
     sim_list=['u501','u502','u503']
-    sim_list=['u503']
-    mode_list=['Alone','Binary','Cluster'][::-1]
+    #sim_list=['u503']
+    mode_list=['Alone','Binary','Cluster']
     for sim in sim_list:
-        stuff[sim]={}
+        if sim not in stuff:
+            stuff[sim]={}
         for mode in mode_list:
-            if mode in stuff[sim]:
-                print("NOT CLOBBER.")
-                continue
-            core_list = TL.loops[sim].core_by_mode[mode]
-            #core_list=core_list[:2]
-            thismp=radial.multipro(TL.loops[sim])
-            timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
-            thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
-            replotter(mp,suffix=mode)
-            stuff[sim][mode]=thismp
+            if mode not in stuff[sim]:
+                core_list = TL.loops[sim].core_by_mode[mode]
+                core_list=core_list[:2]
+                thismp=radial.multipro(TL.loops[sim])
+                timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
+                thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
+                stuff[sim][mode]=thismp
+            replotter(stuff[sim][mode],suffix=mode)
 if 0:
     sim_list=['u503']
     if 'mp' not in dir():
