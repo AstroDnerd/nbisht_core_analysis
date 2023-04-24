@@ -110,6 +110,7 @@ class multipro():
                         RR = sph['radius']
                         DD = sph[YT_density]
                         EG = sph[YT_grav_energy_2]
+                        B2 = sph[YT_magnetic_field_strength]
 
                         ORDER = np.argsort( RR)
                         if 1:
@@ -134,11 +135,13 @@ class multipro():
                         vt = ms.vt2_rel[:,nf]**0.5
                         EG = ms.ge[:,nf]
                         EK = ms.ke_rel[:,nf]
+                        B2 = this.looper.tr.c([core_id],'magnetic_field_strength')
                         ORDER = np.argsort( RR)
 
                     rho_sort = DD[ORDER]
                     RR_sort = RR[ORDER]
                     dv_sort = dv[ORDER]
+                    b2_sort = B2[ORDER]
 
 
                     M_cuml = np.cumsum( DD[ORDER]*dv[ORDER])
@@ -156,8 +159,9 @@ class multipro():
                     mean_flux  =nar([ flux[ digitized == i].sum() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
                     mass_quant  =nar([ M_cuml[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
 
-                    #collector['rho']=colors.density_units* M_cuml/V_cuml
-                    collector['rho']= M_cuml/V_cuml
+                    #collector['rho']= M_cuml/V_cuml
+                    collector['b2']=b2_sort
+                    collector['rho']=colors.density_units* M_cuml/V_cuml
                     collector['V_cuml']=V_cuml
 
                     collector['R']=RR_sort
