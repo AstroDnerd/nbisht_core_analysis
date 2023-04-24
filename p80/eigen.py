@@ -123,7 +123,11 @@ class dq_dt2():
             self.Bp1 = np.zeros_like(R)
             self.Bp2 = np.zeros_like(R)
 
-            self.theta=np.zeros_like(R)
+            self.theta_r=np.zeros_like(R)
+            self.theta_b=np.zeros_like(R)
+            self.proper = np.zeros_like(R)
+            self.theta_w=np.zeros_like(R)
+            self.theta_dot=np.zeros_like(R)
 
             self.rho = rho
             self.dv = dv
@@ -136,19 +140,8 @@ class dq_dt2():
             bar = progressbar.ProgressBar(maxval=len(frames))
             bar.start()
 
-
-            angle_dot=[]
-            angle_guess=[]
-            theta_1=[]
-            theta_5=[]
-            theta_4=[]
-            junk=defaultdict(list)
             for nf,frame in enumerate(frames):
-                #print('frame',frame)
                 bar.update(nf)
-
-
-                #nf = np.where(frame == self.this_looper.tr.frames)[0][0]
 
                 for ip,ppp in enumerate(particles):
                     Dij = np.array([[dxvx[nf,ip], dxvy[nf,ip], dxvz[nf,ip]] ,
@@ -172,7 +165,7 @@ class dq_dt2():
                     b_new = E.transpose()@Bi
                     s_new = b_rot_new@Lambda
                     r_new_basis=np.dot(b_new,s_new)
-                    #print(R[nf,ip]/r_new_basis)
+
                     Isrt = np.argsort(A)[::-1]
                     self.A0[nf,ip]=A[Isrt[0]].real
                     self.A1[nf,ip]=A[Isrt[1]].real
@@ -185,9 +178,51 @@ class dq_dt2():
                     self.Bp1[nf,ip]=b_rot_new[Isrt[1]]
                     self.Bp2[nf,ip]=b_rot_new[Isrt[2]]
 
-                    self.theta[nf,ip]=(np.trace(U)-1)/2
-
                     if 1:
+                        au,eu=np.linalg.eig(U)
+                        primary_axis = np.argmax(np.abs(au.real)) #the one thats 1.
+                        Arot = eu[:,primary_axis]+0
+                        Arot /= (Arot*Arot).sum()**0.5
+                        if (np.sum(Arot.imag)) /(np.sum(Arot.real)) > 1e-7:
+                            print("imaginary eigen vector")
+                            pdb.set_trace()
+                        Arot = Arot.real
+
+                        V = Bi+0
+                        Vm = (V*V).sum()**0.5
+                        V1 = (Arot*V).sum()*Arot
+                        V2 = V-V1
+                        V2m = (V2*V2).sum()**0.5
+                        V1m = (V1*V1).sum()**0.5
+
+                        next_axis = (primary_axis+1)%3
+                        next_eig = au[next_axis]
+                        Theta4 = np.angle(next_eig)
+                        #Theta1 = np.arccos((np.trace(U)-1)/2)
+                        #Theta2 = 2*np.arcsin( V2m/Vm*np.sin(Theta4/2))
+                        if au[primary_axis]>0:
+                            Theta2 = 2*np.arcsin( V2m/Vm*np.sin(Theta4/2))
+                        else:
+                            thisthing= V2m*V2m*np.cos(Theta4)-V1m**2
+                            Theta2 = np.arccos(thisthing)
+
+                        #theta_1.append(Theta1)
+                        #theta_4.append(Theta4)
+
+                        VR = U@V
+                        VRm = (VR*VR).sum()**0.5
+                        Theta3 = np.arccos((V*VR).sum()/(VRm*Vm))
+
+                        self.theta_r[nf,ip] = Theta4
+                        self.theta_dot[nf,ip] = Theta3
+                        self.theta_w[nf,ip] = Theta2
+                        self.theta_b[nf,ip] = np.arcsin(V2m)
+                        self.proper[nf,ip] = au[primary_axis].real
+
+                        #angle_guess.append(Theta2)
+                        #angle_dot.append(Theta3)
+
+                    if 0:
                         VVV = Bi
                         if 0:
                             #hijack U
