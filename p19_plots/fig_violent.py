@@ -114,6 +114,7 @@ def plotmancer(obj, tsing):
 
 
         fig.tight_layout()
+        print('jerk')
         fig.savefig('plots_to_sort/mass_flux_color_%s_c%04d.pdf'%(obj.this_looper.sim_name, core_id))
 class Relaxor():
     def __init__(self,this_looper):
@@ -266,11 +267,11 @@ if 0:
     sim_list=['u602']
 import three_loopers_u500 as TL
 sim_list=['u501','u502','u503']
-#sim_list=['u502']
+sim_list=['u502']
 
 import tsing
 reload(tsing)
-if 'tsing_tool' not in dir() or True:
+if 'tsing_tool' not in dir():
     tsing_tool={}
     for ns,sim in enumerate(sim_list):
         obj=tsing.te_tc(TL.loops[sim])
@@ -282,25 +283,28 @@ if 'tsing_tool' not in dir() or True:
 ##anne.make_inflection()
 if 'thing' not in dir():
     for sim in sim_list:
-        all_cores=np.unique( TL.loops[sim].tr.core_ids)
-        core_list=list(all_cores)
-        core_list=None#[323]
-        core_list=[323]
-        core_list=[25]
-        core_list=[74]
-        core_list=[114]
-        core_list=[195]
-        #core_list = TL.loops[sim].core_by_mode['Alone']
-        #core_list=core_list[2:3]
-
-        #core_list = [114]
+        #all_cores=np.unique( TL.loops[sim].tr.core_ids)
+        #core_list=list(all_cores)
+        #core_list=None#[323]
+        #core_list=[323]
+        #core_list=[25]
+        #core_list=[74]
+        #core_list=[114]
+        #core_list=[195]
         #core_list=[361]
         #core_list=[8]
         #core_list=[381]
         #core_list=[323]
-        core_list=None
+        #core_list=None
+        #core_list = [9]
+        #core_list = TL.loops[sim].core_by_mode['Alone']
+        #core_list=core_list[2:3]
+
+        core_list = [114]
 
         thing = Relaxor( TL.loops[sim])
         thing.run(core_list=core_list, do_plots=True, frame_list=None, tsing=tsing_tool[sim])#, r_inflection=anne.inflection[sim])
 
         plotmancer(thing, tsing_tool[sim])
+if 1:
+    plotmancer(thing,tsing_tool[sim])

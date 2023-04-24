@@ -32,7 +32,7 @@ class multi_profile():
         def get_time_index(time):
             index=np.argmin( np.abs( thtr.times/colors.tff-time))
             return index
-        Nplots = 4
+        Nplots = 1
         Ntimes = 4
         fig,axes = plt.subplots(Nplots,Ntimes, figsize=(8,8))
         fig.subplots_adjust(hspace=0,wspace=0)

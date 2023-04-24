@@ -47,6 +47,7 @@ def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,tra
         zmin = zlim[0]
         zmax = zlim[1]
     norm = mpl.colors.Normalize( vmin =zmin, vmax=zmax)
+    norm = mpl.colors.LogNorm( vmin =zmin, vmax=zmax)
     cmap = copy.copy(mpl.cm.get_cmap(cmap_name))
     cmap.set_under('w')
     if 'shading' not in pcolormesh_args:

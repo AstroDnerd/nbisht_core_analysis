@@ -95,7 +95,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
 
         frame_index=[]
-        for frac in [0.0,0.5, .9]:
+        for frac in [0.0, 0.2, 0.5, 0.7]:
             target = frac*frames[singularity]
             argmin = np.argmin( np.abs( frames-target))
             frame_index.append( frames[argmin])
@@ -153,10 +153,12 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.set(xlabel=r'$t/t_{ff}$')
 
         if annotate_phases:
-            ax2.text( 0.0, 9, "collection")
-            ax2.text( 0.4, 9, "hardening")
-            ax2.text( 0.6, 9, "singularity")
-            ax2.text( 0.8, 9, "mosh")
+            ax2.text( 0.150, 9, r"$collection$")
+            ax2.text( 0.350, 9, r"$hardening$")
+            ax2.text( 0.55, 9, r"$singularity$")
+            ax2.text( 0.9, 9, r"$(mosh)$")
+            ax2.text( times[singularity]+0.01,9,r'$t_{\rm{sing}}$')
+            ax2.text( times[collapse_done]+0.01,9,r'$t_{\rm{sung}}$')
 
 
         #velocity plots
@@ -232,7 +234,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
                 if 0:
                     #gas density cdf
-                    rho_to_hist=DD.flatten()+0
+                    rho_to_hist=DD.flatten()*colors.density_units
                     rho_to_hist.sort()
                     cdf = np.arange( rho_to_hist.size)/rho_to_hist.size
                     ax1.plot( rho_to_hist, cdf, color=color_list[nnn],
@@ -329,7 +331,7 @@ for sim in sims:
     #annotate_phases=False
     annotate_phases=True
     core_list = [114]
-    core_list=[74]
-    core_list = TL.loops[sim].core_by_mode['Alone']
+    #core_list=[74]
+    #core_list = TL.loops[sim].core_by_mode['Alone']
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 

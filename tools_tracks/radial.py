@@ -41,6 +41,7 @@ class multipro():
             self.profiles_gas[core_id]={}
             self.profiles_part[core_id]={}
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
+            ms.get_central_at_once(core_id)
             ms.compute_ge(core_id)
             ms.compute_ke_rel(core_id)
             self.cores_used.append(core_id)
@@ -66,7 +67,7 @@ class multipro():
                 #theta=0.5
                 #half_collapse = theta*tsing.tsing_core[core_id]+(1-theta)*tsing.tend_core[core_id]
                 #frame_mask[get_time_index(half_collapse)]=True
-                self.titles=[ r'$t=0$', r'$t=0.5 t_{\rm{sing}}$', r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{song}}$']
+                self.titles=[ r'$t=0$', r'$t=0.5 t_{\rm{sing}}$', r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{sung}}$']
             if self.timescale==0:
                 frame_mask[0]=True
                 frame_mask[get_time_index(0.25*tsing.tsing_core[core_id])]=True
@@ -79,7 +80,7 @@ class multipro():
                 #half_collapse = theta*tsing.tsing_core[core_id]+(1-theta)*tsing.tend_core[core_id]
                 #frame_mask[get_time_index(half_collapse)]=True
                 self.titles=[ r'$t=0$', r'$t=0.25 t_{\rm{sing}}$', r'$t=0.5 t_{\rm{sing}}$', r'$t=0.75 t_{\rm{sing}}$',\
-                    r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{song}}$']
+                    r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{sung}}$']
             
             frame_list=thtr.frames[frame_mask]
             rm = rainbow_map(len(frame_list))
@@ -112,9 +113,14 @@ class multipro():
 
                         ORDER = np.argsort( RR)
                         if 1:
-                            vel = []
-                            for axis in 'xyz':
-                                vel.append( sph['velocity_%s'%axis][ORDER][:10].mean())
+                            if 0:
+                                #probably the right thing to do
+                                vel = []
+                                for axis in 'xyz':
+                                    vel.append( sph['velocity_%s'%axis][ORDER][:10].mean())
+                            if 1:
+                                #the consistent thing to do
+                                vel = ds.arr(ms.vcentral[:,nf], 'code_velocity')
                             scrub = other_scrubber.scrubber(sph, reference_velocity = vel)
                             scrub.compute_ke_rel()
                         EK = scrub.ke_rel
@@ -150,7 +156,8 @@ class multipro():
                     mean_flux  =nar([ flux[ digitized == i].sum() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
                     mass_quant  =nar([ M_cuml[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
 
-                    collector['rho']=colors.density_units* M_cuml/V_cuml
+                    #collector['rho']=colors.density_units* M_cuml/V_cuml
+                    collector['rho']= M_cuml/V_cuml
                     collector['V_cuml']=V_cuml
 
                     collector['R']=RR_sort
@@ -172,7 +179,8 @@ class multipro():
                         self.profiles_part[core_id][frame]=collector
 
                     if save_sorts:
-                        collector['rho_sort']=colors.density_units*rho_sort
+                        #collector['rho_sort']=colors.density_units*rho_sort
+                        collector['rho_sort']=rho_sort
                         collector['dv_sort']=dv_sort
                         collector['vr_sort']=vr[ORDER]
                         collector['vt_sort']=vt[ORDER]

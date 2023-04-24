@@ -117,6 +117,17 @@ class dq_dt2():
             Sz = bx*dxvz+by*dyvz+bz*dzvz
             Stretch= bx*Sx+by*Sy+bz*Sz
 
+            rho_0=rho[0,:]#.mean()
+            b_0=BP[0,:]#.mean()
+
+            RB=Stretch/(B2*divv)
+            RB_Mode = scipy.stats.mode(RB,axis=1)[0]
+            RB_Mode[0]=1.5
+            RB_Mode = gaussian_filter(RB_Mode,2)
+            #RB_Mean = (rho*RB*dv).sum(axis=1)/(rho*dv).sum(axis=1)
+            #RB_Mean.shape=RB_Mean.size,1
+            RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
+
 
 
 
@@ -126,70 +137,107 @@ class dq_dt2():
             bincen = 0.5*(bins[1:]+bins[:-1])
 
 
-            if 1:
-                #
-                #plot dbdt
-                #
-                THIS_AX=ax0
-                smooth_b=ndimage.gaussian_filter1d(B2, 2, 0)/2
-                db_dt = (smooth_b[1:,:]-smooth_b[:-1,:])/dt_square
-                db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( db_dt.transpose(), tcenter, bins=bins, ax=THIS_AX)
-                THIS_AX.set_yscale('symlog',linthresh=100)
-                THIS_AX.set_title('db/dt')
+            if 0: #TOP ROW
+                if 0:#yes
+                    #
+                    #plot dbdt
+                    #
+                    THIS_AX=ax0
+                    smooth_b=ndimage.gaussian_filter1d(B2, 2, 0)/2
+                    db_dt = (smooth_b[1:,:]-smooth_b[:-1,:])/dt_square
+                    db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( db_dt.transpose(), tcenter, bins=bins, ax=THIS_AX)
+                    THIS_AX.set_yscale('symlog',linthresh=100)
+                    THIS_AX.set_title('db/dt')
 
 
-            if 1:
-                #
-                #plot stretch, squish.
-                #
-                Pstretch=splat(Stretch,tcenter,ax1,'Stretch',bins)
-                Psquish=splat(-B2/2*divv,tcenter,ax2,'Squish',bins)
+                if 0:#yes
+                    #
+                    #plot stretch, squish.
+                    #
+                    Pstretch=splat(Stretch,tcenter,ax1,'Stretch',bins)
+                    Psquish=splat(-B2/2*divv,tcenter,ax2,'Squish',bins)
 
-                RedChan = np.log10(db_h.transpose())
-                GreenChan = np.log10(Psquish[2].transpose())
-                BlueChan = np.log10(Pstretch[2].transpose())
-                oot=np.stack([RedChan,GreenChan,BlueChan],axis=2)
-                #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
-                ax3.imshow(oot, origin='lower', extent=[0,1,0,1])
+            
+                if 0:#yes
+                    #three chanels
+                    RedChan = np.log10(db_h.transpose())
+                    GreenChan = np.log10(Psquish[2].transpose())
+                    BlueChan = np.log10(Pstretch[2].transpose())
+                    oot=np.stack([RedChan,GreenChan,BlueChan],axis=2)
+                    #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
+                    ax3.imshow(oot, origin='lower', extent=[0,1,0,1])
 
-                oot=np.stack([RedChan,GreenChan+BlueChan,GreenChan+BlueChan],axis=2)
-                #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
-                ax4.imshow(oot, origin='lower', extent=[0,1,0,1])
-
-
-            if 1:
-                #
-                #the legend
-                #
-                THE_AX = ax5
-                venn1 = np.zeros([800,800])
-                venn2 = np.zeros([800,800])
-                venn3 = np.zeros([800,800])
-                x,y = np.mgrid[0:1:1/800, 0:1:1/800]-0.5
-                r=0.25
-                x1,y1 = r*np.cos(2*np.pi/3), r*np.sin(2*np.pi/3)
-                ok = (x-x1)**2 + (y-y1)**2 < 1.2*r**2
-                
-                venn1[ok] = 1
-                x2,y2 = r*np.cos(4*np.pi/3), r*np.sin(4*np.pi/3)
-                ok = (x-x2)**2 + (y-y2)**2 < 1.2*r**2
-                venn2[ok] = 1
-                x3,y3 = r*np.cos(6*np.pi/3), r*np.sin(6*np.pi/3)
-                ok = (x-x3)**2 + (y-y3)**2 < 1.2*r**2
-                venn3[ok] = 1
-                venn = np.stack([venn1,venn2,venn3],axis=2)
-                THE_AX.imshow(venn,origin='lower', extent=[-0.5,0.5,-0.5,0.5])
-                THE_AX.text( y1,x1, 'dBdt', color='white')
-                THE_AX.text( y2,x2, 'B2', color='white')
-                THE_AX.text( y3,x3, 'Stretch', color='white')
+                    oot=np.stack([RedChan,GreenChan+BlueChan,GreenChan+BlueChan],axis=2)
+                    #oot=np.stack([moo,mork+pork,mork+pork],axis=2)
+                    ax4.imshow(oot, origin='lower', extent=[0,1,0,1])
 
 
-            if 1:
+                if 0:#yes
+                    #
+                    #the legend
+                    #
+                    THE_AX = ax5
+                    venn1 = np.zeros([800,800])
+                    venn2 = np.zeros([800,800])
+                    venn3 = np.zeros([800,800])
+                    x,y = np.mgrid[0:1:1/800, 0:1:1/800]-0.5
+                    r=0.25
+                    x1,y1 = r*np.cos(2*np.pi/3), r*np.sin(2*np.pi/3)
+                    ok = (x-x1)**2 + (y-y1)**2 < 1.2*r**2
+                    
+                    venn1[ok] = 1
+                    x2,y2 = r*np.cos(4*np.pi/3), r*np.sin(4*np.pi/3)
+                    ok = (x-x2)**2 + (y-y2)**2 < 1.2*r**2
+                    venn2[ok] = 1
+                    x3,y3 = r*np.cos(6*np.pi/3), r*np.sin(6*np.pi/3)
+                    ok = (x-x3)**2 + (y-y3)**2 < 1.2*r**2
+                    venn3[ok] = 1
+                    venn = np.stack([venn1,venn2,venn3],axis=2)
+                    THE_AX.imshow(venn,origin='lower', extent=[-0.5,0.5,-0.5,0.5])
+                    THE_AX.text( y1,x1, 'dBdt', color='white')
+                    THE_AX.text( y2,x2, 'B2', color='white')
+                    THE_AX.text( y3,x3, 'Stretch', color='white')
+
+
+            if 1: #mess around
                 #R take 1
                 THE_AX=ax6
-                #shoot, why is this BP?  Should be B2.
-                RB=Stretch/(B2*divv)
-                print(RB.min(),RB.max())
+                if 0:
+                    #dumb, use bins from above.
+                    #Shows nothing, actually
+                    bins=bins
+                if 0:
+                    #this one shows stuff
+                    bins_1 = np.geomspace( 1,1e3,19)
+                    bins_m1 = -bins_1[::-1]
+                    bins = nar(list(bins_m1)+list(bins_1))
+                if 1:
+                    #this one shows the bulk
+                    bins = np.linspace(-5,5,32)
+
+                #bins=np.geomspace(RB[RB>0].min(),RB.max())
+                #bins=np.linspace(RB.min(),RB.max())
+                PRB = splat(1-RB,tcenter,THE_AX,'1-RB',bins)
+                THE_AX.set_yscale('linear')
+                THE_AX=ax7
+
+                x = np.abs((RB).flatten())
+                #y = np.abs((Stretch/(B2*divv)).flatten())
+                #y = np.abs((Stretch).flatten())
+                x = np.abs(Stretch).flatten()
+                y = np.abs(divv).flatten()
+                ext3=extents()
+                ext3(x);ext3(y)
+                print(ext3.minmax)
+                bins =np.geomspace(ext3.minmax[0],ext3.minmax[1])
+                print(bins)
+                pch.simple_phase(x,y,ax=THE_AX, bins=[bins,bins]) 
+                THE_AX.plot(ext3.minmax,ext3.minmax)
+                THE_AX.set(xscale='log',yscale='log')
+
+            if 1:#yes
+                #R take 1
+                THE_AX=ax6
                 if 0:
                     #dumb, use bins from above.
                     #Shows nothing, actually
@@ -208,7 +256,7 @@ class dq_dt2():
                 PRB = splat(1-RB,tcenter,THE_AX,'1-RB',bins)
                 THE_AX.set_yscale('linear')
 
-            if 0:
+            if 0: #useful but no
                 #the full range of RB, just in case.
                 #cumulative
                 THE_AX=ax7
@@ -223,7 +271,7 @@ class dq_dt2():
 
 
 
-            if 1:
+            if 0: #yes
                 #
                 # d log B / d ln rho
                 #
@@ -233,7 +281,7 @@ class dq_dt2():
                 smooth_rho=ndimage.gaussian_filter1d(np.log(rho), 2, 0)
                 drho_dt = (smooth_rho[2:,:]-smooth_rho[:-2,:])/dt2
                 dLogs=(dlogb_dt/drho_dt)
-                print("%0.2e %0.2e %s"%(dLogs.min(), dLogs.max(),'word'))
+                #print("%0.2e %0.2e %s"%(dLogs.min(), dLogs.max(),'word'))
 
 
                 if 0:
@@ -251,41 +299,41 @@ class dq_dt2():
                 THIS_AX.set_yscale('linear')
 
 
-            if 0:
-                #cumulative
-                QQQ = dLogs.flatten()
-                QQQ.sort()
-                ax9.plot(QQQ)
-                ax9.axhline(0,c=[0.5]*4)
-                ax9.axhline(2,c=[0.5]*4)
-                ax9.axhline(1,c=[0.5]*4)
-                ax9.axhline(0.5,c=[0.5]*4)
-                ax9.set_yscale('symlog',linthresh=1)
-                ax9.set_title('dlnb/dlnrho')
+                if 0:
+                    #cumulative
+                    QQQ = dLogs.flatten()
+                    QQQ.sort()
+                    ax9.plot(QQQ)
+                    ax9.axhline(0,c=[0.5]*4)
+                    ax9.axhline(2,c=[0.5]*4)
+                    ax9.axhline(1,c=[0.5]*4)
+                    ax9.axhline(0.5,c=[0.5]*4)
+                    ax9.set_yscale('symlog',linthresh=1)
+                    ax9.set_title('dlnb/dlnrho')
 
-            if 0:
-                #cumulative
-                Q = dlogb_dt.flatten()+0
-                Q.sort()
-                ax10.plot(Q)
-                Q = drho_dt.flatten()+0
-                Q.sort()
-                ax10.plot(Q)
-                ax10.set_title('dlnb and dlnrho')
+                if 0:
+                    #cumulative
+                    Q = dlogb_dt.flatten()+0
+                    Q.sort()
+                    ax10.plot(Q)
+                    Q = drho_dt.flatten()+0
+                    Q.sort()
+                    ax10.plot(Q)
+                    ax10.set_title('dlnb and dlnrho')
 
-            if 1:
+            if 0: #yes, good plot.
                 #phase diagram to see how right I am.
                 THIS_AX = ax8
                 x = dLogs.flatten()
                 y = 1-RB[1:-1,:].flatten()
                 bins = np.linspace(-5,5,128)
                 print(x.shape,y.shape)
-                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins]) 
                 arr=[-2,2]
                 THIS_AX.plot(arr,arr,c=[0.5]*4)
                 THIS_AX.set(ylabel='1-R',xlabel=r'$\frac{d_t \ln |B|}{d_t \ln \rho}$')
 
-            if 0:
+            if 0:#no
                 #
                 # histograms
                 #
@@ -319,66 +367,155 @@ class dq_dt2():
                 # B and rho
                 #
                 THIS_AX = ax12
-                rho_0=rho[0,:].mean()
-                b_0=BP[0,:].mean()
 
                 THIS_AX.plot(times, rho/rho_0, c=[0.5]*4, linewidth=0.1)
                 THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
             if 1:
-                THIS_AX = ax13
-                rho_0=rho[0,:].mean()
-                b_0=BP[0,:].mean()
-                #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
-                print(rho.shape,"=============")
-                #RB_Mean = (rho*RB*dv)[-1,:].sum()/(rho*dv)[-1,:].sum()
-                RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
-                #RB_Mean = 0.25 #kludge.  
-                RB_Mean = (RB*dv).sum()/(dv).sum()
-                print("ONE MINUS RB MEAN",1-RB_Mean, "rho 0 %0.1e B0 %0.1e"%(rho_0, b_0))
-
-                THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_Mean)), c=[0.5]*4, linewidth=0.1)
-                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
-                THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
-
-
-            if 1:
                 #B rho phase
-                THIS_AX=ax14
+                THIS_AX=ax13
                 ext=extents()
-                rho_0=rho[0,:].mean()
-                b_0=B2[0,:].mean()
 
                 y = (rho/rho_0).flatten()
                 x = (B2/b_0).flatten()
                 ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
-                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins]) 
                 THIS_AX.set(xscale='log',yscale='log',xlabel='B',ylabel='rho')
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+
             if 1:
+                pass
+                #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
+                #RB_Mean = (rho*RB*dv)[-1,:].sum()/(rho*dv)[-1,:].sum()
+                #RB_Mean = 0.25 #kludge.  
+                #RB_Mean = (RB*dv).sum()/(dv).sum()
+                #print("ONE MINUS RB MEAN",1-RB_Mean, "rho 0 %0.1e B0 %0.1e"%(rho_0, b_0))
+            if 1:
+                THIS_AX = ax14
+
+                THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_Mean)), c=[0.5]*4, linewidth=0.1)
+                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='Mean RB')
+            if 1: 
                 #B rho phase
                 THIS_AX=ax15
                 ext=extents()
-                rho_0=rho[0,:].mean()
-                b_0=B2[0,:].mean()
 
                 y = ((rho/rho_0)**np.abs(1-RB_Mean)).flatten()
                 x = (B2/b_0).flatten()
                 ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
                 pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='Mean 1-R %0.2e'%(1-RB_Mean.mean()))
+                THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+            if 1:
+                THIS_AX = ax16
+
+                THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_Mode)), c=[0.5]*4, linewidth=0.1)
+                THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='Mode')
+            if 1: 
+                #B rho phase
+                THIS_AX=ax17
+                ext=extents()
+
+                y = ((rho/rho_0)**np.abs(1-RB_Mode)).flatten()
+                x = (B2/b_0).flatten()
+                ext(x);ext(y)
+                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='Mode')
+                THIS_AX.plot(ext.minmax,ext.minmax,c='k')
+            if 0:
+                #maybe more better math
+                #RB_Mean = np.abs((rho*RB*dv).sum(axis=0)/(rho*dv).sum(axis=0))
+                print(rho.shape,"=============")
+                RB=Stretch/(B2*divv)
+                #RB_Mean = (rho*RB*dv)[-1,:].sum()/(rho*dv)[-1,:].sum()
+                #RB_Mean = (rho*RB*dv).sum()/(rho*dv).sum()
+                #RB_Mean = 0.25 #kludge.  
+                #RB_Mean = (RB*dv).sum()/(dv).sum()
+                #RB_Mean = (RB*dv).sum(axis=1)/(dv).sum(axis=1)
+                #print("ONE MINUS RB MEAN",1-RB_Mean, "rho 0 %0.1e B0 %0.1e"%(rho_0, b_0))
+
+            if 0:
+                THIS_AX = ax10
+                rho_0=rho[0,:].mean()
+                b_0=B2[0,:].mean()
+                RB_Mode[0]=0
+                RB_Mode = gaussian_filter(RB_Mode,2)
+                rho_to_b=(rho)**np.abs((1-RB_Mode))/rho_0
+                #rho_to_b=rho/rho_0
+                THIS_AX.plot(times, rho_to_b, c=[0.5]*4, linewidth=0.1)
+                b_b0=B2/b_0
+                #print(rho_to_b[0,:])
+                #print(b_b0[0,:])
+                THIS_AX.plot(times, b_b0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
+                THIS_AX.set(yscale='log',title='B/B0,rho/rho_0',ylim=[1e-3,1e8])
+
+                THIS_AX=ax11
+                #y = ((rho/rho_0)**np.abs(1-RB_Mode)).flatten()
+                #x = (B2/b_0).flatten()
+                y = rho_to_b
+                x = b_b0
+                ext(x);ext(y)
+                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
                 THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='1-R %0.2e R0 %0.1e B0 %01e'%(1-RB_Mean, rho_0, b_0))
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
 
-            if 1:
-                #counter factual
+            if 0: #no RB mode
+
+                THE_AX=ax10
+                if 0:
+                    #dumb, use bins from above.
+                    #Shows nothing, actually
+                    bins=bins
+                if 0:
+                    #this one shows stuff
+                    bins_1 = np.geomspace( 1,1e3,19)
+                    bins_m1 = -bins_1[::-1]
+                    bins = nar(list(bins_m1)+list(bins_1))
+                if 1:
+                    #this one shows the bulk
+                    bins = np.linspace(-5,5,32)
+
+
+                #bins=np.geomspace(RB[RB>0].min(),RB.max())
+                #bins=np.linspace(RB.min(),RB.max())
+                PRB = splat(1-RB,tcenter,THE_AX,'1-RB',bins)
+                THE_AX.set_yscale('linear')
+
+                #tw = THE_AX.twinx()
+                THE_AX.plot(times,1-RB_Mode)
+                #THIS_AX=ax10
+                #THIS_AX.plot(RB_Mean)
+
+
+            if 0:
+                #log b over log rho
+                THIS_AX=ax9
+                #THIS_AX.plot(times, np.log(b_b0)/np.log(rho_to_b), c=[0.5]*4)
+                #THIS_AX.plot(times, np.log(b_b0)/np.log(rho_to_b), c=[0.5]*4)
+                Q = np.log(b_b0)/np.log(rho_to_b)
+
+                heat_map.heat_map(Q, times, ax=THIS_AX, bins=np.linspace(-10,10, 128))
+                THIS_AX.set_yscale('symlog',linthresh=1)
+                #THIS_AX.set_yscale('linear')
+
+
+            if 0:
+                #Rb from logs
                 THIS_AX = ax16
                 RB_check = 1-(dLogs*dv[1:-1,:]*rho[1:-1,:]).sum()/(rho*dv)[1:-1,:].sum()
                 THIS_AX.plot(times, (rho/rho_0)**np.abs((1-RB_check)), c=[0.5]*4, linewidth=0.1)
                 THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0 RB=1-dlog')
-            if 1:
+
+
+
+            if 0: #kludge
                 #B rho phase
                 THIS_AX=ax17
                 ext=extents()
@@ -389,7 +526,7 @@ class dq_dt2():
                 x = (B2/b_0).flatten()
                 ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
-                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins])
+                pch.simple_phase(x,y,ax=THIS_AX)#, bins=[bins,bins])
                 THIS_AX.set(xscale='log',yscale='log',ylabel='rho',xlabel='B', title='1-R %0.2e R0 %0.1e B0 %01e'%(1-RB_Mean, rho_0, b_0))
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
 
@@ -489,11 +626,12 @@ for sim in sim_list:
     ddd = dq_dt2(TL.loops[sim])
     core_list=None
     #core_list=[7]
-    core_list=[74, 112]
-    #core_list=[74]
+    #core_list=[74, 353]
+    core_list=[74]
     #core_list=[112]
-    core_list=TL.loops[sim].core_by_mode['Alone']
-    #core_list=[214]
+    #core_list=TL.loops[sim].core_by_mode['Alone']
+    #core_list=core_list[:3]
+    #core_list=[214, 114]
     P=ddd.run(core_list=core_list)
 
 
