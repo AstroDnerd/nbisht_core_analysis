@@ -86,6 +86,14 @@ def plotmancer(obj, tsing):
         ax3.set(yscale='log',xlabel='t/tff')
         fig.colorbar(plot3,label='Also Q', ax=ax3 )
 
+        Rcen=0.5*(RV[:,1:]+RV[:,:-1])
+        fig6,ax666=plt.subplots(1,1)
+        #ax666.scatter(Rcen, dMdt)
+        ax666.hist(np.log(np.abs(Rcen.flatten())),histtype='step')
+        ax666.hist(np.log(np.abs(dMdt.flatten())*0.10),histtype='step')
+        print(dt)
+        fig6.savefig('plots_to_sort/fork.png')
+
 
         newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
                                              [(0,         '#0000ff'),

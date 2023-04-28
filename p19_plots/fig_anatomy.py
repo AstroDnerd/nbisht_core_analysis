@@ -156,7 +156,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax2.text( 0.150, 9, r"$collection$")
             ax2.text( 0.350, 9, r"$hardening$")
             ax2.text( 0.55, 9, r"$singularity$")
-            ax2.text( 0.9, 9, r"$(mosh)$")
+            #ax2.text( 0.9, 9, r"$(mosh)$")
             ax2.text( times[singularity]+0.01,9,r'$t_{\rm{sing}}$')
             ax2.text( times[collapse_done]+0.01,9,r'$t_{\rm{sung}}$')
 
@@ -169,7 +169,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
         ax2.plot( times, times*0+1, c=[0.5]*4)
-        ax2.set( ylim=[0,10], ylabel=r'$velocity/c_s$')
+        ax2.set( ylim=[0,10], ylabel=r'velocity (particles)')
 
         if 1:
             #density CDF
@@ -183,7 +183,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
                 #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
                 ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
-            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]$', yscale='linear',xscale='log', xlim=scale, ylabel='Cumulative Density')
+            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]\rm{(particles)}$', yscale='linear',xscale='log', xlim=scale, ylabel='Density CDF (particles)')
 
         #
         # Binding Energy
@@ -291,7 +291,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 if na>0:
                     aaa.set(yticks=[],ylabel='')
                 else:
-                    aaa.set(ylabel='Energy')
+                    aaa.set(ylabel='Energy (full sphere)')
                 aaa.set( xlim=r_ext.minmax, ylim=y_ext.minmax)
 
 
@@ -300,7 +300,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
 
 
-        outname='plots_to_sort/%s_rho_vel_hist_t_c%04d.png'%(this_looper.sim_name,core_id)
+        outname='plots_to_sort/%s_anatomy_c%04d.png'%(this_looper.sim_name,core_id)
         fig.savefig(outname)
         print(outname)
         plt.close(fig)
