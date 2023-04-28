@@ -47,27 +47,7 @@ class multipro():
             self.cores_used.append(core_id)
 
             frame_mask = np.zeros_like(thtr.times, dtype='bool')
-            if self.timescale==1:
-                self.titles=[]
-                for theta in np.linspace(0,1,Ntimes):
-                    t = (1-theta)*tsing.tsing_core[core_id]+theta*tsing.tend_core[core_id]
-                    self.titles.append(r'%0.2f'%theta)
-                    index=get_time_index(t)
-                    frame_mask[index]=True
 
-
-            if self.timescale==2:
-                frame_mask[0]=True
-                #frame_mask[get_time_index(0.25*tsing.tsing_core[core_id])]=True
-                frame_mask[get_time_index(0.5*tsing.tsing_core[core_id])]=True
-                #frame_mask[get_time_index(0.75*tsing.tsing_core[core_id])]=True
-                frame_mask[get_time_index(tsing.tsing_core[core_id])]=True
-                frame_mask[get_time_index(tsing.tend_core[core_id])]=True
-                #half_collapse = 0.5*(tsing.tsing_core[core_id]+tsing.tend_core[core_id])
-                #theta=0.5
-                #half_collapse = theta*tsing.tsing_core[core_id]+(1-theta)*tsing.tend_core[core_id]
-                #frame_mask[get_time_index(half_collapse)]=True
-                self.titles=[ r'$t=0$', r'$t=0.5 t_{\rm{sing}}$', r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{sung}}$']
             if self.timescale==0:
                 frame_mask[0]=True
                 frame_mask[get_time_index(0.25*tsing.tsing_core[core_id])]=True
@@ -81,6 +61,30 @@ class multipro():
                 #frame_mask[get_time_index(half_collapse)]=True
                 self.titles=[ r'$t=0$', r'$t=0.25 t_{\rm{sing}}$', r'$t=0.5 t_{\rm{sing}}$', r'$t=0.75 t_{\rm{sing}}$',\
                     r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{sung}}$']
+            if self.timescale==1:
+                self.titles=[]
+                for theta in np.linspace(0,1,Ntimes):
+                    t = (1-theta)*tsing.tsing_core[core_id]+theta*tsing.tend_core[core_id]
+                    self.titles.append(r'%0.2f'%theta)
+                    index=get_time_index(t)
+                    frame_mask[index]=True
+            if self.timescale==2:
+                frame_mask[0]=True
+                #frame_mask[get_time_index(0.25*tsing.tsing_core[core_id])]=True
+                frame_mask[get_time_index(0.5*tsing.tsing_core[core_id])]=True
+                #frame_mask[get_time_index(0.75*tsing.tsing_core[core_id])]=True
+                frame_mask[get_time_index(tsing.tsing_core[core_id])]=True
+                frame_mask[get_time_index(tsing.tend_core[core_id])]=True
+                #half_collapse = 0.5*(tsing.tsing_core[core_id]+tsing.tend_core[core_id])
+                #theta=0.5
+                #half_collapse = theta*tsing.tsing_core[core_id]+(1-theta)*tsing.tend_core[core_id]
+                #frame_mask[get_time_index(half_collapse)]=True
+                self.titles=[ r'$t=0$', r'$t=0.5 t_{\rm{sing}}$', r'$t=t_{\rm{sing}}$', r'$t=t_{\rm{sung}}$']
+            if self.timescale==3:
+                frame_mask[get_time_index(tsing.tend_core[core_id])]=True
+                self.titles=[  r'$t=t_{\rm{sung}}$']
+            if sum(frame_mask) == 0:
+                pdb.set_trace()
             
             frame_list=thtr.frames[frame_mask]
             rm = rainbow_map(len(frame_list))
@@ -160,7 +164,7 @@ class multipro():
                     mass_quant  =nar([ M_cuml[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
 
                     #collector['rho']= M_cuml/V_cuml
-                    collector['b2']=b2_sort
+                    collector['b2_sort']=b2_sort
                     collector['rho']=colors.density_units* M_cuml/V_cuml
                     collector['V_cuml']=V_cuml
 
@@ -177,11 +181,6 @@ class multipro():
                     collector['mdot']=mean_flux[ok]/mass_quant[ok]*colors.tff
                     collector['mass_quant']=mass_quant[ok]
 
-                    if suite==0:
-                        self.profiles_gas[core_id][frame]=collector
-                    elif suite==1:
-                        self.profiles_part[core_id][frame]=collector
-
                     if save_sorts:
                         #collector['rho_sort']=colors.density_units*rho_sort
                         collector['rho_sort']=rho_sort
@@ -189,6 +188,10 @@ class multipro():
                         collector['vr_sort']=vr[ORDER]
                         collector['vt_sort']=vt[ORDER]
 
+                    if suite==0:
+                        self.profiles_gas[core_id][frame]=collector
+                    elif suite==1:
+                        self.profiles_part[core_id][frame]=collector
 
 
 
