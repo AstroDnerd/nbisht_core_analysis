@@ -233,16 +233,20 @@ def gtoy(obj,suffix=''):
     fig.savefig('plots_to_sort/gtoy_%s_%s_%s'%(obj.this_looper.sim_name,timescale,suffix))
 
             
-def replotter(obj,suffix=''):
+def replotter(obj,suffix='', redlines=False):
     #Nplots=5
     if 0:
         #extra plots for learning
         profs=['rho','vr_cumsum','vt_cumsum','energy','M/r']
         row_dict={'rho':0,'vr_cumsum':2,'vt_cumsum':3,'energy':4, 'M/r':1}
-    if 1:
+    if 0:
         #the paper version
         row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
         profs=['rho','vr_cumsum','vt_cumsum','energy']
+    if 1:
+        #the paper version
+        row_dict={'rho':0,'b2':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
+        profs=['rho','b2']
     if 0:
         #kludge for dev
         row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
@@ -283,10 +287,19 @@ def replotter(obj,suffix=''):
             for nframe,frame in enumerate(frames):
                 ax = axes[row][nframe]
                 AllR = nar(profiles[core_id][frame]['R'].v)
+                args['c']=[0.5]*3
                 if profile == 'M/r':
                     Q = (nar(profiles[core_id][frame]['rho'].v)*\
                         nar(profiles[core_id][frame]['V_cuml'])/\
                         nar(profiles[core_id][frame]['R']))
+                elif profile == 'b2':
+                    B = nar(profiles[core_id][frame]['b2'])*1e8
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    Q = np.cumsum(B*dv)/Vc
+                    args['c']=[1.0,0.0,0.0]
+
+
                 else:
                     Q = nar(profiles[core_id][frame][profile].v)
                 rbins = nar(profiles[core_id][frame]['rbins'])
@@ -407,8 +420,13 @@ def replotter(obj,suffix=''):
             if nax == len(frames)-1:
                 r = np.geomspace(1e-2,0.2)
                 this_y=1e6*(r/0.1)**-2
-                ax.plot( r,this_y,c='r')
+                if redlines:
+                    ax.plot( r,this_y,c='r')
 
+    if 'b2' in profs:
+        row = row_dict['b2']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$B^2$',xlim=ext[-1].minmax)
     if 'M/r' in profs:
         row = row_dict['M/r']
         for ax in axes[row]:
@@ -425,12 +443,12 @@ def replotter(obj,suffix=''):
             ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$<v_r>(<r) [c_s]$', xlim=ext[-1].minmax)
             ax.axhline(0,c=[0.5]*4)
             rbins=np.geomspace(1e-3,1e-2)
-            if nax == 2:
+            if nax == 2 and redlines:
                 #imagine=-4-np.log10(rbins)
                 fitted = -0.5*np.log(rbins/1e-3)-1
                 ax.plot(rbins,fitted,c='r')
                 #ax.plot(rbins,imagine,c='r')
-            if nax==3:
+            if nax==3 and redlines:
                 imagine=np.log(rbins/1e-3)-1
                 ax.plot(rbins,imagine,c='r')
                 #print(rrr)
@@ -441,7 +459,7 @@ def replotter(obj,suffix=''):
         row = row_dict['vt_cumsum']
         for nframe,ax in enumerate(axes[row]):
             ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$<v_t>(<r)$ [c_s]', xlim=ext[-1].minmax)
-            if  nframe == len(frames)-2 or True:
+            if  nframe == len(frames)-2 and redlines:
                 RR_sort = np.geomspace(1e-4,1e1)
                 #ax.plot(RR_sort, RR_sort*vt_cumsum[-1]/RR_sort[-1], c='r')
                 ax.plot(RR_sort, 3*(RR_sort/0.1)**0.5, c='r')
@@ -465,34 +483,11 @@ def replotter(obj,suffix=''):
             ax.axhline(0.5,c=[0.5]*3)
             ax.axhline(2.0,c=[0.5]*3)
 
-            if nframe==0:
+            if nframe==0 and redlines:
                 r2 = np.geomspace(1e-2,0.1,32)
                 y = 10*(r2/0.1)**-1
                 ax.plot(r2,y,c='r')
 
-            if nframe==len(frames)-1 and False:
-                RR_sort = np.geomspace(1e-4,1e1)
-                mean_a = nar(fit_a).mean()
-                mean_p = nar(fit_p).mean()
-                mean_a = 0.5
-                mean_p=-0.5
-                ax.plot(rbins, mean_a*np.log(rbins/1e-3)+mean_p, c='r')
-
-            
-            if nframe==3 and False:
-                RR_sort = np.geomspace(1e-4,1e1)
-                rmin=RR_sort.min()
-                X = np.log((RR_sort/rmin))
-                x_scale = np.log(X)
-                x0, x1 = np.log(1e-3/rmin), np.log(1e-2/rmin)
-                y0, y1 = 0.5, 2
-                m = (y1-y0)/(x1-x0)
-                b = y0 - m*x0
-                print("M",m)
-                print("uM", 1.5/-np.log(10))
-                print("b %0.5f"%b, y1-y0, x1-x0)
-                they=m*X+b
-                axes[3][nframe].plot(RR_sort, they, c='r')
 
 
     for row in axes:
@@ -524,7 +519,7 @@ import radial
 reload(radial)
 #sim_list0i=['u502']
 #mode_list=['Alone']
-if 1:
+if 0:
     if 'stuff' not in dir():
         stuff = {}
     sim_list=['u501','u502','u503']
@@ -534,16 +529,17 @@ if 1:
         if sim not in stuff:
             stuff[sim]={}
         for mode in mode_list:
+            print("Do ",sim,mode)
             if mode not in stuff[sim]:
                 core_list = TL.loops[sim].core_by_mode[mode]
-                core_list=core_list[:2]
+                #core_list=core_list[:2]
                 thismp=radial.multipro(TL.loops[sim])
                 timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
                 thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
             replotter(stuff[sim][mode],suffix=mode)
-if 0:
-    sim_list=['u503']
+if 1:
+    sim_list=['u502']
     if 'mp' not in dir():
         for sim in sim_list:
             all_cores=np.unique( TL.loops[sim].tr.core_ids)
@@ -553,12 +549,12 @@ if 0:
             core_list=[25]
             core_list=[74]
             core_list = TL.loops[sim].core_by_mode['Alone']
-            core_list=core_list[10:]
+            #core_list=core_list[10:]
             #core_list=None
 
             mp=radial.multipro(TL.loops[sim])
             timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
-            mp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
+            mp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False,save_sorts=True )#, r_inflection=anne.inflection[sim])
             replotter(mp)
     if 0:
         density(mp)
