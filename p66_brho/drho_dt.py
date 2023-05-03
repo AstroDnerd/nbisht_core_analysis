@@ -154,7 +154,6 @@ class dq_dt():
         twin.plot(tcenter, fraction_positive)
         twin.set(ylim=[0,1])
 
-        no="""
         #
         #
         #
@@ -214,12 +213,14 @@ class dq_dt():
         fakeit=np.log10(dr_h.transpose())
         borkus=np.log10(drdt_h.transpose())
         dumb = np.zeros_like(fakeit)
+        dumb=fakeit
         oot = np.stack([fakeit,borkus,dumb],axis=2)
         ax9.imshow(oot)
 
         #
         #
         #
+        no="""
         smooth= ndimage.gaussian_filter1d(-1*B*divv, 2, 0)
         smooth = 0.5*(smooth[1:,:]+smooth[:-1,:])
         #ax1.plot( times, smooth, c=c,linewidth=0.1)
@@ -249,12 +250,10 @@ class dq_dt():
         mork = np.log10(dbb_h.transpose())
         oot=np.stack([moo,mork,dumb],axis=2)
         ax12.imshow(oot)
-        """
 
         #
         #
         #
-
         bx = thtr.c([core_id],'magnetic_field_x')
         by = thtr.c([core_id],'magnetic_field_y')
         bz = thtr.c([core_id],'magnetic_field_z')
@@ -303,9 +302,10 @@ class dq_dt():
         #mork = np.log10(dbb_h.transpose())
         #oot=np.stack([moo,mork,dumb],axis=2)
         #ax12.imshow(oot)
-
-
         fig.savefig('plots_to_sort/b_and_rho_2_c%04d.pdf'%(core_id))
+        """
+
+        fig.savefig('plots_to_sort/d_rho_dt_c%04d.pdf'%(core_id))
 
 sim_list=['u902']
 for sim in sim_list:
