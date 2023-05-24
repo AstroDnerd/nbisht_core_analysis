@@ -34,7 +34,7 @@ def plotsa(accreter, tsing):
     #ax1.hist(m10k)
     #ax1.set(xlabel='Mass[Msun]',ylabel='CDF')
 
-    fig.savefig('plots_to_sort/mass_10k.pdf')
+    fig.savefig('plots_to_sort/R1000.pdf')
 
 
 
