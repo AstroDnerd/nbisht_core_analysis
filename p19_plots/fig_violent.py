@@ -26,14 +26,15 @@ def plotsa(accreter, tsing):
     for core_id in accreter['rates']:
         ax0.plot( accreter['time']/tsing.tsing_core[core_id], accreter['r10k'][core_id], c=[0.5]*4)
         #ax0.plot( accreter['time'], accreter['r10k'][core_id])
-    ax0.set(yscale='log',ylabel='R [AU]', xlabel='t/tsing', xlim=[0,2])
+    ax0.set(yscale='log',ylabel=r'$R_{1000} [\rm{AU}]$', xlabel=r'$t/tsing$', xlim=[0,2])
+    ax0.axvline(1,c='k',linewidth=0.1)
     m10k = nar(sorted(accreter['mass_10k']))
     cdf = np.arange(m10k.size)/m10k.size
     #ax1.plot( m10k, cdf)
     #ax1.hist(m10k)
     #ax1.set(xlabel='Mass[Msun]',ylabel='CDF')
 
-    fig.savefig('plots_to_sort/mass_10k.png')
+    fig.savefig('plots_to_sort/mass_10k.pdf')
 
 
 
@@ -527,7 +528,7 @@ if 1:
     if 0:
         sim='u502'
         accreter=accretion(thing_new, tsing_tool[sim])
-    if 0:
+    if 1:
         plotsa(accreter,tsing_tool[sim])
 
     if 1:
