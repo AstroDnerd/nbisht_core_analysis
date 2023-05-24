@@ -21,7 +21,7 @@ def cuml(ax,quan,color,label):
 sims=['u501', 'u502','u503']
 #sims=[ 'u502','u503']
 #sims=['u501']
-sims=['u502']
+#sims=['u502']
 for sim in sims:
     core_list=None
 if 1:
