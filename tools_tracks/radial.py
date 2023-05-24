@@ -165,7 +165,7 @@ class multipro():
 
                     #collector['rho']= M_cuml/V_cuml
                     collector['b2_sort']=b2_sort
-                    collector['rho']=colors.density_units* M_cuml/V_cuml
+                    collector['rho']=M_cuml/V_cuml
                     collector['V_cuml']=V_cuml
 
                     collector['R']=RR_sort
@@ -180,6 +180,9 @@ class multipro():
                     collector['rbins']=rcen[ok]
                     collector['mdot']=mean_flux[ok]/mass_quant[ok]*colors.tff
                     collector['mass_quant']=mass_quant[ok]
+
+                    sqrtG=np.sqrt(colors.G)
+                    collector['britton']=sqrtG*(collector['rho'])/(np.abs(vr_cumsum.v)+1)
 
                     if save_sorts:
                         #collector['rho_sort']=colors.density_units*rho_sort
