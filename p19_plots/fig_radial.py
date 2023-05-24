@@ -22,15 +22,23 @@ if 0:
 
             
 def replotter(obj,suffix='', redlines=False):
+    OneExt = False
     #Nplots=5
-    if 0:
-        #extra plots for learning
-        profs=['rho','vr_cumsum','vt_cumsum','energy','M/r']
-        row_dict={'rho':0,'vr_cumsum':2,'vt_cumsum':3,'energy':4, 'M/r':1}
     if 1:
         #the paper version
-        row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3}
-        profs=['rho','vr_cumsum','vt_cumsum','energy']
+        row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3, 'virial':3}
+        profs=['rho','vr_cumsum','vt_cumsum','virial']
+    if 0:
+        #energy plots
+        profs=['EGmean', 'EKmean', 'Emag','Etherm', 'virial']
+        row_dict={'Emag':2, 'Etherm':3,'EGmean':0, 'EKmean':1, 'virial':4}
+        #row_dict={'Emag':0, 'Etherm':0,'EGmean':0, 'EKmean':0}
+        OneExt=True
+    if 0:
+        #extra plots for learning
+        profs=['rho','EGmean', 'EKmean', 'virial']
+        row_dict={'rho':0,'virial':1, 'EGmean':2, 'EKmean':3}
+
     if 0:
         #kludge
         profs=['vr_cumsum']
@@ -51,7 +59,7 @@ def replotter(obj,suffix='', redlines=False):
         row_dict={'rho':0,'vr_cumsum':1,'britton':2}
         profs=['rho', 'vr_cumsum', 'britton']
     Nplots=len(profs)
-    Nplots=4
+    Nplots=max(2, len(profs))
     Ntimes=len(obj.titles)
     fig,axes = plt.subplots(Nplots,Ntimes, figsize=(12,12))
     fig.subplots_adjust(hspace=0,wspace=0)
@@ -59,7 +67,12 @@ def replotter(obj,suffix='', redlines=False):
         ax.set_title(title)
 
     
-    ext = [extents() for n in range(Nplots+1)]
+    if not OneExt:
+        ext = [extents() for n in range(Nplots+1)]
+    else:
+        #this construct also makes a list of extents objects,
+        #but uses the same object for the first bunch.
+        ext = [extents()]*Nplots+[extents()]
 
     args = {'linewidth':0.2, 'c':[0.5]*3}
 
@@ -88,7 +101,7 @@ def replotter(obj,suffix='', redlines=False):
                         nar(profiles[core_id][frame]['V_cuml'])/\
                         nar(profiles[core_id][frame]['R']))
                 elif profile == 'b2':
-                    B = nar(profiles[core_id][frame]['b2'])*1e8
+                    B = nar(profiles[core_id][frame]['b2'])
                     dv = nar(profiles[core_id][frame]['dv_sort'])
                     Vc = nar(profiles[core_id][frame]['V_cuml'])
                     Q = np.cumsum(B*dv)/Vc
@@ -114,6 +127,50 @@ def replotter(obj,suffix='', redlines=False):
                         nar(profiles[core_id][frame]['V_cuml'])
                     Q = M
                     R0=1e-2
+                elif profile == 'virial':
+                    #Q = nar(profiles[core_id][frame]['energy'])
+                    EK=nar(profiles[core_id][frame]['EKmean'])
+                    EG=nar(profiles[core_id][frame]['EGmean'])
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    #Q = np.cumsum(B*dv)/Vc
+                    EBlocal=nar(profiles[core_id][frame]['b2_sort']**2/np.sqrt(4*np.pi))
+                    EB = np.cumsum(EBlocal*dv)/Vc
+                    rho=nar(profiles[core_id][frame]['rho_sort'])
+                    c=1
+                    ETlocal = c**2*rho*np.log(rho)
+                    ET = np.cumsum(ETlocal*dv)/Vc
+                    #bot += TE
+                    #Q = np.abs(np.abs(EK+EB+ET-EG))
+                    #Q = EK/EB
+                    #Q = 2*EK/(EG+ET+EB)
+                    Q = EK/EG
+
+
+
+                elif profile == 'Emag':
+                    #B = nar(profiles[core_id][frame]['b2_sort'])**(1/0.3)/np.sqrt(4*np.pi)/1000
+                    B = nar(profiles[core_id][frame]['b2_sort'])**(2)/np.sqrt(4*np.pi)
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    Q = np.cumsum(B*dv)/Vc
+                    args['c']=[0.0,0.0,1.0,1.0]
+                elif profile == 'Etherm':
+                    rho=nar(profiles[core_id][frame]['rho_sort'])
+                    c=1
+                    TE = c**2*rho*np.log(rho)
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    Q = np.cumsum(TE*dv)/Vc
+                    args['c']=[0.0,1.0,0.0,1.0]
+                elif profile == 'EGmean':
+
+                    Q = nar(profiles[core_id][frame][profile].v)
+                    args['c'] = [1.0,0.0,0.0,1.0]
+                elif profile == 'EKmean':
+
+                    Q = nar(profiles[core_id][frame][profile].v)
+                    args['c'] = 'k'# [0.5,0.0,1.0,1.0]
                        
 
 
@@ -127,79 +184,30 @@ def replotter(obj,suffix='', redlines=False):
                 y = quan[ok]
                 R = rcen[ok]
                 R *= colors.length_units_au
+
+
+
+                if 0:
+                    y /= R**(-2.8)
+                    #normalize everyone
+                    args['c']=[0.5]*4
+                    i5000 = np.argmin(np.abs(R-5000))
+                    y5000 = y[i5000]
+                    y /= 1e3*y5000
                 ext[-1](R)
 
                 if profile == 'rho':
                     y = y * colors.density_units
-                if profile=='energy':
-                    #def fun(R,A,P):
-                    #    return nar(A/(R/1e-3)**2)+P
-                    ok = y>0
-                    y = y[ok]
-                    R = R[ok]
-                    y=1/y
-                    if np.isnan(y).any() or np.isinf(y).any():
-                        pdb.set_trace()
-                    #if nframe==0:
-                    #    y=y*R
-                    if nframe==3 and False:
-                        fidr=1e-3
-                        ind = np.argmin( np.abs(R-fidr))
-                        if ind==0:
-                            pdb.set_trace()
-                        y = y * 0.5/y[ind]
-
-                        #fid2=2e-2
-                        #ind2=np.argmin(np.abs(R-fid2))
-                        ind2 = np.argmin( np.abs( y-2.01))
-                        print("%5.1f %5.1f %5.1f %5.1f"%(ind,ind2, y[ind],y[ind2]))
-                        fit_y_r_eng.append(y[ind2])
-
+                #if profile=='energy':
+                #    ok = y>0
+                #    y = y[ok]
+                #    R = R[ok]
+                #    y=1/y
+                #    if np.isnan(y).any() or np.isinf(y).any():
+                #        pdb.set_trace()
 
                 ext[row](y)
                 ax.plot( R, y, **args)
-                if profile == 'vr_cumsum' and False:
-                    if nframe==2:
-                        pfit = np.polyfit( np.log(R), y,1)
-                        fit_vr.append(pfit)
-                        #print(fit_vr)
-                        #ax.plot( R, pfit[0]*np.log(R)+pfit[1])
-
-                if profile=='energy' and False:
-                    if nframe==0:
-                        pfit = np.polyfit( np.log(R), np.log(y),1)
-                        #print(pfit)
-                        fit_x.append(pfit[0])
-
-                    if nframe==len(frames)-1:
-                        rmin=1e-3
-                        def fun(R,A,P):
-                            return A*np.log(R/rmin)+P
-                        ok = (R>1e-3)*(R<1e-2)
-                        rbins = np.geomspace(5e-4,1e-2,32)
-                        if y[ok][0]<2:
-                            ybinned, edge, num = stats.binned_statistic(R[ok],y[ok],statistic='mean',bins=rbins)
-                            ok = ~np.isnan(ybinned)
-                            rcen = 0.5*(rbins[1:]+rbins[:-1])
-
-                            popt, pcov = curve_fit(fun,rcen[ok],ybinned[ok],p0=[2,-1])
-                            fit_a.append(popt[0])
-                            fit_p.append(popt[1])
-
-                        if 0:
-                            RR_sort = np.geomspace(1e-4,1e1)
-                            rmin=RR_sort.min()
-                            X = np.log((RR_sort/rmin))
-                            x_scale = np.log(X)
-                            x0, x1 = np.log(1e-3/rmin), np.log(1e-2/rmin)
-                            y0, y1 = 0.5, 2
-                            m = (y1-y0)/(x1-x0)
-                            b = y0 - m*x0
-                            print("M",m, "M*log10", m*np.log(10), "rmin",rmin)
-                            print("uM", 1.5/-np.log(10))
-                            print("b %0.5f"%b, y1-y0, x1-x0)
-                            they=m*X+b
-                        #ax.plot(RR_sort, they, c='r')
 
     if 0:
         def cumr(arr):
@@ -231,8 +239,8 @@ def replotter(obj,suffix='', redlines=False):
     #print(fit_y_r_eng)
     #print(nar(fit_y_r_eng).mean())
     print('set')
-    row = row_dict['rho']
     if 'rho' in profs:
+        row = row_dict['rho']
         for nax,ax in enumerate(axes[row]):
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{\rho(<r)}~~ [\rm{g/cc}]$', xlim=ext[-1].minmax)
             if nax == len(frames)-1:
@@ -255,6 +263,35 @@ def replotter(obj,suffix='', redlines=False):
         row = row_dict['M/r']
         for ax in axes[row]:
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$M(<r)/r$',xlim=ext[-1].minmax)
+    if 'EGmean' in profs:
+        rowG = row_dict['EGmean']
+        rowK = row_dict['EKmean']
+        ext[rowG](ext[rowK].minmax)
+        ext[rowK](ext[rowG].minmax)
+
+    if 'Emag' in profs:
+        row = row_dict['Emag']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EB(<r>)/V(R)', xlim=ext[-1].minmax)
+    if 'Etherm' in profs:
+        row = row_dict['Etherm']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='ET(<r>)/V(R)', xlim=ext[-1].minmax)
+    if 'virial' in profs:
+        row = row_dict['virial']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EK(<r)/EG(<r)', xlim=ext[-1].minmax)
+            ax.axhline(0.5,c=[0.5]*3)
+            ax.axhline(2.0,c=[0.5]*3)
+
+    if 'EGmean' in profs:
+        row = row_dict['EGmean']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EG(<r)/V(r)', xlim=ext[-1].minmax)
+    if 'EKmean' in profs:
+        row = row_dict['EKmean']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EK(<r)/V(r)', xlim=ext[-1].minmax)
         
     if 'vr_cumsum' in profs:
         row = row_dict['vr_cumsum']
@@ -295,7 +332,7 @@ def replotter(obj,suffix='', redlines=False):
         row = row_dict['energy']
         for nframe,ax in enumerate(axes[row]):
             #THIS ONE
-            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\frac{EG(<r)}{EK(<r)}$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\frac{EK(<r)}{EG(<r)}$', xlim=ext[-1].minmax)
             #ax.set(xscale='log',yscale='linear',ylim=[0,3], ylabel=r'$EG(<r)/EK(<r)$', xlim=ext[-1].minmax)
 
             #ax.set(xscale='log',yscale='linear',ylim=[0.1,5], ylabel=r'$Ek(<r)/Eg(<r)$', xlim=ext[-1].minmax)
@@ -365,8 +402,9 @@ if 0:
                 thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
             replotter(stuff[sim][mode],suffix=mode)
+
 if 1:
-    sim_list=['u502']
+    sim_list=['u501']
     if 'mp' not in dir():
         for sim in sim_list:
             all_cores=np.unique( TL.loops[sim].tr.core_ids)
@@ -383,11 +421,11 @@ if 1:
             timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
             mp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False,save_sorts=True )#, r_inflection=anne.inflection[sim])
             replotter(mp)
-    if 0:
-        density(mp)
     if 1:
         replotter(mp, redlines=True)
     if 0:
         geplotter(mp)
     if 0:
         gtoy(mp)
+    if 0:
+        density(mp)

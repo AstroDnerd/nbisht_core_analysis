@@ -525,7 +525,7 @@ if 1:
         thing_saver(things,sim)
     if 1:
         thing_new = thing_reader('this_mass_flux_u502.h5')
-    if 0:
+    if 1:
         sim='u502'
         accreter=accretion(thing_new, tsing_tool[sim])
     if 1:
