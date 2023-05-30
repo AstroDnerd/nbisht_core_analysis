@@ -293,11 +293,11 @@ if 0:
     fig,ax = plt.subplots(2,3)#, figsize=(6,2))
     fig.subplots_adjust(wspace=0, hspace=0)
 
-for nt,tool in enumerate([scope1]):#,scope2,scope3]): 
+for nt,tool in enumerate([scope1,scope2,scope3]): 
     # WHICH CORES
     all_cores = np.unique(tool.this_looper.tr.core_ids)
-    core_list = all_cores[2:4]  #DEBUG
-    #core_list = all_cores
+    #core_list = all_cores[2:4]  #DEBUG
+    core_list = all_cores
 
     # RUN
     tool.qtyRun(nt,core_list=core_list) 
@@ -378,11 +378,11 @@ for nt,tool in enumerate([scope1]):#,scope2,scope3]):
 
     # LABELS
     label_rho3D =r'$\rho_{3D}$' 
-    label_rho2D =r'$\rho_{2D_full}$' 
+    label_rho2D =r'$\rho_{2D,long}$' 
     label_rho2Dmid =r'$\rho_{2D,mid}$' 
     label_rho2Dmf = r'$\rho_{2D,mid}, \rho_{2D,full}$'
     label_b3D = r'$B_{3D}$'
-    label_b2D = r'$B_{2D,full}$'
+    label_b2D = r'$B_{2D,long}$'
     label_b2Dmid = r'$B_{2D,mid}$'
     label_b2Dmf = r'$B_{2D,mid}, B_{2D,full}$'
     label_blos = r'$\left\langle\mid B_i \mid\right\rangle (\mu G)$'
@@ -409,9 +409,10 @@ for nt,tool in enumerate([scope1]):#,scope2,scope3]):
     the_fieldfracbins = np.linspace(the_fieldfracmin,the_fieldfracmax,num=the_fbins) 
 
     # WHAT IS THE ALPHA VALUE
-    if 0:
+    if 1:
         pfit = np.polyfit(RHO[ok],BLOS[ok],1) 
         alpha = pfit[0]
+        print('alpha long',alpha)
         BLOS_o = pfit[1] 
 
         mpfit = np.polyfit(RHOO[okk],BLOSS[okk],1) 
@@ -431,34 +432,34 @@ for nt,tool in enumerate([scope1]):#,scope2,scope3]):
     # SINGLE PANELS
     if 0:
         fig,ax = plt.subplots(1,1)
-        ax.scatter(the_x,the_y,color='purple',alpha=0.4,marker='*')
-        ax.scatter(the_x[ok],the_y[ok],color='k',marker='*')
+        ax.scatter(the_x,the_y,color='blue',alpha=0.4)#,marker='*')
+        ax.scatter(the_x[ok],the_y[ok],color='green',alpha=0.5)#,marker='*')
         RHO_x = np.linspace(RHO[ok].min(),RHO[ok].max(),num=len(RHO[ok]))
         RHO_X = 10 ** RHO_x
         BLOS_Y = 10 ** (alpha*RHO_x + BLOS_o)
-        ax.plot(RHO_X,BLOS_Y,color='grey',linestyle='dashed') 
+        ax.plot(RHO_X,BLOS_Y,color='k',linestyle='dashed') 
 
-        if 1: #OVERLAYED
-            ax.scatter(the_xx,the_yy,color='olive',alpha=0.4,marker='*')
-            ax.scatter(the_xx[okk],the_yy[okk],color='g',marker='*')  # could try red to match final frame of 3D
+        if 0: #OVERLAYED
+            ax.scatter(the_xx,the_yy,color='blue',alpha=0.4)#,marker='*')
+            ax.scatter(the_xx[okk],the_yy[okk],color='orange',alpha=0.7)#,marker='*')  # could try red to match final frame of 3D
             RHO_xx = np.linspace(RHOO[okk].min(),RHOO[okk].max(),num=len(RHOO[okk]))
             RHO_XX = 10 ** RHO_xx
             BLOS_YY = 10 ** (alpha*RHO_xx + BLOSS_o)
-            ax.plot(RHO_XX,BLOS_YY,color='grey',linestyle='dotted')  
+            ax.plot(RHO_XX,BLOS_YY,color='k',linestyle='dotted')  
             
         ax.set_xscale('log')
         ax.set_yscale('log')
         ax.set_xlim(40e-2,20e1)
         ax.set_ylim(1e-1,1e4)
-        ax.set_xlabel(label_rho2Dmf)
-        ax.set_ylabel(label_b2Dmf)
+        ax.set_xlabel(label_rho2D)
+        ax.set_ylabel(label_b2D)
 
-        savename = 'BxyzVsNxyz_fm_cyl128_synth_%s.png'%nt
+        savename = 'BxyzVsNxyz_cyl128_long_synth_%s.png'%nt
         fig.savefig(savename)
         plt.close(fig)
         
     # PLOTTINGS - 3 WAY:  short and long; maybe a way to merge the current Fig 7 & 8.  
-    if 1:
+    if 0:
         plt.clf()
         figa, axa, axtop, axright = multiplots.three_way_bean()  #figsize=(6,6)
         '''

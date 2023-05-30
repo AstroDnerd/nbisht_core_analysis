@@ -173,7 +173,7 @@ class BRho_tool():
                         ax3.scatter(the_range[:-1],self.betarr[:-1],c=c2)   #[2:],
                         ax3.plot(the_range[:-1],self.betarr[:-1],c='k',linewidth=1.0)  
                         #ax3.set_title(r"$\beta = 0.2, \alpha_{cf}$")
-                        ax3.plot([0,1],[0.20,0.20],'--',c=[0.5]*4)
+                        ax3.plot([0,1],[0.196,0.196],'--',c=[0.5]*4)
                     if name == 'u602':
                         the_range = np.arange(0.075,1,0.075) 
                         ax3.scatter(the_range[:-1],self.betarr[:-1],c=c2)  
@@ -382,6 +382,9 @@ class BRho_tool():
                     B_o = pfit[1]  
                     YY = 10 ** (pfit[0]*X2 + pfit[1]) 
                     self.betarr = np.append(self.betarr,beta)                         
+                    #if core_id == core_val:
+                        #print('index',nc)
+                        #print('beta',beta)
                     
                     # - - - - - - - - - - - - - - - - - - - - 
                     #PEARSON FOR ALL TIME
@@ -427,11 +430,14 @@ class BRho_tool():
         the_max = self.betarr.max()
         the_bins = math.isqrt(len(self.betarr))
         the_FTA = np.mean(self.betarr)
+        the_FTA_core = self.betarr[17]
+        #print(the_FTA_core)
         #atf = [0.175,0.270,0.316]
         #the_ATF = atf[num]  
         the_bins = np.linspace(the_min,the_max,num=the_bins)  #'original': 64
         ax2.hist(self.betarr, bins=the_bins, density=True, histtype='step', color='k')
         ax2.axvline(the_FTA, color='grey', linestyle='dashed')
+        ax2.axvline(the_FTA_core, color='k')
         #ax2.axvline(the_ATF, color='m')
 
         ax2.yaxis.tick_right()
@@ -597,9 +603,9 @@ FIGURE 6: type: 'vio_plot' ;time: 'per_frame'
 
 for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
     # TYPE: 
-    which_plot = 'scatter_plot' 
+    which_plot = 'frame_scatters' 
     # TIME:
-    which_time = 'all_time'
+    which_time = 'per_frame'
 
     # GLOBAL TFF 
     G = 1620/(4*np.pi)
