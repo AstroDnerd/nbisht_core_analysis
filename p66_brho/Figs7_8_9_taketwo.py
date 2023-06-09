@@ -110,7 +110,6 @@ class polarization():
                         for j in range(3):
                             self.bparticles[j][nc] = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum() 
                             self.rhoave[j][nc] = (density * cell_volume).sum()/cell_volume.sum()
-            '''
             for j in range(3): 
                 if 1:
                     self.columnrho_cyl[j][nc] = (the_cyl[j]['density'] * the_cyl[j]['cell_volume']).sum()/the_area_one
@@ -211,7 +210,6 @@ class polarization():
                     self.btotal_cyl[j][nc] = (the_cyl[j]['density']* the_cyl[j]['magnetic_field_strength'] * the_cyl[j]['cell_volume']).sum()/(the_cyl[j]['density']*the_cyl[j]['cell_volume']).sum() 
                     self.btotal_mcyl_one[j][nc] = (the_midcyl_one[j]['density']* the_midcyl_one[j]['magnetic_field_strength'] * the_midcyl_one[j]['cell_volume']).sum()/(the_midcyl_one[j]['density']*the_midcyl_one[j]['cell_volume']).sum() 
                     self.btotal_mcyl_two[j][nc] = (the_midcyl_two[j]['density']* the_midcyl_two[j]['magnetic_field_strength'] * the_midcyl_two[j]['cell_volume']).sum()/(the_midcyl_two[j]['density']*the_midcyl_two[j]['cell_volume']).sum() 
-            '''
 
         print("check-in")
         # CACHE TO DISK 
