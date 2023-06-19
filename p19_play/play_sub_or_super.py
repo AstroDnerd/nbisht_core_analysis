@@ -301,6 +301,6 @@ if 0:
     for sim in sim_list:
         #phasor(mp[sim])
         phasor_vr_vt(mp[sim])
-if 1:
+if 0:
     for sim in sim_list:
         souper(mp[sim])
