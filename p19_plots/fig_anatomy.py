@@ -169,7 +169,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
         ax2.plot( times, times*0+1, c=[0.5]*4)
-        ax2.set( ylim=[0,10], ylabel=r'velocity (particles)')
+        ax2.set( ylim=[0,10], ylabel=r'velocity (preimage)')
 
         if 1:
             #density CDF
@@ -183,7 +183,8 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
                 #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
                 ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
-            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]\rm{(particles)}$', yscale='linear',xscale='log', xlim=scale, ylabel='Density CDF (particles)')
+            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]\rm{(preimage)}$',
+                   yscale='linear',xscale='log', xlim=scale, ylabel='Density CDF (preimage)')
 
         #
         # Binding Energy
@@ -256,8 +257,8 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     label_g=None
                     label_k=None
                     if nnn==0:
-                        label_g=r'$E_G$'
-                        label_k=r'$E_K$'
+                        label_g=r'$\overline{E}_G$'
+                        label_k=r'$\overline{E}_K$'
                     ax3[nnn].plot(  RR_cuml*colors.length_units_au, EG_cuml, c=color_list[nnn], linestyle='-', linewidth=line,
                                   label=label_g)
                     ax3[nnn].plot( RR_cuml*colors.length_units_au, EK_cuml,  c=color_list[nnn], linestyle='--', linewidth=line,
@@ -330,9 +331,9 @@ for sim in sims:
     core_list=None
     #annotate_phases=False
     annotate_phases=True
-    #core_list = [114]
+    core_list = [114]
     #core_list=[74]
-    core_list = TL.loops[sim].core_by_mode['Alone']
-    core_list=core_list[:5]
+    #core_list = TL.loops[sim].core_by_mode['Alone']
+    #core_list=core_list[:5]
     frrt=anatomy(TL.loops[sim], do_plots=True, core_list=core_list, annotate_phases=annotate_phases)#, mass=mt[sim].unique_mass, dof=mt[sim].dof, volume=mt[sim].volume)
 

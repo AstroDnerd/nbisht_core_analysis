@@ -78,6 +78,7 @@ if 'tsing_tool' not in dir():
         obj=tsing.te_tc(TL.loops[sim])
         tsing_tool[sim]=obj
         tsing_tool[sim].run()
+
 import convex_hull_tools as CHT
 if 'ht' not in dir():
     ht = {}
@@ -85,7 +86,7 @@ if 'ht' not in dir():
         ht[sim]=CHT.hull_tool( TL.loops[sim])
         ht[sim].make_hulls()
 
-sim_list=['u502']
+#sim_list=['u502']
 
 if 'vs_0' not in dir():
     vs_0={} #initial frame
@@ -98,20 +99,30 @@ for sim in sim_list:
     core_list=None
     #core_list=[300]
     #core_list = TL.loops[sim].core_by_mode['Alone']
-    vs = vs_tsing(TL.loops[sim])
-    vs.run(core_list=core_list,tsing=tsing_tool[sim], frame='tsung')
-    vs_u[sim]=vs
 
-    vs = vs_tsing(TL.loops[sim])
-    vs.run(core_list=core_list,tsing=tsing_tool[sim], frame=0)
-    vs_0[sim]=vs
+    if 1:
+        vs = vs_tsing(TL.loops[sim])
+        vs.run(core_list=core_list,tsing=tsing_tool[sim], frame=0)
+        vs_0[sim]=vs
 
-    vs = vs_tsing(TL.loops[sim])
-    vs.run(core_list=core_list,tsing=tsing_tool[sim], frame='tsing')
-    vs_s[sim]=vs
+    if 0:
+        vs = vs_tsing(TL.loops[sim])
+        vs.run(core_list=core_list,tsing=tsing_tool[sim], frame='tsung')
+        vs_u[sim]=vs
+
+
+    if 0:
+        vs = vs_tsing(TL.loops[sim])
+        vs.run(core_list=core_list,tsing=tsing_tool[sim], frame='tsing')
+        vs_s[sim]=vs
 
 if 1:
+
+    #make pearson and table
     for frame, vs_tool in [[0,vs_0]]:#,['tsing',vs_s]
+        quan_by_sim={}
+
+        
         for sim in sim_list:
             vs = vs_tool[sim]
             htL = ht[sim]
@@ -139,16 +150,17 @@ if 1:
                 TheLR[quan]= "%0.2f"%LR[0]
 
             quan_list=['volume','hull_volumes','mass','ge','ke','avg_v3','avg_vr','avg_vt','avg_tff']
-            quan_tex={'volume':r'$V_{\rm{particles}}$','mass':r'$\langle \rho \rangle$','ge':r'$E_G/V$',
-                      'ke':r'$E_K/V$','avg_v3':r'$v_{\rm{3d}}$','avg_vr':r'$v_r$','avg_vt':r'$v_t$','avg_tff':r'$t_{\rm{ff,core}}$','hull_volumes':r'$V_{\rm{hull}}$'}
-            import jinja2
-            loader=jinja2.FileSystemLoader('.')
-            env = jinja2.Environment(loader=loader)
-            main_template  = env.get_template('p19_plots/table2_template.tex')
-            fptr=open('plots_to_sort/table2.tex','w')
-            #quan_tex=dict(zip(quan_list,quan_list))
-            fptr.write(main_template.render(quan_list=quan_list,R=TheR,LR=TheLR,quan_tex=quan_tex))
-            fptr.close()
+            quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ E_G}$', 'ke':r'$\overline{ E_K }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$t_{\rm{ff}}$','hull_volumes':r'$V_{\rm{hull}}$'}
+            #quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\langle \rho \rangle$','ge':r'$\langle E_G\rangle$', 'ke':r'$\langle E_K \rangle $','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\langle v_r \rangle $','avg_vt':r'$\langle v_t\rangle$','avg_tff':r'$t_{\rm{ff}}$','hull_volumes':r'$V_{\rm{hull}}$'}
+            quan_by_sim[sim]=TheR
+        import jinja2
+        loader=jinja2.FileSystemLoader('.')
+        env = jinja2.Environment(loader=loader)
+        main_template  = env.get_template('p19_plots/table2_template.tex')
+        fptr=open('plots_to_sort/table2.tex','w')
+        #quan_tex=dict(zip(quan_list,quan_list))
+        fptr.write(main_template.render(quan_list=quan_list,R=quan_by_sim,quan_tex=quan_tex))
+        fptr.close()
 
 
 

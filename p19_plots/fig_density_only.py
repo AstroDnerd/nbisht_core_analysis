@@ -24,8 +24,8 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
     times.shape=times.size,1
     times=times/colors.tff
     rho_all = thtr.track_dict['density']
-    rho_min=rho_all.min()
-    rho_max=rho_all.max()
+    rho_min=rho_all.min()*colors.density_units
+    rho_max=rho_all.max()*colors.density_units
     fig,axes=plt.subplots(len(core_list),1, figsize=(4,8))
     fig.tight_layout()
     fig.subplots_adjust(hspace=0)
@@ -51,6 +51,7 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
 
         rho = ms.density[sl].transpose()
         rho = rho[mask,:]
+        rho *= colors.density_units
 
         sim_number=int(this_looper.sim_name[-1])
         ax.text(0,1e6,'sim%d core %d %s'%(sim_number, core_id, this_looper.mode_dict[core_id][-1]))
@@ -58,7 +59,7 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
         if tsing is not None:
             ax.axvline( tsing.tsing_core[core_id], c=[0.5]*3,linewidth=1)
             ax.axvline( tsing.tend_core[core_id], c=[0.5]*3,linewidth=1)
-        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
+        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho~[\rm{cm^{-3}]}$',yscale='log', ylim=[rho_min,rho_max])
 
     for na,aa in enumerate(axes):
         if na < len(axes)-1:

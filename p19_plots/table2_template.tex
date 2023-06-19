@@ -1,10 +1,10 @@
-\begin{table}[h] \begin{center} \input{table2_caption} \label{table2}                                                                                       
-\begin{tabular}{ r l  }
+\begin{table} \begin{center} \input{table2_caption} \label{table2}                                                                                       
+\begin{tabular}{ r l l l  }
     \hline
-
+Q & \sima & \simb & \simc \\
 \hline
 {% for quan in quan_list %}
-{{quan_tex[quan]}} & {{R[quan]}}   \\
+{{quan_tex[quan]}} & {{R['u501'][quan]}} & {{R['u502'][quan]}} & {{R['u503'][quan]}}   \\
 {% endfor %}
 \hline
 \end{tabular}                                                                                       
