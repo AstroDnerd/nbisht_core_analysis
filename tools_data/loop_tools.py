@@ -1,4 +1,5 @@
 import yt
+from tools.yt_names import *
 import matplotlib.pyplot as plt
 from yt.visualization.plot_modifications import *
 import pyximport; pyximport.install()
@@ -28,7 +29,7 @@ def check_particles(ds):
                 bad_index+= list(particles)
     return bad_index
 #g=check_particles(this_looper.ds_list[120])
-def get_leaf_clumps(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
+def get_leaf_clumps(ds,c_min=None,c_max=None,step=None,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
                      subset=None, peak_radius=1.5,bad_particle_list=None, small_test=False):
     """get all the leaf indices for peaks in *ds*.
     If *pickle_name* is supplied, load from that, or if it doesn't exist, save to that.
@@ -43,20 +44,24 @@ def get_leaf_clumps(ds,c_min=None,c_max=None,step=100,h5_name="NEW_PEAK_FILE.h5"
     #ad  = ds.sphere([0.52075195, 0.74682617, 0.01196289], 0.1)
     master_clump = Clump(ad,('gas','density'))
     master_clump.add_validator("min_cells", 8)
-    c_min = 10 #ad["gas", "density"].min()
+    if c_min is None:
+        c_min = 10 #ad["gas", "density"].min()
     #c_max = 534069645. # ad["gas", "density"].max()
-    c_max = ad["gas", "density"].max()
-    step = 100
+    if c_max is None:
+        c_max = ad["gas", "density"].max()
+    if step is None:
+        step = 100
     find_clumps(master_clump, c_min, c_max, step)
 # Write a text file of only the leaf nodes.
     #write_clumps(master_clump,0, "%s_clumps.txt" % ds)
 
-    leaf_clumps = get_lowest_clumps(master_clump)
+    #leaf_clumps = get_lowest_clumps(master_clump)
     return master_clump
 
+from yt.data_objects.level_sets.clump_tools import return_bottom_clumps
 def get_peak_indices(master_clump,ds,h5_name="file.h5"):
 
-    leaf_clumps = get_lowest_clumps(master_clump)
+    leaf_clumps = return_bottom_clumps(master_clump)
 
     peak_list=[]
     den_max=[]
@@ -66,9 +71,9 @@ def get_peak_indices(master_clump,ds,h5_name="file.h5"):
     for i in range(len(leaf_clumps)):
         den_max.append(leaf_clumps[i][('gas','density')].max())
         max_loc = np.where(leaf_clumps[i]['gas','density']==den_max[i])
-        a = leaf_clumps[i]['x'][max_loc][0]
-        b = leaf_clumps[i]['y'][max_loc][0]
-        c = leaf_clumps[i]['z'][max_loc][0]
+        a = leaf_clumps[i][YT_x][max_loc][0]
+        b = leaf_clumps[i][YT_y][max_loc][0]
+        c = leaf_clumps[i][YT_z][max_loc][0]
 
         this_peak = ds.arr([a,b,c],'code_length')
         peak_list.append(this_peak)

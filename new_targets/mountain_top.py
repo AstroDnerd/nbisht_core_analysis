@@ -7,6 +7,7 @@ import convex_hull_tools as CHT
 
 
 class meta_locations():
+    """Container object for data locations."""
     def __init__(self,this_simname,directory = None, frame = None, peak_fname=None, density_cut_fname=None):
         if directory is None:
             directory = dl.sims[this_simname]
@@ -37,6 +38,7 @@ class meta_locations():
         #peaks = nar([ np.array([0.89331055, 0.1159668 , 0.4440918 ])])
 
 class top():
+    """main mountain top object.  Data container, contains peak density and clumps."""
     def __init__(self, ds, location, top_to_bottom=3./4, rhomin=None, radius=1e-2, peak_id=-1):
         self.peak_id = peak_id
         self.radius = ds.arr(radius,'code_length')
@@ -55,14 +57,13 @@ class top():
         self.leaf = leaf1
 
 def check_overlap(leaf_storage):
+    """Check for overlap between cores."""
     import convex_hull_tools as CHT
     from collections import defaultdict
     from scipy.spatial import ConvexHull
     overlap_list = defaultdict(list)
     leaves = np.array(list(leaf_storage.keys()))
     for nleaf,core_1 in enumerate(leaves):
-        if core_1 in [198]:
-            continue
         particles_1 = leaf_storage[core_1][1]['particle_position'].v
         if particles_1.shape[0] < 4:
             continue
@@ -77,17 +78,8 @@ def check_overlap(leaf_storage):
                 overlap_list[core_1].append(core_2)
     return overlap_list
 
-def is_point_in(peak, test_main, tolerance=1./4096):
-    X = test_main['x'].to('code_length')
-    Y = test_main['y'].to('code_length')
-    Z = test_main['z'].to('code_length')
-    mask = ( np.abs(X - peak[0])<tolerance)*( np.abs(Y-peak[1])<tolerance)*(np.abs(Z-peak[2])<tolerance)
-    if mask.sum() == 0:
-        return False
-    return True
-
-
 def is_point_in_hull(points2, test_main, tolerance=1./4096):
+    """check of a point is in a convex hull of test_main"""
     X = test_main['x'].to('code_length')
     Y = test_main['y'].to('code_length')
     Z = test_main['z'].to('code_length')
@@ -101,15 +93,13 @@ def is_point_in_hull(points2, test_main, tolerance=1./4096):
         in_hull_1 = False
     return in_hull_1
 
-
-
 def leaf_with_center(leaf_list):
+    """This has a hard coded minimum point size.  For finding child leaves, maybe not the best method."""
     for leaf in leaf_list:
         if leaf['radius'].min()<1/4096:
             return leaf
-
-
 def get_density(peak, test_main):
+    """Find the density at a location within a yt region"""
     X = test_main[YT_x].to('code_length')
     Y = test_main[YT_y].to('code_length')
     Z = test_main[YT_z].to('code_length')
@@ -120,6 +110,7 @@ def get_density(peak, test_main):
     return test_main['density'][mask]
 
 def read_peaks(this_simname):
+    """read the peak hdf5 file"""
     peak_fname = dl.peak_list[this_simname]
     fptr = h5py.File(peak_fname,'r')
     try:
@@ -131,6 +122,7 @@ def read_peaks(this_simname):
     return peaks
 
 class target_info():
+    """Target object for the tracker."""
     def __init__(self,  peak_id = None, peak_density=None, min_density=None,
                  peak_location = None, nzones=None,
                  particle_index = None, h5ptr=None):
@@ -159,57 +151,12 @@ class target_info():
         group.create_dataset("nzones",        data = self.nzones)
         group.create_dataset("particle_index",data = self.particle_index)
 
-class target_tree():
-    def __init__(self,ds=None,fname=None):
-        self.targets=None
-        self.target_indices={}
-        self.leaves={}
-        self.ds=ds
-        if fname is not None:
-            self.read_targets(fname)
-    def read_targets(self,target_fname):
-        self.all_particles=np.array([])
-        self.core_ids_by_particle=np.array([])
-        if self.targets is None:
-            self.targets = {}
-        h5ptr = h5py.File(target_fname,'r')
-        for group_name in h5ptr:
-            core_id = h5ptr[group_name]['peak_id'][()]
-            #read from disk
-            self.targets[core_id] = target_info(h5ptr=h5ptr[group_name])
-            self.target_indices[core_id] = self.targets[core_id].particle_index
-
-            #check for uniqueness
-            self.all_particles=np.append(self.all_particles, self.target_indices[core_id] )
-            if np.unique(self.all_particles).size - self.all_particles.size:
-                print("FATAL ERROR: repeated particle, ", core_id)
-                pdb.set_trace()
-            #I might need this later when I revamp get_tracks again.
-            these_core_ids=[core_id]*self.target_indices[core_id].size
-            self.core_ids_by_particle=np.append(self.core_ids_by_particle, these_core_ids)
-
-        h5ptr.close()
-        self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
-    def make_leaves_check(self):
-        if self.leaves is None:
-            self.leaves={}
-        for core_id in self.targets:
-            T = self.targets[core_id]
-            sph = self.ds.sphere( T.peak_location, 1e-2)
-            clump = Clump(sph,('gas','density'))
-            clump.find_children( T.min_density, T.peak_density)
-            for leaf1 in clump.children:
-                min_radius=leaf1['radius'].min()
-                if min_radius < 1./2048:
-                    break
-            self.leaves[core_id] = leaf1
-
-            self.leaves
-
 
 
 def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directory = None, frame = None, peak_fname=None, work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
                     verify=None, leaf_storage=None,radius=1e-2, cut_override={}, radius_dict={}):
+
+    """Loop over peaks.  Make mountain tops."""
     meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname)
     meta.density_cuts.update(cut_override)
 
@@ -550,3 +497,51 @@ def recursive_print(children):
         print(child.contour_level)
         if len(child.children):
             recursive_print(child.children)
+
+class target_tree():
+    """Unused."""
+    def __init__(self,ds=None,fname=None):
+        self.targets=None
+        self.target_indices={}
+        self.leaves={}
+        self.ds=ds
+        if fname is not None:
+            self.read_targets(fname)
+    def read_targets(self,target_fname):
+        self.all_particles=np.array([])
+        self.core_ids_by_particle=np.array([])
+        if self.targets is None:
+            self.targets = {}
+        h5ptr = h5py.File(target_fname,'r')
+        for group_name in h5ptr:
+            core_id = h5ptr[group_name]['peak_id'][()]
+            #read from disk
+            self.targets[core_id] = target_info(h5ptr=h5ptr[group_name])
+            self.target_indices[core_id] = self.targets[core_id].particle_index
+
+            #check for uniqueness
+            self.all_particles=np.append(self.all_particles, self.target_indices[core_id] )
+            if np.unique(self.all_particles).size - self.all_particles.size:
+                print("FATAL ERROR: repeated particle, ", core_id)
+                pdb.set_trace()
+            #I might need this later when I revamp get_tracks again.
+            these_core_ids=[core_id]*self.target_indices[core_id].size
+            self.core_ids_by_particle=np.append(self.core_ids_by_particle, these_core_ids)
+
+        h5ptr.close()
+        self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
+    def make_leaves_check(self):
+        if self.leaves is None:
+            self.leaves={}
+        for core_id in self.targets:
+            T = self.targets[core_id]
+            sph = self.ds.sphere( T.peak_location, 1e-2)
+            clump = Clump(sph,('gas','density'))
+            clump.find_children( T.min_density, T.peak_density)
+            for leaf1 in clump.children:
+                min_radius=leaf1['radius'].min()
+                if min_radius < 1./2048:
+                    break
+            self.leaves[core_id] = leaf1
+
+            self.leaves

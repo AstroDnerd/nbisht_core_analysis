@@ -263,9 +263,9 @@ class core_looper2():
             #self.target_indices = self.targets[core_id].particle_index
 
             #check for uniqueness
-        if np.unique(self.target_indices).size - self.target_indices.size:
-            print("FATAL ERROR: repeated particle, ", core_id)
-            pdb.set_trace()
+            if np.unique(self.target_indices).size - self.target_indices.size:
+                print("FATAL ERROR: repeated particle, ", core_id)
+                pdb.set_trace()
 
         h5ptr.close()
         self.core_list = np.sort( np.unique( self.core_ids) )
