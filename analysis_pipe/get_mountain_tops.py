@@ -2,10 +2,9 @@ from starter2 import *
 
 import mountain_top
 reload(mountain_top)
-reload(looper)
-import tracks_read_write
-reload(tracks_read_write)
 
+import coreset_data
+reload(coreset_data)
 
 #
 # Mountain top removal tool.
@@ -14,23 +13,26 @@ reload(tracks_read_write)
 # 3.) Separate peaks by contouring
 # 4.) Re-run mountain top removal.
 
-this_simname = 't02'
-mountain_top_name = "%s_mountain_tops.h5"%this_simname
-do_mountain_projections=True
+def get_mountain_tops(trackname):
+    this_track = track_info.tracks[trackname]
+    mountain_top_name = this_track.mountain_top
 
-import coreset_data
-reload(coreset_data)
-verifier = coreset_data.verify_cores_generic
-this_radius_dict={}
+    if os.path.exists(mountain_top_name):
+        print("File exists, not performing mountain tops.", mountain_top_name)
+        return 0
+
+    do_mountain_projections=True
+
+    verifier = coreset_data.verify_cores_generic
+    this_radius_dict={}
 
 #
 # 1.) Make all the mountain tops.  First pass.
 #
-if 'leaf_storage_all' not in dir():#'leaf_storage' not in dir() and False:
     leaf_storage_tmp={}
     kludge={}
     #kludge={}
-    MT=mountain_top.cut_mountain_top( this_simname, target_fname = mountain_top_name, 
+    MT=mountain_top.cut_mountain_top( trackname, target_fname = mountain_top_name, 
                                      do_projections=False, verify=verifier,
                                      leaf_storage=leaf_storage_tmp, kludge=kludge, 
                                      radius_dict=this_radius_dict)
@@ -40,7 +42,6 @@ if 'leaf_storage_all' not in dir():#'leaf_storage' not in dir() and False:
 #
 # 2.) Check for overlap.
 #
-if 1:
     overlap_all=mountain_top.check_overlap(leaf_storage_all)
 
 
@@ -48,20 +49,18 @@ if 1:
 # 3.) Separate cores with overlap.
 #
 
-if 1:
     new_thresholds = {}  #this gets filled with new thresholds
     if 'all_peaks_tmp' not in dir():
         all_peaks_tmp=defaultdict(dict)     #this is just to reduce redundant work when debugging.
-    mountain_top.split_all(this_simname, overlap_all, new_thresholds, all_peaks_tmp, 
+    mountain_top.split_all(trackname, overlap_all, new_thresholds, all_peaks_tmp, 
                            do_projections=False, radius_dict=this_radius_dict)
 
 #
 # 4.) Make all the leaves again, with new thresholds.  Makes PEAK images of all peaks, even rejects.
 #
-if 1:
     leaf_storage_2={}
     kludge={}
-    MT=mountain_top.cut_mountain_top( this_simname, target_fname = mountain_top_name, 
+    MT=mountain_top.cut_mountain_top( trackname, target_fname = mountain_top_name, 
                                      do_projections=True, verify=verifier,
                                      kludge=kludge, leaf_storage=leaf_storage_2, 
                                      cut_override = new_thresholds, 
