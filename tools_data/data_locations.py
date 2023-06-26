@@ -24,8 +24,6 @@ if machine == 'Nazare':
     sim_u10 = '/archive2/dcollins4096/Paper19/u10_r4_l4_128-Beta2/GravPotential'
     sim_u11 = '/archive2/dcollins4096/Paper19/u11_r4_l4_128-Beta20/GravPotential'
     
-    sim_t02 = '/archive2/dcollins4096/Paper19/u10_r4_l4_128-Beta2/GravPotential'
-
     sim_u101 = '/archive2/dcollins4096/Paper19/u05-r4-l4-128-Beta0.2'
     sim_u102 = '/archive2/dcollins4096/Paper19/u10_r4_l4_128-Beta2/GravPotential'
     sim_u103 = '/archive2/dcollins4096/Paper19/u11_r4_l4_128-Beta20/GravPotential'
@@ -110,47 +108,49 @@ sims.update({'u901':sim_u501,'u902':sim_u502,'u903':sim_u503})
 sims['t02']=sim_t02
 sims['u14']=sim_u14
 
-
-peaks_u05 = 'datasets_small/u05_0125_peaklist.h5'
-peaks_u10 = 'datasets_small/u10_0082_peaklist.h5'
-peaks_u11 = 'datasets_small/u11_0088_peaklist.h5'
-peaks_u101 = 'datasets_small/u101_0080_peaklist.h5'
-peaks_u102 = 'datasets_small/u102_0080_peaklist.h5'
-peaks_u103 = 'datasets_small/u103_0080_peaklist.h5'
-peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'
-peaks_u203 = 'datasets_small/u203_0107_peaklist.h5'
-peaks_u14  = 'datasets_small/u14_0025_peaklist.h5'
-peaks_u301 = 'datasets_small/u301_0125_peaklist.h5'
-peaks_u302 = 'datasets_small/u302_0118_peaklist.h5'
-peaks_u303 = 'datasets_small/u303_0107_peaklist.h5'
-peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103}
-peak_list.update( {'u201':peaks_u05,'u202':peaks_u202, 'u203':peaks_u203})
-peak_list.update( {'u301':peaks_u301,'u302':peaks_u302, 'u303':peaks_u303})
-peak_list.update( {'u701':peaks_u301,'u702':peaks_u302, 'u703':peaks_u303})
-peak_list['u14']=peaks_u14
-peak_list['t02']="datasets_small/t02_0060_peaklist.h5"
+new_tracks = coresets['ourset']+"/NewTracks"
 
 
-target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u14':25}
-target_frames.update({'u201':125,'u202':118,'u203':107})
-target_frames.update({'u301':125,'u302':118,'u303':107})
-target_frames.update({'u401':125,'u402':118,'u403':107})
-target_frames.update({'u501':125,'u502':118,'u503':107})
-target_frames.update({'u601':125,'u602':118,'u603':107})
-target_frames.update({'u701':125,'u702':118,'u703':107})
-target_frames['t02']=60 #half a free fall time
-
-bad_particles_u05='datasets_small/u05_bad_particles.h5'
-bad_particles={'u05':bad_particles_u05,'u10':None,'u11':None}
-
-n_particles={'u05':'datasets_small/u05_n_particles.txt',
-             'u10':'datasets_small/u10_n_particles.txt',
-             'u11':'datasets_small/u11_n_particles.txt',
-             'u101':'datasets_small/u101_n_particles.txt',
-             'u102':'datasets_small/u102_n_particles.txt',
-             'u103':'datasets_small/u103_n_particles.txt',
-             'u301':'datasets_small/u301_n_particles.txt',
-             'u302':'datasets_small/u302_n_particles.txt',
-             'u303':'datasets_small/u303_n_particles.txt',
-             'u14':'datasets_small/u14_n_particles.txt'}
-
+#peaks_u05 = 'datasets_small/u05_0125_peaklist.h5'
+#peaks_u10 = 'datasets_small/u10_0082_peaklist.h5'
+#peaks_u11 = 'datasets_small/u11_0088_peaklist.h5'
+#peaks_u101 = 'datasets_small/u101_0080_peaklist.h5'
+#peaks_u102 = 'datasets_small/u102_0080_peaklist.h5'
+#peaks_u103 = 'datasets_small/u103_0080_peaklist.h5'
+#peaks_u202 = 'datasets_small/u202_0118_peaklist.h5'
+#peaks_u203 = 'datasets_small/u203_0107_peaklist.h5'
+#peaks_u14  = 'datasets_small/u14_0025_peaklist.h5'
+#peaks_u301 = 'datasets_small/u301_0125_peaklist.h5'
+#peaks_u302 = 'datasets_small/u302_0118_peaklist.h5'
+#peaks_u303 = 'datasets_small/u303_0107_peaklist.h5'
+#peak_list = {'u05':peaks_u05,'u10':peaks_u10,'u11':peaks_u11, 'u101':peaks_u101,'u102':peaks_u102,'u103':peaks_u103}
+#peak_list.update( {'u201':peaks_u05,'u202':peaks_u202, 'u203':peaks_u203})
+#peak_list.update( {'u301':peaks_u301,'u302':peaks_u302, 'u303':peaks_u303})
+#peak_list.update( {'u701':peaks_u301,'u702':peaks_u302, 'u703':peaks_u303})
+#peak_list['u14']=peaks_u14
+#peak_list['t02']="datasets_small/t02_0060_peaklist.h5"
+#
+#
+#target_frames={'u05':125,'u10':82,'u11':88,'u101':80,'u102':80,'u103':80,'u14':25}
+#target_frames.update({'u201':125,'u202':118,'u203':107})
+#target_frames.update({'u301':125,'u302':118,'u303':107})
+#target_frames.update({'u401':125,'u402':118,'u403':107})
+#target_frames.update({'u501':125,'u502':118,'u503':107})
+#target_frames.update({'u601':125,'u602':118,'u603':107})
+#target_frames.update({'u701':125,'u702':118,'u703':107})
+#target_frames['t02']=60 #half a free fall time
+#
+#bad_particles_u05='datasets_small/u05_bad_particles.h5'
+#bad_particles={'u05':bad_particles_u05,'u10':None,'u11':None}
+#
+#n_particles={'u05':'datasets_small/u05_n_particles.txt',
+#             'u10':'datasets_small/u10_n_particles.txt',
+#             'u11':'datasets_small/u11_n_particles.txt',
+#             'u101':'datasets_small/u101_n_particles.txt',
+#             'u102':'datasets_small/u102_n_particles.txt',
+#             'u103':'datasets_small/u103_n_particles.txt',
+#             'u301':'datasets_small/u301_n_particles.txt',
+#             'u302':'datasets_small/u302_n_particles.txt',
+#             'u303':'datasets_small/u303_n_particles.txt',
+#             'u14':'datasets_small/u14_n_particles.txt'}
+##
