@@ -2,18 +2,20 @@
 from starter2 import *
 from collections import defaultdict
 
-def read(sim_name):
+def read(fname, method=0):
+    #method==0 assumes an hdf5 file
+    #method==1 assumes a csv.  Not recommended.
 
-    if 1:
-        sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-        fname = "browser_data/core_formation_mode_new_u60%d.h5"%sim_id
+    if method==0:
+        #sim_id = int(sim_name[-1]) #last character is all we need. 501=601
+        #fname = "browser_data/core_formation_mode_new_u60%d.h5"%sim_id
         fptr=h5py.File(fname,'r')
         core_ids = fptr['core_ids'][()]
         modes_str = fptr['modes'][()].astype(str)
         modes_tmp = [sss.split(',') for sss in modes_str]
     else:
         sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-        fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
+        #fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
         fptr = open(fname)
         lines = fptr.readlines()
         fptr.close()
