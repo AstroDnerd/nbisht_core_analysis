@@ -1,6 +1,7 @@
 
 from starter2 import *
 from collections import defaultdict
+import re
 
 def read(fname, method=0):
     #method==0 assumes an hdf5 file
@@ -37,9 +38,11 @@ def read(fname, method=0):
 
     modes=[]
     unique_modes=[]
+    mode_label_dict={}
 
     core_by_mode=defaultdict(list)
 
+    regexp = re.compile(r'([ABC])(\d+)')
     for nm, mode in enumerate(modes_tmp):
         add_binary=False
         add_cluster=False
@@ -48,6 +51,11 @@ def read(fname, method=0):
         merge=False
         for mmm in mode:
             m = mmm.strip()
+            match = regexp.match(m)
+            if match is not None:
+                mode_label_dict[core_ids[nm]]=m
+
+
             if m not in unique_modes:
                 unique_modes.append(m)
             if m.startswith('B'):
@@ -78,6 +86,8 @@ def read(fname, method=0):
         core_by_mode[F] = nar( core_by_mode[F])
 
     mode_dict = dict(zip(core_ids,modes))
-    return {'core_ids':core_ids, 'modes':modes, 'mode_dict':mode_dict, 'core_by_mode':core_by_mode, 'unique_modes':unique_modes}
+    output={'core_ids':core_ids, 'modes':modes, 'mode_dict':mode_dict, 'core_by_mode':core_by_mode, 'unique_modes':unique_modes}
+    output['mode_label_dict']=mode_label_dict
+    return output
 
 
