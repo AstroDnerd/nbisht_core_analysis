@@ -29,11 +29,8 @@ def check_particles(ds):
                 bad_index+= list(particles)
     return bad_index
 #g=check_particles(this_looper.ds_list[120])
-def get_leaf_clumps(ds,c_min=None,c_max=None,step=None,h5_name="NEW_PEAK_FILE.h5",pickle_name=None, 
-                     subset=None, peak_radius=1.5,bad_particle_list=None, small_test=False):
+def get_leaf_clumps(ds,c_min=None,c_max=None,step=None, small_test=False):
     """get all the leaf indices for peaks in *ds*.
-    If *pickle_name* is supplied, load from that, or if it doesn't exist, save to that.
-    *subset*, if supplied, will restrict the indices returned.
     """
     if small_test:
         #center = ds.arr([0.07104492, 0.05688477, 0.1862793 ],'code_length')
@@ -52,10 +49,6 @@ def get_leaf_clumps(ds,c_min=None,c_max=None,step=None,h5_name="NEW_PEAK_FILE.h5
     if step is None:
         step = 100
     find_clumps(master_clump, c_min, c_max, step)
-# Write a text file of only the leaf nodes.
-    #write_clumps(master_clump,0, "%s_clumps.txt" % ds)
-
-    #leaf_clumps = get_lowest_clumps(master_clump)
     return master_clump
 
 from yt.data_objects.level_sets.clump_tools import return_bottom_clumps
