@@ -152,10 +152,14 @@ class core_looper2():
     def read_mode(self):
         import read_mode
         reload(read_mode)
+        if self.mode_fname is None or not os.path.exists(self.mode_fname):
+            print("No extant mode.  Please create.  Ignoring.")
+            return
         if self.mode_fname is not None:
             package = read_mode.read( self.mode_fname)
             self.modes = package['modes']
             self.mode_dict=package['mode_dict']
+            self.mode_label_dict=package['mode_label_dict']
             self.core_by_mode = package['core_by_mode']
             self.unique_modes = package['unique_modes']
             if np.abs( nar(sorted(package['core_ids'])) - nar(sorted(self.core_ids))).sum() > 0:
