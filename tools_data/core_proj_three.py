@@ -186,18 +186,18 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
         # main plot loop
         #
 
-        plot_collector=[]
         sph = ds.region(center,left,right)
+        Rmax = np.sqrt( ( (right-left)**2).max(axis=0)).max()
+        if hasattr(Rmax,'v'):
+            scale = Rmax.v #2*max([Rmax, scale_min]).v
+        else:
+            scale = Rmax
+        print("SCALE", scale)
+        scale = min([scale,1])
+        scale = max([scale,4/128])
+        plot_collector=[]
         for ax in axis_list:
-            Rmax = np.sqrt( ( (right-left)**2).max(axis=0)).max()
-            if hasattr(Rmax,'v'):
-                scale = Rmax.v #2*max([Rmax, scale_min]).v
-            else:
-                scale = Rmax
 
-            print("SCALE", scale)
-            scale = min([scale,1])
-            scale = max([scale,4/128])
             if 0:
                 if only_sphere:
                     sph = ds.region(center,left,right)
@@ -223,7 +223,6 @@ def core_proj_multiple(looper, camera=None, field='density', axis_list=[0,1,2], 
             elif type(zoom) == float or type(zoom) == int:
                 pw.zoom(zoom)
             if monotonic:
-                array = proj[field]
                 used_min = proj[field][ proj['weight_field']>0].min()
                 zmin,zmax = used_min, proj[field].max()
                 zlim = nar([zmin,zmax])
