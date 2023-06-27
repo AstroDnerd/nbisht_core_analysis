@@ -8,13 +8,14 @@ import convex_hull_tools as CHT
 
 class meta_locations():
     """Container object for data locations."""
-    def __init__(self,this_simname,directory = None, frame = None, peak_fname=None, density_cut_fname=None):
+    def __init__(self,trackname,directory = None, frame = None, peak_fname=None, density_cut_fname=None):
+        track = track_info.tracks[trackname]
         if directory is None:
-            directory = dl.sims[this_simname]
+            directory = track.sim_directory
         if frame is None:
-            frame = dl.target_frames[this_simname]
+            frame = track.target_frame
         if peak_fname is None:
-            peak_fname = dl.peak_list[this_simname]
+            peak_fname = track.peak_fname
         self.density_cuts={}
         if density_cut_fname is not None:
             dptr = h5py.File(density_cut_fname,'r')
@@ -44,7 +45,7 @@ class top():
         self.radius = ds.arr(radius,'code_length')
         self.location =     ds.arr(location,'code_length')
         self.region = ds.sphere(self.location,self.radius)
-        self.rhomax = get_density(self.location, self.region).v[0]
+        self.rhomax = get_density(self.location, self.region)
         self.rhomin = rhomin
         if self.rhomin is None:
              self.rhomin = self.rhomax**(top_to_bottom)
@@ -103,11 +104,12 @@ def get_density(peak, test_main):
     X = test_main[YT_x].to('code_length')
     Y = test_main[YT_y].to('code_length')
     Z = test_main[YT_z].to('code_length')
-    tolerance = 0.5/2048
-    mask = ( np.abs(X - peak[0])<tolerance)*( np.abs(Y-peak[1])<tolerance)*(np.abs(Z-peak[2])<tolerance)
-    if mask.sum() != 1:
-        pdb.set_trace()
-    return test_main['density'][mask]
+    #tolerance = 0.5/2048
+    #mask = ( np.abs(X - peak[0])<tolerance)*( np.abs(Y-peak[1])<tolerance)*(np.abs(Z-peak[2])<tolerance)
+    #if mask.sum() != 1:
+    #    pdb.set_trace()
+    index = np.argmin( (X-peak[0])**2+(Y-peak[1])**2+(Z-peak[2])**2)
+    return test_main['density'][index].v
 
 def read_peaks(this_simname):
     """read the peak hdf5 file"""
