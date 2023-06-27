@@ -85,7 +85,7 @@ class product():
         print(file_list)
 
     def get_frames(self,verbose=False):
-        data_path = self.data_dir+"/"+self.re_string
+        data_path = self.data_dir+self.re_string
         dirname = os.path.dirname(data_path)
         file_list = glob.glob(dirname+"/*")
         icut = len(self.data_dir)
@@ -93,6 +93,17 @@ class product():
             short_name = fname[icut:]
             link_name = self.link_dir+"/"+short_name
             match = self.regexp.match(short_name)
+            if 0:
+                #Regular Expressions got you down?
+                print('======')
+                print(self.re_string)
+                print(self.data_dir)
+                print(data_path)
+                print(dirname)
+                print(fname)
+                print(short_name)
+                print(self.regexp)
+                print(match)
             if match is None:
                 continue
             mygroups = match.groups()
