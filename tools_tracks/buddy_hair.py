@@ -138,7 +138,11 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
                 points_axis=(text_x,text_y)
                 axis_to_data = ax.transAxes + ax.transData.inverted()
                 points_data = axis_to_data.transform(points_axis)
-                ax.text( text_x,text_y,r'$c%04d$'%core_id, transform=ax.transAxes, color=color_dict.get(core_id,'k'))
+                if hasattr(this_looper,'mode_dict'):
+                    mode_label=this_looper.mode_label_dict[core_id]
+                else:
+                    mode_label=''
+                ax.text( text_x,text_y,r'$c%04d\ %s$'%(core_id,mode_label), transform=ax.transAxes, color=color_dict.get(core_id,'k'))
             if 0:
                 frame_ind=-1    
                 if what_to_plot in ['hair','centroid']:
