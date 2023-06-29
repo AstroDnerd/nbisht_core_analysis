@@ -1,14 +1,10 @@
 
-# FOR THREE PLOTS OF PAPER66
 '''
- PART OF P19_NEWSCRIPTS REPOSITORY:
-This script must be placed on: ~/p19_newscripts
-With: starter1.py, starter2.py on same directory.
- notes: 
- for debug purposes, long_list = long_list[:3]
-
     B = B0 rho^beta --> lnB = ln(B_0*rho^beta) -->
     lnB = beta*ln(rho) + lnB_0
+
+FOR FIGS 1, 3, 5, 6 OF PAPER66
+Scroll down or shift G in vim to choose the figure
 '''
 
 # - - - - - - - - - - - - - - - - - - - - 
@@ -145,7 +141,7 @@ class BRho_tool():
                 xlims = 10e-3,10e6      
                 ylims = 10e-2,10e3      
                 if n_time == asort[-1]: 
-                    ax1.plot(xx2,yy,c='k',linewidth=1.0)
+                    ax1.plot(xx2,yy,c='grey',linewidth=1.0)
                     ax1.plot(xx2,yym,'--',c='grey',linewidth=1.0)
                     BRho_tool.labelled(ax1,xscale='log',yscale='log',xlabel=r'$\rho/\rho_{o}$',ylabel=r'$\mid B \mid (\mu G)$',
                                        xlim=xlims, ylim=ylims)
@@ -153,7 +149,7 @@ class BRho_tool():
             if typeplot == 'frame_scatters':
                 if n_time in simframes:   
                     lplots[n_time].scatter(density[mask,n_time],magfield[mask,n_time],c=c,label=thtr.times[n_time],s=0.1)  #edit thtr.times          
-                    lplots[n_time].plot(xx2,yy,c='k',linewidth=1.0) #c=c[0] for colors
+                    lplots[n_time].plot(xx2,yy,c='grey',linewidth=0.6) #c=c[0] for colors
                     print("scatters plotted")             
                   
                     #print('nTIME',n_time)
@@ -437,14 +433,14 @@ class BRho_tool():
         the_bins = np.linspace(the_min,the_max,num=the_bins)  #'original': 64
         ax2.hist(self.betarr, bins=the_bins, density=True, histtype='step', color='k')
         ax2.axvline(the_FTA, color='grey', linestyle='dashed')
-        ax2.axvline(the_FTA_core, color='k')
+        #ax2.axvline(the_FTA_core, color='grey')
         #ax2.axvline(the_ATF, color='m')
 
         ax2.yaxis.tick_right()
-        ax2.set_xlabel(r'$\alpha$') 
-        ax2.set_ylabel('%') 
-        y_vals = ax2.get_yticks()
-        ax2.set_yticklabels(['{:.3f}'.format(x/len(self.betarr)) for x in y_vals])
+        ax2.set_xlabel(r'$\kappa$') 
+        #ax2.set_ylabel('%') 
+        #y_vals = ax2.get_yticks()
+        #ax2.set_yticklabels(['{:.3f}'.format(x/len(self.betarr)) for x in y_vals])
 
         outname = 'brhotff_histos_c%04d_%s'%(coreval,name)  
         fig.savefig(outname) 
@@ -603,7 +599,7 @@ FIGURE 6: type: 'vio_plot' ;time: 'per_frame'
 
 for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
     # TYPE: 
-    which_plot = 'frame_scatters' 
+    which_plot = 'box_plot' 
     # TIME:
     which_time = 'per_frame'
 
@@ -676,8 +672,5 @@ for nt,tool in enumerate([BRho_tool1,BRho_tool2,BRho_tool3]):
     if which_plot == 'vio_plot' and which_time == 'per_frame': 
         # CALL VIOLINPLOTS; Fig 6.              
         tool.violins(nt,simnames[nt],tff_labels)
-
-
-
 
 

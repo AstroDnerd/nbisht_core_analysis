@@ -23,9 +23,9 @@ class multipro():
         self.timescale=timescale
         this_looper=self.this_looper
         thtr=this_looper.tr
-        suites_to_use=[0]
+
         if get_particles:
-            suites_to_use=[0,1]
+            suites_to_use=[1]
         if core_list is None:
             core_list = np.unique(this_looper.tr.core_ids)
         def get_time_index(time):
@@ -102,21 +102,39 @@ class multipro():
                     the_midcyl_one = {}
                     xyz = [0,1,2]
 
-                    for i in range(3):  #get one direction right first
-                        the_midcyl_one[i] = ds.disk(the_center,the_normal[i],the_radius_one,height=the_radius_one) 
+                    if suite == 0:
+                        for i in range(3):  #get one direction right first
+                            the_midcyl_one[i] = ds.disk(the_center,the_normal[i],the_radius_one,height=the_radius_one) 
 
-                        #if suite == 0:
-                        dv = the_midcyl_one[i][YT_cell_volume]
-                        DD = the_midcyl_one[i][YT_density]
-                        BX = the_midcyl_one[i][YT_magnetic_field_x]
+                            dv = the_midcyl_one[i][YT_cell_volume]
+                            DD = the_midcyl_one[i][YT_density]
+                            BX = the_midcyl_one[i][YT_magnetic_field_x]
 
-                        b_los_mcyl_one = (DD*BX*dv).sum()/(DD*dv).sum()  #note I have cell_mass in other similar definitions. 
-                        columnrho_mcyl_one = (DD*dv).sum()/the_area_one
+                            b_los_mcyl_one = (DD*BX*dv).sum()/(DD*dv).sum()  #note I have cell_mass in other similar definitions. 
+                            columnrho_mcyl_one = (DD*dv).sum()/the_area_one
 
-                        collector['B_los_r1'].append(b_los_mcyl_one.v)  
-                        collector['N_r1'].append(columnrho_mcyl_one.v)
-                        collector['B_los_r1log'].append(nar(np.log10(abs(b_los_mcyl_one.v))))  
-                        collector['N_r1log'].append(nar(np.log10(abs(columnrho_mcyl_one.v))))
+                            collector['B_los_r1'].append(b_los_mcyl_one.v)  
+                            collector['N_r1'].append(columnrho_mcyl_one.v)
+                            collector['B_los_r1log'].append(nar(np.log10(abs(b_los_mcyl_one.v))))  
+                            collector['N_r1log'].append(nar(np.log10(abs(columnrho_mcyl_one.v))))
+
+                    if suite == 1:  
+                        mask = ms.compute_unique_mask(core_id, dx=1./2048,frame=nframe) 
+                        cell_volume = thtr.c([core_id],'cell_volume')[mask,nframe]
+                        density = thtr.c([core_id],'density')[mask,nframe]
+                        bx = thtr.c([core_id],'magnetic_field_x')[mask,nf]
+                        by = thtr.c([core_id],'magnetic_field_y')[mask,nf]
+                        bz = thtr.c([core_id],'magnetic_field_z')[mask,nf]                
+                        b = [bx, by, bz]
+                        for j in range(3):
+                            bparticles = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum() 
+                            rhoave = (density * cell_volume).sum()/cell_volume.sum()
+
+                            collector['B'].append(bparticles)
+                            collector['Rho'].append(rhoave) 
+                            collector['Blog'].append(nar(np.log10(abs(bparticles))))
+                            collector['Rholog'].append(nar(np.log10(abs(rhoave)))) 
+
 
                     if save_sorts:
                         print('maybe for later')

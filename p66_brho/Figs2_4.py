@@ -68,7 +68,7 @@ class magfield_density_tool():
                 bb = np.sqrt(bx*bx+by*by+bz*bz) 
  
                 # GETTING THE AVERAGES
-                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())
+                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())  #density weight note
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
 
 
@@ -96,11 +96,12 @@ simnames = [simname1, simname2, simname3]
 TURN ON WHICH FIGURE?
 '''
 # IF FIGURE 2 
-if 1:
+if 0:
     time = 'all_time'
 # IF FIGURE 4
-if 0:
+if 1:
     time = 'per_frame'
+    meanbear = []
 
 
 for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):   
@@ -177,7 +178,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
         if time == 'all_time': 
             tmap = rainbow_map(len(this_rho)) 
             ctr = [tmap(n) for n in range(len(this_rho))]  
-            ax1.scatter(this_rho, this_field,c=ctr,marker='*',alpha=0.5)  
+            ax1.scatter(this_rho, this_field,c=ctr,alpha=0.5) #marker='*'  
  
         if time == 'per_frame': 
             rho_extents=davetools.extents()
@@ -189,7 +190,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
             c2 = [tmap2(n) for n in range(len(this_rho))]  
             for i in range(len(this_rho)):
                 if i in frames: 
-                    lplots[i].scatter(this_rho[i],this_field[i],c=c2[i],marker='*')  #C2 gives me lots of notes, but it works... 
+                    lplots[i].scatter(this_rho[i],this_field[i],c=c2[i],s=2,marker='o')  #C2 gives me lots of notes, but it works... 
                     magfield_density_tool.labelled(lplots[i],xscale='log',yscale='log',xlabel=None,ylabel=None,\
                                                    title=None, xlim=rho_extents.minmax,ylim=magfield_extents.minmax)
                     ax2.tick_params(axis='y',labelleft=False)
@@ -215,6 +216,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
 
         spfit = np.polyfit(the_sx,the_sy,1)
         salpha = spfit[0]
+        meanbear.append(salpha)
 
         sXX = 10 ** sX 
         sY = 10 ** (spfit[0]*sX + spfit[1])                
@@ -223,7 +225,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
         # PLOT THE POWER LAW: per frame 
         if time == 'per_frame': 
             if i in frames:
-                lplots[i].plot(sXX,sY,c='k',linewidth=1.0)
+                lplots[i].plot(sXX,sY,c='grey',linewidth=0.8)
 
             outname = 'brhotffpanels_avgs_%s'%(simnames[nt])
             plt.savefig(outname)
@@ -237,6 +239,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
                 pearX,pearY = scipy.stats.pearsonr(the_sx,the_sy)
             else:
                 print("A zero encountered!!",xs,ys)
+    print('meanbear',meanbear)
 
 
     # PLOT THE POWER LAW: all time 
@@ -249,7 +252,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
         XX = 10 ** X
         Y = 10 ** (pfit[0]*X + pfit[1])                
         
-        ax1.plot(XX,Y,c='grey',linewidth=2.0, linestyle='dotted')
+        ax1.plot(XX,Y,c='grey',linewidth=2.0, linestyle='dashed')
         xlabels = r'$\left\langle \rho/\rho_{o} \right\rangle$'
         ylabels = r'$\left\langle\mid B \mid\right\rangle (\mu G)$'
         xlims = 1e-1,1e8
