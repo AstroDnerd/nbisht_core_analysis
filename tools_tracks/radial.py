@@ -18,6 +18,7 @@ class multipro():
         self.cores_used=[]
         self.profiles_gas={}
         self.profiles_part={}
+        self.ds={}
 
     def run(self, core_list=None, frame_list=None, tsing=None, timescale=0, get_particles=False, save_sorts=False):
         self.timescale=timescale

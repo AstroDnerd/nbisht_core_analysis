@@ -1,19 +1,22 @@
 
 from starter2 import *
 from collections import defaultdict
+import re
 
-def read(sim_name):
+def read(fname, method=0):
+    #method==0 assumes an hdf5 file
+    #method==1 assumes a csv.  Not recommended.
 
-    if 1:
-        sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-        fname = "browser_data/core_formation_mode_new_u60%d.h5"%sim_id
+    if method==0:
+        #sim_id = int(sim_name[-1]) #last character is all we need. 501=601
+        #fname = "browser_data/core_formation_mode_new_u60%d.h5"%sim_id
         fptr=h5py.File(fname,'r')
         core_ids = fptr['core_ids'][()]
         modes_str = fptr['modes'][()].astype(str)
         modes_tmp = [sss.split(',') for sss in modes_str]
     else:
         sim_id = int(sim_name[-1]) #last character is all we need. 501=601
-        fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
+        #fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
         fptr = open(fname)
         lines = fptr.readlines()
         fptr.close()
@@ -35,9 +38,11 @@ def read(sim_name):
 
     modes=[]
     unique_modes=[]
+    mode_label_dict={}
 
     core_by_mode=defaultdict(list)
 
+    regexp = re.compile(r'([ABC])(\d+)')
     for nm, mode in enumerate(modes_tmp):
         add_binary=False
         add_cluster=False
@@ -46,6 +51,11 @@ def read(sim_name):
         merge=False
         for mmm in mode:
             m = mmm.strip()
+            match = regexp.match(m)
+            if match is not None:
+                mode_label_dict[core_ids[nm]]=m
+
+
             if m not in unique_modes:
                 unique_modes.append(m)
             if m.startswith('B'):
@@ -76,6 +86,8 @@ def read(sim_name):
         core_by_mode[F] = nar( core_by_mode[F])
 
     mode_dict = dict(zip(core_ids,modes))
-    return {'core_ids':core_ids, 'modes':modes, 'mode_dict':mode_dict, 'core_by_mode':core_by_mode, 'unique_modes':unique_modes}
+    output={'core_ids':core_ids, 'modes':modes, 'mode_dict':mode_dict, 'core_by_mode':core_by_mode, 'unique_modes':unique_modes}
+    output['mode_label_dict']=mode_label_dict
+    return output
 
 

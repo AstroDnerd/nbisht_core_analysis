@@ -162,7 +162,7 @@ def accretion(things, tsing):
     output['mass_10k']=mass_r10k
     output['r10k']=r10k
     return output
-def plotmancer(obj, tsing):
+def plotmancer(obj, tsing, tall=True):
         core_id=obj.core_id
         #ax6.set(xlabel='R',xscale='log',ylabel='|V_r|',yscale='log')
         #ax6.set_title('Slope at tend: %0.2f'%pfit[0])
@@ -180,7 +180,16 @@ def plotmancer(obj, tsing):
 
 
 
-        fig,axes=plt.subplots(3,1,figsize=(4,8))
+        if tall:
+            nup = 3
+            nacross = 1
+            size=(4,8)
+        else:
+            nup=1
+            nacross = 3
+            size=(12,4)
+
+        fig,axes=plt.subplots(nup,nacross,figsize=size)
         #fig,axes=plt.subplots(2,2,figsize=(12,12))
         #ax0=axes[0][0]; ax1=axes[0][1] ax2=axes[1][0]; ax3=axes[1][1]
         ax0=axes[0];ax1=axes[1];ax2=axes[2]
@@ -224,31 +233,36 @@ def plotmancer(obj, tsing):
             fig.colorbar(plot, label=r'$\frac{\dot{M}}{M/ t_{ff}}$',ax=ax1)
             ax1.set(yscale='log', ylabel = r'$R~~[\rm{AU}]$')
 
-        AXX = ax1
-        thalf = 0.5*(obj.times[1:]+obj.times[:-1])
-        dt    =     (obj.times[1:]-obj.times[:-1])
-        #print(thalf.shape)
-        #print(obj.times.shape)
-        #print(MMM.shape)
-        dt.shape=1,dt.size
-        dMass = MMM[:,1:]-MMM[:,:-1]
-        Mcen  = 0.5*(MMM[:,1:]+MMM[:,:-1])
-        dMdt = dMass/dt/Mcen*colors.tff
-        ok = ~np.isnan(dMdt)
-        maxmax=np.abs(dMdt[ok]).max()
-        maxmax=4
-        norm2 = mpl.colors.Normalize(-maxmax,maxmax)
-        X2,Y2=np.meshgrid(thalf.flatten(),rcen)
-        plot3=AXX.pcolormesh(X2 ,Y2, dMdt,  norm=norm2, shading='nearest', cmap=cmap)
-        fig.colorbar(plot3,label=r'$\frac{d \ln M}{d t/tff}$', ax=AXX )
+        if 1:
+            #dMdt
+            AXX = ax1
+            thalf = 0.5*(obj.times[1:]+obj.times[:-1])
+            dt    =     (obj.times[1:]-obj.times[:-1])
+            #print(thalf.shape)
+            #print(obj.times.shape)
+            #print(MMM.shape)
+            dt.shape=1,dt.size
+            dMass = MMM[:,1:]-MMM[:,:-1]
+            Mcen  = 0.5*(MMM[:,1:]+MMM[:,:-1])
+            dMdt = dMass/dt/Mcen*colors.tff
+            ok = ~np.isnan(dMdt)
+            maxmax=np.abs(dMdt[ok]).max()
+            maxmax=4
+            norm2 = mpl.colors.Normalize(-maxmax,maxmax)
+            X2,Y2=np.meshgrid(thalf.flatten(),rcen)
+            plot3=AXX.pcolormesh(X2 ,Y2, dMdt,  norm=norm2, shading='nearest', cmap=cmap)
+            fig.colorbar(plot3,label=r'$\frac{d \ln M}{d t/tff}$', ax=AXX )
 
-        Rcen=0.5*(dMdTf[:,1:]+dMdTf[:,:-1])
-        fig6,ax666=plt.subplots(1,1)
-        #ax666.scatter(Rcen, dMdt)
-        ax666.hist(np.log(np.abs(Rcen.flatten())),histtype='step')
-        ax666.hist(np.log(np.abs(dMdt.flatten())*0.10),histtype='step')
-        print(dt)
-        fig6.savefig('plots_to_sort/fork_c%04d.png'%core_id)
+        if 0:
+            #why is \rho v_r not Mdot?
+            #understand me later. (same as above.)
+            Rcen=0.5*(dMdTf[:,1:]+dMdTf[:,:-1])
+            fig6,ax666=plt.subplots(1,1)
+            #ax666.scatter(Rcen, dMdt)
+            ax666.hist(np.log(np.abs(Rcen.flatten())),histtype='step')
+            ax666.hist(np.log(np.abs(dMdt.flatten())*0.10),histtype='step')
+            print(dt)
+            fig6.savefig('plots_to_sort/fork_c%04d.png'%core_id)
 
 
         newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
@@ -260,11 +274,14 @@ def plotmancer(obj, tsing):
         norm_grav = mpl.colors.LogNorm( vmin=0.01,vmax=100)
         ok = ~np.isnan(obj.RVg)
         AXX=ax2
-        plot=AXX.pcolormesh( XXX,YYY, np.abs(obj.RVg),  norm=norm_grav, shading='nearest', cmap=cmap)
-        fig.colorbar(plot,label='EG/EK', ax=AXX )
+        plot=AXX.pcolormesh( XXX,YYY, np.abs(1/obj.RVg),  norm=norm_grav, shading='nearest', cmap=cmap)
+        fig.colorbar(plot,label='EK/EG', ax=AXX )
         ax0.set(yscale='log', ylabel=r'$R~~[\rm{AU}]$', xticks=[])
         ax2.set(yscale='log',ylabel=r'$R~~[\rm{AU}]$',xlabel='t/tff', xlim=ax0.get_xlim())#,ylabel='R[AU]')
         ax1.set(yscale='log',ylabel=r'$R~~[\rm{AU}]$', xticks=[], xlim=ax0.get_xlim())
+        if tall==False:
+            ax0.set(xlabel='t/tff')
+            ax1.set(xlabel='t/tff')
         #pdb.set_trace()
         
         if 0:
@@ -349,6 +366,9 @@ class Relaxor():
             frame_list=thtr.frames[mask]
 
         rm = rainbow_map(len(frame_list))
+        if len(core_list) != 1:
+            print("Error: this tool only does one core at a time.")
+            pdb.set_trace()
         for core_id in core_list:
             self.core_id=core_id
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
@@ -360,6 +380,8 @@ class Relaxor():
             self.dMdT3d = np.zeros( [len(r_bins)-1, len(frame_list)])
             self.MMM = np.zeros( [len(r_bins)-1, len(frame_list)])
             self.RVg = np.zeros( [len(r_bins)-1, len(frame_list)])
+            self.Mcont={}
+            self.Rcont={}
             self.divv=np.zeros_like(self.MMM)
             self.meanvr=np.zeros_like(self.MMM)
             frame_rmap=rainbow_map(len(frame_list))
@@ -464,6 +486,9 @@ class Relaxor():
                 self.RVg[ok,nframe]=(EGmeans/EKmeans)[ok]
                 self.RVg[~ok,nframe]=np.nan
 
+                self.Mcont[nframe]=M_cuml
+                self.Rcont[nframe]=RR_cuml
+
                 #r_bins_c = 0.5*(r_bins[1:]+r_bins[:-1])
                 #ax6.plot(r_bins_c, vr_mean, c = frame_rmap(nframe))
                 if 0:
@@ -492,7 +517,7 @@ class Relaxor():
                     ax6[ax_index][0].plot( r_cen[ok], vr_mean[ok], c=c, linewidth=linewidth)
                     ax6[ax_index][1].plot( r_cen[ok], vt_mean[ok], c=c, linewidth=linewidth)
                     #ax6[0].hist( RR_cuml.v, histtype='step', color=c)
-            plotmancer(self,tsing)
+            #plotmancer(self,tsing)
 
 
 
@@ -519,7 +544,7 @@ if 'tsing_tool' not in dir():
 if 'things' not in dir():
     things={}
 
-if 1:
+if 0:
     #save and replot.
     if 0:
         thing_saver(things,sim)
@@ -527,7 +552,8 @@ if 1:
         thing_new = thing_reader('this_mass_flux_u502.h5')
     if 1:
         sim='u502'
-        accreter=accretion(thing_new, tsing_tool[sim])
+        if 'accreter' not in dir():
+            accreter=accretion(thing_new, tsing_tool[sim])
     if 1:
         plotsa(accreter,tsing_tool[sim])
 
@@ -535,7 +561,25 @@ if 1:
         #paper plot.  Read off disk.
         plotmancer( thing_new[114], tsing_tool[sim])
 
-if 0:
+def plotsb(things, tsing):
+
+    for core_id in things:
+        print('plot core %d'%core_id)
+        fig,ax=plt.subplots(1,1)
+        frames = sorted(things[core_id].Mcont.keys())
+        rmap = rainbow_map(len(frames))
+        r_end=things[core_id].Rcont[frames[-1]].v*colors.length_units_au
+        m_end=things[core_id].Rcont[frames[-1]].v*colors.mass_units_msun
+        ind_r100= np.argmin( np.abs(r_end-1000))
+        for frame in frames:
+            this_r = things[core_id].Rcont[frame]*colors.length_units_au
+            this_m = things[core_id].Mcont[frame]*colors.mass_units_msun
+            ax.plot(this_r,this_m,c=rmap(frame))
+        ax.set(xscale='log',yscale='log',xlabel='r [au]',ylabel='M [msun]')
+        fig.savefig('plots_to_sort/m_r_t_c%04d'%core_id)
+
+
+if 1:
     #new plots.
     for sim in sim_list:
         #all_cores=np.unique( TL.loops[sim].tr.core_ids)
@@ -553,7 +597,7 @@ if 0:
         #core_list=None
         #core_list = [9]
         core_list = TL.loops[sim].core_by_mode['Alone']
-        #core_list=core_list[4:7]
+        core_list=core_list[4:6]
 
         core_list = [114]
         for core_id in core_list:
@@ -563,9 +607,13 @@ if 0:
             thing.run(core_list=[core_id], do_plots=True, frame_list=None, tsing=tsing_tool[sim])#, r_inflection=anne.inflection[sim])
             things[core_id]=thing
 
-        plotmancer(thing, tsing_tool[sim])
-
+    if 0:
+        plotsb(things, tsing_tool[sim])
     if 1:
+        plotmancer(thing, tsing_tool[sim], tall=False)
+
+    if 0:
+        #really, don't overwrite things. please.
         thing_saver(things,sim)
     if 0:
         if 'accreter' not in dir() or True:
@@ -573,6 +621,9 @@ if 0:
     if 0:
         plotsa(accreter,tsing_tool[sim])
 
+    if 0:
+        for core_id in things:
+            plotmancer(things[core_id], tsing_tool[sim])
     if 0:
         for core_id in things:
             #plotmancer(things[core_id], tsing_tool[sim])

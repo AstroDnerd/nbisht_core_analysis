@@ -686,6 +686,45 @@ class mini_scrubber():
         self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
     def compute_ke_rel(self,core_id):
         self.ke_rel = 0.5*self.density*(self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)
+    """
+    def compute_Rb(self):
+        core_id=self.core_id
+            bx   =extract(thtr.c([core_id],'magnetic_field_x'))
+            by   =extract(thtr.c([core_id],'magnetic_field_y'))
+            bz   =extract(thtr.c([core_id],'magnetic_field_z'))
+            vx   =extract(thtr.c([core_id],'velocity_x'))
+            vy   =extract(thtr.c([core_id],'velocity_y'))
+            vz   =extract(thtr.c([core_id],'velocity_z'))
+            dxvx =extract(thtr.c([core_id],'dxvx'))
+            dxvy =extract(thtr.c([core_id],'dxvy'))
+            dxvz =extract(thtr.c([core_id],'dxvz'))
+            dyvx =extract(thtr.c([core_id],'dyvx'))
+            dyvy =extract(thtr.c([core_id],'dyvy'))
+            dyvz =extract(thtr.c([core_id],'dyvz'))
+            dzvx =extract(thtr.c([core_id],'dzvx'))
+            dzvy =extract(thtr.c([core_id],'dzvy'))
+            dzvz =extract(thtr.c([core_id],'dzvz'))
+
+            if OOM:
+                self.dxvx=dxvx
+                self.dxvy=dxvy
+                self.dxvz=dxvz
+                self.dyvx=dyvx
+                self.dyvy=dyvy
+                self.dyvz=dyvz
+                self.dzvx=dzvx
+                self.dzvy=dzvy
+                self.dzvz=dzvz
+                self.dixj=[[self.dxvx,self.dxvy,self.dxvz],
+                           [self.dyvx,self.dyvy,self.dyvz],
+                           [self.dzvx,self.dzvy,self.dzvz]]
+            Sx = bx*dxvx+by*dyvx+bz*dzvx
+            Sy = bx*dxvy+by*dyvy+bz*dzvy
+            Sz = bx*dxvz+by*dyvz+bz*dzvz
+            Stretch= bx*Sx+by*Sy+bz*Sz
+
+            R = Stretch/(B2*divv)
+            """
 
 
 

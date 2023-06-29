@@ -44,274 +44,163 @@ class dq_dt():
             fig,ax_square=plt.subplots(2,2)
             ax=ax_square.flatten()
 
-        if ms.nparticles < 1000:
-            sl=slice(None)
-            c=[0.5]*4
-        else:
-            sl = slice(None,None,10)
-            #c=[0,0,0,0.1]
-            c=[0.1]*4
+        #if ms.nparticles < 1000:
+        #    sl=slice(None)
+        #else:
+        #    sl = slice(None,None,10)
+        #    #c=[0,0,0,0.1]
+        #    c=[0.1]*4
+        c=[0.5]*4
+        sl=slice(None)
         rho = ms.density[sl].transpose()
         rho = rho[mask,:]
-        B=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
-        B = B**2/2
         divv=thtr.c([core_id],'velocity_divergence')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
+        #B=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
+        #B = B**2/2
 
-        fig, ax=plt.subplots(3,6,figsize=(20,12))
-        ax0=ax[0][0];ax1=ax[0][1] 
-        ax2=ax[1][0];ax3=ax[1][1]
-        ax4=ax[2][0];ax5=ax[2][1]
-        ax6=ax[0][2];
-        ax7=ax[1][2]
+        fig, ax=plt.subplots(3,3,figsize=(12,12))
+        ax0=ax[0][0];
+        ax1=ax[0][1] 
+        ax2=ax[0][2];
+
+
+        ax3=ax[1][0]
+        ax4=ax[1][1];
+        ax5=ax[1][2]
+        ax6=ax[2][0];
+        ax7=ax[2][1]
         ax8=ax[2][2]
-        ax9=ax[0][3]
-        ax10=ax[1][3]
-        ax11=ax[2][3]
-        ax12=ax[0][4]
-        ax13=ax[1][4]
-        ax14=ax[2][4]
-        ax15=ax[0][5]
-        ax16=ax[1][5]
-        ax17=ax[2][5]
+        #ax9=ax[0][3]
+        #ax10=ax[1][3]
+        #ax11=ax[2][3]
+        #ax12=ax[0][4]
+        #ax13=ax[1][4]
+        #ax14=ax[2][4]
+        #ax15=ax[0][5]
+        #ax16=ax[1][5]
+        #ax17=ax[2][5]
 
 
-        if 0:
-            #unsmoothed.  Noisy
-            ax0.plot(times , rho, c=c, linewidth=0.1)
-            axbonk(ax0,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log')#, ylim=[rho_min,rho_max])
 
-            c2 = copy.copy(c)
-            c2[0]=0
-            ax0.plot(times, B, c=c2,linewidth=0.1)
-            #axbonk(ax, xlabel=r'$t/t_{ff}$',ylabel='B', yscale='log')
-
-
-            ##ax2.plot( dt, drho_dt, c=c,linewidth=0.1)
-            #ax2.plot(times[1:]-times[:-1])
-            #ax2.set( ylim = [dt_square.mean()*(0.99), dt_square.mean()*1.01])
-            drho_dt = (rho[1:, :] - rho[:-1,:])/dt_square
-            ax2.plot( tcenter, drho_dt, c=c, linewidth=0.1)
-            ax2.set_yscale('symlog',linthresh=0.5)
-        if 0:
-            for frame in nf:
-                
-                the_x=dsmooth_dt[frame,:]
-                ax1.hist( the_x, bins=bins, histtype='step', color=rm(frame), density=True)
-            ax1.set_xscale('symlog',linthresh=10)
-            ax1.set_yscale('log')
-
-        nf = np.arange(tcenter.size)
-        rm = rainbow_map(tcenter.size)
-
-        smooth=ndimage.gaussian_filter1d(rho, 2, 0)
-        ax0.plot( times, smooth, c=c,linewidth=0.1)
+        rho_smooth=ndimage.gaussian_filter1d(rho, 2, 0)
+        ax0.plot( times, rho_smooth, c=c,linewidth=0.1)
         ax0.set(yscale='log', ylabel='rho smooth')
 
-        dsmooth_dt = (smooth[1:,:]-smooth[:-1,:])/dt_square
-        drho_dt=dsmooth_dt
-        ax2.plot( tcenter, dsmooth_dt, c=c,linewidth=0.1)
-        ax2.set_yscale('symlog',linthresh=100)
-        ax2.set(ylabel='drho/dt')
-
+        dsmooth_dt = (rho_smooth[1:,:]-rho_smooth[:-1,:])/dt_square
+        ax1.plot( tcenter, dsmooth_dt, c=c,linewidth=0.1)
+        ax1.set_yscale('symlog',linthresh=100)
+        ax1.set(ylabel='drho/dt, finite')
 
         bins_1 = np.geomspace( 1,1e9,19)
         bins_m1 = -bins_1[::-1]
         bins = nar(list(bins_m1)+list(bins_1))
 
         drdt_x, drdt_y, drdt_h, drdt_dv, drdt_ploot=\
-                heat_map.heat_map( dsmooth_dt.transpose(), tcenter, bins=bins, ax=ax4)
-        ax4.set_yscale('symlog',linthresh=100)
+                heat_map.heat_map( dsmooth_dt.transpose(), tcenter, bins=bins, ax=ax2)
+        ax2.set_yscale('symlog',linthresh=100)
+        ax2.set(ylabel='drho/dt finite')
 
-        twin = ax4.twinx()
-        fraction_positive = ( dsmooth_dt > 0).sum(axis=1)/dsmooth_dt.shape[0]
-        twin.plot(tcenter, fraction_positive)
-        twin.set(ylim=[0,1])
+        #twin = ax4.twinx()
+        #fraction_positive = ( dsmooth_dt > 0).sum(axis=1)/dsmooth_dt.shape[0]
+        #twin.plot(tcenter, fraction_positive)
+        #twin.set(ylim=[0,1])
+
 
         #
         #
         #
+        divv_smooth= ndimage.gaussian_filter1d(divv, 2, 0)
+        ext=extents()
+        ext(np.abs(divv_smooth))
 
-        smooth=ndimage.gaussian_filter1d(B, 2, 0)
-        ax1.plot( times, smooth, c=c,linewidth=0.1)
-        ax1.set(yscale='log', ylabel='B smooth')
-
-        dsmooth_dt = (smooth[1:,:]-smooth[:-1,:])/dt_square
-        dB_dt = dsmooth_dt
-        ax3.plot( tcenter, dsmooth_dt, c=c,linewidth=0.1)
+        ax3.plot( times, divv_smooth, c=c,linewidth=0.1)
         ax3.set_yscale('symlog',linthresh=100)
-        ax3.set(ylabel='d/dt')
+        ax3.set(ylabel='div v')
 
+
+        bins_1 = np.geomspace( 1,ext.minmax[1],19)
+        bins_m1 = -bins_1[::-1]
+        bins = nar(list(bins_m1)+list(bins_1))
+
+        heat_map.heat_map( divv_smooth.transpose(), times, bins=bins, ax=ax4)
+        ax4.set_yscale('symlog',linthresh=100)
+        ax4.set(ylabel='div v')
+
+
+        #twin = ax8.twinx()
+        #fraction_positive = ( smooth > 0).sum(axis=1)/dsmooth_dt.shape[0]
+        #twin.plot(times, fraction_positive)
+        #twin.set(ylim=[0,1])
+
+        #
+        #
+        #
+        drdt_smooth= ndimage.gaussian_filter1d(-1*rho*divv, 2, 0)
+        drdt_smooth_cen = 0.5*(drdt_smooth[1:,:]+drdt_smooth[:-1,:])
 
         bins_1 = np.geomspace( 1,1e9,19)
         bins_m1 = -bins_1[::-1]
         bins = nar(list(bins_m1)+list(bins_1))
 
-        db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( dsmooth_dt.transpose(), tcenter, bins=bins, ax=ax5)
+        dr_x,dr_y,dr_h,dr_dv,dr_p=heat_map.heat_map( drdt_smooth.transpose(), tcenter, bins=bins, ax=ax5)
         ax5.set_yscale('symlog',linthresh=100)
+        ax5.contour(drdt_x, drdt_y, drdt_h)
+        ax5.set(ylabel='-rho divv')
 
-        twin = ax5.twinx()
-        fraction_positive = ( dsmooth_dt > 0).sum(axis=1)/dsmooth_dt.shape[0]
-        twin.plot(tcenter, fraction_positive)
-        twin.set(ylim=[0,1])
-
-        #
-        #
-        #
-        smooth= ndimage.gaussian_filter1d(divv, 2, 0)
-        #ax1.plot( times, smooth, c=c,linewidth=0.1)
+        #ax5.plot( times, drdt_smooth, c=c,linewidth=0.1)
+        #ax5.set_yscale('symlog',linthresh=100)
         #ax1.set(yscale='log', ylabel='B smooth')
 
-        ax7.plot( times, smooth, c=c,linewidth=0.1)
-        ax7.set_yscale('symlog',linthresh=100)
-        ax7.set(ylabel='d/dt')
 
+        #ax7.plot( tcenter, drdt_smooth_cen, c=c,linewidth=0.1)
+        #ax7.set_yscale('symlog',linthresh=100)
+        #ax7.set(ylabel='d/dt')
+        x=np.abs(drdt_smooth_cen.flatten())
+        y=np.abs(dsmooth_dt.flatten())
+        pch.simple_phase(x,y,log=True, ax=ax6)
+        ax6.set(xscale='log',yscale='log', xlabel='-rho divv', ylabel='drho/dt')
+        ext=extents()
+        ext(x);ext(y)
+        ax6.plot(ext.minmax,ext.minmax,c='r')
 
-        bins_1 = np.geomspace( 1,1e9,19)
-        bins_m1 = -bins_1[::-1]
-        bins = nar(list(bins_m1)+list(bins_1))
-
-        heat_map.heat_map( smooth.transpose(), times, bins=bins, ax=ax8)
-        ax8.set_yscale('symlog',linthresh=100)
-
-        twin = ax8.twinx()
-        fraction_positive = ( smooth > 0).sum(axis=1)/dsmooth_dt.shape[0]
-        twin.plot(times, fraction_positive)
-        twin.set(ylim=[0,1])
-        #
-        #
-        #
-        smooth= ndimage.gaussian_filter1d(-1*rho*divv, 2, 0)
-        smooth = 0.5*(smooth[1:,:]+smooth[:-1,:])
-        #ax1.plot( times, smooth, c=c,linewidth=0.1)
-        #ax1.set(yscale='log', ylabel='B smooth')
-
-        ax10.plot( tcenter, smooth, c=c,linewidth=0.1)
-        ax10.set_yscale('symlog',linthresh=100)
-        ax10.set(ylabel='d/dt')
-
-
-        c2=copy.copy(c)
-        c2[0]=0
-        ax10.plot( tcenter, drho_dt, c=c2, linewidth=0.1)
-
-
-        bins_1 = np.geomspace( 1,1e9,19)
-        bins_m1 = -bins_1[::-1]
-        bins = nar(list(bins_m1)+list(bins_1))
-
-        dr_x,dr_y,dr_h,dr_dv,dr_p=heat_map.heat_map( smooth.transpose(), tcenter, bins=bins, ax=ax11)
-        ax11.set_yscale('symlog',linthresh=100)
-        ax11.contour(drdt_x, drdt_y, drdt_h)
-
-        twin = ax11.twinx()
-        fraction_positive = ( smooth > 0).sum(axis=1)/dsmooth_dt.shape[0]
-        twin.plot(tcenter, fraction_positive)
-        twin.set(ylim=[0,1])
-        #
-        #
-        #
-        fakeit=np.log10(dr_h.transpose())
-        borkus=np.log10(drdt_h.transpose())
-        dumb = np.zeros_like(fakeit)
-        dumb=fakeit
-        oot = np.stack([fakeit,borkus,dumb],axis=2)
-        ax9.imshow(oot)
-
-        #
-        #
-        #
-        no="""
-        smooth= ndimage.gaussian_filter1d(-1*B*divv, 2, 0)
-        smooth = 0.5*(smooth[1:,:]+smooth[:-1,:])
-        #ax1.plot( times, smooth, c=c,linewidth=0.1)
-        #ax1.set(yscale='log', ylabel='B smooth')
-
-        ax13.plot( tcenter, smooth, c=c,linewidth=0.1)
-        ax13.set_yscale('symlog',linthresh=100)
-        ax13.set(ylabel='d/dt')
-
-
-        c2=copy.copy(c)
-        c2[0]=0
-        ax13.plot( tcenter, dB_dt, c=c2, linewidth=0.1)
-
-
-        bins_1 = np.geomspace( 1,1e9,19)
-        bins_m1 = -bins_1[::-1]
-        bins = nar(list(bins_m1)+list(bins_1))
-
-        dbb_x,dbb_y,dbb_h,dbb_dv,dbb_p=heat_map.heat_map( smooth.transpose(), tcenter, bins=bins, ax=ax14)
-        ax14.set_yscale('symlog',linthresh=100)
-        #ax14.contour(drdt_x, drdt_y, drdt_h)
-
-
-        moo = np.log10(db_h.transpose())
-        dumb = np.zeros_like(moo)
-        mork = np.log10(dbb_h.transpose())
-        oot=np.stack([moo,mork,dumb],axis=2)
-        ax12.imshow(oot)
-
-        #
-        #
-        #
-        bx = thtr.c([core_id],'magnetic_field_x')
-        by = thtr.c([core_id],'magnetic_field_y')
-        bz = thtr.c([core_id],'magnetic_field_z')
-        vx = thtr.c([core_id],'velocity_x')
-        vy = thtr.c([core_id],'velocity_y')
-        vz = thtr.c([core_id],'velocity_z')
-        dxvx = thtr.c([core_id],'dxvx')
-        dxvy = thtr.c([core_id],'dxvy')
-        dxvz = thtr.c([core_id],'dxvz')
-        dyvx = thtr.c([core_id],'dyvx')
-        dyvy = thtr.c([core_id],'dyvy')
-        dyvz = thtr.c([core_id],'dyvz')
-        dzvx = thtr.c([core_id],'dzvx')
-        dzvy = thtr.c([core_id],'dzvy')
-        dzvz = thtr.c([core_id],'dzvz')
-        Sx = bx*dxvx+by*dyvx+bz*dzvx
-        Sy = 0 #bx*dxvy+by*dyvy+bz*dzvy
-        Sz = 0 #bx*dxvz+by*dyvz+bz*dzvz
-        Stretch= bx*Sx+by*Sy+bz*Sz
-        Stretch = Stretch[sl].transpose()[mask,:]
-
-        smooth= ndimage.gaussian_filter1d(-1*Stretch, 2, 0)
-        smooth = 0.5*(smooth[1:,:]+smooth[:-1,:])
-        #ax1.plot( times, smooth, c=c,linewidth=0.1)
-        #ax1.set(yscale='log', ylabel='B smooth')
-
-        ax15.plot( tcenter, smooth, c=c,linewidth=0.1)
-        ax15.set_yscale('symlog',linthresh=100)
-        ax15.set(ylabel='d/dt')
 
         #c2=copy.copy(c)
         #c2[0]=0
-        #ax13.plot( tcenter, dB_dt, c=c2, linewidth=0.1)
-
-        bins_1 = np.geomspace( 1,1e9,19)
-        bins_m1 = -bins_1[::-1]
-        bins = nar(list(bins_m1)+list(bins_1))
-
-        ds_x,ds_y,ds_h,ds_dv,ds_p=heat_map.heat_map( smooth.transpose(), tcenter, bins=bins, ax=ax16)
-        ax16.set_yscale('symlog',linthresh=100)
-        #ax14.contour(drdt_x, drdt_y, drdt_h)
+        #ax10.plot( tcenter, drho_dt, c=c2, linewidth=0.1)
 
 
-        #moo = np.log10(db_h.transpose())
-        #dumb = np.zeros_like(moo)
-        #mork = np.log10(dbb_h.transpose())
-        #oot=np.stack([moo,mork,dumb],axis=2)
-        #ax12.imshow(oot)
-        fig.savefig('plots_to_sort/b_and_rho_2_c%04d.pdf'%(core_id))
-        """
 
+        #twin = ax11.twinx()
+        #fraction_positive = ( smooth > 0).sum(axis=1)/dsmooth_dt.shape[0]
+        #twin.plot(tcenter, fraction_positive)
+        #twin.set(ylim=[0,1])
+
+        log_drhodt = np.zeros_like(drdt_h.transpose())
+        ddd = drdt_h.transpose()
+        log_drhodt[ ddd>0] = ddd[ddd>0]
+        log_rhodivv = np.zeros_like(dr_h.transpose())
+        rhodivv = dr_h.transpose()
+        log_rhodivv[ rhodivv>0] = rhodivv[rhodivv>0]
+
+        ext_both=extents()
+        ext_both(log_rhodivv); ext_both(log_drhodt)
+        scale = ext_both.minmax[1]/10
+
+
+        oot = np.stack([log_drhodt/scale, log_drhodt/scale, log_rhodivv/scale],axis=2)
+        print(oot.min(), oot.max())
+        ax7.imshow(oot, origin='lower')
+        ax7.set_aspect( ax1.get_aspect())
+
+
+        fig.tight_layout()
         fig.savefig('plots_to_sort/d_rho_dt_c%04d.pdf'%(core_id))
 
 sim_list=['u902']
 for sim in sim_list:
     ddd = dq_dt(TL.loops[sim])
-    core_list=[7]
-    #core_list=[74]
+    #core_list=[7]
+    core_list=[74]
     ddd.run(core_list=core_list)
 
 

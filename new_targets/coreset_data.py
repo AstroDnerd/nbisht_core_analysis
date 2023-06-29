@@ -8,6 +8,15 @@ skip_303 = [4,5,6,20] #these we have, but I think they're sus.
 skip_303+= [10,122, 133] #these are definitely problematic.
 skip_303+=[11,12,111,179,129,139,132,135,134,170,179] #stragglers
 
+def verify_cores_generic(this_top):
+    keep = True
+    if this_top.rhomax < 1e4:
+        keep=False
+    if this_top.leaf['particle_index'].size <10:
+        keep=False
+    return keep
+
+
 def verify_cores_u301(this_top):
     out = True
     if this_top.rhomax < 1100:
@@ -80,6 +89,7 @@ radius_u301 = {}
 b=[11, 111, 129, 132, 133, 134, 153, 170, 177, 199]
 r=[2e-2]*len(b)
 radius_u303 = dict(zip(b,r))
+
 
 
 overlap_302 = {11: [14],

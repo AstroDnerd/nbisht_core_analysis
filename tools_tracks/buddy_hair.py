@@ -25,7 +25,6 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
     times = (thtr.times+0)/colors.tff
     times.shape = times.size,1
     ds = this_looper.load(0)
-    ycoord=[]
     for core_id in core_list:
         ms = trackage.mini_scrubber(thtr,core_id, do_velocity=False)
         ms.particle_pos(core_id)
@@ -139,7 +138,11 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
                 points_axis=(text_x,text_y)
                 axis_to_data = ax.transAxes + ax.transData.inverted()
                 points_data = axis_to_data.transform(points_axis)
-                ax.text( text_x,text_y,r'$c%04d$'%core_id, transform=ax.transAxes, color=color_dict.get(core_id,'k'))
+                if hasattr(this_looper,'mode_dict'):
+                    mode_label=this_looper.mode_label_dict[core_id]
+                else:
+                    mode_label=''
+                ax.text( text_x,text_y,r'$c%04d\ %s$'%(core_id,mode_label), transform=ax.transAxes, color=color_dict.get(core_id,'k'))
             if 0:
                 frame_ind=-1    
                 if what_to_plot in ['hair','centroid']:
@@ -160,7 +163,7 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
         else:
             ax.set( xlabel=r'$t/t_{ff}$', ylabel = 'xyz'[LOS])
 
-    outname='plots_to_sort/%s_buddies__%s_%s_%s.png'%(this_looper.sim_name, what_to_plot,'xyz',suffix)
+    outname='plots_to_sort/%s_buddies_%s_%s_%s.png'%(this_looper.sim_name, what_to_plot,'xyz',suffix)
     fig.tight_layout()
     fig.savefig(outname)
     print(outname)

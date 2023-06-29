@@ -102,20 +102,24 @@ if 0:
     core_list=[76]
     thing.run(core_list=core_list)
 
+import three_loopers_u500 as TL5
+simlist = ['u501','u502','u503']
+simlist = ['u502']
 if 'brthings' not in dir() or True:
-    import three_loopers_u500 as TL5
-    simlist = ['u501','u502','u503']
-    simlist = ['u502']
     brthings={}
+if 1:
     for sim in simlist:
+        if sim in brthings:
+            continue
         core_list= TL5.loops[sim].core_by_mode['Alone']
 
-        brthings[sim]= brho(TL5.loops[sim])
+        temp_thing= brho(TL5.loops[sim])
         #brthings[sim].run(core_list=[32],plot=True)
         #brthings[sim].run(plot=True)
-        brthings[sim].run(plot=True, core_list=core_list)
+        temp_thing.run(plot=True, core_list=core_list)
+        brthings[sim]=temp_thing
 
-if 1:
+if 0:
     nf=0
     frame=0
     farts=[]
@@ -169,7 +173,7 @@ if 0:
     brthing = brho(TL6.loops['u603'])
     brthing.run()
 
-if 1:
+if 0:
     #make ATF
     for sim_name in brthings:
         brthing = brthings[sim_name]

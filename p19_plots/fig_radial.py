@@ -21,7 +21,7 @@ if 0:
         core_proj_three.core_proj_multiple(loop,axis_list=[0],core_list=[74],frame_list=[0,10],camera=camera, main_core=74)
 
             
-def replotter(obj,suffix='', redlines=False, subset=0):
+def replotter(obj,suffix1='', redlines=False, subset=0):
     OneExt = False
     #Nplots=5
     suffix=""
@@ -34,6 +34,13 @@ def replotter(obj,suffix='', redlines=False, subset=0):
         #energy plots
         profs=['EGmean', 'EKmean', 'Emag','Etherm', 'virial']
         row_dict={'Emag':2, 'Etherm':3,'EGmean':0, 'EKmean':1, 'virial':4}
+        #row_dict={'Emag':0, 'Etherm':0,'EGmean':0, 'EKmean':0}
+        suffix="ENG"
+        OneExt=True
+    if subset==3:
+        #energy plots
+        profs=['EKmean', 'EGrat', 'ETrat','EBrat']
+        row_dict={'EKmean':0, 'EGrat':1, 'ETrat':2, 'EBrat':3}
         #row_dict={'Emag':0, 'Etherm':0,'EGmean':0, 'EKmean':0}
         suffix="ENG"
         OneExt=True
@@ -75,7 +82,8 @@ def replotter(obj,suffix='', redlines=False, subset=0):
     else:
         #this construct also makes a list of extents objects,
         #but uses the same object for the first bunch.
-        ext = [extents()]*Nplots+[extents()]
+        #ext = [extents()]*Nplots+[extents()]
+        ext = [extents()]+3*[extents()]+[extents()]
 
     args = {'linewidth':0.2, 'c':[0.5]*3}
 
@@ -142,15 +150,12 @@ def replotter(obj,suffix='', redlines=False, subset=0):
                     rho=nar(profiles[core_id][frame]['rho_sort'])
                     c=1
                     ETlocal = c**2*rho*np.log(rho)
-                    ET = np.cumsum(ETlocal*dv)/Vc
+                    ET =np.abs( np.cumsum(ETlocal*dv)/Vc)
                     #bot += TE
                     #Q = np.abs(np.abs(EK+EB+ET-EG))
                     #Q = EK/EB
                     #Q = 2*EK/(EG+ET+EB)
                     Q = EK/EG
-
-
-
                 elif profile == 'Emag':
                     #B = nar(profiles[core_id][frame]['b2_sort'])**(1/0.3)/np.sqrt(4*np.pi)/1000
                     B = nar(profiles[core_id][frame]['b2_sort'])**(2)/np.sqrt(4*np.pi)
@@ -167,16 +172,31 @@ def replotter(obj,suffix='', redlines=False, subset=0):
                     Q = np.cumsum(TE*dv)/Vc
                     args['c']=[0.0,1.0,0.0,1.0]
                 elif profile == 'EGmean':
-
                     Q = nar(profiles[core_id][frame][profile].v)
                     args['c'] = [1.0,0.0,0.0,1.0]
                 elif profile == 'EKmean':
-
                     Q = nar(profiles[core_id][frame][profile].v)
                     args['c'] = 'k'# [0.5,0.0,1.0,1.0]
-                       
-
-
+                elif profile == 'EGrat':
+                    EG=nar(profiles[core_id][frame]['EGmean'].v)
+                    EK = nar(profiles[core_id][frame]['EKmean'].v)
+                    Q = EK/EG
+                elif profile == 'ETrat':
+                    rho=nar(profiles[core_id][frame]['rho_sort'])
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    c=1
+                    ETlocal = c**2*rho*np.log(rho)
+                    ET =np.abs( np.cumsum(ETlocal*dv)/Vc)
+                    EK = nar(profiles[core_id][frame]['EKmean'].v)
+                    Q = EK/ET
+                elif profile == 'EBrat':
+                    B = nar(profiles[core_id][frame]['b2_sort'])**(2)/np.sqrt(4*np.pi)
+                    dv = nar(profiles[core_id][frame]['dv_sort'])
+                    Vc = nar(profiles[core_id][frame]['V_cuml'])
+                    EB = np.cumsum(B*dv)/Vc
+                    EK = nar(profiles[core_id][frame]['EKmean'].v)
+                    Q = EK/EB
                 else:
                     Q = nar(profiles[core_id][frame][profile].v)
                 rbins = nar(profiles[core_id][frame]['rbins'])
@@ -266,6 +286,24 @@ def replotter(obj,suffix='', redlines=False, subset=0):
         row = row_dict['M/r']
         for ax in axes[row]:
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$M(<r)/r$',xlim=ext[-1].minmax)
+    if 'EGrat' in profs:
+        row = row_dict['EGrat']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$E_K/E_G$',xlim=ext[-1].minmax)
+            ax.axhline(0.5, c='k', linewidth=0.1)
+            ax.axhline(2, c='k', linewidth=0.1)
+    if 'ETrat' in profs:
+        row = row_dict['ETrat']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$E_K/E_T$',xlim=ext[-1].minmax)
+            ax.axhline(0.5, c='k', linewidth=0.1)
+            ax.axhline(2, c='k', linewidth=0.1)
+    if 'EBrat' in profs:
+        row = row_dict['EBrat']
+        for ax in axes[row]:
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$E_K/E_B$',xlim=ext[-1].minmax)
+            ax.axhline(0.5, c='k', linewidth=0.1)
+            ax.axhline(2, c='k', linewidth=0.1)
     if 'EGmean' in profs:
         rowG = row_dict['EGmean']
         rowK = row_dict['EKmean']
@@ -365,7 +403,8 @@ def replotter(obj,suffix='', redlines=False, subset=0):
         ax.set(xlabel='R [AU]', xlim=ext[-1].minmax, xscale='log')
     print('saving')
     timescale = ['0_tsing','tsing_tsung','16_panel'][obj.timescale]
-    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.this_looper.sim_name,timescale,suffix))
+    suffix2="%s_%s"%(suffix1,suffix)
+    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.this_looper.sim_name,timescale,suffix2))
 
 
 
@@ -387,7 +426,7 @@ import radial
 reload(radial)
 #sim_list0i=['u502']
 #mode_list=['Alone']
-if 0:
+if 1:
     if 'stuff' not in dir():
         stuff = {}
     sim_list=['u501','u502','u503']
@@ -403,11 +442,11 @@ if 0:
                 #core_list=core_list[:2]
                 thismp=radial.multipro(TL.loops[sim])
                 timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
-                thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False )#, r_inflection=anne.inflection[sim])
+                thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False, save_sorts=True )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
             replotter(stuff[sim][mode],suffix=mode)
 
-if 1:
+if 0:
     sim_list=['u501']
     if 'mp' not in dir():
         for sim in sim_list:
@@ -425,9 +464,14 @@ if 1:
             timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
             mp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False,save_sorts=True )#, r_inflection=anne.inflection[sim])
             replotter(mp)
-    if 1:
+    if 0:
+        #rho vr vt alpha
         replotter(mp, redlines=True, subset=0)
-        replotter(mp, redlines=True, subset=1)
+        #energies
+        #replotter(mp, redlines=True, subset=1)
+    if 1:
+        #energy ratios
+        replotter(mp, redlines=True, subset=3)
     if 0:
         geplotter(mp)
     if 0:

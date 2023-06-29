@@ -1,9 +1,10 @@
 from starter2 import *
 
-density_units=1000
-mass_units_msun = 5900
-length_units_au = 928000
-length_units_pc = 4.6
+density_units=1000 #cm^-3
+mass_units_msun = 5900 #Msun
+length_units_au = 928000 #AU
+length_units_pc = 4.6 #pc
+velocity_units_km_s = 0.2
 
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
