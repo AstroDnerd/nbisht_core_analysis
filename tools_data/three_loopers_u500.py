@@ -1,7 +1,8 @@
 
 from starter2 import *
-reload(looper)
 import looper2
+pdb.set_trace()
+print("Warning:  depreciating three_loopers_u500")
 
 if 'loops' not in dir():
     loops={}
