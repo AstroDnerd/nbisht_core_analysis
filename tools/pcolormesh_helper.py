@@ -17,6 +17,29 @@ def simple_phase(field1,field2,log=False,ax=None,nbins=64, weights=None,bins=Non
     hist,xbins,ybins=np.histogram2d( field1,field2, bins=[bins1,bins2],weights=weights)
     output=helper( hist, xbins, ybins,ax=ax)
     return output
+def contour(h_in,xbins_in,ybins_in, ax=None,transpose=False, levels=None,**contour_args):
+    #takes the output of np.histogram2d (or any other 2d histogram)
+    #xbins is 1 larger than h.size[0].
+
+    xbins = xbins_in+0
+    ybins = ybins_in+0
+    h=h_in+0
+
+    if transpose:
+        h = h.transpose()
+        temp = xbins.transpose()
+        xbins=ybins.transpose()
+        ybins=temp
+
+
+    if xbins.size > h.shape[0]:
+        xbins = 0.5*(xbins[1:] + xbins[:-1])
+        ybins = 0.5*(ybins[1:] + ybins[:-1])
+
+    nx = len(xbins) ; ny=len(ybins)
+    TheX = np.r_[(ny)*[xbins]].transpose()
+    TheY = np.r_[(nx)*[ybins]]
+    ax.contour(TheX,TheY,h, levels, **contour_args)
 def helper(h_in,xbins_in,ybins_in, cmap_name = 'viridis', zlim=None, ax=None,transpose=False, **pcolormesh_args):
     #takes the output of np.histogram2d (or any other 2d histogram)
     #xbins is 1 larger than h.size[0].
