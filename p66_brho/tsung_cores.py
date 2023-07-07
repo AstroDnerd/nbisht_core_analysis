@@ -127,7 +127,7 @@ class multipro():
                         bz = thtr.c([core_id],'magnetic_field_z')[mask,nf]                
                         b = [bx, by, bz]
                         for j in range(3):
-                            bparticles = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum() 
+                            bparticles = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum()  #but a heads up that this is just for 1 axis! 
                             rhoave = (density * cell_volume).sum()/cell_volume.sum()
 
                             collector['B'].append(bparticles)

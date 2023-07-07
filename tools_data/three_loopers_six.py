@@ -1,6 +1,6 @@
 from starter2 import *
 import looper2
-reload(looper)
+reload(looper2)
 reload(dl)
 
 if 'loops' not in dir():

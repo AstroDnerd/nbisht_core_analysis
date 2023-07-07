@@ -62,6 +62,7 @@ elif machine == 'cloudbreak':
     sim_u202 = '/data/cb1/Projects/P19_CoreSimulations/u202-Beta2/GravPotential'  
     sim_u203 = '/data/cb1/Projects/P19_CoreSimulations/u203-Beta20/GravPotential' 
     sim_t02 = sim_u202
+    sims['t02']=sim_t02
 
     #The 300 series uses the 200 series data, but extracts cores in a different manner.
     sim_u301 = '/data/cb1/Projects/P19_CoreSimulations/u05-r4-l4-128-Beta0.2/GravPotential'
@@ -105,7 +106,6 @@ sims.update({'u501':sim_u501,'u502':sim_u502,'u503':sim_u503})
 sims.update({'u601':sim_u501,'u602':sim_u502,'u603':sim_u503})
 sims.update({'u701':sim_u501,'u702':sim_u502,'u703':sim_u503})
 sims.update({'u901':sim_u501,'u902':sim_u502,'u903':sim_u503})
-sims['t02']=sim_t02
 sims['u14']=sim_u14
 
 new_tracks = coresets['ourset']+"/NewTracks"

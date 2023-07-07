@@ -6,8 +6,8 @@ from collections import defaultdict
 import davetools
 reload(davetools)
 
-import testing.early_mask as em  #testing old method
-reload(em)  #testing old method
+#import testing.early_mask as em  #testing old method
+#reload(em)  #testing old method
 
 import scipy
 plt.close('all')
@@ -61,6 +61,7 @@ class magfield_density_tool():
 
                 density = thtr.c([core_id],'density')[mask,nf]
                 cell_volume = thtr.c([core_id],'cell_volume')[mask,nf]
+                cell_mass = density * cell_volume 
 
                 bx = thtr.c([core_id],'magnetic_field_x')[mask,nf]
                 by = thtr.c([core_id],'magnetic_field_y')[mask,nf]
@@ -68,7 +69,7 @@ class magfield_density_tool():
                 bb = np.sqrt(bx*bx+by*by+bz*bz) 
  
                 # GETTING THE AVERAGES
-                self.mean_field_comps[core_id].append((bb * cell_volume).sum()/cell_volume.sum())  #density weight note
+                self.mean_field_comps[core_id].append((bb * density * cell_volume).sum()/cell_mass.sum())  
                 self.mean_rho[core_id].append((density * cell_volume).sum()/(cell_volume.sum()))  
 
 
@@ -179,6 +180,7 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
             tmap = rainbow_map(len(this_rho)) 
             ctr = [tmap(n) for n in range(len(this_rho))]  
             ax1.scatter(this_rho, this_field,c=ctr,alpha=0.5) #marker='*'  
+            pdb.set_trace()
  
         if time == 'per_frame': 
             rho_extents=davetools.extents()
@@ -190,7 +192,8 @@ for nt,tool in enumerate([mag_den1,mag_den2,mag_den3]):
             c2 = [tmap2(n) for n in range(len(this_rho))]  
             for i in range(len(this_rho)):
                 if i in frames: 
-                    lplots[i].scatter(this_rho[i],this_field[i],c=c2[i],s=2,marker='o')  #C2 gives me lots of notes, but it works... 
+                    lplots[i].scatter(this_rho[i],this_field[i],c=[c2[i]]*this_rho[i].size,s=2,marker='o')  #C2 gives me lots of notes, but it works... 
+                    #pdb.set_trace()
                     magfield_density_tool.labelled(lplots[i],xscale='log',yscale='log',xlabel=None,ylabel=None,\
                                                    title=None, xlim=rho_extents.minmax,ylim=magfield_extents.minmax)
                     ax2.tick_params(axis='y',labelleft=False)

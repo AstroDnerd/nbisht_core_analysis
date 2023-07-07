@@ -1,0 +1,34 @@
+
+Please describe the differences of h5 files here.
+Thank you.
+
+b_particles_#.h5
+    Fptr['B_parts']=self.bparticles
+    Fptr['Rho_avg_parts']=self.rhoave
+
+    Fptr['core_id']=self.cores_used
+
+    Fptr['Dtheta_cyl']=self.dtheta_cyl
+    Fptr['Dtheta_mcyl_one']=self.dtheta_mcyl_one
+    Fptr['Dtheta_mcyl_two']=self.dtheta_mcyl_two 
+
+    Fptr['B_dcf_cyl']=self.bdcf_cyl
+    Fptr['B_dcf_mcyl_one']=self.bdcf_mcyl_one
+    Fptr['B_dcf_mcyl_two']=self.bdcf_mcyl_two
+
+    Fptr['B_pos_cyl']=self.bpos_cyl
+    Fptr['B_pos_mcyl_one']=self.bpos_mcyl_one
+    Fptr['B_pos_mcyl_two']=self.bpos_mcyl_two
+
+    Fptr['B_los_cyl']=self.blos_cyl
+    Fptr['B_los_mcyl_one']=self.blos_mcyl_one
+    Fptr['B_los_mcyl_two']=self.blos_mcyl_two
+
+    Fptr['B_tot_cyl']=self.btotal_cyl
+    Fptr['B_tot_mcyl_one']=self.btotal_mcyl_one 
+    Fptr['B_tot_mcyl_two']=self.btotal_mcyl_two 
+
+    Fptr['N_cyl']=self.columnrho_cyl
+    Fptr['N_mcyl_one']=self.columnrho_mcyl_one
+    Fptr['N_mcyl_two']=self.columnrho_mcyl_two
+

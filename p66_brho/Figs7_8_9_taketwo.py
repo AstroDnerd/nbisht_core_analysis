@@ -26,6 +26,7 @@ class polarization():
             core_list = all_cores
 
         # FIELDS STORED
+        self.columnrho_sph = [np.zeros(len(core_list)) for x in range(3)]
         self.columnrho_cyl = [np.zeros(len(core_list)) for x in range(3)]
         self.columnrho_mcyl_one = [np.zeros(len(core_list)) for x in range(3)]
         self.columnrho_mcyl_two = [np.zeros(len(core_list)) for x in range(3)]
@@ -42,6 +43,7 @@ class polarization():
         self.bpos_mcyl_one = [np.zeros(len(core_list)) for x in range(3)]
         self.bpos_mcyl_two = [np.zeros(len(core_list)) for x in range(3)]
 
+        self.blos_sph = [np.zeros(len(core_list)) for x in range(3)]
         self.blos_cyl = [np.zeros(len(core_list)) for x in range(3)]
         self.blos_mcyl_one = [np.zeros(len(core_list)) for x in range(3)]
         self.blos_mcyl_two = [np.zeros(len(core_list)) for x in range(3)]
@@ -50,12 +52,14 @@ class polarization():
         self.baxis_mcyl_one = [np.zeros(len(core_list)) for x in range(3)]
         self.baxis_mcyl_two = [np.zeros(len(core_list)) for x in range(3)]
 
+        self.btotal_sph = [np.zeros(len(core_list)) for x in range(3)]
         self.btotal_cyl = [np.zeros(len(core_list)) for x in range(3)]
         self.btotal_mcyl_one = [np.zeros(len(core_list)) for x in range(3)]
         self.btotal_mcyl_two = [np.zeros(len(core_list)) for x in range(3)]
 
         self.bparticles= [np.zeros(len(core_list)) for x in range(3)]
         self.rhoave= [np.zeros(len(core_list)) for x in range(3)]
+        self.rhoave_sph = [np.zeros(len(core_list)) for x in range(3)]
 
         # THE FRAMES
         the_frame = thtr.frames[-1:] 
@@ -79,6 +83,7 @@ class polarization():
             # MAKE THE OBJECTS:
             xyz = [0,1,2]
             the_cyl = {}
+            the_sph = {}
             the_midcyl_one = {}
             the_midcyl_two = {}
 
@@ -86,7 +91,8 @@ class polarization():
                 the_cyl[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius_one,height=(1,'code_length'))
                 the_midcyl_one[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius_one,height=the_radius_one) 
                 the_midcyl_two[xyz[i]] = ds.disk(the_center,the_normal[i],the_radius_two,height=the_radius_one) 
-            
+            the_sphere = ds.sphere(the_center, the_radius_one) 
+
             Q = ['Qx','Qy','Qz']
             U = ['Ux','Uy','Uz']
             B = ['magnetic_field_x','magnetic_field_y','magnetic_field_z']
@@ -96,7 +102,7 @@ class polarization():
             Q_liu = 0.28
 
             # B PARTICLES, 3D
-            if 1:
+            if 0:
                 all_frames = thtr.frames
                 for nf,frame in enumerate(all_frames): 
                     if frame == all_frames[-1]:
@@ -108,14 +114,16 @@ class polarization():
                         bz = thtr.c([core_id],'magnetic_field_z')[mask,nf]                
                         b = [bx, by, bz]
                         for j in range(3):
-                            self.bparticles[j][nc] = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum() 
+                            self.bparticles[j][nc] = (density * b[j] * cell_volume).sum()/(density * cell_volume).sum()   #but a heads up that this is for 1 axis! 
                             self.rhoave[j][nc] = (density * cell_volume).sum()/cell_volume.sum()
             for j in range(3): 
                 if 1:
+                    self.columnrho_sph[j][nc] = (the_sphere['density'] * the_sphere['cell_volume']).sum()/the_area_one
                     self.columnrho_cyl[j][nc] = (the_cyl[j]['density'] * the_cyl[j]['cell_volume']).sum()/the_area_one
                     self.columnrho_mcyl_one[j][nc] = (the_midcyl_one[j]['density'] * the_midcyl_one[j]['cell_volume']).sum()/the_area_one
                     self.columnrho_mcyl_two[j][nc] = (the_midcyl_two[j]['density'] * the_midcyl_two[j]['cell_volume']).sum()/the_area_two
-
+                    
+                    '''
                     # FRBS 
                     # data source: CYLINDER
                     pw_cyl = yt.ProjectionPlot(ds,j,('gas','density'),center=the_center,width=the_radius_one,data_source = the_cyl[j],origin='window')
@@ -167,8 +175,11 @@ class polarization():
                     vlos_two = frb_mcyl_two['velocity_%s'%'xyz'[j]] 
                     vave_two = (vlos_two*rho_mcyl_two).sum()/rho_mcyl_two.sum()
                     dvlos_two = np.sqrt(((vlos_two-vave_two)**2).sum())  
+                    '''
 
                     # AVERAGE DENSITY 
+                    self.rhoave_sph[j][nc] = (the_sphere['density'] * the_sphere['cell_volume']).sum()/ the_sphere['cell_volume'].sum()
+                    '''
                     rhoave_cyl = (the_cyl[j]['density']*the_cyl[j]['cell_volume']).sum()/the_cyl[j]['cell_volume'].sum()
                     rhoave_one = (the_midcyl_one[j]['density']*the_midcyl_one[j]['cell_volume']).sum()/the_midcyl_one[j]['cell_volume'].sum()
                     rhoave_two = (the_midcyl_two[j]['density']*the_midcyl_two[j]['cell_volume']).sum()/the_midcyl_two[j]['cell_volume'].sum()
@@ -178,9 +189,9 @@ class polarization():
                     self.bdcf_cyl[j][nc] = Q_one * np.sqrt(mu * rhoave_cyl) * (dvlos/self.dtheta_cyl[j][nc])   
                     self.bdcf_mcyl_one[j][nc] = Q_one * np.sqrt(mu * rhoave_one) * (dvlos_one/self.dtheta_mcyl_one[j][nc])   
                     self.bdcf_mcyl_two[j][nc] = Q_one * np.sqrt(mu * rhoave_two) * (dvlos_two/self.dtheta_mcyl_two[j][nc])   
-
+                    '''
                     # B POS ; truth (?) to B DCF, compare one plane at a time
-                    if 1:
+                    if 0:
                         plane = ['x','y','z']
                         los = j
                         plane.pop(los) 
@@ -196,6 +207,7 @@ class polarization():
                         self.bpos_mcyl_two[j][nc] = (np.sqrt(bhorizontal_mcyl_two**2 + bvertical_mcyl_two**2) * rho_mcyl_two *cv_mcyl_two).sum()/(rho_mcyl_two*cv_mcyl_two).sum()  
 
                     # B LOS...in the past we have tried to do frb style, we abandoned it.. 
+                    self.blos_sph[j][nc] = (the_sphere['density'] * the_sphere[B[j]] * the_sphere['cell_volume']).sum()/the_sphere['gas','cell_mass'].sum()
                     self.blos_cyl[j][nc] = (the_cyl[j]['density'] * the_cyl[j][B[j]] * the_cyl[j]['cell_volume']).sum()/the_cyl[j]['gas','cell_mass'].sum()
                     self.blos_mcyl_one[j][nc] = (the_midcyl_one[j]['density'] * the_midcyl_one[j][B[j]] * the_midcyl_one[j]['cell_volume']).sum()/the_midcyl_one[j]['gas','cell_mass'].sum()
                     self.blos_mcyl_two[j][nc] = (the_midcyl_two[j]['density'] * the_midcyl_two[j][B[j]] * the_midcyl_two[j]['cell_volume']).sum()/the_midcyl_two[j]['gas','cell_mass'].sum()
@@ -207,6 +219,7 @@ class polarization():
                         self.baxis_mcyl_two[j][nc] = (the_midcyl_two[j]['density'] * the_midcyl_two[j][B[j]] * the_midcyl_two[j]['cell_volume']).sum()/the_midcyl_two[j]['gas','cell_mass'].sum()
 
                     # B TOT
+                    self.btotal_sph[j][nc] = (the_sphere['density']* the_sphere['magnetic_field_strength'] * the_sphere['cell_volume']).sum()/the_sphere['cell_mass'].sum() 
                     self.btotal_cyl[j][nc] = (the_cyl[j]['density']* the_cyl[j]['magnetic_field_strength'] * the_cyl[j]['cell_volume']).sum()/(the_cyl[j]['density']*the_cyl[j]['cell_volume']).sum() 
                     self.btotal_mcyl_one[j][nc] = (the_midcyl_one[j]['density']* the_midcyl_one[j]['magnetic_field_strength'] * the_midcyl_one[j]['cell_volume']).sum()/(the_midcyl_one[j]['density']*the_midcyl_one[j]['cell_volume']).sum() 
                     self.btotal_mcyl_two[j][nc] = (the_midcyl_two[j]['density']* the_midcyl_two[j]['magnetic_field_strength'] * the_midcyl_two[j]['cell_volume']).sum()/(the_midcyl_two[j]['density']*the_midcyl_two[j]['cell_volume']).sum() 
@@ -214,14 +227,15 @@ class polarization():
         print("check-in")
         # CACHE TO DISK 
         if 0: 
-            hfivename = 'p66_brho/b_particles_%s.h5'%(sim)
+            hfivename = 'p66_brho/b_sphere_%s.h5'%(sim)
             Fptr = h5py.File(hfivename,'w')
 
-            Fptr['B_parts']=self.bparticles
-            Fptr['Rho_avg_parts']=self.rhoave
+            #Fptr['B_parts']=self.bparticles
+            #Fptr['Rho_avg_parts']=self.rhoave
+            Fptr['Rho_avg_sph']=self.rhoave_sph
 
             Fptr['core_id']=self.cores_used
-
+            '''
             Fptr['Dtheta_cyl']=self.dtheta_cyl
             Fptr['Dtheta_mcyl_one']=self.dtheta_mcyl_one
             Fptr['Dtheta_mcyl_two']=self.dtheta_mcyl_two 
@@ -233,22 +247,30 @@ class polarization():
             Fptr['B_pos_cyl']=self.bpos_cyl
             Fptr['B_pos_mcyl_one']=self.bpos_mcyl_one
             Fptr['B_pos_mcyl_two']=self.bpos_mcyl_two
-
-            Fptr['B_los_cyl']=self.blos_cyl
-            Fptr['B_los_mcyl_one']=self.blos_mcyl_one
-            Fptr['B_los_mcyl_two']=self.blos_mcyl_two
+            '''
+    
+            Fptr['B_los_sph']=self.blos_sph
+            #Fptr['B_los_cyl']=self.blos_cyl
+            #Fptr['B_los_mcyl_one']=self.blos_mcyl_one
+            #Fptr['B_los_mcyl_two']=self.blos_mcyl_two
 
             #Fptr['B_axis_cyl']=self.baxis_cyl
             #Fptr['B_axis_mcyl_one']=self.baxis_mcyl_one
             #Fptr['B_axis_mcyl_two']=self.baxis_mcyl_two
 
+            Fptr['B_tot_sph']=self.btotal_sph
+            '''
             Fptr['B_tot_cyl']=self.btotal_cyl
             Fptr['B_tot_mcyl_one']=self.btotal_mcyl_one 
             Fptr['B_tot_mcyl_two']=self.btotal_mcyl_two 
+            '''
 
+            Fptr['N_sph']=self.columnrho_sph
+            '''
             Fptr['N_cyl']=self.columnrho_cyl
             Fptr['N_mcyl_one']=self.columnrho_mcyl_one
             Fptr['N_mcyl_two']=self.columnrho_mcyl_two
+            '''
 
             Fptr.close()
 
@@ -259,13 +281,13 @@ if 'clobber' not in dir():
     clobber=True
 if 'scope1' not in dir() or clobber:
     scope1=polarization(TL6.loops['u601'])
-    core_list1 = TL6.loops['u601'].core_by_mode['Alone']
+    #core_list1 = TL6.loops['u601'].core_by_mode['Alone']
 if 'scope2' not in dir() or clobber:
     scope2=polarization(TL6.loops['u602'])
-    core_list2 = TL6.loops['u602'].core_by_mode['Alone']
+    #core_list2 = TL6.loops['u602'].core_by_mode['Alone']
 if 'scope3' not in dir() or clobber:
     scope3=polarization(TL6.loops['u603'])
-    core_list3 = TL6.loops['u603'].core_by_mode['Alone']
+    #core_list3 = TL6.loops['u603'].core_by_mode['Alone']
 
 simnames = ['u601','u602', 'u603']
 
@@ -282,11 +304,28 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
 
     # ONCE CACHED, HISTOGRAMS SCATTERS & REL ERROR REGARDING POLARIZATION 
     if 1: 
-        hfivename = 'p66_brho/h5files/b_2D3D_%s.h5'%(nt)  #EDIT
+        hfivename = 'p66_brho/h5files/b_sphere_%s.h5'%(nt)  #EDIT
         Fptr = h5py.File(hfivename,'r')
 
         cores_used = Fptr['core_id']
+
+        b_los_sph = Fptr['B_los_sph']
+        b_LOS_sph = np.concatenate((b_los_sph[0],b_los_sph[1],b_los_sph[2]))
+        b_lossphlog = np.log10(abs(b_LOS_sph))
+
+        n_sph = Fptr['N_sph']
+        N_sph = np.concatenate((n_sph[0],n_sph[1],n_sph[2]))
+        n_sphlog = np.log10(N_sph)
+
+        b_tot_sph = Fptr['B_tot_sph']
+        b_TOT_sph = np.concatenate((b_tot_sph[0],b_tot_sph[1],b_tot_sph[2]))
+        b_totsphlog = np.log10(abs(b_TOT_sph))
         
+        rho_sph = Fptr['Rho_avg_sph']
+        Rho_sph = np.concatenate((rho_sph[0],rho_sph[1],rho_sph[2]))
+        rho_sphlog = np.log10(Rho_sph)
+        
+        '''
         b_dcf_cyl = Fptr['B_dcf_cyl']
         b_DCF_cyl = np.concatenate((b_dcf_cyl[0],b_dcf_cyl[1],b_dcf_cyl[2]))
         b_dcfcyllog = np.log10(abs(b_DCF_cyl))
@@ -349,7 +388,6 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
         b_PAR = np.concatenate((b_par[0],b_par[1],b_par[2]))
         b_parlog = np.log10(abs(b_PAR))
 
-        '''
         rho_avg = Fptr['Rho_avg_parts']
         rho_AVE = np.concatenate((rho_avg[0],rho_avg[1],rho_avg[2]))
         rho_avelog = np.log10(abs(rho_AVE))
@@ -393,44 +431,43 @@ for nt,tool in enumerate([scope1,scope2,scope3]):
         # ALL DIRECTIONS AT ONCE  
         if 1: 
             if 1:
-                pfit = np.polyfit(rho_avelog,b_parlog, 1)
+                pfit = np.polyfit(rho_sphlog,b_totsphlog, 1)
                 alpha = pfit[0]
                 b_poso = pfit[1]
-                n_Rho = np.linspace(rho_avelog.min(),rho_avelog.max(),num=len(rho_avelog))
+                n_Rho = np.linspace(rho_sphlog.min(),rho_sphlog.max(),num=len(rho_sphlog))
                 N_Rho = 10 ** n_Rho
                 B_two = 10 ** (alpha*n_Rho + b_poso)
                 plt.plot(N_Rho,B_two,color='k',linestyle='dashed')
             if 1:
-                pearX,pearY = scipy.stats.pearsonr(rho_AVE,abs(b_PAR))
+                pearX,pearY = scipy.stats.pearsonr(Rho_sph,abs(b_TOT_sph))
             if 0:
-                pfit2 = np.polyfit(n_rhocyllog,b_loscyllog, 1)
+                pfit2 = np.polyfit(n_sphlog,b_lossphlog, 1)
                 alpha2 = pfit2[0]
                 b_poso2 = pfit2[1]
-                n_Rho2 = np.linspace(n_rhocyllog.min(),n_rhocyllog.max(),num=len(n_rhocyllog))
+                n_Rho2 = np.linspace(n_sphlog.min(),n_sphlog.max(),num=len(n_sphlog))
                 N_Rho2 = 10 ** n_Rho2
                 B_two2 = 10 ** (alpha2*n_Rho2 + b_poso2)
                 plt.plot(N_Rho2,B_two2,color='g',linestyle='dashed')
             if 0:
-                pearX2,pearY2 = scipy.stats.pearsonr(n_RHO_cyl,abs(b_LOS_cyl))
+                pearX2,pearY2 = scipy.stats.pearsonr(N_sph,abs(b_LOS_sph))
 
             #plt.scatter(n_RHO_mcyl_one, abs(b_LOS_mcyl_one),c = 'k', alpha=0.4)
-            #plt.scatter(n_RHO_cyl, abs(b_LOS_cyl),c = 'g', alpha=0.4)
-            plt.scatter(rho_AVE, abs(b_PAR),c = 'k', alpha=0.4)
+            plt.scatter(Rho_sph, abs(b_TOT_sph),c = 'k', alpha=0.4)
+            #plt.scatter(rho_AVE, abs(b_PAR),c = 'k', alpha=0.4)
 
-            #pdb.set_trace()
             #plt.scatter(abs(b_DCF_cyl), abs(b_DCF_midcyl), c = 'orange', alpha=0.4)
             #plt.scatter(abs(b_TOT_midcyl)[ok_los], abs(b_DCF_midcyl)[ok_los], c = 'orange', alpha=0.4)
             #plt.axline((0, 0), slope=1, c='k', linewidth=0.5)
 
             plt.xscale('log')
             plt.yscale('log')
-            #plt.xlabel(r'$N_{mcyl1}$, $N_{cyl}$ $(cm^{-2})$')
+            #plt.xlabel(r'$N_{sph,los}$ $(cm^{-2})$')
             plt.xlabel(r'$rho_{ave}$ $(cm^{-3})$')
-            #plt.ylabel(r'$B_{mcyl1}$ black, $B_{cyl}$ green $(\mu G)$')
-            plt.ylabel(r'$B_{particles}$ $(\mu G)$')
+            plt.ylabel(r'$B_{sph,tot}$ $(\mu G)$')
+            #plt.ylabel(r'$B_{particles}$ $(\mu G)$')
             #plt.title(r'$\kappa_{1,2} = %f,%f$ $R_{1,2}=%f,%f$'%(alpha,alpha2,pearX,pearX2))
             plt.title(r'$\kappa= %f$ $R = %f$'%(alpha,pearX))
-            outname ='b_particles_nook_%s'%(simnames[nt])
+            outname ='b_sphtot_nook_%s'%(simnames[nt])
 
         #color=['g','orange']  #b_tor blue, b_pol orange
         #blosm1_frac = abs(b_LOS_mcyl_one)/abs(b_TOT_mcyl_one) 
