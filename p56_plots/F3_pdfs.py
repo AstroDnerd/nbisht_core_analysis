@@ -1,11 +1,7 @@
 
-"""
-This displays what all the functions in loop_apps.py do.
-"""
 from starter2 import *
 import data_locations as dl
 import xtra_energy
-reload(loop_apps)
 from scipy.optimize import curve_fit
 
 import testing.early_mask as em
@@ -55,10 +51,12 @@ if 'loop_dict' not in dir():
     elif 0:
         import three_loopers_tenfour as TL4
         loop_dict = TL4.loops
-    else:
+    elif 0:
         import three_loopers_six as TL6
         loop_dict = TL6.loops
-
+    else:
+        import track_loader as TL
+        loop_dict = TL.loops
 
 
 
@@ -67,16 +65,24 @@ vrms = {'u201':5.2, 'u202':5.1, 'u203':5.4}
 vrms.update( {'u301':5.2, 'u302':5.1, 'u303':5.4} )
 vrms.update( {'u401':5.2, 'u402':5.1, 'u403':5.4} )
 vrms.update( {'u601':5.2, 'u602':5.1, 'u603':5.4} )
+vrms.update( {'u501':5.2, 'u502':5.1, 'u503':5.4} )
 vrms.update( {'u05':5.2, 'u10':5.1, 'u11':5.4})
 sims_to_use = ['u301', 'u302','u303']
 sims_to_use = ['u401', 'u402','u403']
 sims_to_use = ['u601', 'u602','u603']
+sims_to_use = ['u501', 'u502','u503']
 #sims_to_use = ['u05','u10','u11']
 #sims_to_use = ['u201', 'u202','u203']
+
+#vrms['b002']=vrms['u202']
+#sims_to_use=['b002']
+
 fig, axes = plt.subplots(4,3, figsize=(10,12))
 for nsim,this_simname in enumerate(sims_to_use):
     #if this_simname != 'u11':# and skipper==True:
     #    continue
+
+    TL.load_tracks([this_simname])
 
     this_looper = loop_dict[this_simname]
     for fnum in range(4):
@@ -84,10 +90,6 @@ for nsim,this_simname in enumerate(sims_to_use):
         labelset  = ['abc','def','ghi','jkl'][fnum]
         label=labelset[nsim]
         ax = axes[fnum][nsim]
-
-
-
-
 
 
         #FIELD = YT_density; label = 'abc'[nsim]
@@ -182,29 +184,6 @@ for nsim,this_simname in enumerate(sims_to_use):
             vals2 /= db2
 
 
-
-
-
-
-
-        if 0:
-            fptr1 = h5py.File(prof_full_fname,'w')
-            fptr1.create_dataset( 'bin_edge', data=bbb1)
-            fptr1.create_dataset( 'bin_center', data=bcen1)
-            fptr1.create_dataset( 'vals', data=vals1)
-            fptr1.create_dataset( 'db', data=db1)
-            fptr1.close()
-
-            fptr2 = h5py.File(prof_part_fname,'w')
-            fptr2.create_dataset( 'bin_edge', data=bbb2)
-            fptr2.create_dataset( 'bin_center', data=bcen2)
-            fptr2.create_dataset( 'vals', data=vals2)
-            fptr2.create_dataset( 'db', data=db2)
-            fptr2.close()
-
-
-
-
         if FIELD[1] == 'magnetic_field_strength':
             bcen1 /= mean_field.B[this_simname]
             bcen2 /= mean_field.B[this_simname]
@@ -241,6 +220,7 @@ for nsim,this_simname in enumerate(sims_to_use):
             return ks_string
 
         if FIELD[1]== 'density':
+
             popt, pcov = curve_fit(powerlaw, bcen1[ok], np.log10(ratio[ok]), p0=[1,1,-2])
 
             #p_star_given_rho = vals1*bcen1**popt[2]
@@ -251,7 +231,7 @@ for nsim,this_simname in enumerate(sims_to_use):
             ks_string = do_ks( np.log(vals2[ok_p])[::-1], np.log(p_star_given_rho[ok_p])[::-1])
             lab = r'$V(*) \rho^{%0.2f}V(\rho)$: %s'%(popt[2], ks_string)
             print('=========')
-            print("DENSITY %s %s"%(sim,ks_string))
+            print("DENSITY %s %s"%(this_simname,ks_string))
             ax.plot( bcen1,p_star_given_rho,linewidth=2, label=lab, linestyle='--',c=[0.5]*4)
 
         if FIELD[1] == 'velocity_magnitude':
@@ -264,7 +244,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
             ks_string = do_ks( vals2[ok_p], maxwell[ok_p])
             print('=========')
-            print("SPEED %s %s"%(sim,ks_string))
+            print("SPEED %s %s"%(this_simname,ks_string))
 
             lab = r'$V(*) \mathcal{M}(v;\sigma_{1d}=%0.1f)$: %s'%(sigmav, ks_string)
 
@@ -284,7 +264,7 @@ for nsim,this_simname in enumerate(sims_to_use):
 
 
             print('=========')
-            print("FIELD %s %s"%(sim,ks_string))
+            print("FIELD %s %s"%(this_simname,ks_string))
 
 
         if 1:
