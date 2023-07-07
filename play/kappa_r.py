@@ -97,8 +97,8 @@ class KappaR():
 
 
                 digitized = np.digitize( RR_cuml, self.rbins)
-                B_cuml_quant  = nar([ B_cuml[digitized==i].sum() if (digitized==i).any() else np.nan for i in range(0,len(self.rbins))])
-                D_cuml_quant  = nar([ D_cuml[digitized==i].sum() if (digitized==i).any() else np.nan for i in range(0,len(self.rbins))])
+                B_cuml_quant  = nar([ B_cuml[digitized==i].mean() if (digitized==i).any() else np.nan for i in range(0,len(self.rbins))])
+                D_cuml_quant  = nar([ D_cuml[digitized==i].mean() if (digitized==i).any() else np.nan for i in range(0,len(self.rbins))])
                 
                 #ok = ~np.isnan(B_cuml_quant)
                 self.b_less[ncore][nframe] = B_cuml_quant
@@ -140,7 +140,7 @@ def kappa_r_time(thing):
     mean_lnD.shape = tuple(shapeB)
     cross = np.nansum(((lnB-mean_lnB)*(lnD-mean_lnD)), axis=core_axis)
     var = np.nansum(((lnD-mean_lnD)**2),axis=core_axis)
-    do_plots=False
+    do_plots=True
     if 1:
         for nf,frame in enumerate(thing.frames):
             top = cross[nf,:]
