@@ -7,7 +7,7 @@ reload(product)
 import make_page 
 reload(make_page)
 
-basedir = "./"
+basedir = "./plots_to_sort/"
 plotdir="./plots_to_sort"
 
 def make_browser(trackname):
@@ -26,7 +26,13 @@ def make_browser(trackname):
     PROD.append(p_mode)
 
     NAMES.append("mountain top")
-    RE.append(r"plots_to_sort/mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( trackname))
+    RE.append(r"mountain_top_%s_c(\d\d\d\d)_Projection_x_density.png"%( trackname))
+
+    NAMES.append("Buddies")
+    RE.append(r"%s_buddies_xyzt_xyz_c(\d\d\d\d).png"%trackname)
+
+    NAMES.append('density time')
+    RE.append(r'%s_rho_t_c(\d{4}).png'%trackname)
 
     link_dir='./'
     for N in range(len(RE)):
