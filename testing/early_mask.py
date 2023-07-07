@@ -3,7 +3,6 @@ from starter2 import *
 
 import pyximport; pyximport.install()
 import particle_ops
-all_cores  =looper.get_all_nonzero()
 def target_particle_volume_fast(field, data):
     #!!! not tested.
     #pdb.set_trace()
@@ -86,24 +85,24 @@ def get_deposit_field(myloop,frame=None,core_list=None, mask_stash=None):
     return ad
 
 
-@looper.frame_loop
-def project_particle_mask(myloop,axis_list=[0,1,2],core_list=None,mask_stash=None):
-    for axis in axis_list:
-        ds = myloop.load(frame=myloop.current_frame,derived=[add_tracer_density])
-        add_tracer_density(ds)
-        if mask_stash is None:
-            mask_stash = np.zeros(ds['NumberOfParticles'], dtype='int32')
-        if core_list is None:
-            core_list = myloop.target_indices.keys()
-        mask_stash[:] *= 0 
-        deposit_tuple=("deposit","target_particle_volume")
-        all_target_indices = np.concatenate( [myloop.target_indices[core_id] for core_id in core_list])
-        field_parameters={}
-        field_parameters['target_indices']=all_target_indices
-        field_parameters['mask_to_get']=mask_stash
-        proj = ds.proj(deposit_tuple,axis,center='c',field_parameters=field_parameters)
-        pw = proj.to_pw(center = 'c',width=(1.0,'code_length'), origin='domain')
-        pw.set_cmap(deposit_tuple,'gray')
-        outname = '%s_cic_test_4_n%04d'%(myloop.out_prefix,myloop.current_frame)
-        print( pw.save(outname))
+#@looper.frame_loop
+#def project_particle_mask(myloop,axis_list=[0,1,2],core_list=None,mask_stash=None):
+#    for axis in axis_list:
+#        ds = myloop.load(frame=myloop.current_frame,derived=[add_tracer_density])
+#        add_tracer_density(ds)
+#        if mask_stash is None:
+#            mask_stash = np.zeros(ds['NumberOfParticles'], dtype='int32')
+#        if core_list is None:
+#            core_list = myloop.target_indices.keys()
+#        mask_stash[:] *= 0 
+#        deposit_tuple=("deposit","target_particle_volume")
+#        all_target_indices = np.concatenate( [myloop.target_indices[core_id] for core_id in core_list])
+#        field_parameters={}
+#        field_parameters['target_indices']=all_target_indices
+#        field_parameters['mask_to_get']=mask_stash
+#        proj = ds.proj(deposit_tuple,axis,center='c',field_parameters=field_parameters)
+#        pw = proj.to_pw(center = 'c',width=(1.0,'code_length'), origin='domain')
+#        pw.set_cmap(deposit_tuple,'gray')
+#        outname = '%s_cic_test_4_n%04d'%(myloop.out_prefix,myloop.current_frame)
+#        print( pw.save(outname))
 
