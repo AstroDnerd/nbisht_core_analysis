@@ -244,6 +244,7 @@ class dq_dt2():
             if 1:
                 THIS_AX=ax7
                 THIS_AX.plot(times, kappa)
+                THIS_AX.set(xlabel='time',ylabel='kappa_c')
 
             if 0:
                 #check you did the math right.
