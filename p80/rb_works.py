@@ -243,7 +243,10 @@ class dq_dt2():
 
             if 1:
                 THIS_AX=ax7
-                THIS_AX.plot(times, kappa)
+                THIS_AX.plot(times, kappa, label=r'$\kappa_{c,f}$')
+                THIS_AX.plot(times, 1-RB_Mean_10,c='r')
+                THIS_AX.legend(loc=0)
+
                 THIS_AX.set(xlabel='time',ylabel='kappa_c')
 
             if 0:
