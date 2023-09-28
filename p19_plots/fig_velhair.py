@@ -8,10 +8,11 @@ from scipy.ndimage import gaussian_filter
 import hair_dryer
 reload(hair_dryer)
 
-import three_loopers_u500 as TL
+#import three_loopers_u500 as TL
+import track_loader as TL
 import movie_frames 
 
-def v_hair(this_looper,core_list=None, suffix='', norm=False):
+def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -107,7 +108,12 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False):
         dudt=dU/dt
         thresh = 1e5
         singularity = np.where( dudt >thresh)[0][0]
-        tsing = times[singularity]
+        if tsing_in is None:
+            tsing = times[singularity]
+        else:
+            tsing = tsing_in.tsing_core[core_id]
+            tsing = 1
+
 
         #velocity plots
         ax.plot(times/tsing, v2, c=c, label=r'$v$', linewidth=0.1)
@@ -147,10 +153,11 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False):
     print(outname)
 
 
-if 1:
+if 0:
     #Paper version.
     #don't touch.
     sims=['u501']
+    TL.load_tracks(sims)
     #sims=[ 'u502','u503']
     for sim in sims:
         for mode in ['Alone']:
@@ -160,6 +167,22 @@ if 1:
             #core_list=core_list[:5]
 
             v_hair(TL.loops[sim], core_list=core_list,suffix=mode,norm=False)
+if 1:
+    #play with tsing
+    #don't touch.
+    sims=['u501']
+    TL.load_tracks(sims)
+    #sims=[ 'u502','u503']
+    import tsing
+    tsing_tool=tsing.get_tsing(TL.loops)
+    for sim in sims:
+        for mode in ['Alone']:
+            core_list = TL.loops[sim].core_by_mode[mode]
+            #core_list = np.unique(TL.loops[sim].tr.core_ids)
+
+            #core_list=core_list[:5]
+
+            v_hair(TL.loops[sim], core_list=core_list,suffix=mode,norm=False, tsing_in=tsing_tool[sim])
 
 
 if 0:
