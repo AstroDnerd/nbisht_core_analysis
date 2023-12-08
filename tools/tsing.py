@@ -6,6 +6,23 @@ import colors
 import movie_frames 
 
 from scipy.ndimage import gaussian_filter
+
+tsing_tool={}
+def get_tsing(loop_list):
+    for ns,sim in enumerate(loop_list):
+        if sim in tsing_tool:
+            continue
+        else:
+            print("tsing, %s"%(sim))
+
+        loop=loop_list[sim]
+        obj=te_tc(loop)
+        sim=loop.sim_name
+        tsing_tool[sim]=obj
+        tsing_tool[sim].run()
+    return tsing_tool
+
+
 class te_tc:
     def __init__(self,this_looper):
         self.this_looper=this_looper
