@@ -15,12 +15,11 @@ for directory in path_list:
 import yt
 from yt_names import *
 
-
-import looper2
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 import tools_data.particle_ops as particle_ops
 import tools_data.particle_grid_mask as particle_grid_mask
+import looper2  
 
 #import looper
 #reload(looper)
@@ -32,7 +31,7 @@ from davetools import *
 
 import data_locations as dl
 import track_info
-#import track_loader
+import track_loader
 
 from collections import defaultdict
 import colors
