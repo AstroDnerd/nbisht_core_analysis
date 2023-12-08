@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from yt.visualization.plot_modifications import *
 import pyximport; pyximport.install()
 from scipy.spatial import ConvexHull
-import particle_ops
-import particle_grid_mask
 import h5py
 import time
 import numpy as na

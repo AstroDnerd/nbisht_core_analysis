@@ -16,14 +16,14 @@ import yt
 from yt_names import *
 
 
+import looper2
 import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
-import particle_ops as particle_ops
-import particle_grid_mask as particle_grid_mask
+import tools_data.particle_ops as particle_ops
+import tools_data.particle_grid_mask as particle_grid_mask
 
 #import looper
 #reload(looper)
-import looper2
 import trackage
 import tracks_read_write
 import tracks_read_write as trw

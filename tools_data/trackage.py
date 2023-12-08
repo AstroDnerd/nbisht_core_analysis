@@ -6,9 +6,6 @@ import numpy as np
 nar = np.array
 import time
 from importlib import reload
-import pyximport; pyximport.install()
-import particle_ops
-import particle_grid_mask
 import h5py
 import copy 
 import pdb
