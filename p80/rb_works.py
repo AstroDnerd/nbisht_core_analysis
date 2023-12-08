@@ -26,7 +26,10 @@ def splat(array, tcenter, ax, title,bins):
 class dq_dt2():
     def __init__(self,this_looper):
         self.this_looper=this_looper
-    def run(self,core_list=None,frame_list=None):
+        self.kappa_c=[]
+        self.kappa_cf_bar=[]
+        self.mean_of_means=[]
+    def run(self,core_list=None,frame_list=None, do_plots=True):
         this_looper=self.this_looper
         thtr = this_looper.tr
 
@@ -124,6 +127,37 @@ class dq_dt2():
             bins = nar(list(bins_m1)+list(bins_1))
             bincen = 0.5*(bins[1:]+bins[:-1])
 
+            if 1:
+                dd0f = ((rho[1:]/rho_0)).flatten()
+                bb0f = ((B2[1:]/b_0)).flatten()
+                #x = (rho/rho_0).flatten()
+                #y = (B2/b_0).flatten()
+                pfit = np.polyfit( np.log10(dd0f), np.log10(bb0f), 1)
+                kappa_c = pfit[0]
+                self.kappa_c.append(kappa_c)
+
+            if 1:
+                mean_of_means=(1-RB_Mean_10).mean()
+                self.mean_of_means.append(mean_of_means)
+            if 1:
+                #compute kappa_cf
+                time_ax=0; part_ax=1
+                dd0 = np.log10((rho[1:]/rho_0))
+                bb0 = np.log10((B2[1:]/b_0))
+                xbar = np.mean(dd0, axis=part_ax)
+                ybar = np.mean(bb0, axis=part_ax)
+                xbar.shape =  xbar.size,1
+                ybar.shape =  ybar.size,1
+                top = ((bb0 - ybar)*(dd0-xbar)).sum(axis=part_ax)
+                bot = ( (dd0-xbar)**2).sum(axis=part_ax)
+                if (bot == 0).any():
+                    pdb.set_trace()
+                kappa_cf = top/bot
+                norm = ybar-kappa_cf*xbar
+                self.kappa_cf_bar.append(np.mean(kappa_cf))
+
+            if not do_plots:
+                continue
             fig, ax=plt.subplots(4,2,figsize=(8,12))
             ax0=ax[0][0]
             ax1=ax[0][1] 
@@ -140,7 +174,6 @@ class dq_dt2():
             if 1: #mess around
                 #R take 1
                 THE_AX=ax0
-                ext_r = extents(RB)
                 if 1:
                     #this one shows stuff
                     bins_1 = np.geomspace( np.abs(RB).min(), np.abs(RB).max(),32)
@@ -174,66 +207,68 @@ class dq_dt2():
                 # B and rho
                 #
                 THIS_AX = ax2
-
                 THIS_AX.plot(times, rho/rho_0, c=[0.5]*4, linewidth=0.1)
                 THIS_AX.plot(times, BP/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='B/B0,rho/rho_0')
+
             if 1:
                 #B rho phase
                 THIS_AX=ax3
                 ext=extents()
+                ext(dd0f)
+                ext(bb0f)
 
-                x = (rho/rho_0).flatten()
-                y = (B2/b_0).flatten()
-                ext(x);ext(y)
                 bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
-                pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins]) 
+                pch.simple_phase(dd0f,bb0f,ax=THIS_AX, bins=[bins,bins]) 
                 THIS_AX.set(xscale='log',yscale='log',ylabel='B',xlabel='rho')
                 THIS_AX.plot(ext.minmax,ext.minmax,c='k')
 
-                pfit = np.polyfit( np.log10(x), np.log10(y),1)
                 #print(pfit, RB_Mean_10)
-                ux=np.unique(x)
+                ux=np.unique(dd0f)
                 lnx=np.log10(ux)
                 THIS_AX.plot( ux , 10**(pfit[0]*lnx+pfit[1]),c='orange')
 
+
             if 1:
+                #
+                # B and rho^(1-rb)
+                #
                 THIS_AX = ax4
 
                 RHO_FIX=(rho/rho_0)**np.abs((1-RB_Mean_10))
-
                 THIS_AX.plot(times, RHO_FIX, c=[0.5]*4, linewidth=0.1)
                 THIS_AX.plot(times, B2/b_0, c=[1.0,0.0,0.0,0.5], linewidth=0.1)
                 THIS_AX.set(yscale='log',title='Mean RB 10')
 
+            if 1:
+                #
+                # phase of B vs rho^(1-rb)
+                #
+
+
                 THIS_AX=ax5
                 y=B2/b_0
                 x = RHO_FIX
-                ext(x);ext(y)
+                ext2=extents()
+                ext2(x);ext2(y)
                 x=x.flatten();y=y.flatten()
-                bins = np.geomspace(ext.minmax[0],ext.minmax[1],64)
+                bins = np.geomspace(ext2.minmax[0],ext2.minmax[1],64)
                 pch.simple_phase(x,y,ax=THIS_AX, bins=[bins,bins]) 
-                THIS_AX.plot(ext.minmax,ext.minmax)
+                THIS_AX.plot(ext2.minmax,ext2.minmax)
                 THIS_AX.set(xscale='log',yscale='log', ylabel='B',xlabel='rho')
+
+            if 1:
+                #1-rb on the phaseplot
+                THIS_AX=ax3 
+
+                THIS_AX.plot( ux, ux**(mean_of_means), c='r')
 
 
 
             if 1:
-                #check you did the math right.
-                x = np.log10((rho/rho_0))
-                y = np.log10((B2/b_0))
-                time_ax=0; part_ax=1
-                xbar = np.mean(x, axis=part_ax)
-                ybar = np.mean(y, axis=part_ax)
-                xbar.shape =  xbar.size,1
-                ybar.shape =  ybar.size,1
-                top = ((y - ybar)*(x-xbar)).sum(axis=part_ax)
-                bot = ( (x-xbar)**2).sum(axis=part_ax)
-                kappa = top/bot
-                norm = ybar-kappa*xbar
-                #ax3.plot( 10**x, 10**(kappa*x+norm),c='g')
+                #plot kappa_cf
                 THIS_AX=ax6
-                THIS_AX.hist(kappa, histtype='step', label=r'$\kappa_{c,f}$')
+                THIS_AX.hist(kappa_cf, histtype='step', label=r'$\kappa_{c,f}$')
 
             if 1:
                 THIS_AX=ax6
@@ -243,7 +278,7 @@ class dq_dt2():
 
             if 1:
                 THIS_AX=ax7
-                THIS_AX.plot(times, kappa, label=r'$\kappa_{c,f}$')
+                THIS_AX.plot(times[1:], kappa_cf, label=r'$\kappa_{c,f}$')
                 THIS_AX.plot(times, 1-RB_Mean_10,c='r')
                 THIS_AX.legend(loc=0)
 
@@ -268,16 +303,28 @@ class dq_dt2():
 
 sim_list=['u902']
 TL.load_tracks(sim_list)
-for sim in sim_list:
-    ddd = dq_dt2(TL.loops[sim])
-    core_list=None
-    #core_list=[7]
-    #core_list=[74, 353]
-    #core_list=[74]
-    #core_list=[112]
-    core_list=TL.loops[sim].core_by_mode['Alone']
-    #core_list=core_list[:3]
-    #core_list=[214, 114]
-    P=ddd.run(core_list=core_list)
+if 'P' not in dir():
+    for sim in sim_list:
+        ddd = dq_dt2(TL.loops[sim])
+        core_list=None
+        #core_list=[7]
+        #core_list=[74, 353]
+        #core_list=[74]
+        #core_list=[112]
+        core_list=TL.loops[sim].core_by_mode['Alone']
+        #core_list=core_list[:3]
+        #core_list=[214, 114]
+        P=ddd.run(core_list=core_list, do_plots=False)
+
+if 1:
+    fig,ax=plt.subplots(1,1)
+    ax.scatter(ddd.kappa_c, ddd.mean_of_means)
+    ax.scatter(ddd.kappa_c, ddd.kappa_cf_bar)
+    ext=extents()
+    ext(nar(ddd.kappa_c));ext(nar(ddd.mean_of_means))
+    ext(nar(ddd.kappa_c));ext(nar(ddd.kappa_cf_bar))
+    ax.set(xlabel=r'$\kappa_c$',ylabel=r'$1-<R_B>$')
+    ax.plot(ext.minmax,ext.minmax)
+    fig.savefig('plots_to_sort/hope')
 
 
