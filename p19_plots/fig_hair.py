@@ -7,7 +7,6 @@ import colors
 import hair_dryer
 reload(hair_dryer)
 
-import three_loopers_u500 as TL
 
 def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do='centroid', external_ax=None):
 
@@ -97,7 +96,7 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
 
 
             if not dont_axbonk:
-                axbonk(ax,xlabel='xyz [code length]'[x], ylabel='xyz [code length]'[y], xlim=[xmin,xmax],ylim=[ymin,ymax])
+                axbonk(ax,xlabel='x/L', ylabel='y/L', xlim=[xmin,xmax],ylim=[ymin,ymax])
 
         outname='plots_to_sort/%s_buddies_%s_%s.pdf'%(this_looper.sim_name,'xyz'[LOS],suffix)
         if external_ax is None:
@@ -108,27 +107,7 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
 
 
 
-#sims=['u501']#, 'u502','u503']
 sims=['u501','u502','u503']
-#sims=['u503']
-if 0:
-    #get them all to sanitize
-    all_modes = []
-    for sim in sims:
-        all_modes += TL.loops[sim].unique_modes
-    all_modes=np.unique(nar(sorted(all_modes)))
-
-    print(all_modes)
-#Skip mostly because they're not fleshed out.
-#No cores are missed by this cut.
-skip = [ 'Barely', 'Found', 'Merger', 'Odd',  'Shard', 'Tides']
-#this one skips singletons.
-skip += [ 'One']
-
-    
-S4 = [ 241, 235, 236, 237, 212, 228, 233, 246, 232, 234, 230, 222, 226]
-S5 = [128, 146, 127, 144, 142, 126, 104, 103]
-S6 = [93,94,95,96,97,98,99]
 
 sims=['u502']
 import find_other_cores
@@ -164,5 +143,6 @@ for sim in sims:
                 #print(these_cores)
                 #suffix='S2'
             buddy_hair(TL.loops[sim], core_list=these_cores,suffix=suffix,color_dict=color_dict, external_ax=ax, what_to_do=what_to_plot)
+        fig.tight_layout()
         fig.savefig('plots_to_sort/F1_hair.pdf', bbox_inches='tight')
 

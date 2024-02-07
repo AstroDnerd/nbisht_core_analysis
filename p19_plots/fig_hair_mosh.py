@@ -7,7 +7,7 @@ import colors
 import hair_dryer
 reload(hair_dryer)
 
-import three_loopers_u500 as TL
+import track_loader as TL
 
 def simple_hair(this_looper,core_list=None):
 
@@ -65,12 +65,12 @@ def simple_hair(this_looper,core_list=None):
         rho_plot=ax1.twinx()
         print(rho.shape,c)
         rho_plot.plot(times, rho*colors.density_units, c=c, linewidth=Linewidth1)
-        rho_plot.set(yscale='log',ylabel=r'$\rho_{\rm{particle}} [cm^{-3}]$')
+        rho_plot.set(yscale='log',ylabel=r'$n~ [cm^{-3}]$')
 
         ax1.plot(times, v2, c='k')
         ax1.plot(times, vtm, c='c')
         ax1.plot(times, np.abs(vrm), c='r')
-        ax1.set(ylabel=r'$v_{\rm{particles}}/c_s$', xlabel=r'$t/t_{\rm{ff}}$')
+        ax1.set(ylabel=r'$v/c_s$', xlabel=r'$t/t_{\rm{ff}}$')
 
 
 
@@ -80,7 +80,7 @@ def simple_hair(this_looper,core_list=None):
             aaa.scatter( p[x][0,:].flatten(),p[y][0,:].flatten(),c='k',s=0.1)
             aaa.scatter( p[x][-1,:].flatten(),p[y][-1,:].flatten(),c='r',s=0.1)
             aaa.plot( p[x], p[y], c=c, linewidth=0.3)
-            aaa.set(xlabel='xyz [code length]'[x], ylabel='xyz [code length]'[y])
+            aaa.set(xlabel=r'$z/L$', ylabel=r'$y/L$')
 
         x0,x1=[0.090,0.175]
         y0,y1=[0.15,0.25]

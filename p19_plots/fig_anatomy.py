@@ -9,7 +9,7 @@ reload(camera_path)
 import hair_dryer
 reload(hair_dryer)
 
-import three_loopers_u500 as TL
+import track_loader as TL
 import movie_frames 
 
 from scipy.ndimage import gaussian_filter
@@ -134,8 +134,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax2 = ax.twinx()
         else:
             nx = len(frame_index)
-            fig = plt.figure(figsize=(8, 10))
-            fig.tight_layout()
+            fig = plt.figure(figsize=(7, 9))
             outer_grid = fig.add_gridspec(3, 1)
             #ax = outer_grid[0,0].subgridspec(1,1).subplots()
             #ax2 = ax.twinx()
@@ -148,14 +147,14 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         UN = colors.density_units
         ax.plot(times , rho*UN, c=c, linewidth=0.1)
         ylim=[10,5e9]
-        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho \rm{[cm^{-3}]}$',yscale='log',
+        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$n~\rm{[cm^{-3}]}$',yscale='log',
                ylim=ylim)
         ax2.set(xlabel=r'$t/t_{ff}$')
 
         if annotate_phases:
             ax2.text( 0.150, 9, r"$collection$")
             ax2.text( 0.350, 9, r"$hardening$")
-            ax2.text( 0.55, 9, r"$singularity$")
+            #ax2.text( 0.55, 9, r"$singularity$")
             #ax2.text( 0.9, 9, r"$(mosh)$")
             ax2.text( times[singularity]+0.01,9,r'$t_{\rm{sing}}$')
             ax2.text( times[collapse_done]+0.01,9,r'$t_{\rm{sung}}$')
@@ -169,7 +168,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
         ax2.plot(times, vtm, c='c', label=r'$v_t$')
         ax2.plot(times, v2, c='k', label=r'$v$')
         ax2.plot( times, times*0+1, c=[0.5]*4)
-        ax2.set( ylim=[0,10], ylabel=r'velocity (preimage)')
+        ax2.set( ylim=[0,10], ylabel=r'$v/c_s$')
 
         if 1:
             #density CDF
@@ -183,15 +182,16 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 cuml = np.arange(rho_to_hist.size)/rho_to_hist.size
                 #ax1.hist( rho_to_hist, histtype='step',color=rmap(n),bins=bins, cumulative=True, density=True)
                 ax1.plot( sorted(rho_to_hist), cuml,color=color_list[nnn], linewidth=line_list.get(frame,1))
-            axbonk(ax1,xlabel=r'$\rm{Density}\ [\rm{cm^{-3}}]\rm{(preimage)}$',
-                   yscale='linear',xscale='log', xlim=scale, ylabel='Density CDF (preimage)')
+            axbonk(ax1,xlabel=r'$n\ [\rm{cm^{-3}}]$',
+                   yscale='linear',xscale='log', xlim=scale, ylabel=r'$N_</N_{\rm{total}}$')
 
         #
         # Binding Energy
         #
         camera = camera_path.camera_1(this_looper, 'sphere')
         camera.run([core_id], frames, mini_scrubbers)
-        y_ext = extents(nar([.5,2e5]))
+        #y_ext = extents(nar([.5,2e5]))
+        y_ext = extents()
         r_ext = extents(colors.length_units_au*nar([1./2048, 0.3]))
         if 1:
             nnn=-1
@@ -253,6 +253,10 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                     EG_cuml = np.cumsum( EG[ORDER]*V_local)/V_cuml
                     EK_cuml = np.cumsum( EK[ORDER]*V_local)/V_cuml
 
+                    #UNITS
+                    EG_cuml *= colors.u_eng.v
+                    EK_cuml *= colors.u_eng.v
+
                     line=line_list.get(frame,1)
                     label_g=None
                     label_k=None
@@ -292,7 +296,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
                 if na>0:
                     aaa.set(yticks=[],ylabel='')
                 else:
-                    aaa.set(ylabel='Energy (full sphere)')
+                    aaa.set(ylabel=r'$E~ [\rm{erg}]$')
                 aaa.set( xlim=r_ext.minmax, ylim=y_ext.minmax)
 
 
@@ -302,6 +306,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
 
         outname='plots_to_sort/%s_anatomy_c%04d.png'%(this_looper.sim_name,core_id)
+        fig.tight_layout()
         fig.savefig(outname)
         print(outname)
         plt.close(fig)
@@ -309,7 +314,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
 
 
 sims=['u501', 'u502','u503']
-import three_loopers_u500 as TL
+track_loader.load_tracks(sims)
 import mass_tools
 if 0:
     if 'mt' not in dir():

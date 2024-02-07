@@ -25,7 +25,7 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
     rho_all = thtr.track_dict['density']
     rho_min=rho_all.min()
     rho_max=rho_all.max()
-    fig,axes=plt.subplots(4,1)
+    fig,axes=plt.subplots(4,1, figsize=(6,6))
     fig.subplots_adjust(hspace=0)
     ax=axes[1]; ax1=axes[2]; ax2=axes[3]; ax3=axes[0]
     #ax=axes[4]; ax1=axes[2]; ax2=axes[3]; ax3=axes[0]; ax4=axes[1]
@@ -112,7 +112,6 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
             tsing = times[singularity]
         else:
             tsing = tsing_in.tsing_core[core_id]
-            tsing = 1
 
 
         #velocity plots
@@ -133,22 +132,25 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
 
     axB.set(xscale='log',yscale='log', xlim=eng_ext.minmax,ylim=eng_ext.minmax)
     fig2.savefig('plots_to_sort/grasping')
-    labels = [ r'$\overline{v_{rms}}$', r'$\overline{v_{radial}}$', r'$\overline{v_{tangent}}$']
+    labels = [ r'$\overline{v_{rms}}/c_s$', r'$\overline{v_{R}}/c_s$', r'$\overline{v_{T}}/c_s$']
     for na,aaa in enumerate(axes[1:]):
         aaa.set( ylim=ylim, ylabel=labels[na], xlim=[0,2])
         if na==2:
-            aaa.set(xlabel=r'$t/t_{singularity}$')
+            aaa.set(xlabel=r'$t/t_{\rm{sing}}$')
         else:
             aaa.set(xlabel='', xticks=[])
         aaa.axhline(1,c=[0.5]*4)
         aaa.axvline(1, c=[0.5]*4)
     ax3.axvline(1,c=[0.5]*4)
-    ax3.set(yscale='log', ylim=rho_ext.minmax, xlim=ax.get_xlim(), ylabel=r'$\overline{\rho}}$', xticks=[])
+    ax3.set(yscale='log', ylim=rho_ext.minmax, xlim=ax.get_xlim(), ylabel=r'$\overline{n}~[\rm{cm^{-3}}]$', xticks=[])
     #ax4.set(yscale='log',ylim=eng_ext.minmax)
 
 
 
     outname='plots_to_sort/%s_velocity_mean_hair_t%s.pdf'%(this_looper.sim_name,suffix)
+    fig.tight_layout()
+    fig.subplots_adjust(hspace=0)
+
     fig.savefig(outname)
     print(outname)
 

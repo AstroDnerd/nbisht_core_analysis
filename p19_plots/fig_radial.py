@@ -10,7 +10,7 @@ import other_scrubber
 reload(other_scrubber)
 #import three_loopers_six as TL
 import camera_path
-import three_loopers_u500 as TL
+import track_loader as TL
 sim_list=['u501','u502','u503']
 #sim_list=['u502']
 plt.close('all')
@@ -265,7 +265,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     if 'rho' in profs:
         row = row_dict['rho']
         for nax,ax in enumerate(axes[row]):
-            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{\rho(<r)}~~ [\rm{g/cc}]$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{n(<r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
             if nax == len(frames)-1:
                 r = np.geomspace(1e-3,0.2)* colors.length_units_au
                 this_y=1e6*(r/1e4)**-(2)
@@ -344,7 +344,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         for nax,ax in enumerate(axes[row]):
             vr_ylim=ext[row].minmax
             vr_ylim = -4,2
-            ax.set(xscale='log',yscale='linear',ylim=vr_ylim, ylabel=r'$\overline{v_r(<r)}~~[c_s]$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='linear',ylim=vr_ylim, ylabel=r'$\overline{v_R(<r)}/c_s$', xlim=ext[-1].minmax)
             ax.axhline(0,c=[0.5]*4)
             ax.axhline(-1,c=[0.5]*4)
             rbins=np.geomspace(1e-3,1e-2)* colors.length_units_au
@@ -364,7 +364,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     if 'vt_cumsum' in profs:
         row = row_dict['vt_cumsum']
         for nframe,ax in enumerate(axes[row]):
-            ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$\overline{v_t(<r)}~~ [c_s]$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$\overline{v_T(<r)}/c_s$', xlim=ext[-1].minmax)
             if  nframe == len(frames)-2 and redlines:
                 RR_sort = np.geomspace(1e-4,1e1)*colors.length_units_au
                 #ax.plot(RR_sort, RR_sort*vt_cumsum[-1]/RR_sort[-1], c='r')
@@ -412,6 +412,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
 import tsing
 reload(tsing)
 sim_list=['u501','u502','u503']
+TL.load_tracks(sim_list)
 if 'tsing_tool' not in dir():
     tsing_tool={}
     for ns,sim in enumerate(sim_list):
@@ -429,9 +430,9 @@ reload(radial)
 if 1:
     if 'stuff' not in dir():
         stuff = {}
-    sim_list=['u501','u502','u503']
-    #sim_list=['u503']
-    mode_list=['Alone','Binary','Cluster']
+    #sim_list=['u501','u502','u503']
+    sim_list=['u501']
+    mode_list=['Alone']#,'Binary','Cluster']
     for sim in sim_list:
         if sim not in stuff:
             stuff[sim]={}
@@ -444,37 +445,5 @@ if 1:
                 timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
                 thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False, save_sorts=True )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
-            replotter(stuff[sim][mode],suffix=mode)
+            replotter(stuff[sim][mode],suffix1=mode, redlines=True)
 
-if 0:
-    sim_list=['u501']
-    if 'mp' not in dir():
-        for sim in sim_list:
-            all_cores=np.unique( TL.loops[sim].tr.core_ids)
-            core_list=list(all_cores)
-            core_list=None#[323]
-            core_list=[323]
-            core_list=[25]
-            core_list=[74]
-            core_list = TL.loops[sim].core_by_mode['Alone']
-            #core_list=core_list[10:]
-            #core_list=None
-
-            mp=radial.multipro(TL.loops[sim])
-            timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
-            mp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False,save_sorts=True )#, r_inflection=anne.inflection[sim])
-            replotter(mp)
-    if 0:
-        #rho vr vt alpha
-        replotter(mp, redlines=True, subset=0)
-        #energies
-        #replotter(mp, redlines=True, subset=1)
-    if 1:
-        #energy ratios
-        replotter(mp, redlines=True, subset=3)
-    if 0:
-        geplotter(mp)
-    if 0:
-        gtoy(mp)
-    if 0:
-        density(mp)

@@ -7,7 +7,8 @@ import colors
 import hair_dryer
 reload(hair_dryer)
 
-import three_loopers_u500 as TL
+import track_loader as TL
+
 import movie_frames 
 
 def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
@@ -59,7 +60,7 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
         if tsing is not None:
             ax.axvline( tsing.tsing_core[core_id], c=[0.5]*3,linewidth=1)
             ax.axvline( tsing.tend_core[core_id], c=[0.5]*3,linewidth=1)
-        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho~[\rm{cm^{-3}]}$',yscale='log', ylim=[rho_min,rho_max])
+        axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$n~[\rm{cm^{-3}]}$',yscale='log', ylim=[rho_min,rho_max])
 
     for na,aa in enumerate(axes):
         if na < len(axes)-1:
