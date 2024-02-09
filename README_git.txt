@@ -7,7 +7,7 @@ ON THE WEB
 corner
 
 ON YOUR TERMINAL
-3. git clone URL_OF_FORK  # clone the fork
+3. git clone URL_OF_FORK  # clone the fork, USING SSH!! (https=pain)
 4. cd forkedRepo
 5. git remote -v          # check current remotes, should see
 "origin" and url of the fork if not do:
@@ -28,18 +28,23 @@ first if multiple people are contributing...
 9. make a directory with all of your .py files/work so as to separate your
 contribution and to keep yourself organized
 
-10. git status            # it's nice to see what's going on
-11. git add .             # if you want to add all the changes, otherwise follow
-respecive prompts
+10. git status            # it's nice to see what you have changed 
+11. git add .             # if you want to add all the changes, otherwise only
+add the files you want
 
-12 git commit             # then it will prompt you to write a message
-13. git pull upstream     # to sync with the project; this step can be done
-after 7.   
+12 git commit -m 'message of change'   # a brief message of changes 
+13. git pull upstream     # to sync with the project BEFORE pushing
 
-14. git push upstream     # to sync your contributions to the project
-15. git push origin       # to sync your fork of the project
+14. git push upstream     # to sync your contributions to the fork of your
+project, may need an extra word after upstream
+15. git push origin       # to sync your fork to the original project, may need
+an extra word after origin
 
 # OTHERWISE DO...
 16. Go to:  https://www.dataschool.io/how-to-contribute-on-github/ 
     AND DO STEPS 8-18 to learn how to BRANCH
 
+# OR the simples procedure after #7:
+8. git checkout -b 'branchname'  # however, it may be enough to have forked 
+9. Repeat steps 10-15, except that it is not necessary to add anything post pull/push.
+10. From github (web), pick the branch & create a pull request (PR)
