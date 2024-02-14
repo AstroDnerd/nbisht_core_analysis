@@ -45,9 +45,22 @@ class PlotTheseParticles(PlotCallback):
             warnings.warn( "The minimum_mass keyword is deprecated.  Please use "
                 "an appropriate particle filter and the ptype keyword instead.")
 
+    def is_sequence(self):
+        try: 
+            print('try')
+            len(self.width)
+        except:
+            print('nope')
+            return False
+        else:
+            print('yep')
+            return True
+
     def __call__(self, plot):
         data = plot.data
-        if is_sequence(self.width):
+        #pdb.set_trace()
+       
+        if self.is_sequence():
             validate_width_tuple(self.width)
             self.width = plot.data.ds.quan(self.width[0], self.width[1])
         elif isinstance(self.width, YTQuantity):
