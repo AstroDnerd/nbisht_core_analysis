@@ -2,6 +2,8 @@ from starter2 import *
 
 import find_other_cores
 reload(find_other_cores)
+import track_loader
+import pdb
 
 
 if 0:
@@ -156,7 +158,9 @@ def grade_modes(trackname,delta_alone = 0.025):
     print(new_modes)
     fptr=h5py.File( track.mode_fname, 'w')
     try:
-        fptr['modes']=new_modes
+        #pdb.set_trace()    
+        asciiList = [n.encode("ascii","ignore") for n in new_modes]
+        fptr.create_dataset('modes', (len(asciiList),1),'S10',asciiList)
         fptr['core_ids']=main_core_list
     except:
         raise
