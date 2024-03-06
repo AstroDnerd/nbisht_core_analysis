@@ -20,13 +20,19 @@ if 1:
     #outdir  = '/scratch/00369/tg456484/Paper42_runs/eq44_Actually9_d0.5_p59_L4_J8/transfer/D1'
     #frame = 0;setname = '%s/DD%04d/data%04d'%(dirname,frame,frame)
 
+    #p78c take 1
     #dirname = '/anvil/scratch/x-ux454321/p78c_high_res/512/B02/512/'
     #outdir  = '/anvil/scratch/x-ux454321/p78c_high_res/512/B02/512/WithTracers'
     #dirname = '/anvil/scratch/x-ux454321/p78c_high_res/512/B2'
     #outdir  = '/anvil/scratch/x-ux454321/p78c_high_res/512/B2'
-    dirname = '/anvil/scratch/x-ux454321/p78c_high_res/512/B20'
-    outdir  = '/anvil/scratch/x-ux454321/p78c_high_res/512/B20'
+    #dirname = '/anvil/scratch/x-ux454321/p78c_high_res/512/B20'
+    #outdir  = '/anvil/scratch/x-ux454321/p78c_high_res/512/B20'
+    #frame=0
+    #setname = "%s/RS0000_source/restart0000"%dirname
+    #p78c take 2
     frame=0
-    setname = "%s/RS0000_source/restart0000"%dirname
+    dirname = "/anvil/scratch/x-ux454321/p78c_high_res/512_take2"
+    outdir  = "/anvil/scratch/x-ux454321/p78c_high_res/512_take2/DD0000_blank_particles"
+    setname = "%s/DD0000_512_blank/data0000"%dirname
     ds = yt.load(setname)
     AT.add_particles(ds,setname,outdir, outnumber = frame)
