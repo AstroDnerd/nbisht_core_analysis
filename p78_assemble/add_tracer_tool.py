@@ -6,11 +6,16 @@ import glob
 class fake_grid_for_pointers():    
     def __init__(self):
         self.first_stuff=[]
+        self.active_stuff=[]
         self.NumberOfParticles = None
         self.ParticleFileName = None
         self.BaryonFileName = None
         self.GravityBoundaryType = ''
         self.Pointers = []
+        self.NumberOfActiveParticles = None
+        self.PresentParticleTypes = ""
+        self.ParticleTypeCounts = ""
+
 
 def parse_hierarchy_for_particles(ds_name):
     #ds_name = get_ds_name(directory,frame)
@@ -67,6 +72,12 @@ def parse_hierarchy_for_particles(ds_name):
                 fake_grid_list[g_index].GravityBoundaryType = line
             elif line.startswith("Pointer"):
                 fake_grid_list[g_index].Pointers.append(line)
+            elif line.startswith("NumberOfActiveParticles"):
+                fake_grid_list[g_index].active_stuff.append(line)
+            elif line.startswith("PresentParticleTypes"):
+                fake_grid_list[g_index].active_stuff.append(line)
+            elif line.startswith("ParticleTypeCounts"):
+                fake_grid_list[g_index].active_stuff.append(line)
             elif len( line.strip() ): #it's not whitespace
                 raise Exception("I don't recognize this line, thats super bad. \t\n%s\n"%line)
 
@@ -154,6 +165,8 @@ def add_particles(ds, setname , outdir,outnumber=0):
             out_hierarchy_fptr.write(line)
         NumberOfParticles = particle_count_list[grid_index]
         out_hierarchy_fptr.write("NumberOfParticles = %d\n"%(NumberOfParticles))
+        for line in fake_grid_list[grid_index].active_stuff:
+            out_hierarchy_fptr.write(line)
         if NumberOfParticles > 0 :
             out_hierarchy_fptr.write("ParticleFileName = %s"%fake_grid_list[grid_index].BaryonFileName) 
         out_hierarchy_fptr.write(fake_grid_list[grid_index].GravityBoundaryType)
