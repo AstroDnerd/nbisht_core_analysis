@@ -1,10 +1,25 @@
 from starter2 import *
+import unyt
 
-density_units=1000 #cm^-3
-mass_units_msun = 5900 #Msun
-length_units_au = 928000 #AU
-length_units_pc = 4.6 #pc
-velocity_units_km_s = 0.2
+if 0:
+    density_units=1000 #cm^-3
+    mass_units_msun = 5900 #Msun
+    length_units_au = 928000 #AU
+    length_units_pc = 4.6 #pc
+    velocity_units_km_s = 0.2
+if 1:
+    density_units=817 #cm^-3
+    mass_units_msun = 2267 #Msun
+    length_units_au = (3.6*unyt.pc).in_units('AU').v
+    length_units_pc = 3.6 #pc
+    velocity_units_km_s = 0.2
+
+u_den = density_units*unyt.cm**-3
+u_mass = mass_units_msun*unyt.Msun
+u_length = length_units_au*unyt.AU
+u_vel = velocity_units_km_s*unyt.km/unyt.s
+u_eng = (u_mass*u_vel**2).in_units('erg')
+print(u_eng)
 
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
