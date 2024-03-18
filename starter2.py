@@ -35,3 +35,4 @@ import track_loader
 
 from collections import defaultdict
 import colors
+plot_dir = "%s/PigPen"%os.environ['HOME']
