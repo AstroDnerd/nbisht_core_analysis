@@ -79,39 +79,8 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
         rho_ext(rhomean)
         rho_ext(rhomin)
 
-        ylim=[0,8]
-        if norm:
-            vrm/=vrm[0]
-            v2/=v2[0]
-            vtm/=vtm[0]
-            ylim=[0,5]
-
-            #getotal/=getotal[0]
-            #ketotal/=ketotal[0]
-            getotal/=(dv).sum(axis=1)
-            ketotal/=(dv).sum(axis=1)
-            eng_ext(ketotal);eng_ext(getotal)
-
-            if 1:
-                #look for baddies
-                if (vrm > 4).any():
-                    print('bad one',core_id)
-
-        UB = gaussian_filter(rho.max(axis=1),1)
-        tf = times.flatten()
-        dt = tf[1:]-tf[:-1]
-        dU = UB[1:]-UB[:-1]
-        tc = 0.5*(times[1:]+times[:-1])
-        dU = dU[1:-1]
-        dt = dt[1:-1]
-        tc = tc[1:-1]
-        dudt=dU/dt
-        thresh = 1e5
-        singularity = np.where( dudt >thresh)[0][0]
-        if tsing_in is None:
-            tsing = times[singularity]
-        else:
-            tsing = tsing_in.tsing_core[core_id]
+        #tsing = tsing_in.tend_core[core_id]
+        tsing = tsing_in.tsing_core[core_id]
 
 
         #velocity plots
@@ -134,7 +103,9 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
     fig2.savefig('plots_to_sort/grasping')
     labels = [ r'$\overline{v_{rms}}/c_s$', r'$\overline{v_{R}}/c_s$', r'$\overline{v_{T}}/c_s$']
     for na,aaa in enumerate(axes[1:]):
-        aaa.set( ylim=ylim, ylabel=labels[na], xlim=[0,2])
+        ylim = [0,7.8]
+        xlim = [0,1.2]
+        aaa.set( ylim=ylim, ylabel=labels[na], xlim=xlim)
         if na==2:
             aaa.set(xlabel=r'$t/t_{\rm{sing}}$')
         else:
@@ -156,8 +127,9 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
 
 
 if 0:
-    #Paper version.
+    #First Paper version.
     #don't touch.
+    #probably replaced.
     sims=['u501']
     TL.load_tracks(sims)
     #sims=[ 'u502','u503']
@@ -169,6 +141,7 @@ if 0:
             #core_list=core_list[:5]
 
             v_hair(TL.loops[sim], core_list=core_list,suffix=mode,norm=False)
+
 if 1:
     #play with tsing
     #don't touch.

@@ -23,9 +23,9 @@ def plotsa(accreter, tsing):
     ax0=ax
 
     for core_id in accreter['rates']:
-        ax0.plot( accreter['time']/tsing.tsing_core[core_id], accreter['r10k'][core_id], c=[0.5]*4)
+        ax0.plot( accreter['time']/tsing.tend_core[core_id], accreter['r10k'][core_id], c=[0.5]*4)
         #ax0.plot( accreter['time'], accreter['r10k'][core_id])
-    ax0.set(yscale='log',ylabel=r'$R_{1000} [\rm{AU}]$', xlabel=r'$t/t_{\rm{sing}}$', xlim=[0,2])
+    ax0.set(yscale='log',ylabel=r'$R_{1000} [\rm{AU}]$', xlabel=r'$t/t_{\rm{sung}}$', xlim=[0,1.2])
     ax0.axvline(1,c='k',linewidth=0.1)
     m10k = nar(sorted(accreter['mass_10k']))
     cdf = np.arange(m10k.size)/m10k.size
@@ -45,6 +45,7 @@ def accretion(things, tsing):
     r10k = {}
     mass_r10k=[]
     for core_id in things:
+        print("Mass and accretion on core ",core_id)
         #core_id=obj.core_id
         obj = things[core_id]
         #ax6.set(xlabel='R',xscale='log',ylabel='|V_r|',yscale='log')
@@ -124,7 +125,6 @@ def accretion(things, tsing):
         ax2.plot(thalf.flatten(), DDD)
 
         #pdb.set_trace()
-        print(M10k)
         ax1.plot(thalf.flatten(), rcen[M10k], c='k')
         r10k[core_id]=rcen[M10k]
 
@@ -203,6 +203,7 @@ def plotmancer(obj, tsing, tall=True):
         #5900 solar masses
         MMM *= colors.mass_units_msun
 
+        TIMES = obj.times
         XXX,YYY = np.meshgrid( obj.times.flatten(),rcen)
         ax=axes
         #norm = mpl.colors.LogNorm( dMdTf[dMdTf>0].min(), dMdTf.mean())
@@ -246,7 +247,7 @@ def plotmancer(obj, tsing, tall=True):
             dMdt = dMass/dt/Mcen*colors.tff
             ok = ~np.isnan(dMdt)
             maxmax=np.abs(dMdt[ok]).max()
-            maxmax=4
+            maxmax=3.8
             norm2 = mpl.colors.Normalize(-maxmax,maxmax)
             X2,Y2=np.meshgrid(thalf.flatten(),rcen)
             plot3=AXX.pcolormesh(X2 ,Y2, dMdt,  norm=norm2, shading='nearest', cmap=cmap)
@@ -288,6 +289,7 @@ def plotmancer(obj, tsing, tall=True):
             rrrr = rrrr[mask,:]
 
             ax.plot(times , rrrr, c=[0.5]*3, linewidth=0.1, alpha=0.5)
+
         if tsing:
             for aaa in axes.flatten():
                 aaa.axvline(  tsing.tsing_core[core_id],c='k', linewidth=0.5)
@@ -549,13 +551,13 @@ if 1:
     #save and replot.
     if 0:
         thing_saver(things,sim)
-    if 0:
+    if 1:
         thing_new = thing_reader('this_mass_flux_u502.h5')
-    if 0:
+    if 1:
         sim='u502'
         if 'accreter' not in dir():
             accreter=accretion(thing_new, tsing_tool[sim])
-    if 1:
+    if 0:
         plotsa(accreter,tsing_tool[sim])
 
     if 1:

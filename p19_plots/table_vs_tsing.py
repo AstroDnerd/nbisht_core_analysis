@@ -152,7 +152,7 @@ if 1:
                 TheLR[quan]= "%0.2f"%LR[0]
 
             quan_list=['volume','hull_volumes','mass','ge','ke','avg_v3','avg_vr','avg_vt','avg_tff']
-            quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ E_G}$', 'ke':r'$\overline{ E_K }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
+            quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ \EG}$', 'ke':r'$\overline{ \EK }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
             #quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\langle \rho \rangle$','ge':r'$\langle E_G\rangle$', 'ke':r'$\langle E_K \rangle $','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\langle v_r \rangle $','avg_vt':r'$\langle v_t\rangle$','avg_tff':r'$t_{\rm{ff}}$','hull_volumes':r'$V_{\rm{hull}}$'}
             quan_by_sim[sim]=TheR
         import jinja2
