@@ -343,9 +343,9 @@ def shift_4(arr):
 
         
 class mini_scrubber():
-    def __init__(self,trk,core_id,do_velocity=True, do_magnetic=False):
+    def __init__(self,trk,core_id,do_velocity=True, do_magnetic=False, do_means=True, get_help=True):
         self.trk=trk
-        self.scrub(core_id,do_velocity=do_velocity, do_magnetic=do_magnetic)
+        self.scrub(core_id,do_velocity=do_velocity, do_magnetic=do_magnetic, do_means=do_means, get_help=get_help)
         self.axis=0
                 
     def compute_unique_mask(self,core_id, dx,frame):
@@ -364,7 +364,7 @@ class mini_scrubber():
         mask2 = mask[ rs]
         return mask2
 
-    def scrub(self,core_id, axis=0, do_velocity=True, do_magnetic=False):
+    def scrub(self,core_id, axis=0, do_velocity=True, do_magnetic=False, do_means=True, get_help=True):
         if core_id not in self.trk.core_ids:
             print("Core %d not found in looper"%core_id)
             print("  (also please write a better error handler)")
@@ -373,94 +373,98 @@ class mini_scrubber():
         self.raw_y = self.trk.c([core_id],'y')
         self.raw_z = self.trk.c([core_id],'z')
 
-        self.density = self.trk.c([core_id],'density')
-        self.cell_volume = self.trk.c([core_id],'cell_volume')
-        self.mass = self.density*self.cell_volume
-        self.mass_total=self.mass.sum(axis=0)
-        self.density_tot = self.density.sum(axis=0)
-        self.particle_ids = self.trk.c([core_id],'particle_id')
-
         if 1:
             #do the shift
             self.this_x = shift_4(self.raw_x)
             self.this_y = shift_4(self.raw_y)
             self.this_z = shift_4(self.raw_z)
         else:
-            #don't actually shift
+            #don't actually shift, for testing purposes
             self.this_x = self.raw_x+0
             self.this_y = self.raw_y+0
             self.this_z = self.raw_z+0
 
-        if 0: 
-            #Temp debugging code.  Kill later.
-            if 'shift_x' not in self.trk.track_dict or True:
-                self.trk.track_dict['shift_x']=np.zeros_like( self.trk.track_dict['density'])
-                self.trk.track_dict['shift_y']=np.zeros_like( self.trk.track_dict['density'])
-                self.trk.track_dict['shift_z']=np.zeros_like( self.trk.track_dict['density'])
-                self.trk.track_dict['test_rho']=np.zeros_like( self.trk.track_dict['density'])
-                self.trk.track_dict['test_z']=np.zeros_like( self.trk.track_dict['density'])
-            core_mask = self.trk.core_ids == core_id
-            self.shift_x = self.this_x - self.raw_x
-            self.shift_y = self.this_y - self.raw_y
-            self.shift_z = self.this_z - self.raw_z
-            self.trk.track_dict['shift_x'][core_mask,:]= self.shift_x
-            self.trk.track_dict['shift_y'][core_mask,:]= self.shift_y
-            self.trk.track_dict['shift_z'][core_mask,:]= self.shift_z
-            self.trk.track_dict['test_rho'][core_mask,:]= self.raw_z
-            self.trk.track_dict['test_z'][core_mask,:]= self.this_z
-
-        #print("kludge: raw mean")
-        self.mean_x = np.mean(self.this_x,axis=0)
-        self.mean_y = np.mean(self.this_y,axis=0)
-        self.mean_z = np.mean(self.this_z,axis=0)
-        self.mean_center=nar([self.mean_x,self.mean_y,self.mean_z])
-        #self.mean_x = np.sum(self.this_x*self.mass,axis=0)/self.mass_total
-        #self.mean_y = np.sum(self.this_y*self.mass,axis=0)/self.mass_total
-        #self.mean_z = np.sum(self.this_z*self.mass,axis=0)/self.mass_total
-        self.mean_xc = np.sum(self.this_x*self.density,axis=0)/self.density_tot
-        self.mean_yc = np.sum(self.this_y*self.density,axis=0)/self.density_tot
-        self.mean_zc = np.sum(self.this_z*self.density,axis=0)/self.density_tot
-        self.mean_center_density=nar([self.mean_xc,self.mean_yc,self.mean_zc])
+        if get_help:
+            self.density = self.trk.c([core_id],'density')
+            self.cell_volume = self.trk.c([core_id],'cell_volume')
+            self.mass = self.density*self.cell_volume
+            self.mass_total=self.mass.sum(axis=0)
+            self.density_tot = self.density.sum(axis=0)
+            self.particle_ids = self.trk.c([core_id],'particle_id')
 
 
-        self.nparticles,self.ntimes=self.this_x.shape
-        self.meanx2 = np.tile(self.mean_x,(self.raw_x.shape[0],1))
-        self.meany2 = np.tile(self.mean_y,(self.raw_x.shape[0],1))
-        self.meanz2 = np.tile(self.mean_z,(self.raw_z.shape[0],1))
+        if do_means:
 
-        self.meanx2c = np.tile(self.mean_xc,(self.raw_x.shape[0],1))
-        self.meany2c = np.tile(self.mean_yc,(self.raw_x.shape[0],1))
-        self.meanz2c = np.tile(self.mean_zc,(self.raw_z.shape[0],1))
+            if 0: 
+                #Temp debugging code.  Kill later.
+                if 'shift_x' not in self.trk.track_dict or True:
+                    self.trk.track_dict['shift_x']=np.zeros_like( self.trk.track_dict['density'])
+                    self.trk.track_dict['shift_y']=np.zeros_like( self.trk.track_dict['density'])
+                    self.trk.track_dict['shift_z']=np.zeros_like( self.trk.track_dict['density'])
+                    self.trk.track_dict['test_rho']=np.zeros_like( self.trk.track_dict['density'])
+                    self.trk.track_dict['test_z']=np.zeros_like( self.trk.track_dict['density'])
+                core_mask = self.trk.core_ids == core_id
+                self.shift_x = self.this_x - self.raw_x
+                self.shift_y = self.this_y - self.raw_y
+                self.shift_z = self.this_z - self.raw_z
+                self.trk.track_dict['shift_x'][core_mask,:]= self.shift_x
+                self.trk.track_dict['shift_y'][core_mask,:]= self.shift_y
+                self.trk.track_dict['shift_z'][core_mask,:]= self.shift_z
+                self.trk.track_dict['test_rho'][core_mask,:]= self.raw_z
+                self.trk.track_dict['test_z'][core_mask,:]= self.this_z
+
+            #print("kludge: raw mean")
+            self.mean_x = np.mean(self.this_x,axis=0)
+            self.mean_y = np.mean(self.this_y,axis=0)
+            self.mean_z = np.mean(self.this_z,axis=0)
+            self.mean_center=nar([self.mean_x,self.mean_y,self.mean_z])
+            #self.mean_x = np.sum(self.this_x*self.mass,axis=0)/self.mass_total
+            #self.mean_y = np.sum(self.this_y*self.mass,axis=0)/self.mass_total
+            #self.mean_z = np.sum(self.this_z*self.mass,axis=0)/self.mass_total
+            self.mean_xc = np.sum(self.this_x*self.density,axis=0)/self.density_tot
+            self.mean_yc = np.sum(self.this_y*self.density,axis=0)/self.density_tot
+            self.mean_zc = np.sum(self.this_z*self.density,axis=0)/self.density_tot
+            self.mean_center_density=nar([self.mean_xc,self.mean_yc,self.mean_zc])
 
 
-        self.rx_rel=self.this_x-self.meanx2
-        self.ry_rel=self.this_y-self.meany2
-        self.rz_rel=self.this_z-self.meanz2
+            self.nparticles,self.ntimes=self.this_x.shape
+            self.meanx2 = np.tile(self.mean_x,(self.raw_x.shape[0],1))
+            self.meany2 = np.tile(self.mean_y,(self.raw_x.shape[0],1))
+            self.meanz2 = np.tile(self.mean_z,(self.raw_z.shape[0],1))
 
-        self.rx_relc=self.this_x-self.meanx2c
-        self.ry_relc=self.this_y-self.meany2c
-        self.rz_relc=self.this_z-self.meanz2c
+            self.meanx2c = np.tile(self.mean_xc,(self.raw_x.shape[0],1))
+            self.meany2c = np.tile(self.mean_yc,(self.raw_x.shape[0],1))
+            self.meanz2c = np.tile(self.mean_zc,(self.raw_z.shape[0],1))
 
-        self.mean_xm = np.sum(self.this_x*self.density*self.cell_volume,axis=0)/self.mass_total
-        self.mean_ym = np.sum(self.this_y*self.density*self.cell_volume,axis=0)/self.mass_total
-        self.mean_zm = np.sum(self.this_z*self.density*self.cell_volume,axis=0)/self.mass_total
-        self.mean_xmt = np.tile(self.mean_xm,(self.raw_x.shape[0],1))
-        self.mean_ymt = np.tile(self.mean_ym,(self.raw_x.shape[0],1))
-        self.mean_zmt = np.tile(self.mean_zm,(self.raw_z.shape[0],1))
-        self.rx_relm=self.this_x-self.mean_xmt
-        self.ry_relm=self.this_y-self.mean_ymt
-        self.rz_relm=self.this_z-self.mean_zmt
-        self.r2m = self.rx_relm**2+self.ry_relm**2+self.rz_relm**2
-        self.rm = np.sqrt(self.r2m)
 
-        self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
-        self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
+            self.rx_rel=self.this_x-self.meanx2
+            self.ry_rel=self.this_y-self.meany2
+            self.rz_rel=self.this_z-self.meanz2
 
-        self.r=np.sqrt(self.r2)
-        self.rc=np.sqrt(self.r2c)
-        self.rmax = np.max(self.r,axis=0)
+            self.rx_relc=self.this_x-self.meanx2c
+            self.ry_relc=self.this_y-self.meany2c
+            self.rz_relc=self.this_z-self.meanz2c
 
-        self.rms = np.sqrt( np.mean(self.r2,axis=0))
+            self.mean_xm = np.sum(self.this_x*self.density*self.cell_volume,axis=0)/self.mass_total
+            self.mean_ym = np.sum(self.this_y*self.density*self.cell_volume,axis=0)/self.mass_total
+            self.mean_zm = np.sum(self.this_z*self.density*self.cell_volume,axis=0)/self.mass_total
+            self.mean_xmt = np.tile(self.mean_xm,(self.raw_x.shape[0],1))
+            self.mean_ymt = np.tile(self.mean_ym,(self.raw_x.shape[0],1))
+            self.mean_zmt = np.tile(self.mean_zm,(self.raw_z.shape[0],1))
+            self.rx_relm=self.this_x-self.mean_xmt
+            self.ry_relm=self.this_y-self.mean_ymt
+            self.rz_relm=self.this_z-self.mean_zmt
+            self.r2m = self.rx_relm**2+self.ry_relm**2+self.rz_relm**2
+            self.rm = np.sqrt(self.r2m)
+
+            self.r2 = self.rx_rel**2+self.ry_rel**2+self.rz_rel**2
+            self.r2c = self.rx_relc**2+self.ry_relc**2+self.rz_relc**2
+
+            self.r=np.sqrt(self.r2)
+            self.rc=np.sqrt(self.r2c)
+            self.rmax = np.max(self.r,axis=0)
+
+            self.rms = np.sqrt( np.mean(self.r2,axis=0))
 
         if do_magnetic:
             self.bx = self.trk.c([core_id],'magnetic_field_x')
@@ -629,15 +633,19 @@ class mini_scrubber():
         self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
         self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
         self.angular_v_z = ((self.rx_rel*self.rel_vy - self.ry_rel*self.rel_vx)/self.r**2)
-        self.angular_moment_x = self.I_ii*self.angular_v_x 
-        self.angular_moment_y = self.I_ii*self.angular_v_y
-        self.angular_moment_z = self.I_ii*self.angular_v_z
         self.linear_momentum_rel_x = self.mass*(self.rel_vx)
         self.linear_momentum_rel_y = self.mass*(self.rel_vy)
         self.linear_momentum_rel_z = self.mass*(self.rel_vz)
         self.angular_momentum_rel_x = self.ry_rel*self.linear_momentum_rel_z-self.rz_rel*self.linear_momentum_rel_y
         self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
         self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
+        self.angular_momentum_mag = (self.angular_momentum_rel_x**2+self.angular_momentum_rel_y**2+self.angular_momentum_rel_z**2)**0.5
+        self.j_hat_x = self.angular_momentum_rel_x/self.angular_momentum_mag
+        self.j_hat_y = self.angular_momentum_rel_y/self.angular_momentum_mag
+        self.j_hat_z = self.angular_momentum_rel_z/self.angular_momentum_mag
+        self.j_hat_r = self.angular_momentum_mag
+        self.j_hat_theta = np.arctan2(self.j_hat_y,self.j_hat_x)
+        self.j_hat_phi = np.arccos(self.j_hat_z)
         self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
 
     def particle_pos(self,core_id):
