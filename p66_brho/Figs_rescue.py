@@ -16,6 +16,11 @@ from cfpack import stop,print
 import latex
 import matplotlib as mpl
 mpl.rcParams.update(mpl.rcParamsDefault)
+
+import tsing
+reload(tsing)
+import tsung_spheres
+reload(tsung_spheres)
 # --- --- --- --- --- --- ---
 
 
@@ -76,7 +81,7 @@ class withspheres():
         data_rhosph = [*self.rhoave_sph.values()]
         data_bmagparts = [*self.bmag_parts.values()] 
         data_rhoparts = [*self.rhoave_parts.values()]
-        if 1: 
+        if 0: 
             hfivename = 'p66_brho/brho_sphparts_%s.h5'%(sim)
             Fptr = h5py.File(hfivename,'w')
             Fptr['bfield_sph'] = data_bmagsph 
@@ -87,29 +92,55 @@ class withspheres():
             print('h5 file written. closing.')
 
 
-# YOU ARE HERE
-sims=['u603']#, 'u602','u603']
+
+# YOU ENTER HERE
 # TO GET DATA AND STORE
+# COMPARING SPHERES WITH PARTICLES
 if 0:
+    sims=['u603', 'u602','u603']
     TL.load_tracks(sims)
     for sim in sims:
         core_list=None
         running = withspheres(TL.loops[sim])
         running.framescores(sim)
+# SPHERES SYNCED TO TSUNG
+if 0:
+    sims=['u501', 'u502', 'u503']
+    import three_loopers_u500 as TL   #EDIT THIS!! and put pdb.set_trace() back in this file
+    #TL.load_tracks(sims)
+    if 'tsing_tool' not in dir():
+        tsing_tool={}
+        for ns,sim in enumerate(sims):
+            obj=tsing.te_tc(TL.loops[sim])
+            tsing_tool[sim]=obj
+            tsing_tool[sim].run()
+    if 'mp' not in dir():
+        for sim in sims:
+            all_cores=np.unique(TL.loops[sim].tr.core_ids)
+            core_list=list(all_cores)
+            #core_list=core_list[:1]  #debug
+
+            mp=tsung_spheres.tsungspheres(TL.loops[sim])   #EDIT! make tsung part of this class, then split THIS file into two respectively
+            timescale = 2 
+            mp.run(core_list=core_list, tsing=tsing_tool[sim], timescale=timescale, get_particles=True, save_sorts=True )
+
+
 
 # TO READ DATA FROM STORAGE
 if 1:  
     figtype = 'kappaperframe'  #kappaperframe, kappatff
-    individually = 'yes'  #yes, no
-    parts_or_spheres ='parts' #parts, spheres, sphparts  #EDIT respectively below
+    individually = 'no'  #yes, no
+    parts_or_spheres ='sph_tsung' #parts, spheres, sphparts, sph_tsung  #EDIT respectively below
 
-    hfivename = 'p66_brho/brho_sphparts_%s.h5'%(sims[0])  #EDIT
+    sims=['u503']#, 'u502', 'u503']
+    hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  #EDIT
     Fptr = h5py.File(hfivename,'r')
-    b_sph = Fptr['bfield_sph'][()] 
-    b_parts = Fptr['bfield_parts'][()] 
-    rho_sph = Fptr['rhoavg_sph'][()]
-    rho_parts = Fptr['rhoavg_parst'][()] 
-    #pdb.set_trace()
+    other_h5fields = ['bfield_sph','rhoavg_sph']
+    b_sph = Fptr['bmag_sph'][()] 
+    rho_sph = Fptr['rho_sph'][()]
+    if parts_or_spheres == 'parts':
+        b_parts = Fptr['bfield_parts'][()] 
+        rho_parts = Fptr['rhoavg_parst'][()] 
 
     def afunct(x, a, b):
         y = a * x + b
@@ -118,41 +149,42 @@ if 1:
     if figtype == 'kappaperframe':
         kappas_sph = []
         kappas_parts = []
-        for i in range(len(rho_parts)):   #should make this part of the stored data... 
+        for i in range(len(rho_sph)):   #should make this part of the stored data... 
             rhosph_log = np.log(rho_sph[i])  
-            rhoparts_log = np.log(rho_parts[i])  
             bsph_log = np.log(b_sph[i]) 
-            bparts_log = np.log(b_parts[i]) 
-
             rets_sph = cfp.fit(afunct, rhosph_log, bsph_log)  
-            rets_parts = cfp.fit(afunct, rhoparts_log, bparts_log)  
+            kappas_sph = np.append(kappas_sph, rets_sph.popt[0])
+            if parts_or_spheres == 'parts':
+                bparts_log = np.log(b_parts[i]) 
+                rhoparts_log = np.log(rho_parts[i])  
+                rets_parts = cfp.fit(afunct, rhoparts_log, bparts_log)  
+                kappas_parts = np.append(kappas_parts, rets_parts.popt[0]) 
             '''
             the_xrecipe = np.linspace(rhosph_log.min(),rhosph_log.max(),num=500)
             the_xten =10**the_xrecipe
             the_yrecipe_ = afunct(the_xrecipe, *rets.popt)
             the_yten = 10**the_yrecipe
-            '''
-            kappas_sph = np.append(kappas_sph, rets_sph.popt[0])
-            kappas_parts = np.append(kappas_parts, rets_parts.popt[0]) 
-            
+            ''' 
             if individually == 'yes':
                 fig,ax = plt.subplots(1,1)
                 ax.scatter(rho_sph[i], b_sph[i], color='b', label='spheres', alpha=0.5)  #kappa sph and parts vs time frame
-                ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  #kappa sph and parts vs time frame
+                if parts_or_spheres == 'parts':
+                    ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  #kappa sph and parts vs time frame
                 ax.legend()
                 ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(1e-2,1e8), ylim=(1e0,1e4))
-                outname = 'p66_brho/sphparts_frame%d_%s'%(i,sims[0])
+                outname = 'p66_brho/sphtsung_frame%d_%s'%(i,sims[0])
                 plt.savefig(outname)
                 print('figure saved!')
                 plt.clf()      
         if individually == 'no':
             fig,ax = plt.subplots(1,1)
-            the_x = np.linspace(0,len(rho_parts)+1,len(rho_parts)) 
-            ax.plot(the_x, kappas_sph, color='b', label='spheres')  #kappa sph and parts vs time frame
-            ax.plot(the_x, kappas_parts, color='r', label='particles')  #kappa sph and parts vs time frame
+            the_x = np.linspace(1,len(rho_sph),len(rho_sph)) 
+            ax.scatter(the_x, kappas_sph, color='b', label='spheres')  #kappa sph and parts vs time frame
+            if parts_or_spheres == 'parts':
+                ax.plot(the_x, kappas_parts, color='r', label='particles')  #kappa sph and parts vs time frame
             ax.legend()
-            ax.set(xlabel=r'$t_{ff,dummy}$', ylabel=r'$\kappa_{sph},\kappa_{parts}$', ylim=(0,0.95))
-            outname = 'p66_brho/sphparts_kappadyn_plot_%s'%sims[0]
+            ax.set(xlabel=r'$t_{tsung,dummy}$', ylabel=r'$\kappa_{sph_tsung}$') #,\kappa_{parts}$', ylim=(0,0.95))
+            outname = 'p66_brho/sphtsung_kappadyn_scatter_%s'%sims[0]
             plt.savefig(outname)
             print('figure saved!')
             plt.clf()    
@@ -163,31 +195,32 @@ if 1:
         rhotff_parts = []
         btff_parts = []
         fig,ax = plt.subplots(1,1)
-        for i in range(len(rho_parts)):   
+        for i in range(len(rho_sph)):   
             rhotff_sph = np.append(rhotff_sph, rho_sph[i]) 
             btff_sph = np.append(btff_sph, b_sph[i]) 
-            rhotff_parts = np.append(rhotff_parts, rho_parts[i]) 
-            btff_parts = np.append(btff_parts, b_parts[i])   
+            if parts_or_spheres == 'parts':
+                rhotff_parts = np.append(rhotff_parts, rho_parts[i]) 
+                btff_parts = np.append(btff_parts, b_parts[i])   
 
         rhotff_sphlog = np.log10(rhotff_sph)
         btff_sphlog = np.log10(btff_sph) 
-        rhotff_partslog = np.log10(rhotff_parts)
-        btff_partslog = np.log10(btff_parts)
         rets_sphlog = cfp.fit(afunct, rhotff_sphlog, btff_sphlog)  
-        rets_partslog = cfp.fit(afunct, rhotff_partslog, btff_partslog)  
+        if parts_or_spheres == 'parts':
+            rhotff_partslog = np.log10(rhotff_parts)
+            btff_partslog = np.log10(btff_parts)
+            rets_partslog = cfp.fit(afunct, rhotff_partslog, btff_partslog)  
 
-        tmap = rainbow_map(len(rhotff_parts)) 
-        ctr = [tmap(n) for n in range(len(rhotff_parts))]
-        color_opt = [ctr,'b','r']
-       
-        if 0:
-            ax.scatter(rhotff_sph, btff_sph, color=color_opt[0], alpha=0.4, label='spheres')
+        tmap = rainbow_map(len(rhotff_sph)) 
+        ctr = [tmap(n) for n in range(len(rhotff_sph))]
+        color_opt = [ctr,'b','r']       
         if 1:
+            ax.scatter(rhotff_sph, btff_sph, color=color_opt[0], alpha=0.4, label='spheres')
+        if 0:
             ax.scatter(rhotff_parts, btff_parts, color=color_opt[0], alpha=0.4, label='particles')
 
-        title=[r'$\kappa_{sph}=%f$, $\kappa_{parts}=%f$'%(rets_sphlog.popt[0],rets_partslog.popt[0]), 'particles', 'spheres']
-        ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', \
-               title=title[1])  
+        title=[r'$\kappa_{sph_tsung}=%f$'%rets_sphlog.popt[0]]#, r'$\kappa_{sph}=%f$, $\kappa_{parts}=%f$'%(rets_sphlog.popt[0],rets_partslog.popt[0]), 'particles', 'spheres']
+        ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(10e-3,10e3), ylim=(10e-2,10e3), \
+               title=title[0])  
         ax.legend(loc='best')
 
         outname = 'p66_brho/%s_kappatff_scatter_%s'%(parts_or_spheres,sims[0])
