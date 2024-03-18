@@ -47,7 +47,7 @@ class multipro():
             ms.compute_ke_rel(core_id)
             self.cores_used.append(core_id)
 
-            frame_mask = np.zeros_like(thtr.times, dtype='bool')
+            frame_mask = np.zeros_like(thtr.frames, dtype='bool')
 
             if self.timescale==0:
                 frame_mask[0]=True
