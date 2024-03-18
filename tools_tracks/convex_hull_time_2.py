@@ -3,12 +3,14 @@
 from starter2 import *
 
 #import three_loopers_six as TL
-import three_loopers_u500 as TL
+#import three_loopers_u500 as TL
+import track_loader as TL
 import convex_hull_tools as CHT
 reload(CHT)
 sim_list = ['u601','u602','u603']
 sim_list=['u502']
 #sim_list=['u502']
+TL.load_tracks(sim_list)
 
 if 'hull_by_frame' not in dir():
     #
@@ -25,7 +27,7 @@ if 1:
         loop=TL.loops[sim]
         name = loop.sim_name
         hull_by_frame[name]={}
-        frame_list=loop.tr.frames
+        frame_list=[0,30] #loop.tr.frames
         #frame_list=[125]
         #frame_list=[0]
         for nframe, frame in enumerate(frame_list):
