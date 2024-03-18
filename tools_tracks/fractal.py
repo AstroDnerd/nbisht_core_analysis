@@ -9,6 +9,15 @@ import data_locations as dl
 reload(dl)
 plt.close('all')
 
+def make_fractals(looper, framelist, core_list=None):
+    
+    name =  looper.sim_name
+    fractals={}
+    for nframe, frame in enumerate(framelist):
+        fractals[frame] = fractal_tool( looper )
+        fractals[frame].run(frame=frame, do_plots=False, core_list=core_list)
+    return fractals
+
 #from https://gist.github.com/viveksck/1110dfca01e4ec2c608515f0d5a5b1d1
 def fractal_dimension(Z, threshold=0.9, do_plots=False, plotname='plot'):
 
@@ -42,6 +51,7 @@ def fractal_dimension(Z, threshold=0.9, do_plots=False, plotname='plot'):
 
     # Greatest power of 2 less than or equal to p
     n = 2**np.floor(np.log(p)/np.log(2))
+    #pdb.set_trace()
 
     # Extract the exponent
     n = int(np.log(n)/np.log(2))
@@ -50,10 +60,12 @@ def fractal_dimension(Z, threshold=0.9, do_plots=False, plotname='plot'):
     #sizes = 2**np.arange(n, 1, -1)
     sizes = 2**np.arange(n, -1, -1)
 
-    #don't repeat sizes that are too big.
-    image_length= np.max( nar(np.where(Z)))
-    image_length = 2**np.round(np.log2(image_length))
-    sizes = sizes[ sizes <= image_length]
+    if 0:
+        #maybe it makes more sense to keep everything?
+        #don't repeat sizes that are too big.
+        image_length= np.max( nar(np.where(Z)))
+        image_length = 2**np.round(np.log2(image_length))
+        sizes = sizes[ sizes <= image_length]
 
     # Actual box counting with decreasing size
     counts = []
@@ -83,8 +95,9 @@ def fractal_dimension(Z, threshold=0.9, do_plots=False, plotname='plot'):
 
     sizes=nar(sizes)
     counts=nar(counts)
-    ok = counts > 1
-    if ok.sum():
+    #ok = counts > 1
+    ok = slice(None)
+    if True: #ok.sum():
         coeffs = np.polyfit(np.log(sizes[ok]), np.log(counts[ok]), 1)
     else:
         coeffs = [0,0]
@@ -101,15 +114,18 @@ class fractal_tool():
         self.cores_used=[]
         self.fractal_dim=[]
 
-    def run(self,core_list=None,nf=0, do_plots=False, plot_prefix='FRACTAL'):
+    def run(self,core_list=None,frame=0, do_plots=False, plot_prefix='FRACTAL'):
         thtr = self.this_looper.tr
         all_cores = np.unique(thtr.core_ids)
         rm = rainbow_map(len(all_cores))
         if core_list is None:
             core_list = all_cores
+        all_frames=thtr.frames
+        nf = np.where(all_frames==frame)[0][0]
+        print(nf)
         for core_id in core_list:
-            ms = trackage.mini_scrubber(thtr,core_id)
-            if ms.r.shape[0] <= 4:
+            ms = trackage.mini_scrubber(thtr,core_id, do_velocity=True, do_means=True)
+            if ms.this_x.shape[0] <= 4:
                 continue
             #print("fractal dim on ", core_id)
             self.cores_used.append(core_id)
@@ -135,38 +151,6 @@ class fractal_tool():
             y = y[ mask]
             z = z[ mask]
             image[(x,y,z)]=1
-            if 0:
-                #image = np.zeros( image_size)
-                if 0:
-                    print("image size",core_id,image_size)
-                    ix,iy,iz=np.mgrid[0:128:1,0:128:1,0:128:1]
-                    #ok = ( (ix**2+iy**2+iz**2) < 56**2 )*( (ix**2+iy**2+iz**2) > 54**2)
-                    ok = ( (iy**2+iz**2) < 56**2 )*( (iy**2+iz**2) > 54**2)
-                    ok += (iy==0)*(iz<56)
-                    ok += (iz==0)*(iy<56)
-
-                    image=image*0
-                    image[ok]=1
-                def fill_in(A):
-                    oot=np.ones_like(A)
-                    for dim in [0,1,2]:#[0,1,2]:
-                        P = np.cumsum(A,axis=dim)
-                        E = np.sum(A,axis=dim)
-                        oot *= P*(E-P)
-                        print("OOT",oot.sum())
-
-                    return oot
-                cmap=copy.copy(mpl.cm.get_cmap("viridis"))
-                cmap.set_under('w')
-                fig7,ax7=plt.subplots(1,2)
-                norm=mpl.colors.Normalize(1,20)
-                ax7[0].imshow(np.sum(image,axis=0), origin='lower',interpolation='nearest',cmap=cmap,norm=norm)
-                B =  fill_in(image)  + image
-                print("B sum",B.sum())
-                #pdb.set_trace()
-                ax7[1].imshow(np.sum(B,axis=0), origin='lower',interpolation='nearest',cmap=cmap,norm=norm)
-                fig7.savefig('plots_to_sort/fill_in_c%04d.png'%core_id)
-                plt.close(fig7)
                         
                 
             #print("Total points", x.size, image.sum())
@@ -175,7 +159,8 @@ class fractal_tool():
             stuff = fractal_dimension(image,do_plots=do_plots, plotname=plotname)
             dimension = stuff[0]
             self.fractal_dim.append(dimension)
-            print("fractal dim c%04d %0.2f"%(core_id,self.fractal_dim[-1]))
+            frame = self.this_looper.tr.frames[nf]
+            print("fractal dim c%04d n%04d %0.2f"%(core_id,frame,self.fractal_dim[-1]))
             if 0:
                 #image.
                 plt.clf()
@@ -201,16 +186,20 @@ class fractal_tool():
 
 #import three_loopers_1tff as tl
 #import three_loopers_mountain_top as TLM
-import three_loopers_tenfour as TL4
-
-
+#import three_loopers_tenfour as TL4
+import track_loader as TL
+sims = ['u601','u602','u603']
+sims = ['u602']
+#track_loader.load(sims)
 
 
 if 'toolshed' not in dir():
     toolshed = {}
 
-framelist=[0]#,1,2,3,4,5,6,7,8]
-if 1:
+
+
+if 0:
+    framelist=[0]#,1,2,3,4,5,6,7,8]
     looper_list = TL4.loops
     
     for simname in looper_list:
@@ -235,7 +224,7 @@ if 0:
         core_list=[323]
         tool.run(core_list=core_list, do_plots=True, plot_prefix=simname)
 
-if 1:
+if 0:
     fig,ax=plt.subplots(1,1)
     for nsim,simname in enumerate(toolshed):
         print(nsim,simname)
@@ -246,6 +235,7 @@ if 1:
 if 0:
     for nf,ft in enumerate([ft1,ft2,ft3]):
         name=ft.this_looper.out_prefix
+
         plt.hist(ft.fractal_dim,histtype='step',bins=10,color=colors.color[name],label=name)
         #plt.savefig("plots_to_sort/wtf_%d.png"%nf)
 
