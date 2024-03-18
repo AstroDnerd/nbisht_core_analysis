@@ -8,14 +8,14 @@ import movie_frames
 from scipy.ndimage import gaussian_filter
 
 tsing_tool={}
-def get_tsing(loop_list):
-    for ns,sim in enumerate(loop_list):
+def get_tsing(loop_dict):
+    for ns,sim in enumerate(loop_dict):
         if sim in tsing_tool:
             continue
         else:
             print("tsing, %s"%(sim))
 
-        loop=loop_list[sim]
+        loop=loop_dict[sim]
         obj=te_tc(loop)
         sim=loop.sim_name
         tsing_tool[sim]=obj
