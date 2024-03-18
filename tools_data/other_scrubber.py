@@ -113,6 +113,24 @@ class scrubber():
         self.ke = 0.5*self.density*(self.raw_vx**2+self.raw_vy**2+self.raw_vz**2)
     def compute_ke_rel(self):
         self.ke_rel = 0.5*self.density*(self.rel_vx**2+self.rel_vy**2+self.rel_vz**2)
+    def momenta(self):
+        self.angular_v_x = ((self.ry_rel*self.rel_vz-self.rz_rel*self.rel_vy)/self.r**2)
+        self.angular_v_y = ((self.rz_rel*self.rel_vx - self.rx_rel*self.rel_vz)/self.r**2)
+        self.angular_v_z = ((self.rx_rel*self.rel_vy - self.ry_rel*self.rel_vx)/self.r**2)
+        self.linear_momentum_rel_x = self.mass*(self.rel_vx)
+        self.linear_momentum_rel_y = self.mass*(self.rel_vy)
+        self.linear_momentum_rel_z = self.mass*(self.rel_vz)
+        self.angular_momentum_rel_x = self.ry_rel*self.linear_momentum_rel_z-self.rz_rel*self.linear_momentum_rel_y
+        self.angular_momentum_rel_y = self.rz_rel*self.linear_momentum_rel_x-self.rx_rel*self.linear_momentum_rel_z
+        self.angular_momentum_rel_z = self.rx_rel*self.linear_momentum_rel_y-self.ry_rel*self.linear_momentum_rel_x
+        self.angular_momentum_mag = (self.angular_momentum_rel_x**2+self.angular_momentum_rel_y**2+self.angular_momentum_rel_z**2)**0.5
+        self.j_hat_x = self.angular_momentum_rel_x/self.angular_momentum_mag
+        self.j_hat_y = self.angular_momentum_rel_y/self.angular_momentum_mag
+        self.j_hat_z = self.angular_momentum_rel_z/self.angular_momentum_mag
+        self.j_hat_r = self.angular_momentum_mag
+        self.j_hat_theta = np.arctan2(self.j_hat_y,self.j_hat_x)
+        self.j_hat_phi = np.arccos(self.j_hat_z)
+        self.r_dot_angular_moment = self.rx_rel*self.angular_momentum_rel_x + self.ry_rel*self.angular_momentum_rel_y + self.rz_rel*self.angular_momentum_rel_z
 
 
 
