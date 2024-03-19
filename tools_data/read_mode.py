@@ -2,6 +2,7 @@
 from starter2 import *
 from collections import defaultdict
 import re
+import pdb
 
 def read(fname, method=0):
     #method==0 assumes an hdf5 file
@@ -13,7 +14,7 @@ def read(fname, method=0):
         fptr=h5py.File(fname,'r')
         core_ids = fptr['core_ids'][()]
         modes_str = fptr['modes'][()].astype(str)
-        modes_tmp = [sss.split(',') for sss in modes_str]
+        modes_tmp = [np.split(sss,1) for sss in modes_str]  #this fix may be necessary for other similar lines in the code!
     else:
         sim_id = int(sim_name[-1]) #last character is all we need. 501=601
         #fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
@@ -28,7 +29,7 @@ def read(fname, method=0):
             core_id = int( core_name.split("c")[1])
             core_ids.append(core_id)
             modes_str.append( stuff[1])
-        modes_tmp = [sss.split(',') for sss in modes_str]
+        modes_tmp = [sss.split(',') for sss in modes_str]  
         #trim off whitespace. 
         modes_tmp_2 = []
         for core_modes in modes_tmp:
@@ -50,7 +51,7 @@ def read(fname, method=0):
         shard=False
         merge=False
         for mmm in mode:
-            m = mmm.strip()
+            m = mmm[0]
             match = regexp.match(m)
             if match is not None:
                 mode_label_dict[core_ids[nm]]=m
