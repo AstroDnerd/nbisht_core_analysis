@@ -1,15 +1,208 @@
 
 from starter2 import *
 reload(track_info)
-
-# m_ for multiple target frames
-# track name: m02targetframe, where 02 is the second simulation of the 200 series
-
 #
 # Define tracks, including track location and build information.
 # The constructor also registers each one in track_info.tracks
 #
 
+# m_ for multiple target frames
+# track name: m02targetframe, where 02 is the second simulation of the 200 series
+
+
+# 04-04-sh: glitch
+track_info.track('m0220',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 20, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0220_mountain_top_20.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0220_peaklist_20.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0220_every10_20.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0220_coreformationmode_20.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+
+track_info.track('m0230',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 30, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0230_mountain_top_30.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0230_peaklist_30.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0230_every10_30.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0230_coreformationmode_30.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0231',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 31, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0231_mountain_top_31.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0231_peaklist_31.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0231_every10_31.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0231_coreformationmode_31.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0232',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 32, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0232_mountain_top_32.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0232_peaklist_32.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0232_every10_32.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0232_coreformationmode_32.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0233',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 33, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0233_mountain_top_33.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0233_peaklist_33.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0233_every10_33.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0233_coreformationmode_33.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0234',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 34, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0234_mountain_top_34.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0234_peaklist_34.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0234_every10_34.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0234_coreformationmode_34.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0235',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 35, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0235_mountain_top_35.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0235_peaklist_35.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0235_every10_35.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0235_coreformationmode_35.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0236',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 36, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0236_mountain_top_36.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0236_peaklist_36.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0236_every10_36.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0236_coreformationmode_36.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0237',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 37, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0237_mountain_top_37.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0237_peaklist_37.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0237_every10_37.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0237_coreformationmode_37.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0238',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 38, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0238_mountain_top_38.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0238_peaklist_38.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0238_every10_38.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0238_coreformationmode_38.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0239',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 39, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0239_mountain_top_39.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0239_peaklist_39.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0239_every10_39.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0239_coreformationmode_39.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0240',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 40, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0240_mountain_top_40.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0240_peaklist_40.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0240_every10_40.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0240_coreformationmode_40.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0241',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 41, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0241_mountain_top_41.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0241_peaklist_41.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0241_every10_41.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0241_coreformationmode_41.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0242',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 42, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0242_mountain_top_42.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0242_peaklist_42.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0242_every10_42.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0242_coreformationmode_42.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0243',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 43, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0243_mountain_top_43.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0243_peaklist_43.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0243_every10_43.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0243_coreformationmode_43.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0244',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 44, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0244_mountain_top_44.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0244_peaklist_44.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0244_every10_44.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0244_coreformationmode_44.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0245',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 45, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0245_mountain_top_45.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0245_peaklist_45.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0245_every10_45.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0245_coreformationmode_45.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0246',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 46, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0246_mountain_top_46.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0246_peaklist_46.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0246_every10_46.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0246_coreformationmode_46.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m0247',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 47, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0247_mountain_top_47.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0247_peaklist_47.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0247_every10_47.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0247_coreformationmode_47.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+# FATAL ERROR: repeated particle,  22
+track_info.track('m0248',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 48, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0248_mountain_top_48.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0248_peaklist_48.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0248_every10_48.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0248_coreformationmode_48.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+# FATAL ERROR: repeated particle,  22
+track_info.track('m0249',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 49, 
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0249_mountain_top_49.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0249_peaklist_49.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0249_every10_49.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0249_coreformationmode_49.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
 track_info.track('m0250',
                  sim_directory=dl.sims['u202'],
                  target_frame = 50, 
@@ -19,7 +212,6 @@ track_info.track('m0250',
                  mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0250_coreformationmode_50.h5",
                  frame_list = "every_ten",  
                  field_list = track_info.field_lists['minimal'])
-
 track_info.track('m0260',
                  sim_directory=dl.sims['u202'],
                  target_frame = 60,
@@ -29,7 +221,6 @@ track_info.track('m0260',
                  mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0260_coreformationmode_60.h5",
                  frame_list = "every_ten",  
                  field_list = track_info.field_lists['minimal'])
-
 track_info.track('m0270',
                  sim_directory=dl.sims['u202'],
                  target_frame = 70,
@@ -39,13 +230,41 @@ track_info.track('m0270',
                  mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0270_coreformationmode_70.h5",
                  frame_list = "every_ten",  
                  field_list = track_info.field_lists['minimal'])
-
 track_info.track('m0280',
                  sim_directory=dl.sims['u202'],
                  target_frame = 80,
                  mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0280_mountain_top_80.h5",
                  peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0280_peaklist_80.h5",
                  track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0280_every10_80.h5",
-                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0280_coreformationmode_j0.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0280_coreformationmode_80.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+
+# 04-04: glitch, one of the cores has no particles
+track_info.track('m0290',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 90,
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0290_mountain_top_90.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0290_peaklist_90.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0290_every10_90.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m0290_coreformationmode_90.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m02100',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 100,
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02100_mountain_top_2100.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02100_peaklist_2100.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02100_every10_2100.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02100_coreformationmode_2100.h5",
+                 frame_list = "every_ten",  
+                 field_list = track_info.field_lists['minimal'])
+track_info.track('m02110',
+                 sim_directory=dl.sims['u202'],
+                 target_frame = 110,
+                 mountain_top = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02110_mountain_top_2110.h5",
+                 peak_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02110_peaklist_2110.h5",
+                 track_file = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02110_every10_2110.h5",
+                 mode_fname = "/data/cb1/Projects/P19_CoreSimulations/CoreSets/SFR_game/m02110_coreformationmode_2110.h5",
                  frame_list = "every_ten",  
                  field_list = track_info.field_lists['minimal'])
