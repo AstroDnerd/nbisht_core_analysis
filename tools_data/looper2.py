@@ -191,7 +191,7 @@ class core_looper2():
             for add_derived_field in derived:
                 add_derived_field(self.ds)
             self.ds_list[frame] = self.ds
-        if True:
+        if False:
             self.ds.force_periodicity(True)
         return self.ds
     def get_all_particles(self,frame):

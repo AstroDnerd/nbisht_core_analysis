@@ -53,6 +53,7 @@ class track_manager():
             self.V_rel = nar([],dtype='float64')
             self.shape=(0,0) #particles, frames
         else:
+            #self.shape=(0,0) 
             self.read(fptr=h5ptr)
 
     def sort_time(self):

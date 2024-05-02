@@ -30,7 +30,7 @@ for aaa in grid:
     aaa.set_aspect('equal')
 
 
-# LETS DO A TRIO OF ONE SIM AT A TIME TO OBTAIN A MOVIE 
+# LETS DO A TRIO OF SIMS 
 sim_list=['m0230', 'm0231', 'm0232']
 #sim_list=['m0230', 'm0231', 'm0232', 'm0233', 'm0234', 'm0235', 'm0236', 'm0237', 'm0238', 'm0239', 'm0240', 'm0241', 'm0242',\
 #          'm0243', 'm0244', 'm0245', 'm0246', 'm0247', 'm0250', 'm0260', 'm0270', 'm0280', 'm02100', 'm02110']  

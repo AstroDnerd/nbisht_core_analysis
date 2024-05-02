@@ -75,6 +75,7 @@ class te_tc:
             this_tend = times[collapse_done][0]
             self.tsing_core[core_id]=this_tsing
             self.tend_core[core_id]=this_tend
+            '''
             if core_id in this_looper.core_by_mode['Alone']:
                 self.mode.append(1)
                 self.tsing['Alone'].append( this_tsing)
@@ -91,6 +92,7 @@ class te_tc:
             else:
                 print("You broke something.")
                 raise
+            '''
             self.fsung.append( (rho[collapse_done,:] > 5e3).sum()/rho[collapse_done,:].size)
 
 
