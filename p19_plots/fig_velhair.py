@@ -32,6 +32,7 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
     rho_ext=extents()
     eng_ext=extents()
     fig2,axB=plt.subplots(1,1)
+    mean_rho_mean=[]
     for core_id in core_list:
         print('do',core_id)
 
@@ -76,11 +77,12 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
         rhomean = rho.mean(axis=1)
         rhomax = rho.max(axis=1)
         rhomin = rho.min(axis=1)
+        mean_rho_mean.append(rhomean[0])
         rho_ext(rhomean)
         rho_ext(rhomin)
 
-        #tsing = tsing_in.tend_core[core_id]
-        tsing = tsing_in.tsing_core[core_id]
+        tsing = tsing_in.tend_core[core_id]
+        #tsing = tsing_in.tsing_core[core_id]
 
 
         #velocity plots
@@ -98,6 +100,15 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
         #ax4.plot(times/tsing, getotal,c='g', linewidth=0.1)
         #ax4.plot(times/tsing, getotal/ketotal,c='g', linewidth=0.1)
         axB.plot(getotal/getotal[0],ketotal/ketotal[0])
+
+    test_t = np.arange(0,1,0.01)
+    a=1.8614
+    mean_rho_mean=nar(mean_rho_mean)
+    for rho_mean in [mean_rho_mean.min(),mean_rho_mean.max()]:
+        #rho_mean = np.mean(mean_rho_mean)
+        rhot = (1-test_t**2)**(-a)
+        rho_ff = rho_mean*rhot
+        ax3.plot(test_t,rho_ff)
 
     axB.set(xscale='log',yscale='log', xlim=eng_ext.minmax,ylim=eng_ext.minmax)
     fig2.savefig('plots_to_sort/grasping')
@@ -145,7 +156,7 @@ if 0:
 if 1:
     #play with tsing
     #don't touch.
-    sims=['u501']
+    sims=['u502']
     TL.load_tracks(sims)
     #sims=[ 'u502','u503']
     import tsing

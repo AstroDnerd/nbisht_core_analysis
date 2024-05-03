@@ -9,6 +9,7 @@ class vs_tsing():
     def __init__(self,this_looper):
         self.this_looper=this_looper
         self.tsing_list=[]
+        self.tsung_list=[]
         self.mode_list=[]
         self.quan_list=defaultdict(list)
         self.cores_used=[]
@@ -19,7 +20,7 @@ class vs_tsing():
             core_list = np.unique(this_looper.tr.core_ids)
 
         for core_id in core_list:
-            print(core_id)
+            print('quan maker',core_id)
             self.cores_used.append(core_id)
             frame_tsing = tsing.tsing_frame[core_id]
             frame_tsung = tsing.tend_frame[core_id]
@@ -39,6 +40,7 @@ class vs_tsing():
             KE = ms.ke_rel[:,nframe]
             GE = ms.ge[:,nframe]
             self.tsing_list.append( tsing.tsing_core[core_id])
+            self.tsung_list.append( tsing.tend_core[core_id])
             my_mass= (D*DV).sum()
             self.quan_list['mass'].append( my_mass)
             self.quan_list['volume'].append( DV.sum())
@@ -57,7 +59,10 @@ class vs_tsing():
             self.quan_list['avg_v3'].append(my_v3)
             self.quan_list['avg_vt'].append(my_vt)
 
-            my_tff = np.sqrt( 3*np.pi/(32*colors.G*D))
+            #my_tff = np.sqrt( 3*np.pi/(32*colors.G*D))
+            avg_rho= (D*DV).sum()/DV.sum()
+            self.quan_list['avg_rho'].append(avg_rho)
+            my_tff = np.sqrt( 3*np.pi/(32*colors.G*avg_rho))
             self.quan_list['avg_tff'].append(my_tff.mean())
 
             my_mode = this_looper.mode_dict[core_id]
@@ -118,23 +123,100 @@ for sim in sim_list:
         vs.run(core_list=core_list,tsing=tsing_tool[sim], frame='tsing')
         vs_s[sim]=vs
 
-if 1:
+if 'the_r' not in dir():
+    the_r={}
 
-    #make pearson and table
+if 0:
+    fig,ax=plt.subplots(1,1)
+    ax.plot( sorted(vs.tsung_list))
+    fig.savefig('%s/test'%plot_dir)
+if 1:
+    #plot tffbar
     for frame, vs_tool in [[0,vs_0]]:#,['tsing',vs_s]
         quan_by_sim={}
-
-        
-        for sim in sim_list:
+        ncol=3
+        nrow=1
+        fig,axes_all=plt.subplots(nrow,ncol, figsize=(8,3))
+        axes=[axes_all]
+        exty = extents()
+        extx = extents()
+        for nsim,sim in enumerate(sim_list):
+            the_r[sim]={}
             vs = vs_tool[sim]
             htL = ht[sim]
 
-            the_x=vs.tsing_list
+            the_x=nar(vs.tsung_list)
+            extx(the_x)
             print('word')
             TheR = {}
             TheLR = {}
             quan_list=list(vs.quan_list.keys()) +['hull_volumes']
-            for quan in quan_list:
+            #quan_list = ['density']
+            quan_list=['avg_tff']#,'avg_rho']
+            for nq,quan in enumerate(quan_list):
+                the_r[sim][quan]=defaultdict(list)
+                nc=nsim
+                nr=nq
+                ok_vals = True
+                ok_last = True
+                the_y = nar(vs.quan_list[quan])
+                if 1:
+                    rho = nar(vs.quan_list['avg_rho'])
+                    rhonorm = (rho-rho.mean())/rho.std()
+                    ok_vals = np.abs(rhonorm)<5
+                if 1:
+                    tlast = vs.this_looper.tr.times[-2]
+                    not_last_frame = (the_x*colors.tff)/tlast
+                    ok_last = not_last_frame < 1
+
+                for mode in ['r']:#np.unique(vs.mode_list):
+                    ok = nar(vs.mode_list)==mode
+                    #ok *= ok_vals
+                    #ok *= ok_last
+                    if 1:
+                        okok = nar(vs.quan_list['volume']) < 0.5
+                        ok = ok*okok
+                    R = scipy.stats.pearsonr( nar(the_x)[ok],nar(the_y)[ok])
+                    the_r[sim][quan][mode].append(R)
+                    print(R)
+
+                    axes[nr][nc].scatter(nar(the_x)[ok],nar(the_y)[ok],c=nar(vs.mode_list)[ok])
+                    axes[nr][nc].text(0.3,0.052,"r=%0.2f"%R[0])
+                    axes[nr][nc].set_ylabel(r'$\overline{t_{\rm{ff}}}/t_{\rm{ff}}$')
+                    axes[nr][nc].set_xlabel(r'$t_{\rm{sung}}$')
+                    exty(nar(the_y)[ok])
+        for ax in axes[0]:
+            ax.set(xlim=extx.minmax,ylim=exty.minmax)
+        fig.tight_layout()
+        fig.savefig('%s/tff_tsung'%(plot_dir))
+                
+if 1:
+    #
+    # plot all the quantities
+    #
+    quan_by_sim={}
+    for frame, vs_tool in [[0,vs_0]]:#,['tsing',vs_s]
+        quan_by_sim={}
+        for sim in sim_list:
+            quan_by_sim[sim]={}
+            the_r[sim]={}
+            vs = vs_tool[sim]
+            htL = ht[sim]
+
+            the_x=vs.tsung_list
+            print('word')
+            TheR = {}
+            TheLR = {}
+            quan_list=list(vs.quan_list.keys()) +['hull_volumes']
+            #quan_list = ['density']
+            ncol=3
+            nrow=len(quan_list)//ncol+1
+            fig,axes=plt.subplots(nrow,ncol)
+            for nq,quan in enumerate(quan_list):
+                the_r[sim][quan]=defaultdict(list)
+                nc=nq//ncol
+                nr=nq%ncol
+                ok_vals = True
                 if quan in ['hull_volumes']:
                     the_y = nar(htL.hull_volumes)
                 else:
@@ -143,23 +225,44 @@ if 1:
                     the_y = np.abs(the_y)
                 if quan in ['ge','ke','mass']:
                     the_y = nar(the_y)/nar(vs.quan_list['volume'])
-                do_log=True
-                
-                R = scipy.stats.pearsonr( the_x,the_y)
-                LR = scipy.stats.pearsonr( the_x,np.log10(the_y))
-                print("sim",sim,"%s mean %0.1f R %0.1f LR %0.1f"%( quan, nar(the_y).mean(),R[0], LR[0]))
-                TheR[quan]= "%0.2f"%R[0]
-                TheLR[quan]= "%0.2f"%LR[0]
+                if 1:
+                    rho = nar(vs.quan_list['avg_rho'])
+                    rhonorm = (rho-rho.mean())/rho.std()
+                    ok_vals = np.abs(rhonorm)<5
 
-            quan_list=['volume','hull_volumes','mass','ge','ke','avg_v3','avg_vr','avg_vt','avg_tff']
-            quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ \EG}$', 'ke':r'$\overline{ \EK }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
-            #quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\langle \rho \rangle$','ge':r'$\langle E_G\rangle$', 'ke':r'$\langle E_K \rangle $','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\langle v_r \rangle $','avg_vt':r'$\langle v_t\rangle$','avg_tff':r'$t_{\rm{ff}}$','hull_volumes':r'$V_{\rm{hull}}$'}
-            quan_by_sim[sim]=TheR
+
+
+                do_log=True
+                print(quan)
+                for mode in ['r']:#np.unique(vs.mode_list):
+                    ok = nar(vs.mode_list)==mode
+                    ok *= ok_vals
+                    if 1:
+                        okok = nar(vs.quan_list['volume']) < 0.5
+                        ok = ok*okok
+                    R = scipy.stats.pearsonr( nar(the_x)[ok],nar(the_y)[ok])
+                    the_r[sim][quan][mode].append(R)
+                    if np.abs(R[0]) < 0.01:
+                        st = "%0.3f"%R[0]
+                    else:
+                        st = "%0.2f"%R[0]
+                    quan_by_sim[sim][quan]=st
+                    axes[nc][nr].scatter(nar(the_x)[ok],nar(the_y)[ok],c=nar(vs.mode_list)[ok])
+                    axes[nc][nr].set(title="%0.2f"%R[0])
+                axes[nc][nr].set(ylabel=quan)
+            fig.tight_layout()
+            fig.savefig('%s/pearson_%s'%(plot_dir,sim))
+                
+if 1:
+    #make table
+    for frame, vs_tool in [[0,vs_0]]:#,['tsing',vs_s]
+        quan_list=['volume','hull_volumes','mass','ge','ke','avg_v3','avg_vr','avg_vt','avg_tff']
+        quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ \EG}$', 'ke':r'$\overline{ \EK }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
         import jinja2
         loader=jinja2.FileSystemLoader('.')
         env = jinja2.Environment(loader=loader)
         main_template  = env.get_template('p19_plots/table2_template.tex')
-        fptr=open('plots_to_sort/table2.tex','w')
+        fptr=open('%s/table2.tex'%plot_dir,'w')
         #quan_tex=dict(zip(quan_list,quan_list))
         fptr.write(main_template.render(quan_list=quan_list,R=quan_by_sim,quan_tex=quan_tex))
         fptr.close()

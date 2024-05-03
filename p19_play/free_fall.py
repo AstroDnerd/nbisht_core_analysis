@@ -24,11 +24,14 @@ def simple_rho(this_looper,core_list=None, tsing_tool=None):
     rho_all = thtr.track_dict['density']
     rho_min=rho_all.min()
     rho_max=rho_all.max()
-    fig,axes=plt.subplots(1,2, figsize=(6,4))
-    ax=axes[0];ax1=axes[1]
+    fig,axes=plt.subplots(2,1, figsize=(6,8))
+    ax=axes[0];ax1=axes[1]#; ax2=axes[2]
     time=extents()
-    rho_mean=0
+    rho_max_mean=0
+    rho_avg_mean=0
+    rho_min_mean=0
     tsing_mean=0
+    ext = extents()
     for core_id in core_list:
         print('plot',core_id)
 
@@ -44,8 +47,17 @@ def simple_rho(this_looper,core_list=None, tsing_tool=None):
             #c=[0,0,0,0.1]
             c=[0.1]*4
 
+
         rho = ms.density[sl].transpose()
-        rho = rho[time_mask,:].max(axis=1)
+        rho_max = rho[time_mask,:].max(axis=1)
+        rho_max /= rho_max[0]
+        rho_min = rho[time_mask,:].min(axis=1)
+        rho_min /= rho_min[0]
+        rho_avg = rho[time_mask,:].mean(axis=1)
+        rho_avg /= rho_avg[0]
+        rho_max_mean += rho_max[0]
+        rho_min_mean += rho_min[0]
+        rho_avg_mean += rho_avg[0]
 
 
         
@@ -55,48 +67,74 @@ def simple_rho(this_looper,core_list=None, tsing_tool=None):
             tsing_mean+=tsung
         else:
             tsung=1
-        ax.plot(times, rho, c=c)
-        ax1.plot(times/tsung, rho, c=c)
-        ax1.axvline(tsing/tsung)
-        time(times/tsung)
-        index = np.argmin( np.abs(times/tsung-1))
-        rho_mean += rho[0]
+
+        a=1.8614
+        free_fall = (1-(times.flatten()/tsung)**2)**-a
+        #ax.plot(times/tsung, free_fall)
+        y1=rho_max#/free_fall
+        ax.plot(times/tsung, y1, c=c)
+        y2=rho_avg#/free_fall
+        ax1.plot(times/tsung, y2, c=c)
+        if 0:
+            ax2.plot( times/tsung, free_fall)
+        #ax2.plot(times, rho_min, c=c)
+        ext(rho)
+        #ext(nar([0.01,100]))
 
     time_lim=time.minmax
     time_lim=[0,1.2]
-    ax.set(xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max], xlim=time_lim)
-    ax1.set(xlabel=r'$t/t_{SING}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max], xlim=time_lim)
+    ax.set(xlabel=r'$t/t_{\rm{SUNG}}$',    ylabel=r'$\rho_{\rm{max}}/\rho_0$',yscale='log', ylim=ext.minmax, xlim=time_lim)
+    ax1.set(xlabel=r'$t/t_{\rm{SUNG}}$', ylabel=r'$\rho_{\rm{avg}}/\rho_0$',yscale='log', ylim=ext.minmax, xlim=time_lim)
+    if 0:
+        ax2.set(xlabel=r'$t/t_{SUNG}$', ylabel=r'$\rm{min} \rho$',yscale='log', ylim=ext.minmax, xlim=time_lim)
 
     #pdb.set_trace()
-    rho_mean=rho_mean/len(core_list)
-    tsing_mean /= len(core_list)
+    #rho_mean=rho_mean/len(core_list)
+    #tsing_mean /= len(core_list)
+    rho_max_mean /= len(core_list)
+    rho_min_mean /= len(core_list)
+    rho_avg_mean /= len(core_list)
 
-    b = 4*np.pi/3
-    def f(u,x):
-        return (u[1], -b/u[0]**2)
-    tff = np.sqrt(3*np.pi/32)
-    r0=1
-    t=np.arange(0,tff,tff/1000)
-    init=[1,0]
-    from scipy.integrate import odeint
-    sol=odeint(f,init,t)
+    if 0:
+        #check that the actual ODE is reproduced.
+        b = 4*np.pi/3
+        def f(u,x):
+            return (u[1], -b/u[0]**2)
+        tff = np.sqrt(3*np.pi/32)
+        r0=1
+        t=np.arange(0,tff,tff/1000)
+        init=[1,0]
+        from scipy.integrate import odeint
+        sol=odeint(f,init,t)
 
-    r_t = sol[:,0]
-    rho_t = rho_mean/r_t**3
-    ax.plot(t/tff, rho_t)
-    ax1.plot(t/tff, rho_t)
+        r_t = sol[:,0]
+        rho_t = rho_mean/r_t**3
+        ax.plot(t/tff, rho_t)
+        ax1.plot(t/tff, rho_t)
 
     a=1.8614
+    tff = np.sqrt(3*np.pi/32)
+    t=np.arange(0,tff,tff/1000)
+
     r2 = (1-(t/tff)**2)**(a/3)
-    rho2 = rho_mean/r2**3
-    ax1.plot(t/tff,rho2,c='g')
+    rho_g_max = rho_max_mean/r2**3
+    ax.plot(t/tff,rho_g_max,c='g')
+    rho_g_avg = rho_avg_mean/r2**3
+    ax1.plot(t/tff,rho_g_avg,c='g')
+    rho_g_min = rho_min_mean/r2**3
+    #ax2.plot(t/tff,rho_g_min,c='g')
+    #pdb.set_trace()
 
-    x=t/tff
-    r3 = 1-a/3*(x)**2 + 1/18*(a-3)*a*(x)**4 - 1/162*((a-6)*(a-3)*a)*x**6 + (a-9)*(a-6)*(a-3)*a*x**3/1944
-    rho3 = rho_mean/r3**3
-    ax1.plot(t/tff,rho3,c='r')
+    if 0:
+        #play around to see how many orders you need to take.
+        #turns out all of them.
+        x=t/tff
+        r3 = 1-a/3*(x)**2 + 1/18*(a-3)*a*(x)**4 - 1/162*((a-6)*(a-3)*a)*x**6 + (a-9)*(a-6)*(a-3)*a*x**3/1944
+        rho3 = rho_mean/r3**3
+        ax1.plot(t/tff,rho3,c='r')
 
-    outname='plots_to_sort/%s_free_fall.png'%(this_looper.sim_name)
+    outname='plots_to_sort/%s_free_fall.pdf'%(this_looper.sim_name)
+    fig.tight_layout()
     fig.savefig(outname)
     print(outname)
 
@@ -104,11 +142,12 @@ def simple_rho(this_looper,core_list=None, tsing_tool=None):
 
 
 sims=['u501', 'u502','u503']
-sims=['u502']
+#sims=['u502']
 import tsing
 TL.load_tracks(sims)
 tsing_tool = tsing.get_tsing(TL.loops)
 for sim in sims:
     core_list = TL.loops[sim].core_by_mode['Alone']
+    #core_list=[74]
     simple_rho(TL.loops[sim],core_list=core_list, tsing_tool=tsing_tool[sim])
 

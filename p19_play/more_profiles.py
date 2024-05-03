@@ -7,9 +7,10 @@ import other_scrubber
 reload(other_scrubber)
 #import three_loopers_six as TL
 import camera_path
-import three_loopers_u500 as TL
+import track_loader as TL
 sim_list=['u501','u502','u503']
 sim_list=['u501']
+track_loader.load_tracks(sim_list)
 
 
 if 0:
@@ -177,7 +178,7 @@ if 'tsing_tool' not in dir():
 #import anne
 #reload(anne)
 ##anne.make_inflection()
-if 'multi_proj' not in dir() or True :
+if 'mp' not in dir() or True :
     for sim in sim_list:
         all_cores=np.unique( TL.loops[sim].tr.core_ids)
         core_list=list(all_cores)
@@ -185,8 +186,9 @@ if 'multi_proj' not in dir() or True :
         core_list=[323]
         core_list=[25]
         core_list=[74]
-        #core_list = TL.loops[sim].core_by_mode['Alone']
-        core_list = TL.loops[sim].core_by_mode['Binary']
+        core_list = TL.loops[sim].core_by_mode['Alone'][:5]
+
+        #core_list = TL.loops[sim].core_by_mode['Binary']
         #core_list=core_list[:3]
         #core_list=core_list[:10]
         #core_list=[74,68]
@@ -195,16 +197,6 @@ if 'multi_proj' not in dir() or True :
         #core_list=[114]
 
 
-        #core_list = [114]
-        #core_list=[361]
-        #core_list=[8]
-        #core_list=[381]
-        #core_list=[323]
-        TF=TL.loops[sim].target_frame
-        all_frames = TL.loops[sim].tr.frames
-        nframes = all_frames.size
-        frame_list = all_frames #[0, TF, all_frames[int(nframes/2)]]
-        #frame_list = [100]
 
         mp=multi_profile(TL.loops[sim])
         mp.run(core_list=core_list,tsing=tsing_tool[sim])#, r_inflection=anne.inflection[sim])

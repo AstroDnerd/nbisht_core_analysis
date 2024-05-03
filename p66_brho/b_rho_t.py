@@ -56,8 +56,8 @@ class dq_dt():
             rho = ms.density[sl].transpose()
             rho = rho[mask,:]
             Bmag=thtr.c([core_id],'magnetic_field_strength')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
-            BP = B**2/2
-            B2 = B**2
+            BP = Bmag**2/2
+            B2 = Bmag**2
             divv=thtr.c([core_id],'velocity_divergence')[sl].transpose()[mask,:]#/colors.mean_field[this_looper.sim_name]
 
             fig, ax=plt.subplots(3,6,figsize=(20,12))
@@ -123,7 +123,7 @@ class dq_dt():
             splat(dzvx, ax15,  'dyvx')
             splat(dzvy, ax16, 'dyvy')
             splat(dzvz, ax17, 'dyvz')
-            smooth_b=ndimage.gaussian_filter1d(B, 2, 0)
+            smooth_b=ndimage.gaussian_filter1d(Bmag, 2, 0)
             db_dt = (smooth_b[1:,:]-smooth_b[:-1,:])/dt_square
             db_x,db_y,db_h,db_dv,db_p=heat_map.heat_map( db_dt.transpose(), tcenter, bins=bins, ax=ax0)
             ax0.set_yscale('symlog',linthresh=100)
