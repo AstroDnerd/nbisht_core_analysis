@@ -1,4 +1,8 @@
 
+'''
+needs to be in the same folder as tsung_spheres
+'''
+
 # edit
 from starter2 import *
 import davetools
@@ -34,6 +38,9 @@ class withspheres():
         self.rhoave_sph = defaultdict(list)
         self.bmag_parts = defaultdict(list)
         self.rhoave_parts = defaultdict(list)
+
+        self.ncolumn_sph = defaultdict(list)
+        self.blos_sph = defaultdict(list)
 
     def framescores(self,sim,core_list=None): 
         print('inside!!')
@@ -92,20 +99,66 @@ class withspheres():
             print('h5 file written. closing.')
 
 
+    def syntheticobs(self,sim,core_list=None): 
+        print('inside synthetic observations!')
+        thtr = self.this_looper.tr
+
+        # CORES
+        all_cores = np.unique(thtr.core_ids)
+        if core_list is None:
+            core_list = all_cores #or debug
+
+        # EVERY TEN FRAMES - make a loop now!
+        for nf,frame in enumerate(thtr.frames): 
+
+            # CORE-LOOP
+            for nc,core_id in enumerate(core_list):
+                self.cores_used.append(core_id)
+
+                ds = self.this_looper.load(frame)  #loop frames 
+                ms = trackage.mini_scrubber(thtr,core_id,do_velocity=True)
+                ms.particle_pos(core_id)
+
+                # WITH SPHERES
+                the_center = ms.mean_center[:,nf]  #the three coords for the last frame, will need to stop here. 
+                the_radius = 1/128  #one zone   
+                the_area = np.pi * (the_radius**2) 
+                the_sphere = ds.sphere(the_center, the_radius) 
+
+                B = ['magnetic_field_x','magnetic_field_y','magnetic_field_z']
+                for j in range(3): 
+                    self.ncolumn_sph[nf].append((the_sphere['density'] * the_sphere['cell_volume']).sum()/the_area)
+                    self.blos_sph[nf].append((the_sphere['density'] * the_sphere[B[j]] * the_sphere['cell_volume']).sum()/the_sphere['gas','cell_mass'].sum())
+ 
+        data_blossph = [*self.blos_sph.values()] 
+        data_ncolumnsph = [*self.ncolumn_sph.values()]
+        if 1: 
+            hfivename = 'p66_brho/h5files/blosncol_sph_%s.h5'%(sim)
+            Fptr = h5py.File(hfivename,'w')
+            Fptr['blos_sph'] = data_blossph 
+            Fptr['ncolumn_sph'] = data_ncolumnsph
+            Fptr.close()
+            print('h5 file written. closing.')
+
+
+
 
 # YOU ENTER HERE
 # TO GET DATA AND STORE
 # COMPARING SPHERES WITH PARTICLES
 if 0:
-    sims=['u603', 'u602','u603']
+    sims=['u603']#, 'u602','u603']
     TL.load_tracks(sims)
     for sim in sims:
         core_list=None
         running = withspheres(TL.loops[sim])
-        running.framescores(sim)
+        if 0:
+            running.framescores(sim)
+        if 1:
+            running.syntheticobs(sim)
 # SPHERES SYNCED TO TSUNG
 if 0:
-    sims=['u501', 'u502', 'u503']
+    sims=['u503']#, 'u502', 'u503']
     import three_loopers_u500 as TL   #EDIT THIS!! and put pdb.set_trace() back in this file
     #TL.load_tracks(sims)
     if 'tsing_tool' not in dir():
@@ -122,7 +175,7 @@ if 0:
 
             mp=tsung_spheres.tsungspheres(TL.loops[sim])   #EDIT! make tsung part of this class, then split THIS file into two respectively
             timescale = 2 
-            mp.run(core_list=core_list, tsing=tsing_tool[sim], timescale=timescale, get_particles=True, save_sorts=True )
+            mp.run(core_list=core_list, tsing=tsing_tool[sim], timescale=timescale, get_particles=True, save_sorts=True, obs=True)
 
 
 
@@ -130,14 +183,20 @@ if 0:
 if 1:  
     figtype = 'kappaperframe'  #kappaperframe, kappatff
     individually = 'no'  #yes, no
-    parts_or_spheres ='sph_tsung' #parts, spheres, sphparts, sph_tsung  #EDIT respectively below
+    parts_or_spheres ='synthetic' #parts, spheres, sphparts, sph_tsung, synthetic  #EDIT respectively below
+    kappadyn = 'no' #no: do ratios, yes: do kappa dynamical
 
     sims=['u503']#, 'u502', 'u503']
-    hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  #EDIT
+    hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  
+    hfivename_synth = 'p66_brho/h5files/blosncol_sphtsung_%s.h5'%(sims[0])  
     Fptr = h5py.File(hfivename,'r')
-    other_h5fields = ['bfield_sph','rhoavg_sph']
+    Fptr_synth = h5py.File(hfivename_synth,'r')
+    
     b_sph = Fptr['bmag_sph'][()] 
     rho_sph = Fptr['rho_sph'][()]
+    if parts_or_spheres == 'synthetic':
+        b_sph_synth = Fptr_synth['bmag_sph'][()] 
+        rho_sph_synth = Fptr_synth['rho_sph'][()]
     if parts_or_spheres == 'parts':
         b_parts = Fptr['bfield_parts'][()] 
         rho_parts = Fptr['rhoavg_parst'][()] 
@@ -148,18 +207,26 @@ if 1:
 
     if figtype == 'kappaperframe':
         kappas_sph = []
+        kappas_sph_synth = []
         kappas_parts = []
-        for i in range(len(rho_sph)):   #should make this part of the stored data... 
+        for i in range(len(rho_sph)):   
             rhosph_log = np.log(rho_sph[i])  
             bsph_log = np.log(b_sph[i]) 
             rets_sph = cfp.fit(afunct, rhosph_log, bsph_log)  
             kappas_sph = np.append(kappas_sph, rets_sph.popt[0])
+
+            if parts_or_spheres == 'synthetic':
+                rhosph_synth_log = np.log(rho_sph_synth[i])  
+                bsph_synth_log = np.log(abs(b_sph_synth[i])) 
+                rets_sph_synth = cfp.fit(afunct, rhosph_synth_log, bsph_synth_log)  
+                kappas_sph_synth = np.append(kappas_sph_synth, rets_sph_synth.popt[0])
             if parts_or_spheres == 'parts':
                 bparts_log = np.log(b_parts[i]) 
                 rhoparts_log = np.log(rho_parts[i])  
                 rets_parts = cfp.fit(afunct, rhoparts_log, bparts_log)  
                 kappas_parts = np.append(kappas_parts, rets_parts.popt[0]) 
             '''
+            # if we wanted to plot the fit
             the_xrecipe = np.linspace(rhosph_log.min(),rhosph_log.max(),num=500)
             the_xten =10**the_xrecipe
             the_yrecipe_ = afunct(the_xrecipe, *rets.popt)
@@ -176,15 +243,24 @@ if 1:
                 plt.savefig(outname)
                 print('figure saved!')
                 plt.clf()      
+
         if individually == 'no':
             fig,ax = plt.subplots(1,1)
             the_x = np.linspace(1,len(rho_sph),len(rho_sph)) 
-            ax.scatter(the_x, kappas_sph, color='b', label='spheres')  #kappa sph and parts vs time frame
-            if parts_or_spheres == 'parts':
-                ax.plot(the_x, kappas_parts, color='r', label='particles')  #kappa sph and parts vs time frame
+ 
+            if kappadyn == 'no':
+                kappas_ratio = kappas_sph/kappas_sph_synth
+                ax.scatter(the_x, kappas_ratio, color='orange', label='ratio')  
+            if kappadyn == 'yes':
+                ax.scatter(the_x, kappas_sph, color='b', label='spheres')  
+                if parts_or_spheres == 'synthetic':
+                    ax.scatter(the_x, kappas_sph_synth, color='g', label=parts_or_spheres)  
+                if parts_or_spheres == 'parts':
+                    ax.plot(the_x, kappas_parts, color='r', label='particles')  #kappa sph and parts vs time frame
+
             ax.legend()
-            ax.set(xlabel=r'$t_{tsung,dummy}$', ylabel=r'$\kappa_{sph_tsung}$') #,\kappa_{parts}$', ylim=(0,0.95))
-            outname = 'p66_brho/sphtsung_kappadyn_scatter_%s'%sims[0]
+            ax.set(xlabel=r'$t_{tsung,dummy}$', ylabel=r'$\kappa/\kappa_synth$', ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
+            outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0]
             plt.savefig(outname)
             print('figure saved!')
             plt.clf()    

@@ -17,7 +17,8 @@ import track_loader
 # Can be a new tracks_whatever.py, but must be imported by track_loader.py
 # Then run this.
 
-this_trackname = 'm0250'
+this_trackname = 'm0248'
+
 import get_peaks
 print("GET PEAKS")
 get_peaks.get_peaks(this_trackname)
@@ -34,7 +35,7 @@ print("GET TRACKS")
 new_tracks.get_tracks(this_trackname)
 
 import image_mountain
-image_mountain.image_mountains(this_trackname)
+#image_mountain.image_mountains(this_trackname)
 
 import mode_grader
 reload(mode_grader)

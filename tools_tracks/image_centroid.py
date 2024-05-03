@@ -36,7 +36,7 @@ class image_track():
         x_ext = extents()
         y_ext = extents()
         for core_id in core_list:
-            ms = trackage.mini_scrubber(thtr,core_id)
+            ms = trackage.mini_scrubber(thtr,core_id,do_velocity=False)
             self.ms = ms
             if ms.nparticles < 10:
                 continue

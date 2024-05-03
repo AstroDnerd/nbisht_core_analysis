@@ -10,7 +10,7 @@ reload(track_info)
 # track name: m02targetframe, where 02 is the second simulation of the 200 series
 
 
-# 04-04-sh: glitch
+# glitch
 track_info.track('m0220',
                  sim_directory=dl.sims['u202'],
                  target_frame = 20, 

@@ -7,7 +7,7 @@ class tsungspheres():
         self.bmag_sph = defaultdict(list)
         self.rho_sph = defaultdict(list)
 
-    def run(self, core_list=None, frame_list=None, tsing=None, timescale=0, get_particles=False, save_sorts=False):
+    def run(self, core_list=None, frame_list=None, tsing=None, timescale=0, get_particles=False, save_sorts=False, obs=False):
         self.timescale=timescale
         this_looper=self.this_looper
         thtr=this_looper.tr
@@ -46,30 +46,41 @@ class tsungspheres():
 
             # FOR EACH FRAME IN FRAME LIST!!
             for nframe,frame in enumerate(frame_list):
-                print("profile on %s c%04d n%04d"%(this_looper.sim_name, core_id, frame))
+                #print("profile on %s c%04d n%04d"%(this_looper.sim_name, core_id, frame))
                 ds = this_looper.load(frame)
                 nf = np.where(this_looper.tr.frames == frame)[0][0]
 
                 the_center = ms.mean_center[:,-1]  #the three coords for the last frame 
-                the_radius = 1/128  
+                the_radius = 1/128 
+                the_area = np.pi * (the_radius**2)
                 the_sphere = ds.sphere(the_center, the_radius)
 
                 dV = the_sphere[YT_cell_volume]
                 dM = the_sphere[YT_cell_mass]
                 DD = the_sphere[YT_density]
                 BB = the_sphere[YT_magnetic_field_strength]
+                BBx = the_sphere[YT_magnetic_field_x]
+                BBy = the_sphere[YT_magnetic_field_y]
+                BBz = the_sphere[YT_magnetic_field_z]
+                B = [BBx, BBy, BBz]
 
-                Bmag_sph = (DD*BB*dV).sum()/dM.sum()  
-                Rho_sph = (DD*dV).sum()/dV.sum()
-
-                self.bmag_sph[nframe].append(Bmag_sph.v)  
-                self.rho_sph[nframe].append(Rho_sph.v)  
+                if obs == False:
+                    Bmag_sph = (DD*BB*dV).sum()/dM.sum()  
+                    Rho_sph = (DD*dV).sum()/dV.sum()
+                    self.bmag_sph[nframe].append(Bmag_sph.v)  
+                    self.rho_sph[nframe].append(Rho_sph.v)  
+                if obs == True:
+                    for j in range(3): 
+                        Rho_sph = (DD*dV).sum()/the_area
+                        Bmag_sph = (DD*B[j]*dV).sum()/dM.sum()  
+                        self.bmag_sph[nframe].append(Bmag_sph.v)  
+                        self.rho_sph[nframe].append(Rho_sph.v)  
 
         data_bmagsph = [*self.bmag_sph.values()]
         data_rhosph = [*self.rho_sph.values()]
-        if 0:  
+        if 1:  
             sim = this_looper.sim_name 
-            hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sim)
+            hfivename = 'p66_brho/h5files/blosncol_sphtsung_%s.h5'%(sim)
             Fptr = h5py.File(hfivename,'w')
             Fptr['bmag_sph']=data_bmagsph
             Fptr['rho_sph']=data_rhosph
