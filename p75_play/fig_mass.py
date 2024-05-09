@@ -1,3 +1,4 @@
+
 from starter2 import *
 import xtra_energy
 import pcolormesh_helper as pch 
@@ -10,9 +11,11 @@ G = colors.G
 plt.close('all')
 
 
+
 class Relax2():
     def __init__(self):
         pass
+
 def thing_saver(things,sim):
     fptr = h5py.File('this_mass_flux_%s.h5'%sim,'w')
     try:
@@ -33,7 +36,6 @@ def thing_saver(things,sim):
     finally:
         fptr.close()
 
-
 def thing_reader(fname):
     fptr=h5py.File(fname,'r')
     bucket={}
@@ -45,14 +47,14 @@ def thing_reader(fname):
                 if quan == 'sim_name':
                     QQQ = QQQ.asstr()
                 this_one.__dict__[quan]=QQQ[()]
-            bucket[this_one.core_id] = this_one
-
-            
+            bucket[this_one.core_id] = this_one            
     except:
         raise
     finally:
         fptr.close()
     return bucket
+
+
 class Relaxor():
     def __init__(self,this_looper):
         self.this_looper=this_looper
@@ -81,7 +83,7 @@ class Relaxor():
             pdb.set_trace()
         for core_id in core_list:
             self.core_id=core_id
-            ms = trackage.mini_scrubber(this_looper.tr,core_id)
+            ms = trackage.mini_scrubber(this_looper.tr,core_id,do_velocity=False)
             
             r_bins = np.geomspace( 2e-4, 32/128, 32)
             self.r_bins=r_bins
@@ -119,7 +121,6 @@ class Relaxor():
                 import other_scrubber
                 reload(other_scrubber)
 
-
                 R1 = sp['radius']
                 order = np.argsort(R1)
                 vel = []
@@ -131,7 +132,6 @@ class Relaxor():
 
 
                 #Get data arrays
-
                 dv = scrub.cell_volume
                 RR = scrub.r
                 DD = scrub.density
@@ -165,7 +165,6 @@ class Relaxor():
                 EKmeans =nar([ EK_cuml[ digitized == i].mean() if (digitized==i).any() else -4000 for i in range(1,len(r_bins))])
 
 
-
                 divv_cuml = np.cumsum(divv[ORDER]*V_local)
                 total_vr  =nar([ vr[ digitized == i].sum() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
                 total_divv  =nar([ divv_cuml[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
@@ -181,7 +180,6 @@ class Relaxor():
                 ok = ~np.isnan(total_divv)
                 self.divv[ok,nframe]=total_divv[ok]
                 self.divv[~ok,nframe]=np.nan
-
 
 
                 ok = ~np.isnan(mean_flux)
@@ -229,7 +227,8 @@ class Relaxor():
                     #ax6[0].hist( RR_cuml.v, histtype='step', color=c)
             #plotmancer(self,tsing)
 
-def plotmancer(obj, tsing, tall=True):
+
+def plotmancer(obj, tsing=None, tall=True):
         core_id=obj.core_id
         #ax6.set(xlabel='R',xscale='log',ylabel='|V_r|',yscale='log')
         #ax6.set_title('Slope at tend: %0.2f'%pfit[0])
@@ -244,8 +243,6 @@ def plotmancer(obj, tsing, tall=True):
         #    ax6[i][0].set(ylim=ext.minmax)
         #    ax6[i][1].set(ylim=extt.minmax)
         #fig6.savefig('plots_to_sort/velocity_vs_radius_%s_c%04d.png'%(this_looper.sim_name, core_id))
-
-
 
         if tall:
             nup = 3
@@ -282,13 +279,17 @@ def plotmancer(obj, tsing, tall=True):
         cmap=copy.copy(mpl.cm.get_cmap("seismic"))
         cmap.set_bad([0.9]*3)
 
+        # in progress to detect early sim nan values...
         ok = ~np.isnan(MMM)
         radius_to_cut_off = 1000
         index = np.where( rcen < radius_to_cut_off)[0].max()
+        min_mass_index = np.where(~np.isnan(MMM[index:,-1]))[0][0]+index
+        index = max([min_mass_index,index])
         mass_at_the_end = MMM[index,-1]
         fiducial=mass_at_the_end
         Max=MMM[ok].max()
         minner_chicken_dinner = fiducial**2/Max
+        #pdb.set_trace()
         norm_mass = mpl.colors.LogNorm(vmin=minner_chicken_dinner,vmax=Max)
 
 
@@ -296,11 +297,10 @@ def plotmancer(obj, tsing, tall=True):
         fig.colorbar(plot2, label=r'$M(<r)~~ [M_\odot]$',ax=ax0)
         if 0:
             #MASS FLUX FROM VELOCITY.
-            #UNDERSTAND ME LATER.
+            #UNDERSTAND ME LATER - mass flux.
             plot=ax1.pcolormesh( XXX,YYY, dMdTf,  norm=norm, shading='nearest', cmap=cmap)
             fig.colorbar(plot, label=r'$\frac{\dot{M}}{M/ t_{ff}}$',ax=ax1)
             ax1.set(yscale='log', ylabel = r'$R~~[\rm{AU}]$')
-
         if 1:
             #dMdt
             AXX = ax1
@@ -320,7 +320,6 @@ def plotmancer(obj, tsing, tall=True):
             X2,Y2=np.meshgrid(thalf.flatten(),rcen)
             plot3=AXX.pcolormesh(X2 ,Y2, dMdt,  norm=norm2, shading='nearest', cmap=cmap)
             fig.colorbar(plot3,label=r'$\frac{d \ln M}{d t/t_{\rm{ff}}}$', ax=AXX )
-
         if 0:
             #why is \rho v_r not Mdot?
             #understand me later. (same as above.)
@@ -332,12 +331,14 @@ def plotmancer(obj, tsing, tall=True):
             print(dt)
             fig6.savefig('plots_to_sort/fork_c%04d.png'%core_id)
 
-
+        # ignore
+        '''
         newcmp = mpl.colors.LinearSegmentedColormap.from_list('custom blue', 
                                              [(0,         '#0000ff'),
                                               (norm(0.5), '#dddddd'),
                                               (norm(2.0), '#00ffff'),
                                               (1,         '#ff0000')], N=256)
+        '''
 
         norm_grav = mpl.colors.LogNorm( vmin=0.01,vmax=100)
         ok = ~np.isnan(obj.RVg)
@@ -355,7 +356,6 @@ def plotmancer(obj, tsing, tall=True):
         if 0:
             rrrr = msR.transpose()
             rrrr = rrrr[mask,:]
-
             ax.plot(times , rrrr, c=[0.5]*3, linewidth=0.1, alpha=0.5)
 
         if tsing:
@@ -365,105 +365,44 @@ def plotmancer(obj, tsing, tall=True):
                 aaa.axvline(  tsing.tend_core[core_id],c='k', linewidth=0.5)
                 #ax1.axvline( tsing.tend_core[core_id],c='k')
 
-
         fig.tight_layout()
         fig.subplots_adjust(hspace=0)
+        print("Saving!")
         fig.savefig('plots_to_sort/mass_flux_color_%s_c%04d.pdf'%(obj.sim_name, core_id))
 
 
-if 0:
-    import three_loopers_six as TL
-    sim_list=['u601','u602','u603']
-    sim_list=['u602']
-#import three_loopers_u500 as TL
+
+# OMG THERE COULD BE DEATH OF FETUS STARS!!!! or simply a merge or accretion...sure.
 import track_loader as TL
-sim_list=['u501','u502','u503']
-sim_list=['u502']
+sim_list = ['m0232']#, 'm0240', 'm0250', 'm0260', 'm0270', 'm0280']
 TL.load_tracks(sim_list)
 
-import tsing
-reload(tsing)
-if 'tsing_tool' not in dir():
-    tsing_tool={}
-    for ns,sim in enumerate(sim_list):
-        obj=tsing.te_tc(TL.loops[sim])
-        tsing_tool[sim]=obj
-        tsing_tool[sim].run()
-
-#import anne
-#reload(anne)
-##anne.make_inflection()
 if 'things' not in dir():
     things={}
 
+# use
 if 1:
-    #save and replot.
-    if 0:
-        thing_saver(things,sim)
-    if 1:
-        thing_new = thing_reader('this_mass_flux_u502.h5')
-    if 0:
-        sim='u502'
-        if 'accreter' not in dir():
-            accreter=accretion(thing_new, tsing_tool[sim])
-    if 0:
-        plotsa(accreter,tsing_tool[sim])
-
-    if 1:
-        #paper plot.  Read off disk.
-        plotmancer( thing_new[114], tsing_tool[sim])
-
-def plotsb(things, tsing):
-
-    for core_id in things:
-        print('plot core %d'%core_id)
-        fig,ax=plt.subplots(1,1)
-        frames = sorted(things[core_id].Mcont.keys())
-        rmap = rainbow_map(len(frames))
-        r_end=things[core_id].Rcont[frames[-1]].v*colors.length_units_au
-        m_end=things[core_id].Rcont[frames[-1]].v*colors.mass_units_msun
-        ind_r100= np.argmin( np.abs(r_end-1000))
-        for frame in frames:
-            this_r = things[core_id].Rcont[frame]*colors.length_units_au
-            this_m = things[core_id].Mcont[frame]*colors.mass_units_msun
-            ax.plot(this_r,this_m,c=rmap(frame))
-        ax.set(xscale='log',yscale='log',xlabel='r [au]',ylabel='M [msun]')
-        fig.savefig('plots_to_sort/m_r_t_c%04d'%core_id)
-
-
-if 0:
     #new plots.
     for sim in sim_list:
-        #all_cores=np.unique( TL.loops[sim].tr.core_ids)
-        #core_list=list(all_cores)
-        #core_list=None#[323]
-        #core_list=[323]
-        #core_list=[25]
-        #core_list=[74]
-        #core_list=[114]
-        #core_list=[195]
-        #core_list=[361]
-        #core_list=[8]
-        #core_list=[381]
-        #core_list=[323]
-        #core_list=None
-        #core_list = [9]
-        core_list = TL.loops[sim].core_by_mode['Alone']
-        core_list=core_list[4:6]
+        #core_list = TL.loops[sim].core_by_mode['Alone']
+        all_cores=np.unique(TL.loops[sim].tr.core_ids)
+        core_list=list(all_cores) 
+        print("The core count of target frame %s is %d"%(sim, len(core_list)))
+        print("The newborn tags are: ") 
+        print(core_list)
 
-        core_list = [114]
         for core_id in core_list:
             if core_id in things:
                 continue
-            thing = Relaxor( TL.loops[sim])
-            thing.run(core_list=[core_id], do_plots=True, frame_list=None, tsing=tsing_tool[sim])#, r_inflection=anne.inflection[sim])
+            # maybe re-define
+            thing = Relaxor(TL.loops[sim])
+            thing.run(core_list=[core_id], do_plots=True, frame_list=None)#, tsing=tsing_tool[sim])
             things[core_id]=thing
+            plotmancer(thing, tall=True)  #now changed
+
 
     if 0:
         plotsb(things, tsing_tool[sim])
-    if 1:
-        plotmancer(thing, tsing_tool[sim], tall=True)
-
     if 0:
         #really, don't overwrite things. please.
         thing_saver(things,sim)
@@ -472,7 +411,6 @@ if 0:
             accreter=accretion(things, tsing_tool[sim])
     if 0:
         plotsa(accreter,tsing_tool[sim])
-
     if 0:
         for core_id in things:
             plotmancer(things[core_id], tsing_tool[sim])
@@ -480,8 +418,11 @@ if 0:
         for core_id in things:
             #plotmancer(things[core_id], tsing_tool[sim])
             calculus(things[core_id],tsing_tool[sim])
-
 if 0:
     plotmancer(thing,tsing_tool[sim])
 if 0:
     accretion(thing,tsing_tool[sim])
+
+
+# NOTES
+# use Relaxor, things, and mancer
