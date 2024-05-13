@@ -20,6 +20,7 @@ if 0:
         camera = camera_path.camera_1( loop, 'smooth_zoom_2')
         core_proj_three.core_proj_multiple(loop,axis_list=[0],core_list=[74],frame_list=[0,10],camera=camera, main_core=74)
 
+
             
 def replotter(obj,suffix1='', redlines=False, subset=0):
     OneExt = False
@@ -27,8 +28,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     suffix=""
     if subset==0:
         #the paper version
-        row_dict={'rho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3, 'virial':3}
-        profs=['rho','vr_cumsum','vt_cumsum','virial']
+        row_dict={'drho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3, 'virial':3}
+        profs=['drho','vr_cumsum','vt_cumsum','virial']
         suffix="RVRVTVIR"
     if subset==1:
         #energy plots
@@ -48,6 +49,15 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         #extra plots for learning
         profs=['rho','EGmean', 'EKmean', 'virial']
         row_dict={'rho':0,'virial':1, 'EGmean':2, 'EKmean':3}
+    if subset==4:
+        #profs = ['drho', 'dvr', 'dvt', 'virial']
+        profs = ['drho', 'dvr', 'dvt', 'virial']
+        row_dict = {'drho':0, 'dvr':1,'dvt':2,'virial':3}
+    if subset==5:
+        #profs = ['drho', 'dvr', 'dvt', 'virial']
+        #profs = ['drho', 'pdfrho']
+        profs = ['drho', 'rho_phase']
+        row_dict = {'drho':0, 'rho_phase':1}
 
     if subset==2:
         #kludge
@@ -93,6 +103,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     fit_x=[]
     fit_vr=[]
     fit_y_r_eng=[]
+    fig2,axes2=plt.subplots(1,Ntimes, figsize=(12,3))
+    extrho=extents()
     for nprofile, profile in enumerate(profs):
         print(profile)
 
@@ -100,7 +112,9 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         core_list=list(profiles.keys())
         #core_list=core_list[:5] #kludge
         #print('kludge core list')
-        for core_id in core_list:
+        for ncore,core_id in enumerate(core_list):
+            if ncore != 9:
+                continue
             row = row_dict[profile]
             frames = sorted(list(profiles[core_id].keys()))
             for nframe,frame in enumerate(frames):
@@ -197,8 +211,41 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
                     EB = np.cumsum(B*dv)/Vc
                     EK = nar(profiles[core_id][frame]['EKmean'].v)
                     Q = EK/EB
+                elif profile == 'pdfrho':
+                    import tools.equal_probability_binner as epb
+                    reload(epb)
+                    rho = profiles[core_id][frame]['drho']+0
+                    rho.sort()
+                    extrho(rho)
+                    y = (np.arange(rho.size)/rho.size)[::-1]
+                    ax2=axes2[nframe]
+                    ax2.plot(rho,y)
+                    #pdf, centers, widths=epb.equal_prob(np.log10(rho.v), 16)
+                    #ax2.bar( centers, pdf, width=widths, facecolor=None,edgecolor='k')
+                    continue
+
+                elif profile == 'rho_phase':
+                    rho = profiles[core_id][frame]['drho']
+                    #ok = np.where(rho>1e4)[0]
+                    #if len(ok) :
+                    #    last_dense = nar(ok).max()
+
+                    #    my_r=AllR[last_dense]*colors.length_units_au
+                    #    print(my_r)
+                    #    ax.axvline( my_r)
+                    #    print('wtf',nframe)
+                    ax.axhline( 1e4*colors.density_units)
+                    #ax.scatter(AllR*colors.length_units_au,rho*colors.density_units)
+                    import pcolormesh_helper as pch
+                    reload(pch)
+                    X,Y=AllR*colors.length_units_au,rho*colors.density_units
+                    pch.simple_phase( X,Y,log=True,ax=ax)
+
+                    ax.set(yscale='log',xscale='log')
+                    continue
                 else:
-                    Q = nar(profiles[core_id][frame][profile].v)
+                    print('profile',profile)
+                    Q = nar(profiles[core_id][frame][profile])
                 rbins = nar(profiles[core_id][frame]['rbins'])
                 rcen = 0.5*(rbins[1:]+rbins[:-1])
                 digitized = np.digitize( AllR, rbins)
@@ -208,30 +255,19 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
                 R = rcen[ok]
                 R *= colors.length_units_au
 
-
-
-                if 0:
-                    y /= R**(-2.8)
-                    #normalize everyone
-                    args['c']=[0.5]*4
-                    i5000 = np.argmin(np.abs(R-5000))
-                    y5000 = y[i5000]
-                    y /= 1e3*y5000
                 ext[-1](R)
 
-                if profile == 'rho':
+                if profile == 'rho' or profile == 'drho':
                     y = y * colors.density_units
-                #if profile=='energy':
-                #    ok = y>0
-                #    y = y[ok]
-                #    R = R[ok]
-                #    y=1/y
-                #    if np.isnan(y).any() or np.isinf(y).any():
-                #        pdb.set_trace()
+
 
                 ext[row](y)
                 ax.plot( R, y, **args)
 
+    #for ax2 in axes2:
+    #    ax2.set(yscale='log',xscale='log', xlim=extrho.minmax)
+    #fig2.tight_layout()
+    #fig2.savefig('plots_to_sort/pdf')
     if 0:
         def cumr(arr):
             x = nar(arr)+0
@@ -261,11 +297,23 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
 
     #print(fit_y_r_eng)
     #print(nar(fit_y_r_eng).mean())
-    print('set')
+    if 'rho_phase' in profs:
+        row = row_dict['rho_phase']
+        for nax,ax in enumerate(axes[row]):
+            ax.set(xscale='log',yscale='log',ylim=ext[0].minmax, ylabel=r'$\overline{n(r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
     if 'rho' in profs:
         row = row_dict['rho']
         for nax,ax in enumerate(axes[row]):
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{n(<r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
+            if nax == len(frames)-1:
+                r = np.geomspace(1e-3,0.2)* colors.length_units_au
+                this_y=1e6*(r/1e4)**-(2)
+                if redlines:
+                    ax.plot( r,this_y,c='r')
+    if 'drho' in profs:
+        row = row_dict['drho']
+        for nax,ax in enumerate(axes[row]):
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{n(r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
             if nax == len(frames)-1:
                 r = np.geomspace(1e-3,0.2)* colors.length_units_au
                 this_y=1e6*(r/1e4)**-(2)
@@ -334,6 +382,17 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         for ax in axes[row]:
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EK(<r)/V(r)', xlim=ext[-1].minmax)
         
+    #if 'dvr' in profs:
+    #    row = row_dict['dvr']
+    #    fit_vr = nar(fit_vr)
+    #    for nax,ax in enumerate(axes[row]):
+    #        vr_ylim=ext[row].minmax
+    #        vr_ylim = -4,2
+    #        ax.set(xscale='log',yscale='linear',ylim=vr_ylim, ylabel=r'$\overline{v_R(<r)}/c_s$', xlim=ext[-1].minmax)
+    #if 'dvt' in profs:
+    #    row = row_dict['dvt']
+    #    for nax,ax in enumerate(axes[row]):
+    #        ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$\overline{v_T(<r)}/c_s$', xlim=ext[-1].minmax)
     if 'vr_cumsum' in profs:
         row = row_dict['vr_cumsum']
         fit_vr = nar(fit_vr)
@@ -353,6 +412,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
                 r0=1e4
                 fitted = -0.5*(np.log(rbins/r0))
                 ax.plot(rbins,fitted,c='r')
+                print(rbins, fitted)
                 #ax.plot(rbins,imagine,c='r')
             if nax==3 and redlines:
                 imagine=np.log(rbins/1e3)
@@ -404,7 +464,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     print('saving')
     timescale = ['0_tsing','tsing_tsung','16_panel'][obj.timescale]
     suffix2="%s_%s"%(suffix1,suffix)
-    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.this_looper.sim_name,timescale,suffix2))
+    #fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.this_looper.sim_name,timescale,suffix2))
+    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.png'%(obj.this_looper.sim_name,timescale,suffix2))
 
 
 
@@ -432,7 +493,7 @@ if 1:
         stuff = {}
     #sim_list=['u501','u502','u503']
     sim_list=['u501']
-    mode_list=['Alone']#,'Binary','Cluster']
+    mode_list=['A']#,'Binary','Cluster']
     for sim in sim_list:
         if sim not in stuff:
             stuff[sim]={}
@@ -440,10 +501,10 @@ if 1:
             print("Do ",sim,mode)
             if mode not in stuff[sim]:
                 core_list = TL.loops[sim].core_by_mode[mode]
-                #core_list=core_list[:2]
+                core_list=core_list[:2]
                 thismp=radial.multipro(TL.loops[sim])
                 timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
                 thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False, save_sorts=True )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
-            replotter(stuff[sim][mode],suffix1=mode, redlines=True)
+            replotter(stuff[sim][mode],suffix1=mode, redlines=True, subset=5)
 

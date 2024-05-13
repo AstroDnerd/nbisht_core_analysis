@@ -111,6 +111,8 @@ sims=['u501','u502','u503']
 
 sims=['u502']
 import find_other_cores
+import track_loader as TL
+TL.load_tracks(sims)
 for sim in sims:
         subsets = [[214], [74], [112,113], [369]]
         dothis = [0,0,1,2]
