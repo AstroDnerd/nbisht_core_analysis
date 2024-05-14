@@ -387,7 +387,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     if 'virial' in profs:
         row = row_dict['virial']
         for ax in axes[row]:
-            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EK(<r)/EG(<r)', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel=r'$E_{\rm{K}}(<r)/E_{\rm{G}}(<r)$', xlim=ext[-1].minmax)
             ax.axhline(0.5,c=[0.5]*4)
             ax.axhline(2.0,c=[0.5]*4)
 
@@ -421,7 +421,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         for nax,ax in enumerate(axes[row]):
             vr_ylim=ext[row].minmax
             vr_ylim = -4,2
-            ax.set(xscale='log',yscale='linear',ylim=vr_ylim, ylabel=r'$\overline{v_R(<r)}/c_s$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='linear',ylim=vr_ylim, ylabel=r'$\overline{v_r(<r)}/c_s$', xlim=ext[-1].minmax)
             ax.axhline(0,c=[0.5]*4)
             ax.axhline(-1,c=[0.5]*4)
             rbins=np.geomspace(1e-3,1e-2)* colors.length_units_au
@@ -442,7 +442,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     if 'vt_cumsum' in profs:
         row = row_dict['vt_cumsum']
         for nframe,ax in enumerate(axes[row]):
-            ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$\overline{v_T(<r)}/c_s$', xlim=ext[-1].minmax)
+            ax.set(xscale='log',yscale='linear',ylim=ext[row].minmax, ylabel=r'$\overline{v_t(<r)}/c_s$', xlim=ext[-1].minmax)
             if  nframe == len(frames)-2 and redlines:
                 RR_sort = np.geomspace(1e-4,1e1)*colors.length_units_au
                 #ax.plot(RR_sort, RR_sort*vt_cumsum[-1]/RR_sort[-1], c='r')
