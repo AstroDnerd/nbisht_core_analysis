@@ -30,6 +30,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         #the paper version
         row_dict={'drho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3, 'virial':3}
         profs=['drho','vr_cumsum','vt_cumsum','virial']
+        #row_dict={'drho':0,'vr_cumsum':1,'vt_cumsum':2,'energy':3, 'virial':3, 'rho_phase':4}
+        #profs=['drho','vr_cumsum','vt_cumsum','virial','rho_phase']
         suffix="RVRVTVIR"
     if subset==1:
         #energy plots
@@ -106,14 +108,14 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     fig2,axes2=plt.subplots(1,Ntimes, figsize=(12,3))
     extrho=extents()
     for nprofile, profile in enumerate(profs):
-        print(profile)
 
         profiles = obj.profiles_gas
         core_list=list(profiles.keys())
         #core_list=core_list[:5] #kludge
         #print('kludge core list')
         for ncore,core_id in enumerate(core_list):
-            if ncore != 9:
+            if core_id == 37:
+                print("KLUDGE skipping 37")
                 continue
             row = row_dict[profile]
             frames = sorted(list(profiles[core_id].keys()))
@@ -244,9 +246,13 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
                     ax.set(yscale='log',xscale='log')
                     continue
                 else:
-                    print('profile',profile)
                     Q = nar(profiles[core_id][frame][profile])
+                    if np.isnan(Q).any():
+                        pdb.set_trace()
                 rbins = nar(profiles[core_id][frame]['rbins'])
+                if len(rbins) < 3:
+                    print("NOT ENOUGH BINS")
+                    continue
                 rcen = 0.5*(rbins[1:]+rbins[:-1])
                 digitized = np.digitize( AllR, rbins)
                 quan = nar([Q[digitized==i].mean() if (digitized==i).any() else np.nan for i in range(1,len(rbins))])
@@ -259,6 +265,15 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
 
                 if profile == 'rho' or profile == 'drho':
                     y = y * colors.density_units
+                    #if (Q>1e4).any():
+                    #    dense = Q>1e4
+                    #    r_dense = AllR[dense]
+                    #    r_pseudo=r_dense.max()*colors.length_units_au
+                    #    #ax.axvline(r_pseudo)
+                    #    ax.axvline(1200)
+                    #    print(r_pseudo)
+
+
 
 
                 ext[row](y)
@@ -291,18 +306,21 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         a2.axvline(mean_slope)
         a2.axvline(-1.25)
         print(mean_slope)
-        fig2.savefig('plots_to_sort/a_p_x_%s.png'%obj.this_looper.sim_name)
+        fig2.savefig('plots_to_sort/a_p_x_%s.png'%obj.mon.name)
 
 
 
     #print(fit_y_r_eng)
     #print(nar(fit_y_r_eng).mean())
+    for row in axes:
+        row[-1].axvline(1200,c=[0.5]*4)
     if 'rho_phase' in profs:
         row = row_dict['rho_phase']
         for nax,ax in enumerate(axes[row]):
             ax.set(xscale='log',yscale='log',ylim=ext[0].minmax, ylabel=r'$\overline{n(r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
     if 'rho' in profs:
         row = row_dict['rho']
+        raise
         for nax,ax in enumerate(axes[row]):
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax, ylabel=r'$\overline{n(<r)}~~ [\rm{cm}^{-3}]$', xlim=ext[-1].minmax)
             if nax == len(frames)-1:
@@ -370,8 +388,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
         row = row_dict['virial']
         for ax in axes[row]:
             ax.set(xscale='log',yscale='log',ylim=ext[row].minmax,ylabel='EK(<r)/EG(<r)', xlim=ext[-1].minmax)
-            ax.axhline(0.5,c=[0.5]*3)
-            ax.axhline(2.0,c=[0.5]*3)
+            ax.axhline(0.5,c=[0.5]*4)
+            ax.axhline(2.0,c=[0.5]*4)
 
     if 'EGmean' in profs:
         row = row_dict['EGmean']
@@ -412,7 +430,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
                 r0=1e4
                 fitted = -0.5*(np.log(rbins/r0))
                 ax.plot(rbins,fitted,c='r')
-                print(rbins, fitted)
+                #print(rbins, fitted)
                 #ax.plot(rbins,imagine,c='r')
             if nax==3 and redlines:
                 imagine=np.log(rbins/1e3)
@@ -428,7 +446,7 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
             if  nframe == len(frames)-2 and redlines:
                 RR_sort = np.geomspace(1e-4,1e1)*colors.length_units_au
                 #ax.plot(RR_sort, RR_sort*vt_cumsum[-1]/RR_sort[-1], c='r')
-                ax.plot(RR_sort, 3*(RR_sort/1e5)**0.5, c='r')
+                ax.plot(RR_sort, 9*(RR_sort/colors.length_units_au)**0.5, c='r')
 
     if 'energy' in profs:
         row = row_dict['energy']
@@ -464,8 +482,8 @@ def replotter(obj,suffix1='', redlines=False, subset=0):
     print('saving')
     timescale = ['0_tsing','tsing_tsung','16_panel'][obj.timescale]
     suffix2="%s_%s"%(suffix1,suffix)
-    #fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.this_looper.sim_name,timescale,suffix2))
-    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.png'%(obj.this_looper.sim_name,timescale,suffix2))
+    fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.pdf'%(obj.mon.name,timescale,suffix2))
+    #fig.savefig('plots_to_sort/radial_profile_%s_%s_%s.png'%(obj.mon.name,timescale,suffix2))
 
 
 
@@ -484,8 +502,8 @@ if 'tsing_tool' not in dir():
 #import anne
 #reload(anne)
 ##anne.make_inflection()
-import radial
-reload(radial)
+import radial2
+reload(radial2)
 #sim_list0i=['u502']
 #mode_list=['Alone']
 if 1:
@@ -493,6 +511,9 @@ if 1:
         stuff = {}
     #sim_list=['u501','u502','u503']
     sim_list=['u501']
+    import monster
+    reload(monster)
+    monster.load(sim_list)
     mode_list=['A']#,'Binary','Cluster']
     for sim in sim_list:
         if sim not in stuff:
@@ -501,10 +522,10 @@ if 1:
             print("Do ",sim,mode)
             if mode not in stuff[sim]:
                 core_list = TL.loops[sim].core_by_mode[mode]
-                core_list=core_list[:2]
-                thismp=radial.multipro(TL.loops[sim])
+                #core_list=[8]#core_list[:2]
+                thismp=radial2.multipro2(monster.closet[sim])
                 timescale = 2 #0= 0-tsing, 1=tsing-tsing 2=4 panel
-                thismp.run(core_list=core_list,tsing=tsing_tool[sim], timescale=timescale,get_particles=False, save_sorts=True )#, r_inflection=anne.inflection[sim])
+                thismp.run(core_list=core_list, timescale=timescale,get_particles=False, save_sorts=True )#, r_inflection=anne.inflection[sim])
                 stuff[sim][mode]=thismp
-            replotter(stuff[sim][mode],suffix1=mode, redlines=True, subset=5)
+            replotter(stuff[sim][mode],suffix1=mode, redlines=True, subset=0)
 

@@ -7,7 +7,7 @@ sim_list=['u501']
 
 from collections import defaultdict
 
-def RKEEP(sph):
+def RKEEP(sph, return_ue=False):
     GE = np.abs(sph[YT_grav_energy_2])
     dv = np.abs(sph[YT_cell_volume])
     RR = sph[YT_radius]
@@ -72,20 +72,28 @@ def RKEEP(sph):
         #find out the radius where the inflection happens.
         index = np.where(ok)[0][0]
     R_KEEP = r_cen[keepers][index]
-    return R_KEEP
+    stuff = R_KEEP
+    if return_ue:
+        stuff = R_KEEP, UE, r_cen[keepers], DUE
+    return stuff
 
 class R_INFLECTION():
     def __init__(self, this_looper):
         self.this_looper=this_looper
-        self.rinflection={}
+        self.rinflection=defaultdict(dict)
         self.rinflection_list=[]
 
-    def run(self,core_list=None, do_plots=False):
+    def run(self,frame=None,core_list=None, do_plots=False):
         this_looper=self.this_looper
         if core_list is None:
             core_list = np.unique(this_looper.tr.core_ids)
 
-        frame = this_looper.target_frame
+        if frame is None:
+            frame = this_looper.target_frame
+        thtr=this_looper.tr
+        nf = np.where(thtr.frames==frame)[0][0]
+
+
         ds = this_looper.load(frame)
         G = ds['GravitationalConstant']/(4*np.pi)
         xtra_energy.add_energies(ds)
@@ -93,7 +101,13 @@ class R_INFLECTION():
             print('Potential %s %d'%(this_looper.sim_name,core_id))
 
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
-            c = nar([ms.mean_x[-1], ms.mean_y[-1],ms.mean_z[-1]])
+            density = ms.density[:,nf]
+            if density.max()>1e4:
+                index = np.argmax(density)
+                center = nar([ms.this_x[index,nf], ms.this_y[index,nf],ms.this_z[index,nf]])
+            else:
+                center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
+            #c = nar([ms.mean_x[-1], ms.mean_y[-1],ms.mean_z[-1]])
             
             R_SPHERE = 8/128
             rsph = ds.arr(R_SPHERE,'code_length')

@@ -32,12 +32,10 @@ class multipro():
         def get_time_index(time):
             index=np.argmin( np.abs( thtr.times/colors.tff-time))
             return index
-        Nplots = 4
         if timescale in [2]:
             Ntimes = 4
         else:
             Ntimes = 6
-        ext = [extents() for n in range(Nplots+1)]
         for core_id in core_list:
             self.profiles_gas[core_id]={}
             self.profiles_part[core_id]={}
@@ -99,7 +97,13 @@ class multipro():
                 xtra_energy.add_gdotgradrho(ds)
                 nf = np.where( this_looper.tr.frames == frame)[0][0]
 
-                center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
+                density = ms.density[:,nf]
+                if density.max() > 1e4:
+                    index = np.argmax(density)
+                    center = nar([ms.this_x[index,nf], ms.this_y[index,nf],ms.this_z[index,nf]])
+                else:
+                    center = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
+
                 msR = ms.rc
                 msR[ msR<1/2048]=1/2048
                 
@@ -163,10 +167,14 @@ class multipro():
                     digitized = np.digitize( RR_sort, r_bins)
                     mean_flux  =nar([ flux[ digitized == i].sum() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
                     mass_quant  =nar([ M_cuml[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
+                    drho  =nar([ rho_sort[ digitized == i].mean() if (digitized==i).any() else np.nan for i in range(1,len(r_bins))])
 
                     #collector['rho']= M_cuml/V_cuml
                     collector['b2_sort']=b2_sort
                     collector['rho']=M_cuml/V_cuml
+                    collector['drho']=rho_sort
+                    collector['dvr'] = vr[ORDER]
+                    collector['dvt'] = vt[ORDER]
                     collector['V_cuml']=V_cuml
 
                     collector['R']=RR_sort

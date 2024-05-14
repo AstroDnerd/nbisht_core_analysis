@@ -343,9 +343,16 @@ def shift_4(arr):
 
         
 class mini_scrubber():
-    def __init__(self,trk,core_id,do_velocity=True, do_magnetic=False, do_means=True, get_help=True):
+    def __init__(self,trk,core_id,do_velocity=True, do_magnetic=False, do_means=True, get_help=True, do_central=False,
+                do_ge=False,do_ke=False):
         self.trk=trk
         self.scrub(core_id,do_velocity=do_velocity, do_magnetic=do_magnetic, do_means=do_means, get_help=get_help)
+        if do_central:
+            self.get_central_at_once(core_id)
+        if do_ge:
+            self.compute_ge(core_id)
+        if do_ke:
+            self.compute_ke_rel(core_id)
         self.axis=0
                 
     def compute_unique_mask(self,core_id, dx,frame):

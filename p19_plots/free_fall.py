@@ -83,8 +83,8 @@ def simple_rho(this_looper,core_list=None, tsing_tool=None):
 
     time_lim=time.minmax
     time_lim=[0,1.2]
-    ax.set(xlabel=r'$t/t_{\rm{SUNG}}$',    ylabel=r'$\rho_{\rm{max}}/\rho_0$',yscale='log', ylim=ext.minmax, xlim=time_lim)
-    ax1.set(xlabel=r'$t/t_{\rm{SUNG}}$', ylabel=r'$\rho_{\rm{avg}}/\rho_0$',yscale='log', ylim=ext.minmax, xlim=time_lim)
+    ax.set(xlabel=r'$t/t_{\rm{SUNG}}$',    ylabel=r'$n_{\rm{max}}/n_{\rm{max}}(t=0)$',yscale='log', ylim=ext.minmax, xlim=time_lim)
+    ax1.set(xlabel=r'$t/t_{\rm{SUNG}}$', ylabel=r'$n_{\rm{avg}}/n_{\rm{avg}}(t=0)$',yscale='log', ylim=ext.minmax, xlim=time_lim)
     if 0:
         ax2.set(xlabel=r'$t/t_{SUNG}$', ylabel=r'$\rm{min} \rho$',yscale='log', ylim=ext.minmax, xlim=time_lim)
 
@@ -147,7 +147,7 @@ import tsing
 TL.load_tracks(sims)
 tsing_tool = tsing.get_tsing(TL.loops)
 for sim in sims:
-    core_list = TL.loops[sim].core_by_mode['Alone']
+    core_list = TL.loops[sim].core_by_mode['A']
     #core_list=[74]
     simple_rho(TL.loops[sim],core_list=core_list, tsing_tool=tsing_tool[sim])
 

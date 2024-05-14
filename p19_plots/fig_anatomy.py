@@ -134,7 +134,7 @@ def anatomy(this_looper,core_list=None, do_plots=True, mass=None, dof=None, volu
             ax2 = ax.twinx()
         else:
             nx = len(frame_index)
-            fig = plt.figure(figsize=(7, 9))
+            fig = plt.figure(figsize=(6, 8))
             outer_grid = fig.add_gridspec(3, 1)
             #ax = outer_grid[0,0].subgridspec(1,1).subplots()
             #ax2 = ax.twinx()

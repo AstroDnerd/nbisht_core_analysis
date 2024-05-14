@@ -96,7 +96,7 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_do=
 
 
             if not dont_axbonk:
-                axbonk(ax,xlabel='x/L', ylabel='y/L', xlim=[xmin,xmax],ylim=[ymin,ymax])
+                axbonk(ax,xlabel=r'$x/L_0$', ylabel=r'$y/L_0$', xlim=[xmin,xmax],ylim=[ymin,ymax])
 
         outname='plots_to_sort/%s_buddies_%s_%s.pdf'%(this_looper.sim_name,'xyz'[LOS],suffix)
         if external_ax is None:
@@ -114,11 +114,14 @@ import find_other_cores
 import track_loader as TL
 TL.load_tracks(sims)
 for sim in sims:
-        subsets = [[214], [74], [112,113], [369]]
+        #draft 1
+        #subsets = [[214], [74], [112,113], [369]]
+        #dothis = [0,0,1,2]
+        #fig,axes=plt.subplots(2,2)
+        #draft 5
+        subsets = [[214], [74]]
         dothis = [0,0,1,2]
-        #subsets = [[369]]
-        #dothis = [2]
-        fig,axes=plt.subplots(2,2)
+        fig,axes=plt.subplots(2,1,figsize=(4,8))
         this_looper=TL.loops[sim]
 
         for ns, core_list in enumerate(subsets):

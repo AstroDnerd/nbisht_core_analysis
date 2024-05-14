@@ -3,8 +3,12 @@ import davetools
 def simple_phase(field1,field2,log=False,ax=None,nbins=64, weights=None,bins=None ):
     ext1=davetools.extents()
     ext2=davetools.extents()
-    ext1(field1)
-    ext2(field2)
+    if log:
+        ext1(field1[field1>0])
+        ext2(field2[field2>0])
+    else:
+        ext1(field1)
+        ext2(field2)
     if log:
         bins1=np.geomspace(ext1.minmax[0],ext1.minmax[1],nbins)
         bins2=np.geomspace(ext2.minmax[0],ext2.minmax[1],nbins)

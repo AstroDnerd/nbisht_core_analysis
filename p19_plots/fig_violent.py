@@ -182,7 +182,7 @@ def plotmancer(obj, tsing, tall=True):
         if tall:
             nup = 3
             nacross = 1
-            size=(4,8)
+            size=(5,8)
         else:
             nup=1
             nacross = 3

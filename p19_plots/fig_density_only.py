@@ -27,7 +27,7 @@ def simple_rho(this_looper,core_list=None, thicker=False, tsing=None):
     rho_all = thtr.track_dict['density']
     rho_min=rho_all.min()*colors.density_units
     rho_max=rho_all.max()*colors.density_units
-    fig,axes=plt.subplots(len(core_list),1, figsize=(4,4))
+    fig,axes=plt.subplots(len(core_list),1, figsize=(6,6))
     fig.tight_layout()
     fig.subplots_adjust(hspace=0)
     for nc,core_id in enumerate(core_list):
@@ -77,7 +77,7 @@ import tsing
 reload(tsing)
 sim_list = ['u501','u502','u503']
 TL.load_tracks(sim_list)
-if 'tsing_tool' not in dir() or True:
+if 'tsing_tool' not in dir():
     tsing_tool={}
     for ns,sim in enumerate(sim_list):
         obj=tsing.te_tc(TL.loops[sim])
