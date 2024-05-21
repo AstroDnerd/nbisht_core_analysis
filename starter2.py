@@ -3,7 +3,13 @@
 # ALl the other things that aren't standard python packages.
 #
 
-from starter1 import *
+import os
+if not os.path.exists('dtools'):
+    print("Need to get the submodule")
+    print("submodule init")
+    print("submodule update")
+    sys.exit(-1)
+
 #so we can import things from sub directories
 path_list= ["./tools_data", "./tools_pdf", "./testing",\
             "./tools", "./tools_tracks", "./trash","./new_targets", "./p56_plots",
