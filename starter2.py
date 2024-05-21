@@ -10,6 +10,7 @@ if not os.path.exists('dtools/starter1.py'):
     print("git submodule init")
     print("git submodule update")
     sys.exit(-1)
+from dtools.starter1 import *
 
 #so we can import things from sub directories
 path_list= ["./tools_data", "./tools_pdf", "./testing",\
