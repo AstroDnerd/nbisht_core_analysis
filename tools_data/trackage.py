@@ -376,6 +376,7 @@ class mini_scrubber():
             print("Core %d not found in looper"%core_id)
             print("  (also please write a better error handler)")
             raise
+        self.particle_id = self.trk.c([core_id],'particle_id')
         self.raw_x = self.trk.c([core_id],'x')
         self.raw_y = self.trk.c([core_id],'y')
         self.raw_z = self.trk.c([core_id],'z')
