@@ -4,7 +4,7 @@
 #
 
 import os
-if not os.path.exists('dtools'):
+if not os.path.exists('dtools/starter1.py'):
     print("Need to get the submodule")
     print("submodule init")
     print("submodule update")
