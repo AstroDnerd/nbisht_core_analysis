@@ -5,18 +5,21 @@ reload(rak)
 import build_dataset as bs
 reload(bs)
 
+import add_tracer_tool as AT
+reload(AT)
+
 if 1:
     #read the cubes
-    directory = "/anvil/scratch/x-ux454321/p78c_high_res/1024/B02/ICs"
+    directory = "/anvil/scratch/x-ux454321/p19b_high_res/IC_1024/B02"
     base = "%s/cube080"%directory
     if 'stuff1024' not in dir():
         print('read the cubes.')
         stuff1024 = rak.read_alexei(base,Isothermal=True, dtype='<f8')
-    output_directory='/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Run1024'
+    output_directory='/anvil/scratch/x-ux454321/p19b_high_res/assembler_1024/B02'
     for n in range(len(stuff1024)):
         stuff1024[n].shape=[1024]*3
 
-if 0:
+if 1:
 
     sl = tuple([slice(0,512)]*3)
     sl = tuple([slice(None)]*3)
@@ -28,12 +31,11 @@ if 0:
     bs.write_enzo_set(stuff1024[5][sl],output_directory,'p19b_b02_by.1024',extend=1 )
     bs.write_enzo_set(stuff1024[6][sl],output_directory,'p19b_b02_bz.1024',extend=2 )
 
-if 1:
+if 0:
     #DO ONE STEP.
     #ADD TRACERS
-    import p78_assemble.add_tracer_tool as AT
-    reload(AT)
-    particle_base="/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Particles1024"
+    output_directory='/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Run1024_4096'
+    particle_base="/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Particles1024_4096"
     setname = "%s/DD0000/data0000"%output_directory
     frame=0
     ds = yt.load(setname)
@@ -45,7 +47,7 @@ if 0:
     names = ['density','vx','vy','vz','Bx','By','Bz']
     fig,axes=plt.subplots(3,3)
     axlist=axes.flatten()
-    for nc,cube in enumerate(stuff):
+    for nc,cube in enumerate(stuff1024):
         print(cube.size/1024**3)
         print(names[nc])
         cube.shape = 1024,1024,1024
