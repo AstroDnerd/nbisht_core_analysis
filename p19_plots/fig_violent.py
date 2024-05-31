@@ -275,7 +275,7 @@ def plotmancer(obj, tsing, tall=True):
         ok = ~np.isnan(obj.RVg)
         AXX=ax2
         plot=AXX.pcolormesh( XXX,YYY, np.abs(1/obj.RVg),  norm=norm_grav, shading='nearest', cmap=cmap)
-        fig.colorbar(plot,label=r'$\overline{E}_{\rm{K}}/\overline{E}_{\rm{G}}$', ax=AXX )
+        fig.colorbar(plot,label=r'$\overline{E}_{\rm{K}}/|\overline{E}_{\rm{G}}|$', ax=AXX )
         ax0.set(yscale='log', ylabel=r'$R~~[\rm{AU}]$', xticks=[])
         ax2.set(yscale='log',ylabel=r'$R~~[\rm{AU}]$',xlabel=r'$t/t_{\rm{ff}}$', xlim=ax0.get_xlim())#,ylabel='R[AU]')
         ax1.set(yscale='log',ylabel=r'$R~~[\rm{AU}]$', xticks=[], xlim=ax0.get_xlim())

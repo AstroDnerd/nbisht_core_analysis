@@ -13,13 +13,14 @@ if 1:
     length_units_au = (3.6*unyt.pc).in_units('AU').v
     length_units_pc = 3.6 #pc
     velocity_units_km_s = 0.2
+    time_units_Myr = 1.2
+    time_units_s = (time_units_myr*unyt.Myr).in_units('s').v
 
 u_den = density_units*unyt.cm**-3
 u_mass = mass_units_msun*unyt.Msun
 u_length = length_units_au*unyt.AU
 u_vel = velocity_units_km_s*unyt.km/unyt.s
 u_eng = (u_mass*u_vel**2).in_units('erg')
-print(u_eng)
 
 color={'u05':'r','u10':'g','u11':'b'}
 color.update({'u201':'r','u202':'g','u203':'b'})
