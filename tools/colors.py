@@ -14,7 +14,7 @@ if 1:
     length_units_pc = 3.6 #pc
     velocity_units_km_s = 0.2
     time_units_Myr = 1.2
-    time_units_s = (time_units_myr*unyt.Myr).in_units('s').v
+    time_units_s = (time_units_Myr*unyt.Myr).in_units('s').v
 
 u_den = density_units*unyt.cm**-3
 u_mass = mass_units_msun*unyt.Msun
