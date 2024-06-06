@@ -186,7 +186,7 @@ if 1:
     parts_or_spheres ='synthetic' #parts, spheres, sphparts, sph_tsung, synthetic  
     kappadyn = 'no' #no: do ratios, yes: do kappa dynamical; EDIT: outnames should reflect this too
     
-    series = '500'  #500 or 600
+    series = '600'  #500 or 600
     # for tsung plots
     if series == '500':  
         sims=['u501']#, 'u502', 'u503']  #EDIT: need a loop!!
@@ -277,18 +277,18 @@ if 1:
             if kappadyn == 'no':
                 kappas_ratio = kappas_sph/kappas_sph_synth
                 ax.scatter(the_x, kappas_ratio, color='orange', label='ratio')  
-                outname = 'p66_brho/sphwsynthtsung_kappadynratio_scatter_%s'%sims[0]
+                outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0] #tsung or tff
             if kappadyn == 'yes':
                 ax.scatter(the_x, kappas_sph, color='b', label='spheres')  
                 if parts_or_spheres == 'synthetic':
                     ax.scatter(the_x, kappas_sph_synth, color='g', label=parts_or_spheres)  
                 if parts_or_spheres == 'parts':
                     ax.plot(the_x, kappas_parts, color='r', label='particles')  
-                outname = 'p66_brho/sphwsynthtsung_kappadyn_scatter_%s'%sims[0]
+                outname = 'p66_brho/sphwsynthtsung_kappadyn_scatter_%s'%sims[0]  #tsung or tff
             ax.legend()
             xlabels = [r'$t_{tsung,dummy}$', r'$t_{tff,dummy}$'] 
-            ylabels = [r'$\kappa/\kappa_synth$', r'$\kappa$' ]
-            ax.set(xlabel=xlabels[0], ylabel=ylabels[0], ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
+            ylabels = [r'$\kappa/\kappa_synth$', r'$\kappa$' ]  
+            ax.set(xlabel=xlabels[1], ylabel=ylabels[0], ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
             plt.savefig(outname)
             print('figure saved!')
             plt.clf()    
