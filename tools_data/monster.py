@@ -4,6 +4,7 @@ import xtra_energy
 
 import track_loader as TL
 import trackage
+import other_scrubber
 
 if 'closet' not in dir() or True:
     closet = {}
@@ -21,6 +22,7 @@ class boo():
         self.name = this_looper.sim_name
         self.tr = this_looper.tr
         self.frames=self.tr.frames
+        self.times = self.tr.times
         self.core_ids = np.unique(self.tr.core_ids)
         self.tsing = tsing.te_tc(this_looper)
         self.tsing.run()
@@ -77,6 +79,18 @@ class boo():
         ind = np.unique(ind)
         ind.sort()
         return ind
+
+    def scrub_sphere(self,core_id,frame,sphere_type):
+        sph= self.get_sphere(core_id,frame,sphere_type)
+        ms = self.get_ms(core_id)
+        ds = self.get_ds(frame)
+        nf = self.get_frame_index(frame)
+
+        vel = ds.arr(ms.vcentral[:,nf], 'code_velocity')
+        scrub = other_scrubber.scrubber(sph, reference_velocity = vel)
+        scrub.compute_ke_rel()
+        scrub.compute_ge()
+        return scrub
 
     def get_sphere(self,core_id,frame,sphere_type):
         if core_id not in self.spheres[sphere_type]:
