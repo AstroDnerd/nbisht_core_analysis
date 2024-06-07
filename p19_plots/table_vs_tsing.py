@@ -188,6 +188,7 @@ if 1:
         for ax in axes[0]:
             ax.set(xlim=extx.minmax,ylim=exty.minmax)
         fig.tight_layout()
+        print('CLOWN',plot_dir)
         fig.savefig('%s/tff_tsung'%(plot_dir))
                 
 if 1:
@@ -256,8 +257,10 @@ if 1:
 if 1:
     #make table
     for frame, vs_tool in [[0,vs_0]]:#,['tsing',vs_s]
-        quan_list=['volume','hull_volumes','mass','ge','ke','avg_v3','avg_vr','avg_vt','avg_tff']
-        quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ \EG}$', 'ke':r'$\overline{ \EK }$','avg_v3':r'$\sigma_{3d}$','avg_vr':r'$\overline{ v_r }$','avg_vt':r'$\overline{v_t}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
+        quan_list=['volume','hull_volumes','mass','avg_tff','ge','ke','avg_v3','avg_vr','avg_vt']
+        quan_tex={'volume':r'$N_{\rm{particles}}$','mass':r'$\overline{ \rho }$','ge':r'$\overline{ \EG}$', 
+                  'ke':r'$\overline{ \EK }$','avg_v3':r'$\overline{v_{\rm{rms}}}$','avg_vr':r'$\overline{ v_{\rm{R}} }$',
+                  'avg_vt':r'$\overline{v_{\rm{T}}}$','avg_tff':r'$\overline{t_{\rm{ff}}}$','hull_volumes':r'$V_{\rm{hull}}$'}
         import jinja2
         loader=jinja2.FileSystemLoader('.')
         env = jinja2.Environment(loader=loader)

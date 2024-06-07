@@ -81,8 +81,8 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
         rho_ext(rhomean)
         rho_ext(rhomin)
 
-        tsing = tsing_in.tend_core[core_id]
-        #tsing = tsing_in.tsing_core[core_id]
+        #tsing = tsing_in.tend_core[core_id]
+        tsing = tsing_in.tsing_core[core_id]
 
 
         #velocity plots
@@ -104,15 +104,16 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
     test_t = np.arange(0,1,0.01)
     a=1.8614
     mean_rho_mean=nar(mean_rho_mean)
-    for rho_mean in [mean_rho_mean.min(),mean_rho_mean.max()]:
-        #rho_mean = np.mean(mean_rho_mean)
-        rhot = (1-test_t**2)**(-a)
-        rho_ff = rho_mean*rhot
-        ax3.plot(test_t,rho_ff)
+    if 0:
+        for rho_mean in [mean_rho_mean.min(),mean_rho_mean.max()]:
+            #rho_mean = np.mean(mean_rho_mean)
+            rhot = (1-test_t**2)**(-a)
+            rho_ff = rho_mean*rhot
+            ax3.plot(test_t,rho_ff)
 
     axB.set(xscale='log',yscale='log', xlim=eng_ext.minmax,ylim=eng_ext.minmax)
     fig2.savefig('plots_to_sort/grasping')
-    labels = [ r'$\overline{v_{rms}}/c_s$', r'$\overline{v_{R}}/c_s$', r'$\overline{v_{T}}/c_s$']
+    labels = [ r'$\overline{v_{\rm{rms}}}/c_s$', r'$|\overline{v_{\rm{R}}}|/c_s$', r'$|\overline{v_{\rm{T}}}|/c_s$']
     for na,aaa in enumerate(axes[1:]):
         ylim = [0,7.8]
         xlim = [0,1.2]
@@ -137,7 +138,7 @@ def v_hair(this_looper,core_list=None, suffix='', norm=False, tsing_in=None):
     print(outname)
 
 
-if 0:
+if 1:
     #First Paper version.
     #don't touch.
     #probably replaced.
@@ -145,15 +146,15 @@ if 0:
     TL.load_tracks(sims)
     #sims=[ 'u502','u503']
     for sim in sims:
-        for mode in ['Alone']:
+        for mode in ['A']:
             core_list = TL.loops[sim].core_by_mode[mode]
             #core_list = np.unique(TL.loops[sim].tr.core_ids)
 
             #core_list=core_list[:5]
 
-            v_hair(TL.loops[sim], core_list=core_list,suffix=mode,norm=False)
+            v_hair(TL.loops[sim], core_list=core_list,suffix=mode,norm=False, tsing_in=tsing_tool[sim])
 
-if 1:
+if 0:
     #play with tsing
     #don't touch.
     sims=['u502']
@@ -162,7 +163,7 @@ if 1:
     import tsing
     tsing_tool=tsing.get_tsing(TL.loops)
     for sim in sims:
-        for mode in ['Alone']:
+        for mode in ['A']:
             core_list = TL.loops[sim].core_by_mode[mode]
             #core_list = np.unique(TL.loops[sim].tr.core_ids)
 
