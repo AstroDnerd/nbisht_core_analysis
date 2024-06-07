@@ -372,14 +372,12 @@ def plotmancer(obj, tsing=None, tall=True):
 
 
 
-# OMG THERE COULD BE DEATH OF FETUS STARS!!!! or simply a merge or accretion...sure.
 import track_loader as TL
 sim_list = ['m0232']#, 'm0240', 'm0250', 'm0260', 'm0270', 'm0280']
 TL.load_tracks(sim_list)
 
 if 'things' not in dir():
     things={}
-
 # use
 if 1:
     #new plots.
@@ -387,42 +385,17 @@ if 1:
         #core_list = TL.loops[sim].core_by_mode['Alone']
         all_cores=np.unique(TL.loops[sim].tr.core_ids)
         core_list=list(all_cores) 
-        print("The core count of target frame %s is %d"%(sim, len(core_list)))
-        print("The newborn tags are: ") 
-        print(core_list)
+        #core_list = [123]
 
+        #to get figure 4 on p19!
         for core_id in core_list:
             if core_id in things:
                 continue
-            # maybe re-define
-            thing = Relaxor(TL.loops[sim])
-            thing.run(core_list=[core_id], do_plots=True, frame_list=None)#, tsing=tsing_tool[sim])
-            things[core_id]=thing
-            plotmancer(thing, tall=True)  #now changed
-
-
-    if 0:
-        plotsb(things, tsing_tool[sim])
-    if 0:
-        #really, don't overwrite things. please.
-        thing_saver(things,sim)
-    if 0:
-        if 'accreter' not in dir() or True:
-            accreter=accretion(things, tsing_tool[sim])
-    if 0:
-        plotsa(accreter,tsing_tool[sim])
-    if 0:
-        for core_id in things:
-            plotmancer(things[core_id], tsing_tool[sim])
-    if 0:
-        for core_id in things:
-            #plotmancer(things[core_id], tsing_tool[sim])
-            calculus(things[core_id],tsing_tool[sim])
-if 0:
-    plotmancer(thing,tsing_tool[sim])
-if 0:
-    accretion(thing,tsing_tool[sim])
-
+                # maybe re-define
+                thing = Relaxor(TL.loops[sim])
+                thing.run(core_list=[core_id], do_plots=True, frame_list=None)
+                things[core_id]=thing
+                plotmancer(thing, tall=True)  #now changed
 
 # NOTES
 # use Relaxor, things, and mancer

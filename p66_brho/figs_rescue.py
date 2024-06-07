@@ -182,24 +182,48 @@ if 0:
 # TO READ DATA FROM STORAGE
 if 1:  
     figtype = 'kappaperframe'  #kappaperframe, kappatff
-    individually = 'no'  #yes, no
-    parts_or_spheres ='synthetic' #parts, spheres, sphparts, sph_tsung, synthetic  #EDIT respectively below
-    kappadyn = 'no' #no: do ratios, yes: do kappa dynamical
+    individually = 'no'  #if kappaperframe, yes: one panel per frame, no: frame time series
+    parts_or_spheres ='synthetic' #parts, spheres, sphparts, sph_tsung, synthetic  
+    kappadyn = 'no' #no: do ratios, yes: do kappa dynamical; EDIT: outnames should reflect this too
+    
+    series = '600'  #500 or 600
+    # for tsung plots
+    if series == '500':  
+        sims=['u501']#, 'u502', 'u503']  #EDIT: need a loop!!
+        hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  
+        hfivename_synth = 'p66_brho/h5files/blosncol_sphtsung_%s.h5'%(sims[0])  
+        Fptr = h5py.File(hfivename,'r')
+        Fptr_synth = h5py.File(hfivename_synth,'r')
 
-    sims=['u503']#, 'u502', 'u503']
-    hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  
-    hfivename_synth = 'p66_brho/h5files/blosncol_sphtsung_%s.h5'%(sims[0])  
+        #if parts_or_spheres == 'spheres':
+        b_sph = Fptr['bmag_sph'][()] 
+        rho_sph = Fptr['rho_sph'][()]
+        if parts_or_spheres == 'synthetic':
+            b_sph_synth = Fptr_synth['bmag_sph'][()] 
+            rho_sph_synth = Fptr_synth['rho_sph'][()]
+
+    # for tff plots
+    if series == '600':
+        sims=['u601']#, 'u602', 'u603']  #EDIT: need a loop!!
+        hfivename = 'p66_brho/h5files/brho_sphparts_%s.h5'%(sims[0])  
+        hfivename_synth = 'p66_brho/h5files/blosncol_sph_%s.h5'%(sims[0])  
+        Fptr = h5py.File(hfivename,'r')
+        Fptr_synth = h5py.File(hfivename_synth,'r')
+
+        #if parts_or_spheres == 'spheres':
+        b_sph = Fptr['bfield_sph'][()] 
+        rho_sph = Fptr['rhoavg_sph'][()] 
+        if parts_or_spheres == 'parts':
+            b_parts = Fptr['bfield_parts'][()] 
+            rho_parts = Fptr['rhoavg_parst'][()] 
+        if parts_or_spheres == 'synthetic':
+            b_sph_synth = Fptr_synth['blos_sph'][()] 
+            rho_sph_synth = Fptr_synth['ncolumn_sph'][()] 
+
     Fptr = h5py.File(hfivename,'r')
     Fptr_synth = h5py.File(hfivename_synth,'r')
-    
-    b_sph = Fptr['bmag_sph'][()] 
-    rho_sph = Fptr['rho_sph'][()]
-    if parts_or_spheres == 'synthetic':
-        b_sph_synth = Fptr_synth['bmag_sph'][()] 
-        rho_sph_synth = Fptr_synth['rho_sph'][()]
-    if parts_or_spheres == 'parts':
-        b_parts = Fptr['bfield_parts'][()] 
-        rho_parts = Fptr['rhoavg_parst'][()] 
+   
+
 
     def afunct(x, a, b):
         y = a * x + b
@@ -211,7 +235,7 @@ if 1:
         kappas_parts = []
         for i in range(len(rho_sph)):   
             rhosph_log = np.log(rho_sph[i])  
-            bsph_log = np.log(b_sph[i]) 
+            bsph_log = np.log(b_sph[i])      
             rets_sph = cfp.fit(afunct, rhosph_log, bsph_log)  
             kappas_sph = np.append(kappas_sph, rets_sph.popt[0])
 
@@ -232,11 +256,12 @@ if 1:
             the_yrecipe_ = afunct(the_xrecipe, *rets.popt)
             the_yten = 10**the_yrecipe
             ''' 
+            # one panel for each time frame; edit x,y labels and saving names as necessary
             if individually == 'yes':
                 fig,ax = plt.subplots(1,1)
-                ax.scatter(rho_sph[i], b_sph[i], color='b', label='spheres', alpha=0.5)  #kappa sph and parts vs time frame
+                ax.scatter(rho_sph[i], b_sph[i], color='b', label='spheres', alpha=0.5)  
                 if parts_or_spheres == 'parts':
-                    ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  #kappa sph and parts vs time frame
+                    ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  
                 ax.legend()
                 ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(1e-2,1e8), ylim=(1e0,1e4))
                 outname = 'p66_brho/sphtsung_frame%d_%s'%(i,sims[0])
@@ -244,6 +269,7 @@ if 1:
                 print('figure saved!')
                 plt.clf()      
 
+        # time frames in time series; edit x,y labels and saving names as necessary
         if individually == 'no':
             fig,ax = plt.subplots(1,1)
             the_x = np.linspace(1,len(rho_sph),len(rho_sph)) 
@@ -251,19 +277,22 @@ if 1:
             if kappadyn == 'no':
                 kappas_ratio = kappas_sph/kappas_sph_synth
                 ax.scatter(the_x, kappas_ratio, color='orange', label='ratio')  
+                outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0] #tsung or tff
             if kappadyn == 'yes':
                 ax.scatter(the_x, kappas_sph, color='b', label='spheres')  
                 if parts_or_spheres == 'synthetic':
                     ax.scatter(the_x, kappas_sph_synth, color='g', label=parts_or_spheres)  
                 if parts_or_spheres == 'parts':
-                    ax.plot(the_x, kappas_parts, color='r', label='particles')  #kappa sph and parts vs time frame
-
+                    ax.plot(the_x, kappas_parts, color='r', label='particles')  
+                outname = 'p66_brho/sphwsynthtsung_kappadyn_scatter_%s'%sims[0]  #tsung or tff
             ax.legend()
-            ax.set(xlabel=r'$t_{tsung,dummy}$', ylabel=r'$\kappa/\kappa_synth$', ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
-            outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0]
+            xlabels = [r'$t_{tsung,dummy}$', r'$t_{tff,dummy}$'] 
+            ylabels = [r'$\kappa/\kappa_synth$', r'$\kappa$' ]  
+            ax.set(xlabel=xlabels[1], ylabel=ylabels[0], ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
             plt.savefig(outname)
             print('figure saved!')
             plt.clf()    
+
 
     if figtype == 'kappatff':
         rhotff_sph = []
@@ -307,5 +336,3 @@ if 1:
     print('closing fig and h5 file!')
     Fptr.close()
 
-# simple rho was a definition, withspheres is a class
-# UFFF

@@ -59,6 +59,7 @@ class targetpdfs():
         ds = self.this_looper.load(frame)  
         em.add_tracer_density(ds)  
         ad = ds.all_data()
+        #stop()
         deposit_tuple = ("deposit","target_particle_volume") 
  
         all_target_indices = self.this_looper.target_indices
@@ -97,9 +98,9 @@ class targetpdfs():
 
 
 # YOU ARE HERE
-sims=['m0230', 'm0231', 'm0232', 'm0233', 'm0234', 'm0235', 'm0236', 'm0237', 'm0238', 'm0239', 'm0240', 'm0241', 'm0242',\
-      'm0243', 'm0244', 'm0245', 'm0246', 'm0247', 'm0250', 'm0260', 'm0270', 'm0280', 'm02100', 'm02110']  
-#sims=['m02110']
+#sims=['m0230', 'm0231', 'm0232', 'm0233', 'm0234', 'm0235', 'm0236', 'm0237', 'm0238', 'm0239', 'm0240', 'm0241', 'm0242',\
+#      'm0243', 'm0244', 'm0245', 'm0246', 'm0247', 'm0250', 'm0260', 'm0270', 'm0280', 'm02100', 'm02110']  
+sims=['m0230']
 if 'targets' not in dir():
     targets=True
 # TO GET DATA AND STORE
@@ -114,12 +115,12 @@ if 1:
             if 0: 
                 numofcores = targets.coresvstime()
                 cnum.append(numofcores)
-            if 1:
+            if 0:
                 pl_val = targets.getthepdfs(sim)
                 pl.append(pl_val)
             if 0:
                 targets.vstime(sim)
-        if 1:
+        if 0:
             fig,ax=plt.subplots(1,1)
             if 0:  #number of cores vs time frames
                 ax.scatter(an_x, cnum, c='g')
@@ -134,3 +135,4 @@ if 1:
             plt.close(fig)
 
 
+stop()
