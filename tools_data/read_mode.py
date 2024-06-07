@@ -14,8 +14,11 @@ def read(fname, method=0):
         fptr=h5py.File(fname,'r')
         core_ids = fptr['core_ids'][()]
         modes_str = fptr['modes'][()].astype(str)
-        modes_tmp = [np.split(sss,1) for sss in modes_str]  #this fix may be necessary for other similar lines in the code!
-        #modes_tmp = [sss.split(',') for sss in modes_str]  
+        rank = len(modes_str.shape)
+        if rank >1:
+            modes_tmp = [np.split(sss,1) for sss in modes_str]  #this fix may be necessary for other similar lines in the code!
+        else:
+            modes_tmp = [sss.split(',') for sss in modes_str]  
     else:
         sim_id = int(sim_name[-1]) #last character is all we need. 501=601
         #fname = "browser_data/Core Browser Plots - u50%s.tsv"%sim_id
