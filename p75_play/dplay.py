@@ -179,6 +179,9 @@ if 'ht' not in dir():
         ht[sim] = CHT.hull_tool(TL.loops[sim])
         ht[sim].make_hulls()
 
+times=[]
+for net,et in enumerate(etrack_list):
+    times.append( TL.tracks[et].tr.times[-1])
 if 1:
     ucore_volumes={}
     for ucore in ucore_list:
@@ -196,7 +199,7 @@ if 1:
     for ucore in ucore_list:
         uid = ucore.uid
         cum = ucore_volumes[ucore.uid] + cum
-        ax.plot(cum)
+        ax.plot(times/colors.tff,cum)
     ax.set(yscale='log')
     fig.savefig('%s/volume'%(plot_dir))
 

@@ -19,7 +19,7 @@ def smother(arr):
     ab[~ok]=np.nan
     return ab
 def dIdt(prof):
-    print('cheese')
+    print('run dIdt')
 
     prof.fields['Ismooth'] = smother( prof.fields['I'])
     prof.fields['dI'] = (prof.fields['Ismooth'][:,2:]-prof.fields['Ismooth'][:,:-2])/prof.dt
@@ -35,11 +35,14 @@ class profiler():
     def __init__(self,mon,core_id):
         self.mon=mon
         self.core_id=core_id
-        self.field_list=['M','I','dI','ddI','EK','EG','EB','ET']#,'SK','SB','ST','I','dI','ddI']
+        self.field_list=['M','particle_count','I','dI','ddI','EK','EG','EB','ET']
         self.fields={}
-    def run(self):
-        frame_slice=slice(None)
-        #frame_slice=slice(None,None,10)
+    def run(self, sphere_type='rmax', frames='movie'):
+        if frames == 'movie':
+            frame_slice=slice(None)
+        elif frames == 'short':
+            frame_slice=slice(None,None,10)
+
         frame_list=self.mon.frames[frame_slice]
         self.times=self.mon.times[frame_slice]#/colors.tff
         self.dt   = 0.5*(self.times[2:]-self.times[:-2])
@@ -53,8 +56,10 @@ class profiler():
         for field in self.field_list:
             self.fields[field]=np.zeros([len(self.r_bins)-1,len(frame_list)])
         for nf,frame in enumerate(frame_list):
-            sph = self.mon.get_sphere(core_id,frame,'rinf')
-            scrub = self.mon.scrub_sphere(core_id,frame,'rinf')
+            print('prof',frame)
+            sph = self.mon.get_sphere(core_id,frame,sphere_type)
+            scrub = self.mon.scrub_sphere(core_id,frame,sphere_type)
+            xyz, r = self.mon.particle_recenter(core_id, frame, sph.center.v)
             dv = scrub.cell_volume
             RR = scrub.r
             DD = scrub.density
@@ -78,6 +83,13 @@ class profiler():
             EB_cuml = np.cumsum( EB_srt*dv_srt)
             ET_cuml = np.cumsum( ET_srt*dv_srt)
             I_cuml = np.cumsum(I_srt*dv_srt)
+
+            order_particle = np.argsort(r)
+            rp_srt = r[order_particle]
+            np_cuml = np.cumsum(np.ones_like(rp_srt))
+            particle_count, bins, ind = scipy.stats.binned_statistic(rp_srt, np_cuml, bins=self.r_bins, statistic='mean')
+            self.fields['particle_count'][:,nf]=particle_count
+
 
             Mbinned, bins, ind = scipy.stats.binned_statistic(RR_srt, M_cuml, bins=self.r_bins,statistic='mean')
             EGbinned, bins, ind = scipy.stats.binned_statistic(RR_srt, EG_cuml, bins=self.r_bins,statistic='mean')

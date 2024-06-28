@@ -14,6 +14,99 @@ import scipy.stats
 import radial_sphere 
 reload(radial_sphere)
 
+def mass_particles(core_id,prof,mon,outname):
+    ncol = 2
+    nrow = 2
+    fig,axes=plt.subplots(nrow,ncol, figsize=(12,12))
+    if nrow==1:
+        axes=[axes]
+    if ncol==1:
+        axes=[axes]
+    skip_lines = np.zeros([nrow,ncol])
+
+    radius = prof.r_cen*colors.length_units_au
+    XXX,YYY = np.meshgrid(prof.times/colors.tff,radius)
+    cmap=copy.copy(mpl.cm.get_cmap("seismic"))
+    cmap.set_bad([0.9]*3)
+    cmap.set_over('b')
+    cmap.set_under('g')
+
+    field = 'M'
+    if field in prof.fields:
+
+        MMM = prof.fields[field]
+        ok = ~np.isnan(MMM)
+        radius_to_cut_off = 1000
+        ok2 = ~np.isnan(MMM[:,-1])
+        index = np.where( prof.r_cen[ok2]*colors.length_units_au < radius_to_cut_off)[0].max()
+        mass_at_the_end = MMM[ok2,-1][index]
+        fiducial=mass_at_the_end
+        Max=MMM[ok].max()
+        minner_chicken_dinner = fiducial**2/Max
+        norm_mass = mpl.colors.LogNorm(vmin=minner_chicken_dinner,vmax=Max)
+
+        nr = 0; nc = 0; ax = axes[nr][nc]
+        plot=ax.pcolormesh(XXX,YYY,MMM,cmap=cmap, norm=norm_mass,shading='nearest')
+        ax.set(yscale='log')
+        fig.colorbar(plot,label='Mass',ax=ax)
+
+    field = 'particle_count'
+    if field in prof.fields:
+        MMM = prof.fields[field]
+        ok = ~np.isnan(MMM)
+        ok2 = ~np.isnan(MMM[:,-1])
+        index = np.where( prof.r_cen[ok2]*colors.length_units_au < radius_to_cut_off)[0].max()
+        count_at_the_end = MMM[ok2,-1][index]
+        fiducial=count_at_the_end
+        Max=MMM[ok].max()
+        minner_chicken_dinner = fiducial**2/Max
+        #norm_particle = mpl.colors.LogNorm(vmin=minner_chicken_dinner,vmax=Max)
+        norm_particle = mpl.colors.LogNorm(vmin=1,vmax=Max)
+        nr = 0; nc = 1; ax=axes[nr][nc]
+        plot=ax.pcolormesh(XXX,YYY,MMM,cmap=cmap, norm=norm_particle,shading='nearest')
+
+        ax.set(yscale='log')
+        fig.colorbar(plot,label='P',ax=ax)
+
+    field = 'density_trace'
+    if 1:
+        print('are you my mommy?')
+        ms = mon.get_ms(core_id)
+        rho = ms.density.transpose()[:,::10]
+        t = mon.all_times/colors.tff
+        t.shape = t.size,1
+        nr = 1; nc = 1; ax=axes[nr][nc]
+        ax.set(yscale='log')
+        ax.plot(t,rho,c=[0.1]*4)
+        print('no')
+
+    if 1:
+        nr = 1; nc = 0; ax=axes[nr][nc]
+        skip_lines[nr][nc]=True
+
+        ms = mon.get_ms(core_id)
+        ms.particle_pos(core_id)
+        px = ms.particle_x.transpose()[:,::100]
+        py = ms.particle_y.transpose()[:,::100]
+        ax.plot(px,py,c=[0.1]*4)
+
+
+
+
+    af = nar(axes).flatten()
+    ss = skip_lines.flatten()
+    for nax,ax in enumerate(af):
+        if ss[nax]:
+            continue
+        ax.set(xlim=af[0].get_xlim(), xlabel='t/tff',ylabel='R')
+        tsing = prof.mon.get_tsing( prof.core_id)
+        tsung = prof.mon.get_tsung( prof.core_id)
+        ax.axvline(tsing, c=[0.5]*4)
+        ax.axvline(tsung, c=[0.5]*4)
+    fig.tight_layout()
+    fig.savefig('%s/mass_particle'%(plot_dir))
+
+
 def mass_moment(prof,outname):
     ncol = 2
     nrow = 2
