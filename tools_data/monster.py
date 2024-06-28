@@ -5,6 +5,7 @@ import xtra_energy
 import track_loader as TL
 import trackage
 import other_scrubber
+import movie_frames
 
 if 'closet' not in dir() or True:
     closet = {}
@@ -21,8 +22,11 @@ class boo():
         self.this_looper=this_looper
         self.name = this_looper.sim_name
         self.tr = this_looper.tr
-        self.frames=self.tr.frames
-        self.times = self.tr.times
+        self.all_frames=self.tr.frames
+        self.all_times = self.tr.times
+        self.movie_mask = movie_frames.quantized_mask(this_looper)
+        self.frames = self.all_frames[self.movie_mask]
+        self.times = self.all_times[self.movie_mask]
         self.core_ids = np.unique(self.tr.core_ids)
         self.tsing = tsing.te_tc(this_looper)
         self.tsing.run()
@@ -53,6 +57,15 @@ class boo():
             this_ms = trackage.mini_scrubber(self.tr,core_id, **kwargs)
             self.ms[core_id]=this_ms
             return this_ms
+    def particle_recenter(self,core_id,frame,center):
+        ms = self.get_ms(core_id,do_velocity=False)
+        nf = self.get_frame_index(frame)
+        x = ms.this_x[:,frame] - center[0]
+        y = ms.this_y[:,frame] - center[1]
+        z = ms.this_z[:,frame] - center[2]
+        r = np.sqrt(x**2+y**2+z**2)
+        xyz=np.stack([x,y,z])
+        return xyz, r
     def get_frame_index(self,frame):
         nf = np.where( self.tr.frames == frame)[0][0]
         return nf
