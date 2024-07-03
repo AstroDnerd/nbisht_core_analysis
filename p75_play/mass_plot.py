@@ -23,11 +23,7 @@ if 'things' not in dir():
 for sim in sim_list:
     last_etrack = ucore.etrack_list[-1]
     mon = monster.closet[sim]
-    for uc in ucore.ucore_list:
-        print(uc)
-        if last_etrack not in uc.core_id_by_et:
-            continue
-        core_id = uc.core_id_by_et[last_etrack]
+    for core_id in mon.this_looper.core_by_mode['A']:
         if core_id in things:
             continue
         prof = radial_sphere.profiler(mon,core_id)
