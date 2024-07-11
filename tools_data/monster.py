@@ -31,7 +31,7 @@ class boo():
         self.tsing = tsing.te_tc(this_looper)
         self.tsing.run()
         self.ms = {}
-        self.spheres={'r8':{},'r1':{},'rmax':{},'rinf':{}}
+        self.spheres={'r8':{},'r1':{},'rmax':{},'rinf':{},'rsmart':{}}
         self.r_inflection={}
     def get_r_inflection(self,core_id,frame):
         import r_inflection
@@ -109,11 +109,12 @@ class boo():
         if core_id not in self.spheres[sphere_type]:
             self.spheres[sphere_type][core_id]={}
         if frame not in self.spheres[sphere_type][core_id]:
+            THRESH = 1e3
             nf = self.get_frame_index(frame)
             ms = self.get_ms(core_id)
             #center = nar([ms.this_x[index,nf], ms.this_y[index,nf],ms.this_z[index,nf]])
             density = ms.density[:,nf]
-            if density.max() > 1e2 and True:
+            if density.max() > THRESH and True:
                 index = np.argmax(density)
                 center = nar([ms.this_x[index,nf], ms.this_y[index,nf],ms.this_z[index,nf]])
                 geomcenter = nar([ms.mean_xc[nf], ms.mean_yc[nf],ms.mean_zc[nf]])
@@ -136,6 +137,17 @@ class boo():
             elif sphere_type == 'rinf':
                 rinf = self.get_r_inflection(core_id,frame)
                 rsph = ds.arr(rinf,'code_length')
+            elif sphere_type == 'rsmart':
+                rinf = self.get_r_inflection(core_id,frame)
+                msR = ms.rc+0
+                MaxRadius=msR[:,nf].max()
+                one_zone = 1./128
+                if density.max() > THRESH:
+                    rpick = min([one_zone,rinf])
+                else:
+                    rpick = min([MaxRadius,rinf])
+                rsph = ds.arr(rpick,'code_length')
+
 
             sph = ds.sphere(center,rsph)
             self.spheres[sphere_type][core_id][frame]=sph
