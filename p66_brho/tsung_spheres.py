@@ -27,6 +27,7 @@ class tsungspheres():
             ms = trackage.mini_scrubber(this_looper.tr,core_id)
             ms.get_central_at_once(core_id)  #ask?
 
+            alltime = thtr.times
             frame_mask = np.zeros_like(thtr.times, dtype='bool')
 
             tsung = tsing.tend_core[core_id]
@@ -99,5 +100,7 @@ class tsungspheres():
             Fptr['tsungtff']=self.tsungtff
             print('check h5files in p66_brho/h5files')
             Fptr.close()
+        
+        return alltime 
 
 
