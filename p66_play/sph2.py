@@ -10,7 +10,9 @@ import colors
 import dtools.davetools as dt
 
 
-sim_list=['u501']#,'u502','u503']
+sim_list=['u501','u502','u503']
+#sim_list=['u501','u502','u503']
+sim_list=['u503']
 import track_loader as TL
 TL.load_tracks(sim_list)
 import monster
@@ -34,17 +36,20 @@ class meanie():
             frame_slice=slice(-1,None,10)
             frame_slice = np.zeros_like(self.mon.frames,dtype='bool')
             frame_slice[0]=True;frame_slice[-1]=True
+        frame_slice[0]=False
 
         frame_list=self.mon.frames[frame_slice]
         self.frames_used=frame_list
         self.cores_used = core_list
         self.means['B']={}
         self.means['rho']={}
+        self.means['rhorho']={}
         self.vars['B']={}
         self.vars['rho']={}
         for frame in frame_list:
             self.means['B'][frame]=[]
             self.means['rho'][frame]=[]
+            self.means['rhorho'][frame]=[]
             self.vars['B'][frame]=[]
             self.vars['rho'][frame]=[]
             for core_id in core_list:
@@ -58,6 +63,7 @@ class meanie():
                 meanD=mtot/vtot
                 self.means['rho'][frame].append(meanD)
                 self.vars['rho'][frame].append( ((sph['density']-meanD)**2*sph['cell_volume'])/vtot)
+                self.means['rhorho'][frame].append( (sph['density']*sph['cell_mass']).sum()/mtot)
 
 
 
@@ -77,7 +83,7 @@ def ploot(brho,fname):
         t_tsung = [time/mon.get_tsung(core_id) for core_id in brho.cores_used]
         col = [colorbar(ttt) for ttt in t_tsung]
         this_b = brho.means['B'][frame]
-        this_d = brho.means['rho'][frame]
+        this_d = brho.means['rhorho'][frame]
         #ax.scatter(this_d,this_b,c=[rm(nf)]*len(this_d))
         ax.scatter(this_d,this_b,c=col)
         ext_b(this_b)
@@ -118,17 +124,22 @@ if 'brho_rinf' not in dir():
 if 'brho_r1' not in dir():
     brho_r1={}
     brho_rmax={}
-if 'brho_rsmart' not in dir():
-    brho_rsmart={}
+if 'brho_rsmart_1' not in dir():
+    brho_rsmart_1={}
+if 'brho_rsmart_2' not in dir():
+    brho_rsmart_2={}
 if 1:
-    for sim in sim_list[:1]:
-        if sim in brho_rinf:
+    for sim in sim_list:
+        if sim in brho_rmax:
             continue
         mon = monster.closet[sim]
         core_list =  mon.this_looper.core_by_mode['A']
         this = meanie(mon)
-        this.run(core_list,frames='short',sphere_type='rsmart')
-        brho_rsmart[sim]=this
+        #this.run(core_list,frames='short',sphere_type='rsmart_1')
+        #brho_rsmart_1[sim]=this
+        #this = meanie(mon)
+        #this.run(core_list,frames='short',sphere_type='rsmart_2')
+        #brho_rsmart_2[sim]=this
         this = meanie(mon)
         this.run(core_list,frames='short',sphere_type='rinf')
         brho_rinf[sim]=this
@@ -139,13 +150,16 @@ if 1:
         that.run(core_list, frames='short',sphere_type='rmax')
         brho_rmax[sim]=that
 
-ploot(brho_rsmart[sim],fname='b_rho_%s_rsmart'%sim)
-#ploot(brho_r1[sim],fname='b_rho_%s_r1'%sim)
-#ploot(brho_rmax[sim],fname='b_rho_%s_rmax'%sim)
-#ploot(brho_rinf[sim],fname='b_rho_%s_rinf'%sim)
+#ploot(brho_rsmart_1[sim],fname='b_rho_%s_rsmart_1'%sim)
+#ploot(brho_rsmart_2[sim],fname='b_rho_%s_rsmart_2'%sim)
+ploot(brho_r1[sim],fname='b_rho_%s_r1'%sim)
+ploot(brho_rmax[sim],fname='b_rho_%s_rmax'%sim)
+ploot(brho_rinf[sim],fname='b_rho_%s_rinf'%sim)
 for sim in sim_list:
     ploot2(brho_r1[sim], brho_rmax[sim],vert='max',horz='1')
     ploot2(brho_r1[sim], brho_rinf[sim],vert='inf',horz='1')
     ploot2(brho_rmax[sim], brho_rinf[sim],vert='inf',horz='max')
-    ploot2(brho_rinf[sim], brho_rsmart[sim],vert='smart',horz='inf')
+    #ploot2(brho_rinf[sim], brho_rsmart[sim],vert='smart',horz='inf')
+    #ploot2(brho_r1[sim], brho_rsmart[sim],vert='smart',horz='1')
+    #ploot2(brho_rsmart_1[sim], brho_rsmart_2[sim],vert='smart_2',horz='smart_1')
 
