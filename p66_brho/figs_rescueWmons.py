@@ -28,13 +28,17 @@ reload(tsung_spheres)
 import monster
 reload(monster)
 
-import projections
-reload(projections)
+from yt.data_objects.level_sets.api import *
+#import projections
+#reload(projections)
 # --- --- --- --- --- --- ---
 
 class withspheres(): 
     def __init__(self,the_loop):
         self.this_looper = the_loop
+
+        self.field_leaf = defaultdict(list)
+        self.rho_leaf = defaultdict(list)
 
         self.bmag_sph = defaultdict(list)
         self.rhoave_sph = defaultdict(list)
@@ -173,7 +177,77 @@ class withspheres():
             print('h5 file written. closing.')
 
 
-    def projswithspheres(self, sim, core_list=None,individual='no'): 
+    def withleaves(self, sim, core_list=None, individual='no', proj='off'): 
+        thtr = self.this_looper.tr
+        monster.load([sim])
+        the_monster = monster.closet[sim]
+
+        all_cores = np.unique(thtr.core_ids)
+        if core_list is None:
+            core_list = the_monster.this_looper.core_by_mode['A']
+
+        # EVERY TEN FRAMES
+        for nf,frame in enumerate(thtr.frames[4:]):  #or debug 
+            ds = the_monster.get_ds(frame) 
+
+            # CORE-LOOP
+            for nc,core_id in enumerate(core_list):
+                #if core_id == 109:
+                if 1: 
+                    the_sphere_rinf = the_monster.get_sphere(core_id,frame,'rinf')
+                    the_sphere_rone = the_monster.get_sphere(core_id,frame,'r1')
+                    the_sphere_rmax = the_monster.get_sphere(core_id,frame,'rmax')
+                    the_radius_one = 1/128
+                    the_center = the_sphere_rinf.center 
+
+                    if individual == 'yes_clump':
+                        if the_sphere_rmax.radius < the_radius_one:
+                            master_clump = Clump(the_sphere_rone, ("gas", "density"))
+                            c_min = the_sphere_rone["gas", "density"].min()
+                            c_max = the_sphere_rone["gas", "density"].max() 
+                            if proj =='on':
+                                p = yt.ProjectionPlot(ds, "z", ("gas", "density"), center=the_center, data_source=the_sphere_rone)  
+                                p.set_width(2*the_radius_one)
+                                p.annotate_sphere(the_center, radius=the_radius_one, circle_args={"color": "red"})
+                        else:
+                            the_center = the_sphere_rmax.center 
+                            master_clump = Clump(the_sphere_rmax, ("gas", "density"))
+                            c_min = the_sphere_rmax["gas", "density"].min()
+                            c_max = the_sphere_rmax["gas", "density"].max() 
+
+                            if proj =='on':
+                                p = yt.ProjectionPlot(ds, "z", ("gas", "density"), center=the_center, data_source=the_sphere_rmax)  
+                                p.set_width(2*the_sphere_rmax.radius)
+                                p.annotate_sphere(the_center, radius=the_sphere_rmax.radius, circle_args={"color": "orange"})
+
+                        # add a clump validator, which one??
+                        step=3
+                        find_clumps(master_clump, c_min, c_max, step)  #what is the optimal step size
+                        leaf_clumps = master_clump.leaves
+                            if proj =='on':
+                                p.annotate_clumps(leaf_clumps)
+                                p.save('./p66_brho/plotsexplore/clump_%d_%d_%s_%d'%(core_id,frame,sim,step))
+
+                        # probably best to save the master clump as a data set
+                        for leaf in range(len(leaf_clumps)): 
+                            self.field_leaf[nf].append((leaf_clumps[leaf]['density']* leaf_clumps[leaf]['magnetic_field_strength'] * \
+                                                        leaf_clumps[leaf]['cell_volume']).sum()/leaf_clumps[leaf]['cell_mass'].sum()) 
+                            self.rho_leaf[nf].append((leaf_clumps[leaf]['density'] *leaf_clumps[leaf]['cell_volume']).sum()/leaf_clumps[leaf]['cell_volume'].sum())
+
+
+        data_leaf_field = [*self.field_leaf.values()] 
+        data_leaf_rho = [*self.rho_leaf.values()]
+        print('before saving to h5 files')
+        if 0: 
+            hfivename = 'p66_brho/field_rho_leaves_alone_%s.h5'%(sim)
+            Fptr = h5py.File(hfivename,'w')
+            Fptr['field_leaf'] = data_leaf_field 
+            Fptr['rho_leaf'] = data_leaf_rho
+            Fptr.close()
+            print('h5 file written. closing.')
+
+
+    def projspheres(self, sim, core_list=None,individual='no'): 
         print('inside projections')
         thtr = self.this_looper.tr
         monster.load([sim])
@@ -185,17 +259,19 @@ class withspheres():
             #core_list = all_cores  #or debug
             #core_list = core_list#[3:4]
             core_list = the_monster.this_looper.core_by_mode['A']
+            #stop()
 
-
-        # TEST!!
-        proj_cores_annotate_zoom = projections.proj_cores_annotate_zoom
-        proj_cores_annotate_zoom(the_monster.this_looper, axis_list=[2], core_list=core_list, cb_label='density', annotate_particles=True, \
-                                 plot_dir="./p66_brho/plotsexplore", zoom_level=1)
-        stop()
+        # TEST & NEXT ideas!!
+        if 0:
+            proj_cores_annotate_zoom = projections.proj_cores_annotate_zoom
+            proj_cores_annotate_zoom(the_monster.this_looper, axis_list=[2], core_list=core_list, cb_label='density', annotate_particles=True, \
+                                     plot_dir="./p66_brho/plotsexplore", zoom_level=1)
+            stop()
+            # next hand in data source to be r_particles, then try annotating countours of the master clump
 
 
         # EVERY TEN FRAMES
-        for nf,frame in enumerate(thtr.frames[1:]):  #or debug 
+        for nf,frame in enumerate(thtr.frames[4:]):  #or debug 
             ds = the_monster.get_ds(frame) 
             if individual == 'no':
                 p = yt.ProjectionPlot(ds, 2, ("gas", "density"))
@@ -203,11 +279,12 @@ class withspheres():
             # CORE-LOOP
             for nc,core_id in enumerate(core_list):
 
-                #if core_id == 263:
+                #if core_id == 109:
                 if 1: 
                     the_sphere_rinf = the_monster.get_sphere(core_id,frame,'rinf')
                     the_sphere_rone = the_monster.get_sphere(core_id,frame,'r1')
                     the_sphere_reight = the_monster.get_sphere(core_id,frame,'r8')
+                    the_sphere_rmax = the_monster.get_sphere(core_id,frame,'rmax')
 
                     the_radius_rinf = the_monster.get_r_inflection(core_id,frame)
                     the_radius_eight = 8/128
@@ -215,7 +292,7 @@ class withspheres():
                     the_center = the_sphere_rinf.center 
 
                     if individual == 'no':
-                        #p.annotate_sphere(the_center, radius=the_radius_rinf, circle_args={"color": "red"})
+                        p.annotate_sphere(the_center, radius=the_radius_rinf, circle_args={"color": "red"})
                         p.annotate_sphere(the_center, radius=the_radius_one, circle_args={"color": "black"}, text='%d'%core_id)
                     if individual == 'yes':
                         p = yt.ProjectionPlot(ds, 2, ("gas", "density"), center=the_center, data_source=the_sphere_reight)
@@ -229,12 +306,15 @@ class withspheres():
                 print('saving proj')
                 p.save('./p66_brho/plotsexplore/%d_%s'%(frame,sim))
 
+
+
 # YOU ENTER HERE
 # TO GET DATA AND STORE
 # COMPARING SPHERES WITH PARTICLES
 # note: take a look at p19_play/psedo.py for a brief example with monster.py
 if 1:
-    sims=['u603']#, 'u602','u603']
+    sims=['u601']#, 'u602','u603']
+    #sims=['u501']#, 'u502', 'u503']
     TL.load_tracks(sims)
     for sim in sims:
         core_list=None
@@ -244,7 +324,7 @@ if 1:
         if 0:
             running.syntheticobs(sim)
         if 1:
-            running.projswithspheres(sim, individual='no')
+            running.withleaves(sim, individual='yes_clump')
 # SPHERES SYNCED TO TSUNG
 G = 1620/(4*np.pi)
 rho_mean = 1
@@ -276,11 +356,11 @@ if 0:
 # TO READ DATA FROM STORAGE
 if 0:   
     figtype = 'kappaperframe'  #kappaperframe, kappatff, rinfradii: histos, tsungtff 
-    individually = 'yes'  #if kappaperframe, yes: one panel per frame, no: frame time series
-    parts_or_spheres ='spheres' #parts, spheres, sphparts, sph_tsung, synthetic  
+    individually = 'no'  #if kappaperframe, yes: one panel per frame, no: frame time series
+    parts_or_spheres ='leaves' #parts, spheres, sphparts, sph_tsung, synthetic  
     kappadyn = 'yes' #no: do ratios, yes: do kappa dynamical; EDIT: outnames should reflect this too
-    whichradius = 'rinf' 
-    radius_compare = 'yes'
+    whichradius = None#'rinf' 
+    radius_compare = 'no'
     compareparam = 'density'
     
     series = '600'  #500 or 600
@@ -304,7 +384,6 @@ if 0:
             Fptr = h5py.File(hfivename,'r')
             tsung_tff = Fptr['tsungtff'][()] 
 
-
     # for tff plots
     if series == '600':
         sims=['u601']#, 'u602', 'u603']  #EDIT: need a loop!!
@@ -312,14 +391,17 @@ if 0:
             hfivename = 'p66_brho/h5files/brho_sph_r1rinf_%s.h5'%(sims[0])
             hfivename_synth = 'p66_brho/h5files/blosncol_sph_r1rinf_%s.h5'%(sims[0])
         else:
-            hfivename = 'p66_brho/h5files/brho_sphparts_%s.h5'%(sims[0])  
+            hfivename = 'p66_brho/h5files/field_rho_leaves_alone_%s.h5'%(sims[0])
+            #hfivename = 'p66_brho/h5files/brho_sphparts_%s.h5'%(sims[0])  
             hfivename_synth = 'p66_brho/h5files/blosncol_sph_%s.h5'%(sims[0])  
         Fptr = h5py.File(hfivename,'r')
         Fptr_synth = h5py.File(hfivename_synth,'r')
 
         if figtype == 'kappaperframe' or figtype == 'kappatff':
-            b_sph = Fptr['bfield_sph'][()] 
-            rho_sph = Fptr['rhoavg_sph'][()] 
+            b_sph = Fptr['field_leaf'][()] 
+            rho_sph = Fptr['rho_leaf'][()] 
+            #b_sph = Fptr['bfield_sph'][()] 
+            #rho_sph = Fptr['rhoavg_sph'][()] 
             if whichradius == 'rinf':
                 b_sph_rinf = Fptr['bfield_sph_rinf'][()]  #added 
                 rho_sph_rinf = Fptr['rhoavg_sph_rinf'][()]#added 
@@ -441,7 +523,7 @@ if 0:
                 ax.scatter(the_x, kappas_ratio, color='orange', label='ratio')  
                 outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0] #tsung or tff
             if kappadyn == 'yes':
-                #ax.scatter(the_x, kappas_sph, color='b', label='spheres_r1')  
+                ax.scatter(the_x, kappas_sph, color='g', label='leaves')  
                 if whichradius == 'rinf':
                     #ax.scatter(the_x, kappas_sph_rinf, color='orange', label='spheres_rinf')  
                     # for the tsung vertical line
@@ -459,7 +541,8 @@ if 0:
                         ax.scatter(the_x, kappas_sph_rinf_synth, color='r', label='synthetic_rinf', alpha=0.5)  
                 if parts_or_spheres == 'parts':
                     ax.plot(the_x, kappas_parts, color='r', label='particles')  
-                outname = 'p66_brho/plotsexplore/%s_rinf_kappadyn_scatter_%s'%(parts_or_spheres,sims[0]) 
+                #outname = 'p66_brho/plotsexplore/%s_rinf_kappadyn_scatter_%s'%(parts_or_spheres,sims[0]) 
+                outname = 'p66_brho/plotsexplore/%s_kappadyn_scatter_%s'%(parts_or_spheres,sims[0]) 
             ax.legend(loc='best')
             xlabels = [r'$t_{tsung,dummy}$', r'$t_{tff,dummy}$'] 
             ylabels = [r'$\kappa/\kappa_synth$', r'$\kappa$' ]  
