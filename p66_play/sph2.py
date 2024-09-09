@@ -12,7 +12,7 @@ import dtools.davetools as dt
 
 sim_list=['u501','u502','u503']
 #sim_list=['u501','u502','u503']
-sim_list=['u501','u503']
+sim_list=['u502']#,'u503']
 import track_loader as TL
 TL.load_tracks(sim_list)
 import monster
@@ -70,7 +70,10 @@ class meanie():
 def ploot(brho,fname):
     rm = dt.rainbow_map(len(brho.frames_used))
     norm = mpl.colors.Normalize(vmin=0,vmax=1)
-    cmap=copy.copy(mpl.cm.get_cmap("jet"))
+    #cmap=copy.copy(mpl.cm.get_cmap("jet"))
+    cmap=copy.copy(mpl.cm.get_cmap("seismic"))
+    norm = mpl.colors.Normalize(vmin=0,vmax=2)
+    #cmap.set_over([0.5,0.5,0.5,0.0])
     cmap.set_over([0.5,0.5,0.5])
     colorbar = mpl.cm.ScalarMappable(norm=norm,cmap=cmap).to_rgba
 
@@ -149,6 +152,8 @@ def ploot_bckgrnd(brho,fname):
 
 
     print('wtf2')
+    crap={}
+
     if 'ball' not in crap:
         crap['ball']=ad['magnetic_field_strength']
     if 'dall' not in crap:
@@ -183,6 +188,12 @@ def ploot_bckgrnd(brho,fname):
     pch.contour(h2d0,xbins,ybins,ax=ax,levels=[1e-3])
     h2dT, binsx, binsy = np.histogram2d(dall,ball,bins=[xbins,ybins])
     pch.contour(h2dT,xbins,ybins,ax=ax,levels=[1e-3])
+
+    x = nar([10,1000])
+    b = 100*(x/10)**0.5
+    ax.plot(x,b,c='orange')
+    b = 100*(x/10)**0.2
+    ax.plot(x,b,c='orange')
 
     #ad = mon.get_ds(target).all_data()
     #ball = ad['magnetic_field_strength']
@@ -230,6 +241,7 @@ if 1:
             continue
         mon = monster.closet[sim]
         core_list =  mon.this_looper.core_by_mode['A']
+        print( core_list)
         #this = meanie(mon)
         #this.run(core_list,frames='short',sphere_type='rsmart_1')
         #brho_rsmart_1[sim]=this
@@ -246,10 +258,12 @@ if 1:
         #that.run(core_list, frames='short',sphere_type='rmax')
         #brho_rmax[sim]=that
 
-if 1:
+if 0:
     for sim in sim_list:
         ploot_bckgrnd(brho_rsmart_2[sim],fname='brho_rs2_tracks_%s.png'%sim)
 
+if 1:
+    ploot(brho_rsmart_2[sim],fname='b_rho_%s_rs2'%sim)
 if 0:
     #ploot(brho_rsmart_1[sim],fname='b_rho_%s_rsmart_1'%sim)
     #ploot(brho_rsmart_2[sim],fname='b_rho_%s_rsmart_2'%sim)
