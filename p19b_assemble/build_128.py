@@ -9,10 +9,10 @@ reload(bs)
 fields = [('enzo','Density'), ('enzo','x-velocity'),('enzo','y-velocity'),('enzo','z-velocity'),('enzo','Bx'),('enzo','By'),('enzo','Bz')]
 
 if 'ds128' not in dir():
-    ds128  = yt.load('/anvil/scratch/x-ux454321/p78c_high_res/128/B2/DD0000/data0000')
+    ds128  = yt.load('/anvil/scratch/x-ux454321/p19b_high_res/test128/u203_beta20/DD0000/data0000')
     cg = ds128.covering_grid(0,[0.0]*3,[128]*3)
     stuff = [cg[field] for field in fields]
-    output_directory='/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Run128'
+    output_directory='/anvil/scratch/x-ux454321/p19b_high_res/test128/p19_203_repeat'
 
 
 
@@ -24,18 +24,18 @@ if 0:
     by = x+1
     bz = x+1
 
-if 0:
+if 1:
     #build the set
     swap=True
-    bs.write_enzo_set(stuff[0],output_directory,do_swap=swap,field='p19b_b02_density.128')
-    bs.write_enzo_set(stuff[1],output_directory,do_swap=swap,field='p19b_b02_vx.128')
-    bs.write_enzo_set(stuff[2],output_directory,do_swap=swap,field='p19b_b02_vy.128')
-    bs.write_enzo_set(stuff[3],output_directory,do_swap=swap,field='p19b_b02_vz.128')
-    bs.write_enzo_set(stuff[4],output_directory,do_swap=swap,field='p19b_b02_bx.128',extend=0 )
-    bs.write_enzo_set(stuff[5],output_directory,do_swap=swap,field='p19b_b02_by.128',extend=1 )
-    bs.write_enzo_set(stuff[6],output_directory,do_swap=swap,field='p19b_b02_bz.128',extend=2 )
+    bs.write_enzo_set(stuff[0],output_directory,do_swap=swap,field='p19b_b20_density.128')
+    bs.write_enzo_set(stuff[1],output_directory,do_swap=swap,field='p19b_b20_vx.128')
+    bs.write_enzo_set(stuff[2],output_directory,do_swap=swap,field='p19b_b20_vy.128')
+    bs.write_enzo_set(stuff[3],output_directory,do_swap=swap,field='p19b_b20_vz.128')
+    bs.write_enzo_set(stuff[4],output_directory,do_swap=swap,field='p19b_b20_bx.128',extend=0 )
+    bs.write_enzo_set(stuff[5],output_directory,do_swap=swap,field='p19b_b20_by.128',extend=1 )
+    bs.write_enzo_set(stuff[6],output_directory,do_swap=swap,field='p19b_b20_bz.128',extend=2 )
 
-if 1:
+if 0:
     #DO ONE STEP.
     #ADD TRACERS
     import p78_assemble.add_tracer_tool as AT
