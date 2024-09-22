@@ -31,7 +31,7 @@ class boo():
         self.tsing = tsing.te_tc(this_looper)
         self.tsing.run()
         self.ms = {}
-        self.spheres={'r8':{},'r1':{},'rmax':{},'rinf':{},'rsmart':{}}
+        self.spheres={'r8':{},'r1':{},'rmax':{},'rinf':{},'rsmart_1':{},'rsmart_2':{},'rgreed':{}}
         self.r_inflection={}
     def get_r_inflection(self,core_id,frame):
         import r_inflection
@@ -136,8 +136,15 @@ class boo():
                 rsph = ds.arr(Radius,'code_length')
             elif sphere_type == 'rinf':
                 rinf = self.get_r_inflection(core_id,frame)
+                fine_grid_zone = 1/256
+                rinf = max([rinf,fine_grid_zone])
                 rsph = ds.arr(rinf,'code_length')
-            elif sphere_type == 'rsmart':
+            elif sphere_type == 'rgreed':
+                rinf = self.get_r_inflection(core_id,frame)
+                msR = ms.rc+0
+                MaxRadius=msR[:,nf].max()
+                rsph = min([rinf,MaxRadius])
+            elif sphere_type == 'rsmart_1':
                 rinf = self.get_r_inflection(core_id,frame)
                 msR = ms.rc+0
                 MaxRadius=msR[:,nf].max()
@@ -146,6 +153,13 @@ class boo():
                     rpick = min([one_zone,rinf])
                 else:
                     rpick = min([MaxRadius,rinf])
+                rsph=ds.arr(rpick,'code_length')
+            elif sphere_type == 'rsmart_2':
+                rinf = self.get_r_inflection(core_id,frame)
+                msR = ms.rc+0
+                MaxRadius=msR[:,nf].max()
+                one_zone = 1./128
+                rpick = max([1/128, min(rinf,MaxRadius)])
                 rsph = ds.arr(rpick,'code_length')
 
 
