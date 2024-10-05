@@ -93,6 +93,20 @@ class boo():
         ind.sort()
         return ind
 
+    def get_rsmarttwo(self,core_id,frame):
+        nf = self.get_frame_index(frame)
+        ms = self.get_ms(core_id)
+        ds = self.get_ds(frame)
+
+        rinf = self.get_r_inflection(core_id,frame)
+        msR = ms.rc+0
+        MaxRadius=msR[:,nf].max()
+        one_zone = 1./128
+        rpick = max([1/128, min(rinf,MaxRadius)])
+        rsph = ds.arr(rpick,'code_length')
+
+        return rsph
+
     def scrub_sphere(self,core_id,frame,sphere_type):
         sph= self.get_sphere(core_id,frame,sphere_type)
         ms = self.get_ms(core_id)
@@ -104,7 +118,6 @@ class boo():
         scrub.compute_ke_rel()
         scrub.compute_ge()
         return scrub
-
     def get_sphere(self,core_id,frame,sphere_type):
         if core_id not in self.spheres[sphere_type]:
             self.spheres[sphere_type][core_id]={}
