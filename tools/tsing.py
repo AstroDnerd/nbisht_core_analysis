@@ -53,6 +53,7 @@ class te_tc:
         times=times/colors.tff
         self.core_list=core_list
         for core_id in core_list:
+            print("tsing_run, core:",core_id)
 
                 
             #ms = trackage.mini_scrubber(thtr,core_id, do_velocity=True)
@@ -66,6 +67,9 @@ class te_tc:
             rho = thtr.c([core_id], 'density').transpose()[mask,:]+0
             rho_sorted=rho+0
             rho_sorted.sort(axis=1)
+            if (rho_sorted.shape[-1]<5):
+                print("Possibly incorrect tsing! Excluded from tsing and tend_core ",core_id)
+                continue
             rho_max = rho_sorted[:,-5]
             #rho = rho[mask,:]
             #rho_max=rho.max(axis=1)
@@ -80,7 +84,11 @@ class te_tc:
             tc = tc[1:-1]
             dudt=dU/dt
             thresh = 1e5
-            singularity = np.where( dudt >thresh)[0][0]
+            if max(dudt)>thresh:
+                singularity = np.where( dudt >thresh)[0][0]
+            else:
+                print("Possibly incorrect tsing! Excluded from tsing and tend_core ",core_id)
+                continue
             if (dudt[singularity:]<=0).any():
                 collapse_done = np.where( dudt[singularity:] < 0)[0][0]
                 collapse_done += singularity

@@ -3,6 +3,7 @@
 # ALl the other things that aren't standard python packages.
 #
 
+
 import os
 import sys
 if not os.path.exists('dtools/starter1.py'):
@@ -15,7 +16,7 @@ from dtools.starter1 import *
 #so we can import things from sub directories
 path_list= ["./tools_data", "./tools_pdf", "./testing",\
             "./tools", "./tools_tracks", "./trash","./new_targets", "./p56_plots",
-            "./other_particles", "./browser"]
+            "./other_particles", "./browser", "./sink_analysis"]
 for directory in path_list:
     if directory not in sys.path:
         sys.path += [directory]
@@ -43,4 +44,4 @@ import track_loader
 
 from collections import defaultdict
 import colors
-plot_dir = "%s/PigPen"%os.environ['HOME']
+plot_dir = "%s/cdbreak_desktop/nikhilb_home/results"%os.environ['HOME']

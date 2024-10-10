@@ -27,30 +27,30 @@ def check_particles(ds):
                 bad_index+= list(particles)
     return bad_index
 #g=check_particles(this_looper.ds_list[120])
-def get_leaf_clumps(ds,c_min=None,c_max=None,step=None, small_test=False):
+def get_leaf_clumps(ds,c_min=None,c_max=None,step=None, small_test=False, density_placeholder = 'density'):
     """get all the leaf indices for peaks in *ds*.
     """
     if small_test:
         #center = ds.arr([0.07104492, 0.05688477, 0.1862793 ],'code_length')
-        peak,center=ds.find_max('density')
+        peak,center=ds.find_max(density_placeholder)
         ad = ds.sphere(center,0.1)
     else:
         ad = ds.all_data()
     #ad  = ds.sphere([0.52075195, 0.74682617, 0.01196289], 0.1)
-    master_clump = Clump(ad,('gas','density'))
+    master_clump = Clump(ad,('gas',density_placeholder))
     master_clump.add_validator("min_cells", 8)
     if c_min is None:
         c_min = 10 #ad["gas", "density"].min()
     #c_max = 534069645. # ad["gas", "density"].max()
     if c_max is None:
-        c_max = ad["gas", "density"].max()
+        c_max = ad["gas", density_placeholder].max()
     if step is None:
         step = 100
     find_clumps(master_clump, c_min, c_max, step)
     return master_clump
 
 from yt.data_objects.level_sets.clump_tools import return_bottom_clumps
-def get_peak_indices(master_clump,ds,h5_name="file.h5"):
+def get_peak_indices(master_clump,ds,h5_name="file.h5", density_placeholder = 'density'):
 
     leaf_clumps = return_bottom_clumps(master_clump)
 
@@ -60,8 +60,8 @@ def get_peak_indices(master_clump,ds,h5_name="file.h5"):
     y_max=[]
     z_max=[]
     for i in range(len(leaf_clumps)):
-        den_max.append(leaf_clumps[i][('gas','density')].max())
-        max_loc = np.where(leaf_clumps[i]['gas','density']==den_max[i])
+        den_max.append(leaf_clumps[i][('gas',density_placeholder)].max())
+        max_loc = np.where(leaf_clumps[i]['gas',density_placeholder]==den_max[i])
         a = leaf_clumps[i][YT_x][max_loc][0]
         b = leaf_clumps[i][YT_y][max_loc][0]
         c = leaf_clumps[i][YT_z][max_loc][0]

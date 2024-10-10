@@ -8,7 +8,7 @@ import hair_dryer
 reload(hair_dryer)
 
 
-def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plot='centroids', shifter={}):
+def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plot='centroids', shifter={}, sink_dict = None):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -46,9 +46,24 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
         ax=axlist[LOS]
         #ax.set_aspect('equal')
 
-        
         ycoord=[]
         for ncore,core_id in enumerate(core_list):
+            sink_pos = []
+            if str(core_id) in sink_dict.keys(): 
+                if sink_dict[str(core_id)] !=-1:
+                    times_sink = []
+                    every_frame = this_looper.frame_list
+                    starting_frame = int(every_frame[-1])+1-len(sink_dict[str(core_id)]['sink_xpos'])
+                    xpos_sink = []
+                    ypos_sink = []
+                    zpos_sink = []
+                    for frame_num_index in range(len(every_frame)):
+                        if every_frame[frame_num_index]>=starting_frame:
+                            times_sink.append(times[frame_num_index])
+                            xpos_sink.append(sink_dict[str(core_id)]['sink_xpos'][every_frame[frame_num_index]-starting_frame])
+                            ypos_sink.append(sink_dict[str(core_id)]['sink_ypos'][every_frame[frame_num_index]-starting_frame])
+                            zpos_sink.append(sink_dict[str(core_id)]['sink_zpos'][every_frame[frame_num_index]-starting_frame])
+                    sink_pos = [xpos_sink,ypos_sink,zpos_sink]
             ms=mini_scrubbers[core_id]
             
 
@@ -82,6 +97,8 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
                 ax.plot( pmean[x], pmean[y], c=color_base)
             elif what_to_plot == 'xyzt':
                 ax.plot( times, p[LOS], c=color_alpha, linewidth=0.1)
+                if sink_pos!=[]:
+                    ax.plot( times_sink, sink_pos[LOS], c='black', linewidth=0.5)
                 ycoord.append(p[LOS].mean(axis=1)[-1])
 
                 dont_axbonk=True

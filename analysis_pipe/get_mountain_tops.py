@@ -13,7 +13,7 @@ reload(coreset_data)
 # 3.) Separate peaks by contouring
 # 4.) Re-run mountain top removal.
 
-def get_mountain_tops(trackname):
+def get_mountain_tops(trackname, density_placeholder = 'density'):
     this_track = track_info.tracks[trackname]
     mountain_top_name = this_track.mountain_top
 
@@ -33,9 +33,10 @@ def get_mountain_tops(trackname):
     kludge={}
     #kludge={}
     MT=mountain_top.cut_mountain_top( trackname, target_fname = mountain_top_name, 
-                                     do_projections=False, verify=verifier,
+                                     do_projections=False, verify=None,
                                      leaf_storage=leaf_storage_tmp, kludge=kludge, 
-                                     radius_dict=this_radius_dict)
+                                     radius_dict=this_radius_dict,
+                                     density_placeholder = density_placeholder)
     leaf_storage_all = leaf_storage_tmp
 
 
@@ -53,7 +54,7 @@ def get_mountain_tops(trackname):
     if 'all_peaks_tmp' not in dir():
         all_peaks_tmp=defaultdict(dict)     #this is just to reduce redundant work when debugging.
     mountain_top.split_all(trackname, overlap_all, new_thresholds, all_peaks_tmp, 
-                           do_projections=False, radius_dict=this_radius_dict)
+                           do_projections=False, radius_dict=this_radius_dict, density_placeholder = density_placeholder)
 
 #
 # 4.) Make all the leaves again, with new thresholds.  Makes PEAK images of all peaks, even rejects.
@@ -61,8 +62,9 @@ def get_mountain_tops(trackname):
     leaf_storage_2={}
     kludge={}
     MT=mountain_top.cut_mountain_top( trackname, target_fname = mountain_top_name, 
-                                     do_projections=True, verify=verifier,
+                                     do_projections=False, verify=None,
                                      kludge=kludge, leaf_storage=leaf_storage_2, 
                                      cut_override = new_thresholds, 
-                                     radius_dict=this_radius_dict)
+                                     radius_dict=this_radius_dict,
+                                     density_placeholder = density_placeholder)
     overlap_2=mountain_top.check_overlap(leaf_storage_2)

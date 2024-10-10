@@ -8,7 +8,7 @@ reload(hair_dryer)
 import track_loader as TL
 import movie_frames 
 
-def simple_rho(this_looper,core_list=None):
+def simple_rho(this_looper,core_list=None, tsing_dict = None, tend_dict = None):
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -43,15 +43,25 @@ def simple_rho(this_looper,core_list=None):
         ax.plot(times , rho, c=c, linewidth=0.1)
         axbonk(ax,xlabel=r'$t/t_{ff}$', ylabel=r'$\rho$',yscale='log', ylim=[rho_min,rho_max])
 
+        #add tsing and tend lines
+        if tsing_dict != None:
+            if core_id in list(tsing_dict.keys()):
+                ax.axvline(x=tsing_dict[core_id], c = 'green')
+        
+        if tend_dict != None:
+            if core_id in list(tend_dict.keys()):
+                ax.axvline(x=tend_dict[core_id], c = 'red')
+            
+
         outname='plots_to_sort/%s_rho_t_c%04d.png'%(this_looper.sim_name,core_id)
         fig.savefig(outname)
         print(outname)
 
 
-def run(trackname):
+def run(trackname, core_list=None, tsing_dict = None, tend_dict = None):
     TL.load_tracks([trackname])
     this_looper=TL.tracks[trackname]
-    simple_rho(this_looper)
+    simple_rho(this_looper, core_list=core_list, tsing_dict = tsing_dict, tend_dict = tend_dict)
 
 if 0:
 #sims=['u501', 'u502','u503']

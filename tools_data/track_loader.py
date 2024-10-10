@@ -21,6 +21,8 @@ import track_files.tracks_m000
 reload(track_files.tracks_m000)
 import track_files.tracks_u900
 reload(track_files.tracks_u900)
+import track_files.tracks_nb100
+reload(track_files.tracks_nb100)
 
 if 'tracks' not in dir():
     tracks={}

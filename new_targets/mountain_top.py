@@ -1,14 +1,17 @@
 from starter2 import *
-import annotate_particles_4
+#import annotate_particles_4
 from scipy.spatial import ConvexHull
 from yt.data_objects.level_sets.api import *
 from collections import defaultdict
 import convex_hull_tools as CHT
 
+def density_with_sinks(field, data):
+    return data["gas", "density"] + (data["deposit", "all_density"])
+
 
 class meta_locations():
     """Container object for data locations."""
-    def __init__(self,trackname,directory = None, frame = None, peak_fname=None, density_cut_fname=None):
+    def __init__(self,trackname,directory = None, frame = None, peak_fname=None, density_cut_fname=None, density_placeholder = 'density'):
         track = track_info.tracks[trackname]
         if directory is None:
             directory = track.sim_directory
@@ -29,6 +32,8 @@ class meta_locations():
         ds_name="%s/DD%04d/data%04d"%(directory,frame,frame)
         print("OPENING %s and %s"%(ds_name, peak_fname))
         self.ds = yt.load(ds_name)
+        if density_placeholder == 'total_density':
+            self.ds.add_field(("gas",density_placeholder),units="g/cm**3",function=density_with_sinks,sampling_type="cell")
         fptr = h5py.File(peak_fname,'r')
         try:
             self.peaks = fptr['peaks'][()]
@@ -40,16 +45,16 @@ class meta_locations():
 
 class top():
     """main mountain top object.  Data container, contains peak density and clumps."""
-    def __init__(self, ds, location, top_to_bottom=3./4, rhomin=None, radius=1e-2, peak_id=-1):
+    def __init__(self, ds, location, top_to_bottom=3./4, rhomin=None, radius=1e-2, peak_id=-1, density_placeholder = 'density'):
         self.peak_id = peak_id
         self.radius = ds.arr(radius,'code_length')
         self.location =     ds.arr(location,'code_length')
         self.region = ds.sphere(self.location,self.radius)
-        self.rhomax = get_density(self.location, self.region)
+        self.rhomax = get_density(self.location, self.region, density_placeholder = density_placeholder)
         self.rhomin = rhomin
         if self.rhomin is None:
              self.rhomin = self.rhomax**(top_to_bottom)
-        self.clump = Clump(self.region,('gas','density'))
+        self.clump = Clump(self.region,('gas',density_placeholder))
         self.clump.find_children( self.rhomin, self.rhomax)
         for leaf1 in self.clump.leaves:
             min_radius=leaf1['radius'].min()
@@ -81,9 +86,9 @@ def check_overlap(leaf_storage):
 
 def is_point_in_hull(points2, test_main, tolerance=1./4096):
     """check of a point is in a convex hull of test_main"""
-    X = test_main['x'].to('code_length')
-    Y = test_main['y'].to('code_length')
-    Z = test_main['z'].to('code_length')
+    X = test_main[YT_x].to('code_length')
+    Y = test_main[YT_y].to('code_length')
+    Z = test_main[YT_z].to('code_length')
     points1 = np.column_stack([X,Y,Z])
 
     try:
@@ -97,9 +102,10 @@ def is_point_in_hull(points2, test_main, tolerance=1./4096):
 def leaf_with_center(leaf_list):
     """This has a hard coded minimum point size.  For finding child leaves, maybe not the best method."""
     for leaf in leaf_list:
-        if leaf['radius'].min()<1/4096:
+        print(leaf['radius'].min())
+        if leaf['radius'].min()<32/4096:
             return leaf
-def get_density(peak, test_main):
+def get_density(peak, test_main, density_placeholder = 'density'):
     """Find the density at a location within a yt region"""
     X = test_main[YT_x].to('code_length')
     Y = test_main[YT_y].to('code_length')
@@ -109,7 +115,7 @@ def get_density(peak, test_main):
     #if mask.sum() != 1:
     #    pdb.set_trace()
     index = np.argmin( (X-peak[0])**2+(Y-peak[1])**2+(Z-peak[2])**2)
-    return test_main['density'][index].v
+    return test_main[density_placeholder][index].v
 
 def read_peaks(this_simname):
     """read the peak hdf5 file"""
@@ -156,10 +162,10 @@ class target_info():
 
 
 def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directory = None, frame = None, peak_fname=None, work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
-                    verify=None, leaf_storage=None,radius=1e-2, cut_override={}, radius_dict={}):
+                    verify=None, leaf_storage=None,radius=1e-2, cut_override={}, radius_dict={}, density_placeholder = 'density'):
 
     """Loop over peaks.  Make mountain tops."""
-    meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname)
+    meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname, density_placeholder = density_placeholder)
     meta.density_cuts.update(cut_override)
 
     ds = meta.ds
@@ -171,10 +177,11 @@ def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directo
 
 
         radius = ds.arr(radius_dict.get(peak_id,1e-2),'code_length')
-        top1 = top(ds,meta.peaks[peak_id], radius=radius,top_to_bottom=top_to_bottom, rhomin=meta.density_cuts.get(peak_id,None), peak_id=peak_id)
+        top1 = top(ds,meta.peaks[peak_id], radius=radius,top_to_bottom=top_to_bottom, rhomin=meta.density_cuts.get(peak_id,None), peak_id=peak_id, density_placeholder = density_placeholder)
+        print("PARTICLE INDEX SORTING:", len(np.array(top1.leaf['particle_index'])[np.where(top1.leaf['particle_type']==3)[0]]), len(top1.leaf['particle_index']))
         this_target_info = target_info( peak_id = peak_id, peak_density=top1.rhomax, min_density=top1.rhomin,
                                        peak_location = center_o, nzones=top1.leaf['radius'].size,
-                                       particle_index = np.sort(top1.leaf['particle_index']))
+                                       particle_index = np.sort(np.array(top1.leaf['particle_index'])[np.where(top1.leaf['particle_type']==3)[0]]))#np.sort(top1.leaf['particle_index']))
         FAIL = ""
         write_dataset=True
         if verify is not None and not verify(top1):
@@ -196,9 +203,9 @@ def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directo
                 h5ptr.close()
                 raise
         if do_projections:
-            proj = ds.proj('density',0,center=top1.location,data_source=top1.region)
+            proj = ds.proj(density_placeholder,0,center=top1.location,data_source=top1.region)
             pw = proj.to_pw()
-            pw.set_cmap('density','Greys')
+            pw.set_cmap(density_placeholder,'Greys')
 
             #pw.annotate_clumps([master_clump]+master_clump.leaves)
             if top1.leaf['particle_index'].size > 10:
@@ -218,8 +225,8 @@ def cut_mountain_top(this_simname, target_fname, density_cut_fname=None, directo
 
 def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, peak_fname=None, density_cut_fname=None,
                 work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
-                recheck=False,   verify=None, leaf_storage=None, radius_dict={}, auto_double=True,contour_step=1.5):
-    meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname)
+                recheck=False,   verify=None, leaf_storage=None, radius_dict={}, auto_double=True,contour_step=1.5, density_placeholder = 'density'):
+    meta = meta_locations(this_simname,directory=directory,frame=frame,peak_fname=peak_fname,density_cut_fname=density_cut_fname, density_placeholder = density_placeholder)
     ds = meta.ds
     radius1 = ds.arr(radius_dict.get(peak_1,1e-2),'code_length')
     radius2 = ds.arr(radius_dict.get(peak_2,1e-2),'code_length')
@@ -227,16 +234,16 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
     output={}
 
     #NOTE need to pass in alternate contours.
-    top1 = top(ds,meta.peaks[peak_1],radius=radius1,top_to_bottom=top_to_bottom,peak_id=peak_1)
-    top2 = top(ds,meta.peaks[peak_2],radius=radius2,top_to_bottom=top_to_bottom,peak_id=peak_2)
+    top1 = top(ds,meta.peaks[peak_1],radius=radius1,top_to_bottom=top_to_bottom,peak_id=peak_1, density_placeholder = density_placeholder)
+    top2 = top(ds,meta.peaks[peak_2],radius=radius2,top_to_bottom=top_to_bottom,peak_id=peak_2, density_placeholder = density_placeholder)
 
     #low density pairs need to be bigger
     if top1.rhomax < 3000 and top2.rhomax < 3000 and auto_double:
         print("BOTH LOW DENSITY USING BIGGER SPHERE")
         radius1 = ds.arr(radius_dict.get(peak_1,2e-2),'code_length')
         radius2 = ds.arr(radius_dict.get(peak_2,2e-2),'code_length')
-        top1 = top(ds,meta.peaks[peak_1],radius=radius1,top_to_bottom=top_to_bottom,peak_id=peak_1)
-        top2 = top(ds,meta.peaks[peak_2],radius=radius2,top_to_bottom=top_to_bottom,peak_id=peak_2)
+        top1 = top(ds,meta.peaks[peak_1],radius=radius1,top_to_bottom=top_to_bottom,peak_id=peak_1, density_placeholder = density_placeholder)
+        top2 = top(ds,meta.peaks[peak_2],radius=radius2,top_to_bottom=top_to_bottom,peak_id=peak_2, density_placeholder = density_placeholder)
     
 
 
@@ -272,7 +279,7 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
 
     else:
         min_density = top_to_contour.rhomin
-        temp_clump = Clump(top_to_contour.region, ('gas','density'), clump_info="")
+        temp_clump = Clump(top_to_contour.region, ('gas',density_placeholder), clump_info="")
         temp_clump.add_validator("min_cells", 8)
         find_clumps(temp_clump, top_to_contour.rhomin, top_to_contour.rhomax, contour_step)
 
@@ -322,8 +329,8 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
         leaf_storage['stuff']={'top1':top1,'top2':top2}
 
     if recheck:
-        top3 = top(ds,meta.peaks[peak_1], radius1, rhomin=output[peak_1],peak_id=peak_1)
-        top4 = top(ds,meta.peaks[peak_2], radius2, rhomin=output[peak_2],peak_id=peak_2)
+        top3 = top(ds,meta.peaks[peak_1], radius1, rhomin=output[peak_1],peak_id=peak_1, density_placeholder = density_placeholder)
+        top4 = top(ds,meta.peaks[peak_2], radius2, rhomin=output[peak_2],peak_id=peak_2, density_placeholder = density_placeholder)
         leaf_storage['new']={}
         leaf_storage['new'][peak_1]=ds,top3.leaf
         leaf_storage['new'][peak_2]=ds,top4.leaf
@@ -334,9 +341,9 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
         print("ZZZ Core 1:  rhomax %0.2e rhomin %0.2enew %0.2e"%( top1.rhomax, top1.rhomin,output[peak_1]))
         print("ZZZ Core 2:  rhomax %0.2e rhomin %0.2enew %0.2e"%( top2.rhomax, top2.rhomin,output[peak_2]))
     if do_projections:
-        proj = ds.proj('density',0,center=top1.location,data_source=top1.region)
+        proj = ds.proj(density_placeholder,0,center=top1.location,data_source=top1.region)
         pw = proj.to_pw()
-        pw.set_cmap('density','Greys')
+        pw.set_cmap(density_placeholder,'Greys')
         pw.set_axes_unit('code_length')
         pw.zoom(0.5/radius1.v)
 
@@ -383,7 +390,7 @@ def split_peaks(this_simname, peak_1, peak_2,directory = None, frame = None, pea
     return output
 
 def split_all(this_simname, overlap_all, new_thresholds, all_peaks, skip_list=[], peak_list=None, do_projections=False, radius_dict={},
-              auto_double=True,contour_step=1.5):
+              auto_double=True,contour_step=1.5, density_placeholder = 'density'):
     if peak_list is None:
         peak_list = sorted( list(overlap_all.keys()))
     for peak_id in peak_list:
@@ -401,7 +408,7 @@ def split_all(this_simname, overlap_all, new_thresholds, all_peaks, skip_list=[]
             more_leaf_storage={}
             split_density=split_peaks(this_simname, peak_id,other_peak ,do_projections=do_projections,
                                       leaf_storage=more_leaf_storage,radius_dict=radius_dict, auto_double=auto_double, 
-                                      contour_step=contour_step)
+                                      contour_step=contour_step, density_placeholder = density_placeholder)
             all_peaks[peak_id][other_peak]=split_density[peak_id]
             for ppp in split_density:
                 this_density = split_density[ppp]
@@ -411,7 +418,7 @@ def split_all(this_simname, overlap_all, new_thresholds, all_peaks, skip_list=[]
 # old tools, keep around until we're sure we're done.
 #
 def plot_leaves(this_simname, target_fname, density_cut_fname=None, directory = None, frame = None, peak_fname=None, work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
-                    verify=None, leaf_storage=None):
+                    verify=None, leaf_storage=None, density_placeholder = 'density'):
     if directory is None:
         directory = dl.sims[this_simname]
     if frame is None:
@@ -431,9 +438,11 @@ def plot_leaves(this_simname, target_fname, density_cut_fname=None, directory = 
     ds_name="%s/DD%04d/data%04d"%(directory,frame,frame)
     print("OPENING %s and %s"%(ds_name, peak_fname))
     ds = yt.load(ds_name)
+    if density_placeholder == 'total_density':
+        ds.add_field(("gas",density_placeholder),units="g/cm**3",function=density_with_sinks,sampling_type="cell")
 
 def get_peak_densities(this_simname, target_fname, density_cut_fname=None, directory = None, frame = None, peak_fname=None, work_radius=1e-2, do_projections=False, top_to_bottom=3./4, kludge={},
-                    verify=None, leaf_storage=None):
+                    verify=None, leaf_storage=None, density_placeholder = 'density'):
     if directory is None:
         directory = dl.sims[this_simname]
     if frame is None:
@@ -453,6 +462,8 @@ def get_peak_densities(this_simname, target_fname, density_cut_fname=None, direc
     ds_name="%s/DD%04d/data%04d"%(directory,frame,frame)
     print("OPENING %s and %s"%(ds_name, peak_fname))
     ds = yt.load(ds_name)
+    if density_placeholder == 'total_density':
+        ds.add_field(("gas",density_placeholder),units="g/cm**3",function=density_with_sinks,sampling_type="cell")
     fptr = h5py.File(peak_fname,'r')
     try:
         peaks = fptr['peaks'][()]
@@ -470,7 +481,7 @@ def get_peak_densities(this_simname, target_fname, density_cut_fname=None, direc
 
         center = ds.arr(center_o, 'code_length')
         test_main = ds.sphere(center, radius)
-        peak_density = get_density(center,test_main)
+        peak_density = get_density(center,test_main, density_placeholder = density_placeholder)
         peak_densities.append(peak_density)
         print(" peak %d %0.2e"%(peak_id,peak_density))
     return peak_densities
@@ -532,13 +543,13 @@ class target_tree():
 
         h5ptr.close()
         self.core_list = np.sort( np.unique( list(self.target_indices.keys())))
-    def make_leaves_check(self):
+    def make_leaves_check(self, density_placeholder = 'density'):
         if self.leaves is None:
             self.leaves={}
         for core_id in self.targets:
             T = self.targets[core_id]
             sph = self.ds.sphere( T.peak_location, 1e-2)
-            clump = Clump(sph,('gas','density'))
+            clump = Clump(sph,('gas',density_placeholder))
             clump.find_children( T.min_density, T.peak_density)
             for leaf1 in clump.children:
                 min_radius=leaf1['radius'].min()

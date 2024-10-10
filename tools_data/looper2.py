@@ -8,7 +8,10 @@ import tracks_read_write
 reload(tracks_read_write)
 verbose=True
 
-def load_looper(fname, directory=None, mode_fname=None):
+def density_with_sinks(field, data):
+    return data["gas", "density"] + (data["deposit", "all_density"])
+
+def load_looper(fname, directory=None, mode_fname=None, density_placeholder='density'):
     import looper
     h5ptr=h5py.File(fname,'r')
     looper_version=1
@@ -23,7 +26,7 @@ def load_looper(fname, directory=None, mode_fname=None):
     if directory is None:
         #It's actually not great to store this if you move machines.
         directory = h5ptr['directory'].asstr()[()]
-    new_looper=looper_main(directory=directory, savefile_only_trackage=fname)
+    new_looper=looper_main(directory=directory, savefile_only_trackage=fname, density_placeholder = density_placeholder)
     new_looper.core_ids = np.sort(np.unique(new_looper.tr.core_ids))
 
     new_looper.mode_fname = mode_fname
@@ -93,7 +96,8 @@ class core_looper2():
                  fields_from_grid = None, 
                  individual_particle_tracks=False,
                  derived=None, do_shift=True, 
-                 bad_particles=None):
+                 bad_particles=None,
+                 density_placeholder = 'density'):
         #set defaults and/or arguments.
         self.looper_version = 2
         self.current_frame = None
@@ -111,7 +115,12 @@ class core_looper2():
         self.plot_directory = plot_directory
         if fields_from_grid is None:
             fields_from_grid = []
-        self.fields_from_grid = [YT_density, YT_cell_volume] + fields_from_grid
+        if density_placeholder == 'total_density':
+            self.fields_from_grid = [YT_total_density, YT_cell_volume] + fields_from_grid
+        else:
+            self.fields_from_grid = [YT_density, YT_cell_volume] + fields_from_grid
+        
+        self.density_placeholder = density_placeholder
 
         #the track manager.
         self.tr = None
@@ -138,6 +147,8 @@ class core_looper2():
 
         if savefile_only_trackage is not None:
             tracks_read_write.load_trackage_only(self,savefile_only_trackage )
+        
+        self.sink_core_dic = {}
 
         #read from save file.
         #if savefile is not None:
@@ -148,6 +159,23 @@ class core_looper2():
         #        line = line.strip() #clean off white space
         #        #treat each line as a command to run on 'self'
         #        exec("self.%s"%sline)
+
+    def fix_frame_list(self):
+        #Sometimes runs will have consecutive datasets with same time coz of restart
+        frame_to_remove = []
+        last_time = -1
+        for frames in self.frame_list:
+            with open(str(self.data_template)%(self.directory,frames,frames)) as datafile:
+                for line in datafile:
+                    if 'InitialTime' in line:
+                        current_time = float(line.split()[-1])
+                        if  current_time== last_time:
+                            frame_to_remove.append(frames)
+                        last_time = current_time
+                        break
+        print("Removing Frames!: ",frame_to_remove)
+        self.frame_list = np.array(self.frame_list)[~np.isin(self.frame_list, frame_to_remove)]
+        print("New Frame List: ",self.frame_list)
 
     def read_mode(self):
         import read_mode
@@ -186,6 +214,7 @@ class core_looper2():
                 new_ds = False
         if new_ds:
             self.ds = yt.load(self.filename)
+            self.ds.add_field(("gas",self.density_placeholder),units="g/cm**3",function=density_with_sinks,sampling_type="cell")
             if derived is None:
                 derived = self.derived
             for add_derived_field in derived:
@@ -236,7 +265,7 @@ class core_looper2():
         if frame in self.snaps:
             this_snap = self.snaps[frame]
         else:
-            this_snap = snapshot(self,frame,dummy_ds=dummy_ds)
+            this_snap = snapshot(self,frame,dummy_ds=dummy_ds, density_placeholder = self.density_placeholder)
             self.snaps[frame] = this_snap # not a weak ref, needs to persist.weakref.proxy(this_snap)
         return this_snap
 
@@ -251,7 +280,7 @@ class core_looper2():
             self.targets[core_id] = mountain_top.target_info(h5ptr=h5ptr[group_name])
         
     #reload(mountain_top)
-    def read_targets(self,target_fname):
+    def read_targets(self,target_fname, bad_particle_fname_read):
         import mountain_top
         all_particles=np.array([])
         core_ids_by_particle=np.array([])
@@ -270,8 +299,14 @@ class core_looper2():
 
             #check for uniqueness
             if np.unique(self.target_indices).size - self.target_indices.size:
-                print("FATAL ERROR: repeated particle, ", core_id)
-                pdb.set_trace()
+                arr, count_arr = np.unique(self.target_indices, return_counts=True)
+                dup = arr[count_arr>1]
+                bad_particles=bad_particle_fname_read
+                bad_p = h5py.File(bad_particles, 'a')
+                bad_p[str(core_id)] = dup
+                bad_p.close()
+                print("FATAL ERROR: %d repeated particles in core %d"%(len(dup),core_id))
+                #pdb.set_trace()
 
         h5ptr.close()
         self.core_list = np.sort( np.unique( self.core_ids) )
@@ -411,7 +446,7 @@ class core_looper2():
 class snapshot():
     """For one core and one time, collect the particle positions and whatnot.
     """
-    def __init__(self,loop,frame,dummy_ds=False):
+    def __init__(self,loop,frame,dummy_ds=False, density_placeholder = 'density'):
         self.loop           = weakref.proxy(loop) #cyclic references are bad, weakref helps.
         self.target_indices = weakref.proxy(loop.target_indices)
         self.core_ids = weakref.proxy(loop.core_ids)
@@ -438,6 +473,8 @@ class snapshot():
         self.V_radial    =None #(radial coordinate of velocity)
         
         self.dummy_ds = dummy_ds
+
+        self.density_placeholder = density_placeholder
 
     def get_ds(self,frame=None):
         if frame is None:
@@ -497,7 +534,7 @@ class snapshot():
         self.vel = self.loop.all_particle_velocity[mask][args]
 
 
-    def compute_relative_coords(self):
+    def compute_relative_coords(self, density_placeholder = 'density'):
         """Compute and store 
         R_centroid (centroid weighted by grid quantities)
         R_vec      (particle position relative to centroid)
@@ -515,7 +552,7 @@ class snapshot():
         if len(self.field_values.keys())==0:
             self.get_particle_values_from_grid()
 
-        m = self.field_values['density'].sum()
+        m = self.field_values[density_placeholder].sum()
         if self.loop.shift:
             shifted = loop_tools.shift_particles(self.ds,self.pos,shiftRight=False)
         else:
@@ -526,8 +563,8 @@ class snapshot():
         else:
             self.R_centroid = yt.units.yt_array([0,0,0],'cm')
             self.V_bulk =    yt.units.yt_array([0,0,0],'cm/s')
-        centroid_tmp =  np.array([(shifted[:,dim]*self.field_values['density']).sum()/m for dim in range(3)])
-        vbulk_tmp = [ (self.vel[:,dim]*self.field_values['density']).sum()/m for dim in range(3)]
+        centroid_tmp =  np.array([(shifted[:,dim]*self.field_values[density_placeholder]).sum()/m for dim in range(3)])
+        vbulk_tmp = [ (self.vel[:,dim]*self.field_values[density_placeholder]).sum()/m for dim in range(3)]
         if self.ds is not None:
             self.R_centroid = self.ds.arr(centroid_tmp,'code_length')
             self.V_bulk = self.ds.arr(vbulk_tmp,'code_velocity')

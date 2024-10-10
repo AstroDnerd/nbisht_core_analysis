@@ -6,11 +6,12 @@ import tracks_read_write
 reload(dl)
 looper_main = looper2.core_looper2
 
-def get_tracks(trackname):
+def get_tracks(trackname, density_placeholder = 'density'):
     track=track_info.tracks[trackname]
     target_frame=track.target_frame
     mountain_top_fname = track.mountain_top
     outname  = track.track_file
+    bad_particle_fname_read = track.bad_particles
 
     if os.path.exists(outname):
         print("File exists, will not make tracks", outname)
@@ -29,10 +30,12 @@ def get_tracks(trackname):
                                      core_list =  None,
                                      fields_from_grid=track.field_list,
                                      derived = track.derived_fields,
-                                    do_shift=False
+                                    do_shift=False,
+                                    density_placeholder = density_placeholder
                                   )
+    new_looper.fix_frame_list() #remove restarted frames
     new_looper.plot_directory = track.plot_directory
-    new_looper.read_targets(mountain_top_fname)
+    new_looper.read_targets(mountain_top_fname, bad_particle_fname_read)
 
     if 0:
         #
@@ -51,7 +54,7 @@ def get_tracks(trackname):
 
 
     if track.bad_particles is not None:
-        new_looper.read_bad_particles(bad_particle_fname_read, core_hijack=0)
+        new_looper.read_bad_particles(bad_particle_fname_read)
         new_looper.remove_bad_particles()
 
 

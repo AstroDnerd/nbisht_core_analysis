@@ -33,7 +33,7 @@ derived=[xtra_energy.add_force_terms, xtra_energy.add_v_grad]
 
 class track():
     def __init__(self,name,sim_directory=None,target_frame=None,mountain_top=None,peak_fname=None,track_file=None, field_list=None, frame_list=None, clump_parameters=None,
-                bad_particles=None, plot_directory="./plots_to_sort", derived_fields=None, mode_fname=None):
+                bad_particles=None, plot_directory="./plots_to_sort", derived_fields=None, mode_fname=None, export_to_ML_fname = None, SinkClumpLink_fname = None):
         self.name = name
         self.sim_directory =sim_directory
         self.target_frame  =target_frame
@@ -42,6 +42,8 @@ class track():
         self.track_file    =track_file
         self.field_list    = field_list
         self.mode_fname    = mode_fname
+        self.export_to_ML_fname = export_to_ML_fname
+        self.SinkClumpLink_fname = SinkClumpLink_fname
         if frame_list is not None:
             if type(frame_list)==str:
                 self.frame_list = self.make_frame_list(frame_list)
