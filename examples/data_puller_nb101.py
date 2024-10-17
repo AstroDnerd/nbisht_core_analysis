@@ -65,7 +65,7 @@ if 1:
     target_frame = dl.target_frames[this_simname]
     frame_list =list(range(0,target_frame,10))+[target_frame]
     fields = ['x','y','z','density'] #always need these
-    fields += ['kinetic_energy','therm_energy','magnetic_energy','PotentialField','vorticity_magnitude']
+    fields += ['kinetic_energy_density','therm_energy','magnetic_energy','PotentialField','vorticity_magnitude']
     fields += ['velocity_x','velocity_y','velocity_z']
     fields += ['magnetic_field_%s'%s for s in 'xyz']
     fields += ['PotentialField']

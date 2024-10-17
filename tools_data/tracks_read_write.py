@@ -50,7 +50,7 @@ def save_loop(self,fname):
             if result is None:
                 continue
             fptr.create_dataset(value,data=result)
-        fptr.create_dataset('fields_from_grid',data=np.array( [np.string_(s) for s in self.fields_from_grid]))
+        fptr.create_dataset('fields_from_grid',data=np.array( [np.bytes_(s) for s in self.fields_from_grid]))
         ti_grp=fptr.create_group('target_indices')
         for core in self.target_indices:
             ti_grp.create_dataset(str(core),data=self.target_indices[core])
@@ -206,7 +206,7 @@ def save_loop_trackage_only(self,fname):
                 continue
             fptr.create_dataset(value,data=result)
         # write fields
-        fptr.create_dataset('fields_from_grid',data=np.array( [np.string_(s) for s in self.fields_from_grid]))
+        fptr.create_dataset('fields_from_grid',data=np.array( [np.bytes_(s) for s in self.fields_from_grid]))
         # write target_indices
         if looper_version == 1:
             ti_grp=fptr.create_group('target_indices')

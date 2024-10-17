@@ -1,11 +1,11 @@
 from starter2 import *
 import xtra_operators as xo
 reload(xo)
-kinetic_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','kinetic_energy'])]
+kinetic_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','kinetic_energy_density'])]
 #std_validators = [yt.ValidateSpatial(1,['Bx','By','Bz', 'x-velocity','y-velocity','z-velocity'])]
 std_validators_2 = [yt.ValidateSpatial(1,['magnetic_field_x','magnetic_field_y','magnetic_field_z', 'x-velocity','y-velocity','z-velocity'])]
 mag_validators = [yt.ValidateSpatial(1,['magnetic_field_x','magnetic_field_y','magnetic_field_z'])]
-kinetic_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','kinetic_energy'])]
+kinetic_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','kinetic_energy_density'])]
 kinetic_validators=[yt.ValidateSpatial(1,['density'])]
 pressure_validators=[yt.ValidateSpatial(1,['x-velocity','y-velocity','z-velocity','pressure'])]
 work_units='erg/(cm**3*s)'

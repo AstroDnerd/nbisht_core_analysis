@@ -6,9 +6,17 @@ import random
 from starter2 import *
 import json
 
+def make_dir(dir_path):
+        if not os.path.exists(dir_path):
+                print("making directory:",dir_path)
+                os.makedirs(dir_path)
+
 def SinkClumpLinker(trackname, sink_trackname, do_projections = False):
     this_track = track_info.tracks[trackname]
-    this_simname = sink_track.sim_directory
+    this_simname = this_track.sim_directory
+    if os.path.exists(this_track.SinkClumpLink_fname):
+        print("Sink Clump File exists!")
+        return True
     #let's get all peaks
     peaklist_name = this_track.peak_fname
     f = h5py.File(peaklist_name,"r")
@@ -45,6 +53,7 @@ def SinkClumpLinker(trackname, sink_trackname, do_projections = False):
     time_arr.append(ds.current_time)
 
     if do_projections==True:
+        make_dir("plots_to_sort/SinkClumpPlots")
         #setup plot
         plot = yt.ProjectionPlot(ds, 'z', ("enzo","Density"), fontsize = 10)
         plot.annotate_timestamp(corner="upper_left", redshift=True, draw_inset_box=True)
@@ -64,7 +73,7 @@ def SinkClumpLinker(trackname, sink_trackname, do_projections = False):
                 plot.annotate_sphere((peak_pos[0], peak_pos[1],peak_pos[2]), radius=(10*np.log10(float(peak_density)), "um"), coord_system="data", circle_args={"color": "black"})
 
         print("Considering All peaks, (min,max,avg,number) of densities: ",min(peak_densities),max(peak_densities), sum(peak_densities)/len(peak_densities),len(peak_densities))
-        print("Considering peaks above critical, (min,max,avg,number) of densities: "min(peak_densities_abovecrit),max(peak_densities_abovecrit), sum(peak_densities_abovecrit)/len(peak_densities_abovecrit),len(peak_densities_abovecrit))
+        print("Considering peaks above critical, (min,max,avg,number) of densities: ",min(peak_densities_abovecrit),max(peak_densities_abovecrit), sum(peak_densities_abovecrit)/len(peak_densities_abovecrit),len(peak_densities_abovecrit))
 
         #plot sink particles
 
@@ -80,19 +89,19 @@ def SinkClumpLinker(trackname, sink_trackname, do_projections = False):
                     '{:0.1e}'.format(sink_particle_mass[-1][sink_i]*solar_mass), coord_system="data", text_args={"fontsize": 50, "color":'blue'})
 
         #save plot
-        plot.save("plots_to_sort/CorePositionsAll_DD"+str(this_frame)+".png")
+        plot.save("plots_to_sort/SinkClumpPlots/CorePositionsAll_DD"+str(this_frame)+".png")
 
         fig = plt.figure()
         plt.hist(peak_densities)
-        plt.savefig("plots_to_sort/CorePeakDensityDistbn_DD"+str(this_frame)+".png")
+        plt.savefig("plots_to_sort/SinkClumpPlots/CorePeakDensityDistbn_DD"+str(this_frame)+".png")
 
         fig = plt.figure()
         plt.hist(peak_densities_abovecrit)
-        plt.savefig("plots_to_sort/CorePeakHighDensityDistbn_DD"+str(this_frame)+".png")
+        plt.savefig("plots_to_sort/SinkClumpPlots/CorePeakHighDensityDistbn_DD"+str(this_frame)+".png")
 
         fig = plt.figure()
         plt.hist(sink_particle_mass[-1])
-        plt.savefig("plots_to_sort/SinkMassDistbn_DD"+str(this_frame)+".png")
+        plt.savefig("plots_to_sort/SinkClumpPlots/SinkMassDistbn_DD"+str(this_frame)+".png")
 
 
     #now save core ids and respective sink indices by location in dictionary

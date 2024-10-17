@@ -93,7 +93,7 @@ def grade_modes(trackname,delta_alone = 0.025):
     temp_mode={}
     buddy_list={}
     mini_scrubbers={}
-    for core_id in this_looper.core_list:
+    for core_id in this_looper.core_ids:
         ms =  trackage.mini_scrubber(thtr,core_id, do_velocity=False)
         ms.particle_pos(core_id)
         mini_scrubbers[core_id]  = ms

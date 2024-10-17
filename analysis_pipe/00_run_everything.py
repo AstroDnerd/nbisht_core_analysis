@@ -38,8 +38,8 @@ import image_peaks
 #image_peaks.image_peaks(this_trackname)
 
 #FOR LINKING NONSINK CORES TO SINKS
-#import SinkClumpLink
-#SinkClumpLink.SinkClumpLinker(this_trackname, sink_trackname, do_projections = True)
+import SinkClumpLink
+SinkClumpLink.SinkClumpLinker(this_trackname, sink_trackname, do_projections = True)
 
 import get_mountain_tops
 print("GET MOUNTAIN")
@@ -57,12 +57,12 @@ reload(mode_grader)
 delta_alone = 0.025
 mode_grader.grade_modes(this_trackname, delta_alone=delta_alone)  
 
-#import buddy_centroid
-#reload(buddy_centroid)
-#new_core_list = buddy_centroid.buddy_centroid(this_trackname, thresh=2*delta_alone, sink_dict_loc=sink_dict_loc)  
+import buddy_centroid
+reload(buddy_centroid)
+new_core_list = buddy_centroid.buddy_centroid(this_trackname, thresh=2*delta_alone, sink_dict_loc=sink_dict_loc)  
 
-#import rho_time  
-#rho_time.run(this_trackname, new_core_list)
+import rho_time  
+rho_time.run(this_trackname, new_core_list)
 
 #import browser_skin
 #reload(browser_skin)

@@ -45,3 +45,8 @@ import track_loader
 from collections import defaultdict
 import colors
 plot_dir = "%s/cdbreak_desktop/nikhilb_home/results"%os.environ['HOME']
+
+def make_dir(dir_path):
+        if not os.path.exists(dir_path):
+                print("making directory:",dir_path)
+                os.makedirs(dir_path)

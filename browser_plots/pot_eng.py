@@ -119,7 +119,7 @@ def energy_plots(this_looper, core_list=None, r_inflection=None, r_mass=None):
             if field_name in ['grav_energy']:
                 PPP = np.abs(PPP)
 
-            if field_name in ['density', 'grav_energy', 'kinetic_energy']:
+            if field_name in ['density', 'grav_energy', 'kinetic_energy_density']:
                 norm = mpl.colors.LogNorm(vmin=PPP[PPP>0].min(), vmax=PPP.max())
             else:
 

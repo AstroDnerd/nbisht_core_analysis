@@ -9,6 +9,7 @@ import track_loader as TL
 import movie_frames 
 
 def simple_rho(this_looper,core_list=None, tsing_dict = None, tend_dict = None):
+    make_dir("plots_to_sort/rho_t")
 
     if core_list is None:
         core_list = np.unique(this_looper.tr.core_ids)
@@ -53,7 +54,7 @@ def simple_rho(this_looper,core_list=None, tsing_dict = None, tend_dict = None):
                 ax.axvline(x=tend_dict[core_id], c = 'red')
             
 
-        outname='plots_to_sort/%s_rho_t_c%04d.png'%(this_looper.sim_name,core_id)
+        outname='plots_to_sort/rho_t/%s_rho_t_c%04d.png'%(this_looper.sim_name,core_id)
         fig.savefig(outname)
         print(outname)
 

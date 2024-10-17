@@ -16,7 +16,7 @@ def buddy_centroid(trackname, thresh=0.05, sink_dict_loc = None):
     TL.load_tracks([trackname])
     this_looper = TL.tracks[trackname]
     thtr=this_looper.tr
-    main_core_list = nar(this_looper.core_list)
+    main_core_list = nar(this_looper.core_ids)
     main_core_list.sort()
     mini_scrubbers={}
     for core_id in main_core_list:
