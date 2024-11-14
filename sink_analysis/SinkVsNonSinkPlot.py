@@ -195,9 +195,9 @@ def SinkVsNonSinkPlotter(trackname, sink_trackname, field_name = ("gas","density
         animate_plots.animator("plots_to_sort/SinkVsNonSink_%s_%s/Core_%03d"%(field_name[1],which_cores,core_id),"Core_%03d"%(core_id))
 
 
-SinkVsNonSinkPlotter('nb101', 'nb102', which_cores = 'densest', set_clim = False, clim_arr = [1e-3,1e4])
-SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","magnetic_field_strength"), which_cores = 'densest', set_clim = False, clim_arr = [1e-2,1e5])
-SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","velocity_magnitude"), which_cores = 'densest', set_clim = False, clim_arr = [1e-1,1e3])
-SinkVsNonSinkPlotter('nb101', 'nb102', which_cores = 'alone', set_clim = False, clim_arr = [1e-3,1e4])
-SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","magnetic_field_strength"), which_cores = 'alone', set_clim = False, clim_arr = [1e-2,1e5])
-SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","velocity_magnitude"), which_cores = 'alone', set_clim = False, clim_arr = [1e-1,1e3])
+SinkVsNonSinkPlotter('nb101', 'nb102', which_cores = 'densest', set_clim = False, clim_arr = [1e-1,1e4])
+#SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","magnetic_field_strength"), which_cores = 'densest', set_clim = False, clim_arr = [1e-1,1e2])
+#SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","velocity_magnitude"), which_cores = 'densest', set_clim = False, clim_arr = [1e-1,7])
+#SinkVsNonSinkPlotter('nb101', 'nb102', which_cores = 'alone', set_clim = False, clim_arr = [1e-3,1e4])
+#SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","magnetic_field_strength"), which_cores = 'alone', set_clim = False, clim_arr = [1e-2,1e5])
+#SinkVsNonSinkPlotter('nb101', 'nb102', field_name=("gas","velocity_magnitude"), which_cores = 'alone', set_clim = False, clim_arr = [1e-1,1e3])
