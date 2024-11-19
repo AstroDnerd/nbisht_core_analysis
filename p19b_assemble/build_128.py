@@ -8,34 +8,58 @@ reload(bs)
 
 fields = [('enzo','Density'), ('enzo','x-velocity'),('enzo','y-velocity'),('enzo','z-velocity'),('enzo','Bx'),('enzo','By'),('enzo','Bz')]
 
+base='/data/cb1/Projects/P19_CoreSimulations/u203-Beta20'
+frame = 0
+output_directory='/data/cb1/dccollins/Enzo/turbulence_read/take6'
+
 if 'ds128' not in dir():
-    ds128  = yt.load('/anvil/scratch/x-ux454321/p78c_high_res/128/B2/DD0000/data0000')
-    cg = ds128.covering_grid(0,[0.0]*3,[128]*3)
-    stuff = [cg[field] for field in fields]
-    output_directory='/anvil/scratch/x-ux454321/p78c_high_res/IC_assembler/Run128'
+    #ds128  = yt.load('/anvil/scratch/x-ux454321/p19b_high_res/test128/u203_beta20/DD0000/data0000')
+    ds128  = yt.load('%s/DD0000/data0000'%base)
+    TopGridDimensions = ds128.parameters['TopGridDimensions']
+    import dtools.big_tools.lite_grid as lgrid
+    reload(lgrid)
+    this_h = lgrid.fake_hierarchy(base,frame)
+    this_h.parse()
+    read_den = lgrid.get_cube(this_h, TopGridDimensions, 'Density')
+    read_vx  = lgrid.get_cube(this_h, TopGridDimensions, 'x-velocity')
+    read_vy  = lgrid.get_cube(this_h, TopGridDimensions, 'y-velocity')
+    read_vz  = lgrid.get_cube(this_h, TopGridDimensions, 'z-velocity')
+    read_bx  = lgrid.get_cube(this_h, TopGridDimensions, 'BxF',extend=nar([1,0,0]))
+    read_by  = lgrid.get_cube(this_h, TopGridDimensions, 'ByF',extend=nar([0,1,0]))
+    read_bz  = lgrid.get_cube(this_h, TopGridDimensions, 'BzF',extend=nar([0,0,1]))
+
+if 'cpu0' not in dir():
+    cpu0=h5py.File('/data/cb1/Projects/P19_CoreSimulations/u203-Beta20/DD0000/data0000.cpu0000','r')
+    g = cpu0['Grid00000001']
+    den = g['Density'][()]
+    bxF = g['BxF'][()]
+    byF = g['ByF'][()]
+    bzF = g['BzF'][()]
+    cpu0.close()
 
 
-
-if 0:
-    dx = 1/128
-    x,y,z=np.mgrid[0:1:dx, 0:1:dx,0:1:dx]
-    x,y,z=np.mgrid[0:128, 0:128, 0:128]
-    bx = x+1
-    by = x+1
-    bz = x+1
-
+if 1:
+    #build the set
+    swap=True
+    bs.write_enzo_set(read_den,output_directory,do_swap=swap,field='p19b_b20_density.128')
+    bs.write_enzo_set(read_vx ,output_directory,do_swap=swap,field='p19b_b20_vx.128')
+    bs.write_enzo_set(read_vy ,output_directory,do_swap=swap,field='p19b_b20_vy.128')
+    bs.write_enzo_set(read_vz ,output_directory,do_swap=swap,field='p19b_b20_vz.128')
+    bs.write_enzo_set(read_bx ,output_directory,do_swap=swap,field='p19b_b20_bx.128',extend=0 )
+    bs.write_enzo_set(read_by ,output_directory,do_swap=swap,field='p19b_b20_by.128',extend=1 )
+    bs.write_enzo_set(read_bz ,output_directory,do_swap=swap,field='p19b_b20_bz.128',extend=2 )
 if 0:
     #build the set
     swap=True
-    bs.write_enzo_set(stuff[0],output_directory,do_swap=swap,field='p19b_b02_density.128')
-    bs.write_enzo_set(stuff[1],output_directory,do_swap=swap,field='p19b_b02_vx.128')
-    bs.write_enzo_set(stuff[2],output_directory,do_swap=swap,field='p19b_b02_vy.128')
-    bs.write_enzo_set(stuff[3],output_directory,do_swap=swap,field='p19b_b02_vz.128')
-    bs.write_enzo_set(stuff[4],output_directory,do_swap=swap,field='p19b_b02_bx.128',extend=0 )
-    bs.write_enzo_set(stuff[5],output_directory,do_swap=swap,field='p19b_b02_by.128',extend=1 )
-    bs.write_enzo_set(stuff[6],output_directory,do_swap=swap,field='p19b_b02_bz.128',extend=2 )
+    bs.write_enzo_set(stuff[0],output_directory,do_swap=swap,field='p19b_b20_density.128')
+    bs.write_enzo_set(stuff[1],output_directory,do_swap=swap,field='p19b_b20_vx.128')
+    bs.write_enzo_set(stuff[2],output_directory,do_swap=swap,field='p19b_b20_vy.128')
+    bs.write_enzo_set(stuff[3],output_directory,do_swap=swap,field='p19b_b20_vz.128')
+    bs.write_enzo_set(stuff[4],output_directory,do_swap=swap,field='p19b_b20_bx.128',extend=0 )
+    bs.write_enzo_set(stuff[5],output_directory,do_swap=swap,field='p19b_b20_by.128',extend=1 )
+    bs.write_enzo_set(stuff[6],output_directory,do_swap=swap,field='p19b_b20_bz.128',extend=2 )
 
-if 1:
+if 0:
     #DO ONE STEP.
     #ADD TRACERS
     import p78_assemble.add_tracer_tool as AT
