@@ -2,8 +2,6 @@
 '''
 needs to be in the same folder as tsung_spheres
 '''
-
-# edit
 from starter2 import *
 import davetools
 reload(davetools)
@@ -29,12 +27,18 @@ import tsung_spheres
 reload(tsung_spheres)
 import monster
 reload(monster)
-# --- --- --- --- --- --- ---
 
+from yt.data_objects.level_sets.api import *
+#import projections
+#reload(projections)
+# --- --- --- --- --- --- ---
 
 class withspheres(): 
     def __init__(self,the_loop):
         self.this_looper = the_loop
+
+        self.field_leaf = defaultdict(list)
+        self.rho_leaf = defaultdict(list)
 
         self.bmag_sph = defaultdict(list)
         self.rhoave_sph = defaultdict(list)
@@ -81,6 +85,7 @@ class withspheres():
                 # WITH SPHERES
                 self.bmag_sph[nf].append((the_sphere['density']* the_sphere['magnetic_field_strength'] * the_sphere['cell_volume']).sum()/the_sphere['cell_mass'].sum()) 
                 self.rhoave_sph[nf].append((the_sphere['density'] * the_sphere['cell_volume']).sum()/ the_sphere['cell_volume'].sum())
+
                 self.bmag_sph_rinf[nf].append((the_sphere_rinf['density']* the_sphere_rinf['magnetic_field_strength'] * \
                                                the_sphere_rinf['cell_volume']).sum()/the_sphere_rinf['cell_mass'].sum()) 
                 self.rhoave_sph_rinf[nf].append((the_sphere_rinf['density'] * the_sphere_rinf['cell_volume']).sum()/ the_sphere_rinf['cell_volume'].sum())
@@ -110,7 +115,7 @@ class withspheres():
         data_the_rinfs = [*self.the_rinfs.values()]
 
         print('before saving to h5 files!!')
-        if 1: 
+        if 0: 
             hfivename = 'p66_brho/brho_sph_r1rinf_%s.h5'%(sim)
             Fptr = h5py.File(hfivename,'w')
             Fptr['bfield_sph'] = data_bmagsph 
@@ -160,7 +165,7 @@ class withspheres():
         data_blossph_rinf = [*self.blos_sph_rinf.values()] 
         data_ncolumnsph_rinf = [*self.ncolumn_sph_rinf.values()]
         print('before saving to h5 files')
-        if 1: 
+        if 0: 
             hfivename = 'p66_brho/blosncol_sph_r1rinf_%s.h5'%(sim)
             Fptr = h5py.File(hfivename,'w')
             #pdb.set_trace()
@@ -172,22 +177,154 @@ class withspheres():
             print('h5 file written. closing.')
 
 
+    def withleaves(self, sim, core_list=None, individual='no', proj='off'): 
+        thtr = self.this_looper.tr
+        monster.load([sim])
+        the_monster = monster.closet[sim]
+
+        all_cores = np.unique(thtr.core_ids)
+        if core_list is None:
+            core_list = the_monster.this_looper.core_by_mode['A']
+
+        # EVERY TEN FRAMES
+        for nf,frame in enumerate(thtr.frames[4:]):  #or debug 
+            ds = the_monster.get_ds(frame) 
+
+            # CORE-LOOP
+            for nc,core_id in enumerate(core_list):
+                #if core_id == 109:
+                if 1: 
+                    the_sphere_rinf = the_monster.get_sphere(core_id,frame,'rinf')
+                    the_sphere_rone = the_monster.get_sphere(core_id,frame,'r1')
+                    the_sphere_rmax = the_monster.get_sphere(core_id,frame,'rmax')
+                    the_radius_one = 1/128
+                    the_center = the_sphere_rinf.center 
+
+                    if individual == 'yes_clump':
+                        if the_sphere_rmax.radius < the_radius_one:
+                            master_clump = Clump(the_sphere_rone, ("gas", "density"))
+                            c_min = the_sphere_rone["gas", "density"].min()
+                            c_max = the_sphere_rone["gas", "density"].max() 
+                            if proj =='on':
+                                p = yt.ProjectionPlot(ds, "z", ("gas", "density"), center=the_center, data_source=the_sphere_rone)  
+                                p.set_width(2*the_radius_one)
+                                p.annotate_sphere(the_center, radius=the_radius_one, circle_args={"color": "red"})
+                        else:
+                            the_center = the_sphere_rmax.center 
+                            master_clump = Clump(the_sphere_rmax, ("gas", "density"))
+                            c_min = the_sphere_rmax["gas", "density"].min()
+                            c_max = the_sphere_rmax["gas", "density"].max() 
+
+                            if proj =='on':
+                                p = yt.ProjectionPlot(ds, "z", ("gas", "density"), center=the_center, data_source=the_sphere_rmax)  
+                                p.set_width(2*the_sphere_rmax.radius)
+                                p.annotate_sphere(the_center, radius=the_sphere_rmax.radius, circle_args={"color": "orange"})
+
+                        # add a clump validator, which one??
+                        step=3
+                        find_clumps(master_clump, c_min, c_max, step)  #what is the optimal step size
+                        leaf_clumps = master_clump.leaves
+                            if proj =='on':
+                                p.annotate_clumps(leaf_clumps)
+                                p.save('./p66_brho/plotsexplore/clump_%d_%d_%s_%d'%(core_id,frame,sim,step))
+
+                        # probably best to save the master clump as a data set
+                        for leaf in range(len(leaf_clumps)): 
+                            self.field_leaf[nf].append((leaf_clumps[leaf]['density']* leaf_clumps[leaf]['magnetic_field_strength'] * \
+                                                        leaf_clumps[leaf]['cell_volume']).sum()/leaf_clumps[leaf]['cell_mass'].sum()) 
+                            self.rho_leaf[nf].append((leaf_clumps[leaf]['density'] *leaf_clumps[leaf]['cell_volume']).sum()/leaf_clumps[leaf]['cell_volume'].sum())
+
+
+        data_leaf_field = [*self.field_leaf.values()] 
+        data_leaf_rho = [*self.rho_leaf.values()]
+        print('before saving to h5 files')
+        if 0: 
+            hfivename = 'p66_brho/field_rho_leaves_alone_%s.h5'%(sim)
+            Fptr = h5py.File(hfivename,'w')
+            Fptr['field_leaf'] = data_leaf_field 
+            Fptr['rho_leaf'] = data_leaf_rho
+            Fptr.close()
+            print('h5 file written. closing.')
+
+
+    def projspheres(self, sim, core_list=None,individual='no'): 
+        print('inside projections')
+        thtr = self.this_looper.tr
+        monster.load([sim])
+        the_monster = monster.closet[sim]
+
+        # CORES
+        all_cores = np.unique(thtr.core_ids)
+        if core_list is None:
+            #core_list = all_cores  #or debug
+            #core_list = core_list#[3:4]
+            core_list = the_monster.this_looper.core_by_mode['A']
+            #stop()
+
+        # TEST & NEXT ideas!!
+        if 0:
+            proj_cores_annotate_zoom = projections.proj_cores_annotate_zoom
+            proj_cores_annotate_zoom(the_monster.this_looper, axis_list=[2], core_list=core_list, cb_label='density', annotate_particles=True, \
+                                     plot_dir="./p66_brho/plotsexplore", zoom_level=1)
+            stop()
+            # next hand in data source to be r_particles, then try annotating countours of the master clump
+
+
+        # EVERY TEN FRAMES
+        for nf,frame in enumerate(thtr.frames[4:]):  #or debug 
+            ds = the_monster.get_ds(frame) 
+            if individual == 'no':
+                p = yt.ProjectionPlot(ds, 2, ("gas", "density"))
+
+            # CORE-LOOP
+            for nc,core_id in enumerate(core_list):
+
+                #if core_id == 109:
+                if 1: 
+                    the_sphere_rinf = the_monster.get_sphere(core_id,frame,'rinf')
+                    the_sphere_rone = the_monster.get_sphere(core_id,frame,'r1')
+                    the_sphere_reight = the_monster.get_sphere(core_id,frame,'r8')
+                    the_sphere_rmax = the_monster.get_sphere(core_id,frame,'rmax')
+
+                    the_radius_rinf = the_monster.get_r_inflection(core_id,frame)
+                    the_radius_eight = 8/128
+                    the_radius_one = 1/128
+                    the_center = the_sphere_rinf.center 
+
+                    if individual == 'no':
+                        p.annotate_sphere(the_center, radius=the_radius_rinf, circle_args={"color": "red"})
+                        p.annotate_sphere(the_center, radius=the_radius_one, circle_args={"color": "black"}, text='%d'%core_id)
+                    if individual == 'yes':
+                        p = yt.ProjectionPlot(ds, 2, ("gas", "density"), center=the_center, data_source=the_sphere_reight)
+                        p.set_width(2*the_radius_eight)
+                        p.annotate_sphere(the_center, radius=the_radius_rinf, circle_args={"color": "red"})
+                        p.annotate_sphere(the_center, radius=the_radius_one, circle_args={"color": "black"})
+                        print('about to save')
+                        p.save('./p66_brho/plotsexplore/%d_%d_%s'%(core_id,frame,sim))
+
+            if individual == 'no':
+                print('saving proj')
+                p.save('./p66_brho/plotsexplore/%d_%s'%(frame,sim))
+
 
 
 # YOU ENTER HERE
 # TO GET DATA AND STORE
 # COMPARING SPHERES WITH PARTICLES
 # note: take a look at p19_play/psedo.py for a brief example with monster.py
-if 0:
+if 1:
     sims=['u601']#, 'u602','u603']
+    #sims=['u501']#, 'u502', 'u503']
     TL.load_tracks(sims)
     for sim in sims:
         core_list=None
         running = withspheres(TL.loops[sim])
-        if 1:
+        if 0:
             running.framescores(sim)
-        if 1:
+        if 0:
             running.syntheticobs(sim)
+        if 1:
+            running.withleaves(sim, individual='yes_clump')
 # SPHERES SYNCED TO TSUNG
 G = 1620/(4*np.pi)
 rho_mean = 1
@@ -206,25 +343,30 @@ if 0:
         for sim in sims:
             all_cores=np.unique(TL.loops[sim].tr.core_ids)
             core_list=list(all_cores)
-            #core_list=core_list[:1]  #debug
+            core_list=core_list[1:2]  #debug or just get tsung_frame
 
             mp=tsung_spheres.tsungspheres(TL.loops[sim])   #EDIT! make tsung part of this class, then split THIS file into two respectively
-            mp.run(core_list=core_list, tsing=tsing_tool[sim], obs=True, whichdataset='tsungtimes')
+
+            # pick whichdataset = None with one core to get the following for main figure
+            timings = mp.run(core_list=core_list, tsing=tsing_tool[sim], obs=True, whichdataset=None)
+            #stop()
 
 
 
 # TO READ DATA FROM STORAGE
-if 1:   
-    figtype = 'tsungtff'  #kappaperframe, kappatff, rinfradii: histos, tsungtff 
+if 0:   
+    figtype = 'kappaperframe'  #kappaperframe, kappatff, rinfradii: histos, tsungtff 
     individually = 'no'  #if kappaperframe, yes: one panel per frame, no: frame time series
-    parts_or_spheres ='synthetic' #parts, spheres, sphparts, sph_tsung, synthetic  
+    parts_or_spheres ='leaves' #parts, spheres, sphparts, sph_tsung, synthetic  
     kappadyn = 'yes' #no: do ratios, yes: do kappa dynamical; EDIT: outnames should reflect this too
     whichradius = None#'rinf' 
+    radius_compare = 'no'
+    compareparam = 'density'
     
-    series = '500'  #500 or 600
+    series = '600'  #500 or 600
     # for tsung plots
     if series == '500':  
-        sims=['u503']#, 'u502', 'u503']  #EDIT: need a loop!!
+        sims=['u501']#, 'u502', 'u503']  #EDIT: need a loop!!
         if figtype!= 'tsungtff':
             hfivename = 'p66_brho/h5files/brho_sphtsung_%s.h5'%(sims[0])  
             hfivename_synth = 'p66_brho/h5files/blosncol_sphtsung_%s.h5'%(sims[0])  
@@ -237,11 +379,10 @@ if 1:
             if parts_or_spheres == 'synthetic':
                 b_sph_synth = Fptr_synth['bmag_sph'][()] 
                 rho_sph_synth = Fptr_synth['rho_sph'][()]
-        if figtype == 'tsungtff':
+        if whichradius == 'rinf':
             hfivename = 'p66_brho/h5files/coreids_tsungtff_%s.h5'%(sims[0])  
             Fptr = h5py.File(hfivename,'r')
             tsung_tff = Fptr['tsungtff'][()] 
-
 
     # for tff plots
     if series == '600':
@@ -250,14 +391,17 @@ if 1:
             hfivename = 'p66_brho/h5files/brho_sph_r1rinf_%s.h5'%(sims[0])
             hfivename_synth = 'p66_brho/h5files/blosncol_sph_r1rinf_%s.h5'%(sims[0])
         else:
-            hfivename = 'p66_brho/h5files/brho_sphparts_%s.h5'%(sims[0])  
+            hfivename = 'p66_brho/h5files/field_rho_leaves_alone_%s.h5'%(sims[0])
+            #hfivename = 'p66_brho/h5files/brho_sphparts_%s.h5'%(sims[0])  
             hfivename_synth = 'p66_brho/h5files/blosncol_sph_%s.h5'%(sims[0])  
         Fptr = h5py.File(hfivename,'r')
         Fptr_synth = h5py.File(hfivename_synth,'r')
 
         if figtype == 'kappaperframe' or figtype == 'kappatff':
-            b_sph = Fptr['bfield_sph'][()] 
-            rho_sph = Fptr['rhoavg_sph'][()] 
+            b_sph = Fptr['field_leaf'][()] 
+            rho_sph = Fptr['rho_leaf'][()] 
+            #b_sph = Fptr['bfield_sph'][()] 
+            #rho_sph = Fptr['rhoavg_sph'][()] 
             if whichradius == 'rinf':
                 b_sph_rinf = Fptr['bfield_sph_rinf'][()]  #added 
                 rho_sph_rinf = Fptr['rhoavg_sph_rinf'][()]#added 
@@ -272,6 +416,11 @@ if 1:
                     rho_sph_synth_rinf = Fptr_synth['ncolumn_sph_rinf'][()]#added 
         if figtype == 'rinfradii':
             rinf_radii = Fptr['the_rinfs'][()]  
+        if whichradius == 'rinf':
+            simsall=['u501'] 
+            hfivename = 'p66_brho/h5files/coreids_tsungtff_%s.h5'%(simsall[0])  
+            Fptr = h5py.File(hfivename,'r')
+            tsung_tff = Fptr['tsungtff'][()] 
  
 
 
@@ -315,49 +464,89 @@ if 1:
                 rhoparts_log = np.log10(rho_parts[i])  
                 rets_parts = cfp.fit(afunct, rhoparts_log, bparts_log)  
                 kappas_parts = np.append(kappas_parts, rets_parts.popt[0]) 
-            '''
-            # if we wanted to plot the fit
-            the_xrecipe = np.linspace(rhosph_log.min(),rhosph_log.max(),num=500)
-            the_xten =10**the_xrecipe
-            the_yrecipe_ = afunct(the_xrecipe, *rets.popt)
-            the_yten = 10**the_yrecipe
-            ''' 
+
             # one panel for each time frame; edit x,y labels and saving names as necessary
             if individually == 'yes':
                 fig,ax = plt.subplots(1,1)
-                ax.scatter(rho_sph[i], b_sph[i], color='b', label='spheres', alpha=0.5)  
-                if parts_or_spheres == 'parts':
-                    ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  
-                ax.legend()
-                ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(1e-2,1e8), ylim=(1e0,1e4))
-                outname = 'p66_brho/sphtsung_frame%d_%s'%(i,sims[0])
-                plt.savefig(outname)
-                print('figure saved!')
-                plt.clf()      
+                if radius_compare == 'no':
+                    #ax.scatter(rho_sph[i], b_sph[i], color='b', label='spheres', alpha=0.5)  
+                    if whichradius == 'rinf':
+                        ax.scatter(rho_sph_rinf[i], b_sph_rinf[i], color='orange', label='spheres_rinf', alpha=0.5)  
+                    if parts_or_spheres == 'synthetic':
+                        ax.scatter(rho_sph_synth_rinf[i], b_sph_synth_rinf[i], color='r', label='synthetic_rinf', alpha=0.5)  
+                    if parts_or_spheres == 'parts':
+                        ax.scatter(rho_parts[i], b_parts[i], color='r', label='particles', alpha=0.5)  
+
+                    #if parts_or_spheres == 'spheres': 
+                    if whichradius == 'rinf':
+                        the_xrecipe = np.linspace(rhosph_rinf_log.min(),rhosph_rinf_log.max(),num=500)
+                        the_yrecipe = afunct(the_xrecipe, *rets_sph_rinf.popt)
+                        the_xten_rinf =10**the_xrecipe
+                        the_yten_rinf = 10**the_yrecipe
+                    if parts_or_spheres == 'synthetic': 
+                        the_xrecipe = np.linspace(rhosph_synth_rinf_log.min(),rhosph_synth_rinf_log.max(),num=500)
+                        the_yrecipe = afunct(the_xrecipe, *rets_sph_synth_rinf.popt)
+                        the_xten_rinfsynth =10**the_xrecipe
+                        the_yten_rinfsynth = 10**the_yrecipe
+                    ax.plot(the_xten_rinf, the_yten_rinf, c='gray', linewidth=2.0, alpha=0.7)
+                    ax.plot(the_xten_rinfsynth, the_yten_rinfsynth, c='gray', linewidth=2.0, alpha=0.7)
+
+                    ax.legend(loc='best')
+                    title=r'$\kappa_{sph_rinfs}=%f, \kappa_{synth_rinfs}=%f $'%(rets_sph_rinf.popt[0],rets_sph_synth_rinf.popt[0])
+                    ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(1e-2,1e8), ylim=(1.5e-2,1.5e4), \
+                        title=title)
+                    outname = 'p66_brho/plotsexplore/%s_rinf_frame%d_%s'%(parts_or_spheres,i,sims[0])
+                    plt.savefig(outname)
+                    print('figure saved!')
+                    plt.clf()      
+                if radius_compare == 'yes':
+                    if compareparam == 'density':
+                        ax.scatter(rho_sph[i], rho_sph_rinf[i], color='k', alpha=0.5)  
+                        ax.axline((0, 0), slope=1, alpha=0.5)
+                        ax.set(xlabel=r'$\rho_{rone}$', ylabel=r'$\rho_{rinf}$', xscale='log', yscale='log', xlim=(1e0,1.5e4), ylim=(1e0,1e6))
+                    if compareparam == 'bfield':
+                        ax.scatter(b_sph[i], b_sph_rinf[i], color='blue', alpha=0.5)  
+                        ax.axline((0, 0), slope=1, alpha=0.5)
+                        ax.set(xlabel=r'$\|B|_{rone}$', ylabel=r'$|B|_{rinf}$', xscale='log', yscale='log', xlim=(1.5e0,1.5e4), ylim=(1.5e0,1.5e4))
+                    outname = 'p66_brho/plotsexplore/%s_%s_frame%d_%s'%(parts_or_spheres,compareparam,i,sims[0])
+                    plt.savefig(outname)
+                    print('figure saved!')
+                    plt.clf()      
+
 
         # time frames in time series; edit x,y labels and saving names as necessary
         if individually == 'no':
             fig,ax = plt.subplots(1,1)
-            the_x = np.linspace(1,len(rho_sph),len(rho_sph))  
+            the_x = np.linspace(1,len(rho_sph_rinf),len(rho_sph_rinf))  
             if kappadyn == 'no':
                 kappas_ratio = kappas_sph/kappas_sph_synth
                 ax.scatter(the_x, kappas_ratio, color='orange', label='ratio')  
                 outname = 'p66_brho/sphwsynth_kappadynratio_scatter_%s'%sims[0] #tsung or tff
             if kappadyn == 'yes':
-                #ax.scatter(the_x, kappas_sph, color='b', label='spheres_r1')  
+                ax.scatter(the_x, kappas_sph, color='g', label='leaves')  
                 if whichradius == 'rinf':
-                    ax.scatter(the_x, kappas_sph_rinf, color='b', label='spheres_rinf')  
+                    #ax.scatter(the_x, kappas_sph_rinf, color='orange', label='spheres_rinf')  
+                    # for the tsung vertical line
+                    '''
+                    timings_tff = timings/t_ff  #from 500s
+                    tff_ratio = tsung_tff/t_ff
+                    tsungtiming = tff_ratio.mean()
+                    index = np.argmin(np.abs(timings_tff - tsungtiming))
+                    vline = (index*len(kappas_sph_rinf))/(len(tff_ratio)-1)
+                    stop()
+                    '''
                 if parts_or_spheres == 'synthetic':
                     #ax.scatter(the_x, kappas_sph_synth, color='g', label='synthetic_r1')  
                     if whichradius == 'rinf':
-                        ax.scatter(the_x, kappas_sph_rinf_synth, color='g', label='synthetic_rinf')  
+                        ax.scatter(the_x, kappas_sph_rinf_synth, color='r', label='synthetic_rinf', alpha=0.5)  
                 if parts_or_spheres == 'parts':
                     ax.plot(the_x, kappas_parts, color='r', label='particles')  
-                outname = 'p66_brho/sphsynth_rinf_kappadyn_scatter_%s'%sims[0]  #tsung or tff
-            ax.legend()
+                #outname = 'p66_brho/plotsexplore/%s_rinf_kappadyn_scatter_%s'%(parts_or_spheres,sims[0]) 
+                outname = 'p66_brho/plotsexplore/%s_kappadyn_scatter_%s'%(parts_or_spheres,sims[0]) 
+            ax.legend(loc='best')
             xlabels = [r'$t_{tsung,dummy}$', r'$t_{tff,dummy}$'] 
             ylabels = [r'$\kappa/\kappa_synth$', r'$\kappa$' ]  
-            ax.set(xlabel=xlabels[1], ylabel=ylabels[1])#, ylim=(0,4)) #,\kappa_{parts}$', ylim=(0,0.95))
+            ax.set(xlabel=xlabels[1], ylabel=ylabels[1], ylim=(0,0.85))
             plt.savefig(outname)
             print('figure saved!')
             plt.clf()    
@@ -368,36 +557,63 @@ if 1:
         btff_sph = []
         rhotff_parts = []
         btff_parts = []
+        rhotff_synth = []
+        btff_synth = []
         fig,ax = plt.subplots(1,1)
         for i in range(len(rho_sph)):   
-            rhotff_sph = np.append(rhotff_sph, rho_sph[i]) 
-            btff_sph = np.append(btff_sph, b_sph[i]) 
+            rhotff_sph = np.append(rhotff_sph, rho_sph_rinf[i]) 
+            btff_sph = np.append(btff_sph, b_sph_rinf[i]) 
             if parts_or_spheres == 'parts':
                 rhotff_parts = np.append(rhotff_parts, rho_parts[i]) 
                 btff_parts = np.append(btff_parts, b_parts[i])   
+            if parts_or_spheres == 'synthetic':
+                rhotff_synth = np.append(rhotff_synth, rho_sph_synth_rinf[i]) 
+                btff_synth = np.append(btff_synth, b_sph_synth_rinf[i])   
 
         rhotff_sphlog = np.log10(rhotff_sph)
         btff_sphlog = np.log10(btff_sph) 
         rets_sphlog = cfp.fit(afunct, rhotff_sphlog, btff_sphlog)  
+        if parts_or_spheres == 'synthetic':
+            rhotff_synthrinflog = np.log10(rhotff_synth)
+            btff_synthrinflog = np.log10(abs(btff_synth))
+            rets_synthlog = cfp.fit(afunct, rhotff_synthrinflog, btff_synthrinflog)  
         if parts_or_spheres == 'parts':
             rhotff_partslog = np.log10(rhotff_parts)
             btff_partslog = np.log10(btff_parts)
             rets_partslog = cfp.fit(afunct, rhotff_partslog, btff_partslog)  
 
-        tmap = rainbow_map(len(rhotff_sph)) 
-        ctr = [tmap(n) for n in range(len(rhotff_sph))]
+        if parts_or_spheres == 'spheres': 
+            tmap = rainbow_map(len(rhotff_sph)) 
+            ctr = [tmap(n) for n in range(len(rhotff_sph))]
+        if parts_or_spheres == 'synthetic': 
+            tmap = rainbow_map(len(rhotff_synth)) 
+            ctr = [tmap(n) for n in range(len(rhotff_synth))]
         color_opt = [ctr,'b','r']       
+        if 0:
+            ax.scatter(rhotff_sph, btff_sph, color=color_opt[0], alpha=0.4, label='spheres_rinf')
         if 1:
-            ax.scatter(rhotff_sph, btff_sph, color=color_opt[0], alpha=0.4, label='spheres')
+            ax.scatter(rhotff_synth, btff_synth, color=color_opt[0], alpha=0.4, label='spheres_rinf_synth')
         if 0:
             ax.scatter(rhotff_parts, btff_parts, color=color_opt[0], alpha=0.4, label='particles')
 
-        title=[r'$\kappa_{sph_tsung}=%f$'%rets_sphlog.popt[0]]#, r'$\kappa_{sph}=%f$, $\kappa_{parts}=%f$'%(rets_sphlog.popt[0],rets_partslog.popt[0]), 'particles', 'spheres']
-        ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', xlim=(10e-3,10e3), ylim=(10e-2,10e3), \
-               title=title[0])  
+        # seeing the fit, aka the 'kappa' 
+        if parts_or_spheres == 'synthetic': 
+            the_xrecipe = np.linspace(rhotff_synthrinflog.min(),rhotff_synthrinflog.max(),num=500)
+            the_yrecipe = afunct(the_xrecipe, *rets_synthlog.popt)
+        if parts_or_spheres == 'spheres': 
+            the_xrecipe = np.linspace(rhotff_sphlog.min(),rhotff_sphlog.max(),num=500)
+            the_yrecipe = afunct(the_xrecipe, *rets_sphlog.popt)
+        the_xten =10**the_xrecipe
+        the_yten = 10**the_yrecipe
+        ax.plot(the_xten, the_yten, c='gray', linewidth=2.0, alpha=0.7)
+
+        title=[r'$\kappa_{sph_rinfs}=%f$'%rets_sphlog.popt[0],r'$\kappa_{synth_rinfs}=%f$'%rets_synthlog.popt[0]]
+        ax.set(xlabel=r'$\rho_{ave}$', ylabel=r'$|B|$', xscale='log', yscale='log', title=title[1])#,  
+               #xlim=(10e-2,1.5e4), ylim=(1.5e0,1e4)) 
+               #, xlim=(10e-3,10e3), ylim=(10e-2,10e3))      
         ax.legend(loc='best')
 
-        outname = 'p66_brho/%s_kappatff_scatter_%s'%(parts_or_spheres,sims[0])
+        outname = 'p66_brho/plotsexplore/%s_rinf_kappatff_scatter_%s'%(parts_or_spheres,sims[0])
         plt.savefig(outname)
         print('figure saved!')
         plt.clf()    
@@ -431,13 +647,21 @@ if 1:
                 plt.clf()    
 
             if typeofhistos == 'original':
+                outof = len(rinf_radii[i])
+                lessthanone = 0
+                the_radius = 1/128
+                for radii in rinf_radii[i]:
+                    if radii < the_radius:
+                        lessthanone = lessthanone + 1 
                 fig,ax = plt.subplots(1,1)
                 the_min = rinf_radii[i].min()
                 the_max = rinf_radii[i].max()
                 the_bins = np.linspace(the_min, the_max, num=64)  #there was a comment made at the group meet about this.
                 ax.hist(rinf_radii[i], bins=the_bins, density=True, histtype='step', color='k')
+                ax.set(title='less than 1/128 cores: %d, out of %d'%(lessthanone,outof))
+                plt.axvline(x=1/128)
                 print('saving frame %d'%i)
-                plt.savefig('p66_brho/plotexplore/og_rinfs_frame_%d'%i)
+                plt.savefig('p66_brho/plotsexplore/og_rinfs_frame_%d'%i)
 
     if figtype == 'tsungtff':
         fig,ax = plt.subplots(1,1)
@@ -447,6 +671,7 @@ if 1:
         the_bins = np.linspace(the_min, the_max, num=64)  #there was a comment made at the group meet about this.
         ax.hist(tff_ratio, bins=the_bins, density=True, histtype='step', color='k')
         tsungtffratio = tff_ratio.mean()
+
         ax.set(title='mean tsung/tff ratio: %f'%tsungtffratio, xlabel=r'$t_{\mathrm{sung}}/t_{\mathrm{ff}}$', ylabel='count')
         print('saving histos')
         plt.savefig('p66_brho/plotexplore/tsungratiotff_%s'%sims[0])

@@ -7,7 +7,6 @@ import pandas
 from starter2 import *
 import json
 from mpl_toolkits.axes_grid1 import AxesGrid
-from yt.visualization.base_plot_types import get_multi_plot
 import animate_plots
 
 def SinkVsNonSink_BRhoPlotter(trackname, sink_trackname, framelist):
@@ -150,4 +149,4 @@ def SinkVsNonSink_BRhoPlotter(trackname, sink_trackname, framelist):
 
 
 
-SinkVsNonSink_BRhoPlotter('nb101', 'nb102', np.arange(0,126))
+#SinkVsNonSink_BRhoPlotter('nb101', 'nb102', np.arange(0,126))

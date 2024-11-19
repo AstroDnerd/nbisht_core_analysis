@@ -18,8 +18,6 @@ import monster
 import pandas as pd
 
 
-path_to_output_plots = "/home/nbisht/cdbreak_desktop/nikhilb_home/results/plots_to_sort"
-path_to_sink_clump = '/data/cb1/nbisht/anvil_scratch/projects/128/B2_sink_nazare/datasets/sink_clump_position_with_sink_totaldensity.json'
 nonsink_trackname = 'nb101'
 sink_trackname = 'nb102'
 
@@ -29,7 +27,7 @@ import rho_time
 #get core data only for valid tsing cores
 def export_data_for_ML(trackname, plot_rho = False):
     this_track = track_info.tracks[trackname]
-    with open(path_to_sink_clump, 'r') as fp:
+    with open(this_track.SinkClumpLink_fname, 'r') as fp:
         sink_core_dict = json.load(fp)
     monster.load([trackname])
     mon = monster.closet[trackname]
@@ -141,19 +139,59 @@ def export_data_for_ML(trackname, plot_rho = False):
     del all_data_final
 
     #Open dataframe
-    df_name = this_track.export_to_ML_fname
+    df_name = this_track.export_to_ML_fname+".csv"
     df = pd.DataFrame(data)
     df.to_csv(df_name)
     
     diff = time.time() - start_time
     print('Time taken by looper:',diff)
 
-    pdb.set_trace()
+    #pdb.set_trace()
     del df
+
+
+
+#get all tracer particle density data and see if it picks up cores
+def export_data_for_ML_autoencoder(trackname, target_frames = None):
+    this_track = track_info.tracks[trackname]
+    import time
+    start_time = time.time()
+    if target_frames ==None:
+        target_frames = this_track.frame_list
+    
+    df_name = this_track.export_to_ML_fname+"_AllData_AutoEnc.h5"
+    if os.path.isfile(df_name):
+        print("File exists!")
+        return 1
+    for framenum in target_frames:
+        hf = h5py.File(df_name, 'a')
+        g1 = hf.create_group(str(framenum))
+        #Open these frames and get particle data
+        ds_begin = yt.load("%s/DD%04d/data%04d"%(this_track.sim_directory,framenum,framenum))
+        all_data_begin = ds_begin.all_data()
+        all_pids = np.array(all_data_begin[ds_begin.fields.all.particle_index])
+
+        g1.create_dataset('Particle_id', data = all_pids)
+        g1.create_dataset('X', data =  np.array(all_data_begin[ds_begin.fields.all.particle_position_x]).tolist())
+        g1.create_dataset('Y', data =  np.array(all_data_begin[ds_begin.fields.all.particle_position_y]).tolist())
+        g1.create_dataset('Z', data =  np.array(all_data_begin[ds_begin.fields.all.particle_position_z]).tolist())
+        non_pos = np.array(all_data_begin[ds_begin.fields.all.particle_position])
+        peak_density = ds_begin.find_field_values_at_points([("gas", "density")],non_pos)
+        g1.create_dataset('Density', data =  peak_density.tolist())
+        g1.create_dataset('Vx', data =  np.array(all_data_begin[ds_begin.fields.all.particle_velocity_x]).tolist())
+        g1.create_dataset('Vy', data =  np.array(all_data_begin[ds_begin.fields.all.particle_velocity_y]).tolist())
+        g1.create_dataset('Vz', data =  np.array(all_data_begin[ds_begin.fields.all.particle_velocity_z]).tolist())
+        hf.close()
+        del ds_begin
+        del all_data_begin
+
+    diff = time.time() - start_time
+    print('Time taken by looper:',diff)
+
 
     
     
-export_data_for_ML(nonsink_trackname, plot_rho = False)
+export_data_for_ML_autoencoder(nonsink_trackname)
 
 
 

@@ -180,7 +180,8 @@ def buddy_hair(this_looper,core_list=None, suffix='', color_dict={}, what_to_plo
         else:
             ax.set( xlabel=r'$t/t_{ff}$', ylabel = 'xyz'[LOS])
 
-    outname='plots_to_sort/%s_buddies_%s_%s_%s.png'%(this_looper.sim_name, what_to_plot,'xyz',suffix)
+    make_dir("plots_to_sort/buddy_centroid")
+    outname='plots_to_sort/buddy_centroid/%s_buddies_%s_%s_%s.png'%(this_looper.sim_name, what_to_plot,'xyz',suffix)
     fig.tight_layout()
     fig.savefig(outname)
     print(outname)

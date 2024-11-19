@@ -8,7 +8,21 @@ reload(bs)
 import add_tracer_tool as AT
 reload(AT)
 
+fields = [('enzo','Density'), ('enzo','x-velocity'),('enzo','y-velocity'),('enzo','z-velocity'),('enzo','Bx'),('enzo','By'),('enzo','Bz')]
+fields = [('enzo','Density'), ('enzo','x-velocity'),('enzo','y-velocity'),('enzo','z-velocity')]
 if 1:
+    suite = "mach4"
+    size = 1024
+    setname = "/anvil/scratch/x-ux454321/p19b_high_res/IC_1024/mach4_xi0.5_b0/DD0090/data0090"
+    ds= yt.load(setname)
+    cg = ds.covering_grid(0,[0.0]*3,[size]*3)
+    print('make cg')
+    stuff1024=[]
+    for field in fields:
+        print('make',field)
+        stuff1024.append( cg[field])
+
+if 0:
     #read the cubes
     directory = "/anvil/scratch/x-ux454321/p19b_high_res/IC_1024/B02"
     base = "%s/cube080"%directory
@@ -20,16 +34,17 @@ if 1:
         stuff1024[n].shape=[1024]*3
 
 if 1:
+    output_directory = "/anvil/scratch/x-ux454321/p19b_high_res/take1/mach4_1024"
 
     sl = tuple([slice(0,512)]*3)
     sl = tuple([slice(None)]*3)
-    bs.write_enzo_set(stuff1024[0][sl],output_directory,'p19b_b02_density.1024')
-    bs.write_enzo_set(stuff1024[1][sl],output_directory,'p19b_b02_vx.1024')
-    bs.write_enzo_set(stuff1024[2][sl],output_directory,'p19b_b02_vy.1024')
-    bs.write_enzo_set(stuff1024[3][sl],output_directory,'p19b_b02_vz.1024')
-    bs.write_enzo_set(stuff1024[4][sl],output_directory,'p19b_b02_bx.1024',extend=0 )
-    bs.write_enzo_set(stuff1024[5][sl],output_directory,'p19b_b02_by.1024',extend=1 )
-    bs.write_enzo_set(stuff1024[6][sl],output_directory,'p19b_b02_bz.1024',extend=2 )
+    bs.write_enzo_set(stuff1024[0][sl],output_directory,'p19b_%s_density.1024'%suite)
+    bs.write_enzo_set(stuff1024[1][sl],output_directory,'p19b_%s_vx.1024'%suite)
+    bs.write_enzo_set(stuff1024[2][sl],output_directory,'p19b_%s_vy.1024'%suite)
+    bs.write_enzo_set(stuff1024[3][sl],output_directory,'p19b_%s_vz.1024'%suite)
+    bs.write_enzo_set(stuff1024[4][sl],output_directory,'p19b_%s_bx.1024'%suite,extend=0 )
+    bs.write_enzo_set(stuff1024[5][sl],output_directory,'p19b_%s_by.1024'%suite,extend=1 )
+    bs.write_enzo_set(stuff1024[6][sl],output_directory,'p19b_%s_bz.1024'%suite,extend=2 )
 
 if 0:
     #DO ONE STEP.
