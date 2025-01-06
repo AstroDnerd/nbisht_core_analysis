@@ -81,7 +81,7 @@ class Down(nn.Module):
     def __init__(self, in_channels, out_channels, emb_dim=256):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
-            nn.MaxPool3d(3),
+            nn.MaxPool3d(2),
             DoubleConv(in_channels, in_channels, residual=True),
             DoubleConv(in_channels, out_channels),
         )
@@ -131,25 +131,46 @@ class UNet_conditional(nn.Module):
         super().__init__()
         self.device = device
         self.time_dim = time_dim
-        self.inc = DoubleConv(c_in, 64)
-        self.down1 = Down(64, 128)
-        self.sa1 = SelfAttention(128, 32)
-        self.down2 = Down(128, 256)
-        self.sa2 = SelfAttention(256, 16)
-        self.down3 = Down(256, 256)
-        self.sa3 = SelfAttention(256, 8)
+        #self.inc = DoubleConv(c_in, 64)
+        #self.down1 = Down(64, 128)
+        #self.sa1 = SelfAttention(128, 32)
+        #self.down2 = Down(128, 256)
+        #self.sa2 = SelfAttention(256, 16)
+        #self.down3 = Down(256, 256)
+        #self.sa3 = SelfAttention(256, 8)
 
-        self.bot1 = DoubleConv(256, 512)
-        self.bot2 = DoubleConv(512, 512)
-        self.bot3 = DoubleConv(512, 256)
+        #self.bot1 = DoubleConv(256, 512)
+        #self.bot2 = DoubleConv(512, 512)
+        #self.bot3 = DoubleConv(512, 256)
 
-        self.up1 = Up(512, 128)
-        self.sa4 = SelfAttention(128, 16)
-        self.up2 = Up(256, 64)
-        self.sa5 = SelfAttention(64, 32)
-        self.up3 = Up(128, 64)
-        self.sa6 = SelfAttention(64, 64)
-        self.outc = nn.Conv3d(64, c_out, kernel_size=1)
+        #self.up1 = Up(512, 128)
+        #self.sa4 = SelfAttention(128, 16)
+        #self.up2 = Up(256, 64)
+        #self.sa5 = SelfAttention(64, 32)
+        #self.up3 = Up(128, 64)
+        #self.sa6 = SelfAttention(64, 64)
+        #self.outc = nn.Conv3d(64, c_out, kernel_size=1)
+
+        self.inc = DoubleConv(c_in, 32)
+        self.down1 = Down(32, 64)
+        self.sa1 = SelfAttention(64, 16)
+        self.down2 = Down(64, 128)
+        self.sa2 = SelfAttention(128, 8)
+        self.down3 = Down(128, 128)
+        self.sa3 = SelfAttention(128, 4)
+
+
+        self.bot1 = DoubleConv(128, 256)
+        self.bot2 = DoubleConv(256, 256)
+        self.bot3 = DoubleConv(256, 128)
+
+        self.up1 = Up(256, 128)
+        self.sa4 = SelfAttention(128, 4)
+        self.up2 = Up(128, 64)
+        self.sa5 = SelfAttention(64, 8)
+        self.up3 = Up(64, 32)
+        self.sa6 = SelfAttention(32, 16)
+        self.outc = nn.Conv3d(32, c_out, kernel_size=1)
 
 
     def pos_encoding(self, t, channels):

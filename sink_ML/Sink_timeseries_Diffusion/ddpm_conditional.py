@@ -48,7 +48,8 @@ class Diffusion:
             if cfg_scale > 0:
                 x_IC_cfg = torch.normal(mean=0.0, std = 1, size=(n, int(self.n_channels/2), self.img_size, self.img_size, self.img_size)).to(self.device)
             initial_condition_image = torch.reshape(initial_condition_image, xinput.shape)
-            x = torch.cat((initial_condition_image,xinput),1)
+            noised_initial_image, _ = self.noise_images(initial_condition_image, torch.Tensor([self.noise_steps]).long())
+            x = torch.cat((noised_initial_image,xinput),1)
             for i in tqdm(reversed(range(1, self.noise_steps)), position=0):
                 t = (torch.ones(n) * i).long().to(self.device)
                 predicted_noise = model(x, t)
@@ -65,7 +66,7 @@ class Diffusion:
                     noise = torch.zeros_like(x)
                 x = 1 / torch.sqrt(alpha) * (x - ((1 - alpha) / (torch.sqrt(1 - alpha_hat))) * predicted_noise) + torch.sqrt(beta) * noise
         model.train()
-        x[:,0,:,:,:] = initial_condition_image
+        #x[:,0,:,:,:] = initial_condition_image
         x = (x.clamp(-1, 1) + 1) / 2
         #x = (x * 255).type(torch.uint8)
         return x
