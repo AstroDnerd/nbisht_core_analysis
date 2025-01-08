@@ -66,52 +66,60 @@ def plot_autocorrelation_0d(x):
     plt.tight_layout()
     plt.savefig("./plots_to_sort/AutocorrelationTest/AutocorrelationTest_0D.png")
 
-def plot_autocorrelation_nd(x):
+def plot_autocorrelation_nd(x, dim='1D'):
     #calculate Nd autocorrelation
     ac_x = ac_fft(x)
     print("FFT shape:",ac_x.shape)
     ac_s = ac_self(x)
     print("self shape:",ac_s.shape)
 
+    ac_x_summed = ac_x
+    ac_s_summed = ac_s
+    for i in range(1,len(ac_x.shape)):
+        print("Compressing along dimension:",i)
+        ac_x_summed = np.sum(ac_x_summed, axis=1)/ac_x.shape[1]
+        ac_s_summed = np.sum(ac_s_summed, axis=1)/ac_x.shape[1]
+    L_fft = get_integral_scale(ac_x_summed)
+    L_self = get_integral_scale(ac_s_summed)
+
     #Make timeseries
-    t = np.arange(ac_x.shape[0])
-    y = np.arange(ac_x.shape[1])
-    Y,T = np.meshgrid(y,t)
-    print(T.shape,Y.shape)
-    L_fft = get_integral_scale(np.sum(ac_x, axis=1)/ac_x.shape[1])
-    L_self = get_integral_scale(np.sum(ac_s, axis=1)/ac_s.shape[1])
-    print(ac_x)
+    T = np.arange(ac_x.shape[0])
+
+    print(ac_x_summed.shape)
     for i in range(len(x)):
         x_i = x[i]
         fig = plt.figure(figsize=(10,20))
 
-        ax1 = fig.add_subplot(211)
-        ax1.plot(x_i)
+        if dim == '1D':
+            ax1 = fig.add_subplot(211)
+            ax1.plot(x_i)
+        elif dim=='2D':
+            ax1 = fig.add_subplot(211)
+            ax1.imshow(x_i.T, vmin=-1, vmax=+1)
         ax1.set_title('Raw data: %04d'%(i))
 
-        ax2 = fig.add_subplot(212, projection='3d')
-        ax2.scatter(T[:i+1],Y[:i+1], ac_s[:i+1], label='self', c='blue')
-        ax2.scatter(T[:i+1],Y[:i+1], ac_x[:i+1], label='fft', c='orange')
-        ax2.set_xlim([0,ac_x.shape[0]])
-        ax2.set_ylim([0,ac_x.shape[1]])
-        ax2.set_zlim([-1,1])
+        ax2 = fig.add_subplot(212)
+        ax2.scatter(T[:i+1], ac_s_summed[:i+1], label='self', c='blue')
+        ax2.scatter(T[:i+1], ac_x_summed[:i+1], label='fft', c='orange')
+        ax2.set_xlim([0,ac_x_summed.shape[0]])
+        ax2.set_ylim([-1,1])
         ax2.legend()
 
         ax2.set_title('FFT L:%.3f;\n Self L:%.3f'%(L_fft,L_self))
 
-        plt.savefig("./plots_to_sort/AutocorrelationTest/AT_1D_plots/DD%04d.png"%(i))
+        plt.savefig("./plots_to_sort/AutocorrelationTest/AT_"+dim+"_plots/DD%04d.png"%(i))
         plt.close()
-    animator("./plots_to_sort/AutocorrelationTest/AT_1D_plots","AutocorrelationTest_1D")
+    animator("./plots_to_sort/AutocorrelationTest/AT_"+dim+"_plots","AutocorrelationTest_"+dim)
     
 
 #Test Cases
-if 1:
+if 0:
     #0D, 1 number varying through time from -1 to 1, sinusoidal at first then random
     x = np.linspace(0, 2 * np.pi, 50)
     x = np.sin(x)
     x = np.append(x,np.random.uniform(-1, 1, 75))
     plot_autocorrelation_0d(x)
-if 1:
+if 0:
     #1D, initial a 1D sine curve then randomness
     x = []
     for i in range(125):
@@ -122,6 +130,19 @@ if 1:
         else:
             x.append(np.random.uniform(-1, 1, 128))
     plot_autocorrelation_nd(x)
+if 1:
+    #2D, initial a 2D sine sheet then randomness
+    x = []
+    for i in range(125):
+        if i<50:
+            shift_i = i*np.pi/25
+            x_i = np.linspace(0+shift_i, 2 * np.pi+shift_i, 128)
+            x_i = np.tile(x_i,(128,1))
+            x.append(np.sin(x_i))
+        else:
+            x_i = np.random.uniform(-1, 1, (128,128))
+            x.append(x_i)
+    plot_autocorrelation_nd(x, dim='2D')
 
 
 
