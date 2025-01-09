@@ -88,17 +88,26 @@ def plot_autocorrelation_nd(x, dim='1D'):
     print(ac_x_summed.shape)
     for i in range(len(x)):
         x_i = x[i]
-        fig = plt.figure(figsize=(10,20))
+        fig = plt.figure(figsize=(20,20))
 
         if dim == '1D':
             ax1 = fig.add_subplot(211)
             ax1.plot(x_i)
+            ax2 = fig.add_subplot(212)
         elif dim=='2D':
             ax1 = fig.add_subplot(211)
             ax1.imshow(x_i.T, vmin=-1, vmax=+1)
-        ax1.set_title('Raw data: %04d'%(i))
+            ax2 = fig.add_subplot(212)
+        elif dim=='3D':
+            ax1 = fig.add_subplot(221)
+            ax1.imshow(np.sum(x_i, axis=0)/x_i.shape[0], vmin=-1, vmax=+1)
+            ax1 = fig.add_subplot(222)
+            ax1.imshow(np.sum(x_i, axis=1)/x_i.shape[1], vmin=-1, vmax=+1)
+            ax1 = fig.add_subplot(223)
+            ax1.imshow(np.sum(x_i, axis=2)/x_i.shape[2], vmin=-1, vmax=+1)
+            ax2 = fig.add_subplot(224)
 
-        ax2 = fig.add_subplot(212)
+        ax1.set_title('Raw data: %04d'%(i))        
         ax2.scatter(T[:i+1], ac_s_summed[:i+1], label='self', c='blue')
         ax2.scatter(T[:i+1], ac_x_summed[:i+1], label='fft', c='orange')
         ax2.set_xlim([0,ac_x_summed.shape[0]])
@@ -130,7 +139,7 @@ if 0:
         else:
             x.append(np.random.uniform(-1, 1, 128))
     plot_autocorrelation_nd(x)
-if 1:
+if 0:
     #2D, initial a 2D sine sheet then randomness
     x = []
     for i in range(125):
@@ -143,6 +152,19 @@ if 1:
             x_i = np.random.uniform(-1, 1, (128,128))
             x.append(x_i)
     plot_autocorrelation_nd(x, dim='2D')
+if 1:
+    #3D, initial a 3D sine sheet then randomness
+    x = []
+    for i in range(125):
+        if i<50:
+            shift_i = i*np.pi/25
+            x_i = np.linspace(0+shift_i, 2 * np.pi+shift_i, 128)
+            x_i = np.repeat(np.tile(x_i,(128,1))[:,:,np.newaxis],128,axis=2)
+            x.append(np.sin(x_i))
+        else:
+            x_i = np.random.uniform(-1, 1, (128,128,128))
+            x.append(x_i)
+    plot_autocorrelation_nd(x, dim='3D')
 
 
 
