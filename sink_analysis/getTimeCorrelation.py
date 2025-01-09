@@ -11,12 +11,16 @@ warnings.filterwarnings("ignore")
 import json
 import scipy.fft as fft
 from starter2 import *
+import track_loader as TL
 from animate_plots import animator
 import pdb
 
 #define paths sinkoff
 path_to_data_128 = "/data/cb1/nbisht/anvil_scratch/projects/128/B2/"
 path_to_output_plots = "./plots_to_sort/TimeCorrelation/"
+
+#Average Time difference between snapshots
+DELTAT = 0.0003744333333
 
 def make_dir(dir_path):
     if not os.path.exists(dir_path):
@@ -47,6 +51,7 @@ def get_integral_scale(x):
             L_scale+=val
         else:
             return L_scale
+    return L_scale
 
 def plot_autocorrelation_0d(x):
     ac_x = ac_fft(x)
@@ -86,19 +91,22 @@ def plot_autocorrelation_nd(x, dim='1D'):
     T = np.arange(ac_x.shape[0])
 
     print(ac_x_summed.shape)
+    print(L_fft)
+    print(ac_s_summed.shape)
+    print(L_self)
     for i in range(len(x)):
         x_i = x[i]
         fig = plt.figure(figsize=(20,20))
 
-        if dim == '1D':
+        if dim[0] == '1':
             ax1 = fig.add_subplot(211)
             ax1.plot(x_i)
             ax2 = fig.add_subplot(212)
-        elif dim=='2D':
+        elif dim[0] =='2':
             ax1 = fig.add_subplot(211)
             ax1.imshow(x_i.T, vmin=-1, vmax=+1)
             ax2 = fig.add_subplot(212)
-        elif dim=='3D':
+        elif dim[0]=='3':
             ax1 = fig.add_subplot(221)
             ax1.imshow(np.sum(x_i, axis=0)/x_i.shape[0], vmin=-1, vmax=+1)
             ax1 = fig.add_subplot(222)
@@ -114,7 +122,7 @@ def plot_autocorrelation_nd(x, dim='1D'):
         ax2.set_ylim([-1,1])
         ax2.legend()
 
-        ax2.set_title('FFT L:%.3f;\n Self L:%.3f'%(L_fft,L_self))
+        ax2.set_title('FFT L:%.3f, %.3fs;\n Self L:%.3f, %.3fs'%(L_fft,DELTAT*L_fft,L_self,DELTAT*L_self))
 
         plt.savefig("./plots_to_sort/AutocorrelationTest/AT_"+dim+"_plots/DD%04d.png"%(i))
         plt.close()
@@ -152,7 +160,7 @@ if 0:
             x_i = np.random.uniform(-1, 1, (128,128))
             x.append(x_i)
     plot_autocorrelation_nd(x, dim='2D')
-if 1:
+if 0:
     #3D, initial a 3D sine sheet then randomness
     x = []
     for i in range(125):
@@ -165,21 +173,16 @@ if 1:
             x_i = np.random.uniform(-1, 1, (128,128,128))
             x.append(x_i)
     plot_autocorrelation_nd(x, dim='3D')
-
-
-
-def Correlation_Plot(path_to_data, number_of_frames):
-    #import data
-    if not os.path.exists(path_to_output_plots):
-        os.makedirs(path_to_output_plots)
-
-    for frame_number in range(0,number_of_frames):
-        frame_str = str(frame_number).zfill(4)
-        data = yt.load(path_to_data+"DD"+frame_str+"/data"+frame_str)
-        all_data = data.all_data()
-        print(data.field_list)
-
-        plot = yt.ProjectionPlot(data, coordinate, dataset_to_plot, fontsize = 10)
-
-
+if 1:
+    #3D density Timeseries_Cube
+    nonsink_trackname = 'nb101'
+    this_track = track_info.tracks[nonsink_trackname]
+    df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
+    infile = open(df_name, 'rb')
+    TSCube_density = np.load(infile)
+    time_array = np.load(infile)
+    infile.close()
+    #density variance
+    TSCube_density = TSCube_density-1
+    plot_autocorrelation_nd(TSCube_density, dim='3D_densityvariance')
 

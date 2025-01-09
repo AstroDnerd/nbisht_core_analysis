@@ -34,7 +34,7 @@ def getTimeseriesCubes(trackname, fieldname = 'density', target_frames = None):
     if target_frames ==None:
         target_frames = this_track.frame_list
     
-    df_name = this_track.sim_directory+'/datasets/TimeseriesCubes_Density.json'
+    df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
     if os.path.isfile(df_name):
         print("File exists!")
         return 1
@@ -56,12 +56,13 @@ def getTimeseriesCubes(trackname, fieldname = 'density', target_frames = None):
     
     TSCube_dic = {"Cube":TSCube_array, "Time": time_arr}
     print(time_arr)
-    infile = open(df_name, 'w')
-    json.dump(TSCube_dic, infile)
+    infile = open(df_name, 'wb')
+    np.save(infile, TSCube_array)
+    np.save(infile, time_arr)
     infile.close()
     diff = time.time() - start_time
     print('Time taken by looper:',diff)
 
-getTimeseriesCubes(nonsink_trackname, fieldname = 'density')
+#getTimeseriesCubes(nonsink_trackname, fieldname = 'density')
 
 
