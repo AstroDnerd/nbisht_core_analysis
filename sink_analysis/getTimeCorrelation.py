@@ -173,7 +173,7 @@ if 0:
             x_i = np.random.uniform(-1, 1, (128,128,128))
             x.append(x_i)
     plot_autocorrelation_nd(x, dim='3D')
-if 1:
+if 0:
     #3D density Timeseries_Cube
     nonsink_trackname = 'nb101'
     this_track = track_info.tracks[nonsink_trackname]
@@ -185,4 +185,43 @@ if 1:
     #density variance
     TSCube_density = TSCube_density-1
     plot_autocorrelation_nd(TSCube_density, dim='3D_densityvariance')
+
+if 1:
+    #3D density Timeseries_Cube visualised with plotly
+    import plotly.graph_objects as go
+    import plotly.express as px
+    nonsink_trackname = 'nb101'
+    this_track = track_info.tracks[nonsink_trackname]
+    df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
+    infile = open(df_name, 'rb')
+    TSCube_density = np.load(infile)
+    time_array = np.load(infile)
+    infile.close()
+    html_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density_visualiser_DD0125.html'
+
+
+    #plotly figure, first create x,y,z meshgrid with evenly spaced numbers
+    X, Y, Z = np.mgrid[0:1:128j, 0:1:128j, 0:1:128j]
+    #flatten 3D array
+    flat_tscube = TSCube_density[120].flatten()
+    minval = np.quantile(flat_tscube,0.2)
+    base_minval = 10**(round(np.log10(minval)))
+    isominval = int(minval/base_minval)*base_minval
+    maxval = np.quantile(flat_tscube,0.99999)
+    base_maxval = 10**(round(np.log10(maxval)))
+    isomaxval = int(maxval/base_maxval)*base_maxval
+    print(minval,maxval)
+    print("min isocontour:%0.3f max isocontour:%0.3f"%(isominval,isomaxval))
+    fig = go.Figure(data=go.Volume(
+        x=X.flatten(),
+        y=Y.flatten(),
+        z=Z.flatten(),
+        value=flat_tscube,
+        isomin=isominval,
+        isomax=isomaxval,
+        opacity=0.1, # needs to be small to see through all surfaces
+        surface_count=50, # needs to be a large number for good volume rendering
+        ))
+    fig.write_html(html_name)
+
 
