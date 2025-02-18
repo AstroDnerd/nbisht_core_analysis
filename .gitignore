@@ -10,5 +10,6 @@ trash/*
 .*swp
 *h5
 *json
-
+*csv
+*pkl
 msu23
