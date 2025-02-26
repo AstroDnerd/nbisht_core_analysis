@@ -1,0 +1,173 @@
+# standard system modules
+import os, sys
+os.environ["PATH"] += os.pathsep + "/home/nbisht/myapps/bin/"
+import h5py 
+import pandas as pd
+import pickle
+# standard module for array manipulation
+import numpy as np
+
+# standard module for high-quality plots
+from PIL import Image
+import matplotlib as mp
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+mp.rcParams.update(mp.rcParamsDefault)
+mp.rcParams['agg.path.chunksize'] = 100000
+import matplotlib.gridspec as gridspec
+import scienceplots
+
+#plt.style.use(['science','scatter','grid'])
+
+# set a seed to ensure reproducibility
+seed = 128
+rnd  = np.random.RandomState(seed)
+FRAME_DIFF = 30
+def mae_modded(y_true, y_pred):
+    mae = np.array([0.,0.,0.])
+    mae_diff = np.abs(y_true - y_pred)
+    mae_add = 1 - mae_diff
+    stacked = np.stack([mae_diff, mae_add], axis=2)
+    mae = stacked.min(axis=2).mean(axis=0)
+    return mae
+
+def r2_modded(y_true, y_pred):
+    true_mean = np.mean(y_true,axis=0)
+    mae_diff = np.abs(y_true - y_pred)
+    mae_add = 1 - mae_diff
+    stacked = np.stack([mae_diff, mae_add], axis=2)
+    r2_residual = stacked.min(axis=2)**2
+    mae_diff = np.abs(y_true - true_mean)
+    mae_add = 1 - mae_diff
+    stacked = np.stack([mae_diff, mae_add], axis=2)
+    r2_total = stacked.min(axis=2)**2
+
+    return 1-r2_residual.sum(axis=0)/r2_total.sum(axis=0)
+
+
+with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Core_framewise_predictions.pickle', 'rb') as handle:
+    results_dic_core = pickle.load(handle)
+
+'''
+with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_NonCore_predictions.pickle', 'rb') as handle:
+    results_dic_noncore = pickle.load(handle)
+
+with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Combined_predictions.pickle', 'rb') as handle:
+    results_dic_combined = pickle.load(handle)
+'''
+
+#{'Model_1':{'ytrue':[], 'ypred':[]}, 'Model_2':{'ytrue':[], 'ypred':[]}, 'Model_3':{'ytrue':[], 'ypred':[]}}
+
+TARGET = ['X', 'Y', 'Z']
+prediction_type_name = ['Core', 'NonCore', 'Combined']
+prediction_type = [results_dic_core, results_dic_core, results_dic_core]
+model_names = ['Model_1', 'Model_2', 'Model_3']
+
+def plot_prediction_framewise(X_test, ypred, ytrue):
+    unique_frames = np.unique(X_test['Initial_Frame'])
+    fig = plt.figure(figsize=(4.5*len(unique_frames)//2, 8))
+    for frame_num_index in range(0,len(unique_frames),2):
+        frame_val = unique_frames[frame_num_index]
+        print(frame_val)
+        X_test_frame = X_test[X_test['Initial_Frame'] == frame_val]
+        ypred_frame = ypred.loc[X_test_frame.index]
+        ytrue_frame = ytrue.loc[X_test_frame.index]
+        ax = plt.subplot2grid((2,len(unique_frames)//2), (0,frame_num_index//2))
+        ax.set_title(f'Predicted Frame: {frame_val+FRAME_DIFF}', fontsize=18)
+        ax.set_xlim(0, 1)
+        ax.set_xlabel('X', fontsize=18)
+        ax.set_ylim(0, 1)
+        ax.set_ylabel('Y', fontsize=18)
+        ax.scatter(ypred_frame['X_f'], ypred_frame['Y_f'], s=1e-3, color='coral', alpha = 0.5)
+
+        ax = plt.subplot2grid((2,len(unique_frames)//2), (1,frame_num_index//2))
+        ax.set_title(f'True Frame: {frame_val+FRAME_DIFF}', fontsize=18)
+        ax.set_xlim(0, 1)
+        ax.set_xlabel('X', fontsize=18)
+        ax.set_ylim(0, 1)
+        ax.set_ylabel('Y', fontsize=18)
+        ax.scatter(ytrue_frame['X_f'], ytrue_frame['Y_f'], s=1e-3, color='royalblue', alpha = 0.5)
+        
+    fig.tight_layout()
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_prediction.png', dpi=300, bbox_inches='tight')
+    plt.show()
+
+
+def adjacent_values(vals, q1, q3):
+    upper_adjacent_value = q3 + (q3 - q1) * 1.5
+    upper_adjacent_value = np.clip(upper_adjacent_value, q3, vals[-1])
+
+    lower_adjacent_value = q1 - (q3 - q1) * 1.5
+    lower_adjacent_value = np.clip(lower_adjacent_value, vals[0], q1)
+    return lower_adjacent_value, upper_adjacent_value
+
+
+def set_axis_style(ax, labels):
+    ax.set_xticks(np.arange(1, len(labels) + 1), labels=labels)
+    ax.set_xlim(0.25, len(labels) + 0.75)
+    ax.set_xlabel('Sample name')
+
+def plot_framewise_l2norm(X_test, ypred, ytrue):
+    unique_frames = np.unique(X_test['Initial_Frame'])
+    predicted_dataset = []
+    predicted_frame = []
+    for frame_num_index in range(0,len(unique_frames)):
+        frame_val = unique_frames[frame_num_index]
+        predicted_frame.append(frame_val+FRAME_DIFF)
+        X_test_frame = X_test[X_test['Initial_Frame'] == frame_val]
+        ypred_frame = ypred.loc[X_test_frame.index]
+        ytrue_frame = ytrue.loc[X_test_frame.index]
+
+        diff = np.abs(ytrue_frame-ypred_frame)
+        diff['X_f'] = np.where(diff['X_f']>=0.5, 1-diff['X_f'], diff['X_f'])
+        diff['Y_f'] = np.where(diff['Y_f']>=0.5, 1-diff['Y_f'], diff['Y_f'])
+        diff['Z_f'] = np.where(diff['Z_f']>=0.5, 1-diff['Z_f'], diff['Z_f'])
+        diff = diff.to_numpy()
+        predicted_dataset.append(np.sort(np.linalg.norm(diff, axis=1)))
+    data = np.array(predicted_dataset).T
+    print(data.shape)
+    print(len(predicted_frame))
+    fig, (ax1) = plt.subplots(nrows=1, ncols=1, figsize=(24, 9))
+    parts = ax1.violinplot(
+            data, showmeans=False, showmedians=False,
+            showextrema=False)
+
+    for pc in parts['bodies']:
+        pc.set_facecolor('plum')
+        pc.set_edgecolor('indigo')
+        pc.set_alpha(1)
+
+    quartile1, medians, quartile3 = np.percentile(data, [25, 50, 75], axis=0)
+    whiskers = np.array([
+        adjacent_values(sorted_array, q1, q3)
+        for sorted_array, q1, q3 in zip(data, quartile1, quartile3)])
+    whiskers_min, whiskers_max = whiskers[:, 0], whiskers[:, 1]
+
+    inds = np.arange(1, len(medians) + 1)
+    ax1.scatter(inds, medians, marker='o', color='white', s=30, zorder=3)
+    ax1.vlines(inds, quartile1, quartile3, color='k', linestyle='-', lw=5)
+    ax1.vlines(inds, whiskers_min, whiskers_max, color='k', linestyle='-', lw=1)
+    ax1.axhline(0, color='black', linestyle='--', lw=2)
+    ax1.set_ylabel('Euclidean Distance', fontsize=18)
+    # set style for the axes
+    for ax in [ax1]:
+        set_axis_style(ax, predicted_frame)
+    
+    ax1.set_xlabel('Frame', fontsize=18)
+
+
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_Euclidean_Distance.png', dpi=300, bbox_inches='tight')
+    plt.show()
+    plt.close()
+
+
+col = 0
+row = 0
+ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
+ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
+X_test = prediction_type[col]['xtest'].reset_index(drop=True)
+plot_framewise_l2norm(X_test, ypred, ytrue)
+
+
+
+
