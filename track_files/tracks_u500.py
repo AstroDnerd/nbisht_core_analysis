@@ -24,6 +24,7 @@ track_info.track('u502',
                  mountain_top = "datasets_small/u302_mountain_tops_take_9.h5",
                  peak_fname = 'datasets_small/u302_0118_peaklist.h5',
                  track_file = "%s/u500/u502_all_frame_all_prim.h5"%dl.coresets['ourset'],
+                 export_to_ML_fname = "/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_ML_dataset",
                  mode_fname = "browser_data/core_formation_mode_new_u602.h5",
                  frame_list = "all_frames",
                  field_list = track_info.field_lists['most_things'])

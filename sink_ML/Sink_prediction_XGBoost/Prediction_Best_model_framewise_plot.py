@@ -45,51 +45,46 @@ def r2_modded(y_true, y_pred):
     return 1-r2_residual.sum(axis=0)/r2_total.sum(axis=0)
 
 
-with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Core_framewise_predictions.pickle', 'rb') as handle:
-    results_dic_core = pickle.load(handle)
 
-'''
-with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_NonCore_predictions.pickle', 'rb') as handle:
-    results_dic_noncore = pickle.load(handle)
-
-with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Combined_predictions.pickle', 'rb') as handle:
-    results_dic_combined = pickle.load(handle)
-'''
-
-#{'Model_1':{'ytrue':[], 'ypred':[]}, 'Model_2':{'ytrue':[], 'ypred':[]}, 'Model_3':{'ytrue':[], 'ypred':[]}}
-
-TARGET = ['X', 'Y', 'Z']
-prediction_type_name = ['Core', 'NonCore', 'Combined']
-prediction_type = [results_dic_core, results_dic_core, results_dic_core]
-model_names = ['Model_1', 'Model_2', 'Model_3']
-
-def plot_prediction_framewise(X_test, ypred, ytrue):
+def plot_prediction_framewise(X_test, ypred, ytrue, append=''):
     unique_frames = np.unique(X_test['Initial_Frame'])
-    fig = plt.figure(figsize=(4.5*len(unique_frames)//2, 8))
+    if len(unique_frames)%2 == 0:
+        num_cols = len(unique_frames)//2
+    else:
+        num_cols = len(unique_frames)//2+1
+    fig = plt.figure(figsize=(4.5*num_cols, 12))
     for frame_num_index in range(0,len(unique_frames),2):
         frame_val = unique_frames[frame_num_index]
-        print(frame_val)
+        print(frame_num_index,frame_val)
         X_test_frame = X_test[X_test['Initial_Frame'] == frame_val]
         ypred_frame = ypred.loc[X_test_frame.index]
         ytrue_frame = ytrue.loc[X_test_frame.index]
-        ax = plt.subplot2grid((2,len(unique_frames)//2), (0,frame_num_index//2))
-        ax.set_title(f'Predicted Frame: {frame_val+FRAME_DIFF}', fontsize=18)
+        ax = plt.subplot2grid((3,num_cols), (0,frame_num_index//2))
+        ax.set_title(f'Initial Frame: {frame_val}', fontsize=18)
         ax.set_xlim(0, 1)
         ax.set_xlabel('X', fontsize=18)
         ax.set_ylim(0, 1)
         ax.set_ylabel('Y', fontsize=18)
-        ax.scatter(ypred_frame['X_f'], ypred_frame['Y_f'], s=1e-3, color='coral', alpha = 0.5)
+        ax.scatter(X_test_frame['X_i'], X_test_frame['Y_i'], s=1e-3, color='coral', alpha = 0.5)
 
-        ax = plt.subplot2grid((2,len(unique_frames)//2), (1,frame_num_index//2))
+        ax = plt.subplot2grid((3,num_cols), (1,frame_num_index//2))
         ax.set_title(f'True Frame: {frame_val+FRAME_DIFF}', fontsize=18)
         ax.set_xlim(0, 1)
         ax.set_xlabel('X', fontsize=18)
         ax.set_ylim(0, 1)
         ax.set_ylabel('Y', fontsize=18)
-        ax.scatter(ytrue_frame['X_f'], ytrue_frame['Y_f'], s=1e-3, color='royalblue', alpha = 0.5)
+        ax.scatter(ytrue_frame['X_f'], ytrue_frame['Y_f'], s=1e-3, color='cornflowerblue', alpha = 0.5)
+
+        ax = plt.subplot2grid((3,num_cols), (2,frame_num_index//2))
+        ax.set_title(f'Predicted Frame: {frame_val+FRAME_DIFF}', fontsize=18)
+        ax.set_xlim(0, 1)
+        ax.set_xlabel('X', fontsize=18)
+        ax.set_ylim(0, 1)
+        ax.set_ylabel('Y', fontsize=18)
+        ax.scatter(ypred_frame['X_f'], ypred_frame['Y_f'], s=1e-3, color='royalblue', alpha = 0.5)
         
     fig.tight_layout()
-    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_prediction.png', dpi=300, bbox_inches='tight')
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_prediction_with_initialframe_'+append+'.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 
@@ -107,24 +102,33 @@ def set_axis_style(ax, labels):
     ax.set_xlim(0.25, len(labels) + 0.75)
     ax.set_xlabel('Sample name')
 
-def plot_framewise_l2norm(X_test, ypred, ytrue):
+def plot_framewise_l2norm(X_test, ypred, ytrue, append=''):
     unique_frames = np.unique(X_test['Initial_Frame'])
     predicted_dataset = []
+    predicted_as_orig_dataset = []
     predicted_frame = []
     for frame_num_index in range(0,len(unique_frames)):
         frame_val = unique_frames[frame_num_index]
         predicted_frame.append(frame_val+FRAME_DIFF)
         X_test_frame = X_test[X_test['Initial_Frame'] == frame_val]
+        X_initial = X_test_frame[['X_i', 'Y_i', 'Z_i']]
+        X_initial = X_initial.loc[X_test_frame.index]
+        X_initial.rename(columns={"X_i": "X_f", "Y_i": "Y_f", 'Z_i':'Z_f'}, inplace=True)
         ypred_frame = ypred.loc[X_test_frame.index]
         ytrue_frame = ytrue.loc[X_test_frame.index]
 
+        diff_orig = np.abs(ytrue_frame-X_initial)
         diff = np.abs(ytrue_frame-ypred_frame)
-        diff['X_f'] = np.where(diff['X_f']>=0.5, 1-diff['X_f'], diff['X_f'])
-        diff['Y_f'] = np.where(diff['Y_f']>=0.5, 1-diff['Y_f'], diff['Y_f'])
-        diff['Z_f'] = np.where(diff['Z_f']>=0.5, 1-diff['Z_f'], diff['Z_f'])
+        for df in [diff_orig, diff]:
+            df['X_f'] = np.where(df['X_f']>=0.5, 1-df['X_f'], df['X_f'])
+            df['Y_f'] = np.where(df['Y_f']>=0.5, 1-df['Y_f'], df['Y_f'])
+            df['Z_f'] = np.where(df['Z_f']>=0.5, 1-df['Z_f'], df['Z_f'])
         diff = diff.to_numpy()
+        diff_orig = diff_orig.to_numpy()
         predicted_dataset.append(np.sort(np.linalg.norm(diff, axis=1)))
+        predicted_as_orig_dataset.append(np.sort(np.linalg.norm(diff_orig, axis=1)))
     data = np.array(predicted_dataset).T
+    data_orig = np.array(predicted_as_orig_dataset).T
     print(data.shape)
     print(len(predicted_frame))
     fig, (ax1) = plt.subplots(nrows=1, ncols=1, figsize=(24, 9))
@@ -138,15 +142,21 @@ def plot_framewise_l2norm(X_test, ypred, ytrue):
         pc.set_alpha(1)
 
     quartile1, medians, quartile3 = np.percentile(data, [25, 50, 75], axis=0)
+    medians_orig= np.percentile(data_orig,  50, axis=0)
     whiskers = np.array([
         adjacent_values(sorted_array, q1, q3)
         for sorted_array, q1, q3 in zip(data, quartile1, quartile3)])
     whiskers_min, whiskers_max = whiskers[:, 0], whiskers[:, 1]
 
     inds = np.arange(1, len(medians) + 1)
+    #prediction norm
     ax1.scatter(inds, medians, marker='o', color='white', s=30, zorder=3)
     ax1.vlines(inds, quartile1, quartile3, color='k', linestyle='-', lw=5)
     ax1.vlines(inds, whiskers_min, whiskers_max, color='k', linestyle='-', lw=1)
+
+    #original as predicted
+    ax1.scatter(inds, medians_orig, marker='x', color='red', s=50, zorder=3)
+
     ax1.axhline(0, color='black', linestyle='--', lw=2)
     ax1.set_ylabel('Euclidean Distance', fontsize=18)
     # set style for the axes
@@ -156,18 +166,43 @@ def plot_framewise_l2norm(X_test, ypred, ytrue):
     ax1.set_xlabel('Frame', fontsize=18)
 
 
-    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_Euclidean_Distance.png', dpi=300, bbox_inches='tight')
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Model1_Framewise_Euclidean_Distance'+append+'.png', dpi=300, bbox_inches='tight')
     plt.show()
     plt.close()
 
 
-col = 0
-row = 0
-ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
-ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
-X_test = prediction_type[col]['xtest'].reset_index(drop=True)
-plot_framewise_l2norm(X_test, ypred, ytrue)
+#{'Model_1':{'ytrue':[], 'ypred':[]}, 'Model_2':{'ytrue':[], 'ypred':[]}, 'Model_3':{'ytrue':[], 'ypred':[]}}
 
+TARGET = ['X', 'Y', 'Z']
+prediction_type_name = ['Core', 'NonCore', 'Combined']
+model_names = ['Model_1', 'Model_2', 'Model_3']
+
+if 0:
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Core_framewise_predictions.pickle', 'rb') as handle:
+        results_dic_core = pickle.load(handle)
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_NonCore_predictions.pickle', 'rb') as handle:
+        results_dic_noncore = pickle.load(handle)
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Combined_predictions.pickle', 'rb') as handle:
+        results_dic_combined = pickle.load(handle)
+    col = 0
+    row = 0
+    prediction_type = [results_dic_core, results_dic_core, results_dic_core]
+    ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
+    ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
+    X_test = prediction_type[col]['xtest'].reset_index(drop=True)
+    plot_framewise_l2norm(X_test, ypred, ytrue)
+
+if 1:
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions.pickle', 'rb') as handle:
+        results_dic_core = pickle.load(handle)
+    col = 0
+    row = 0
+    prediction_type = [results_dic_core, results_dic_core, results_dic_core]
+    ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
+    ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
+    X_test = prediction_type[col]['xtest'].reset_index(drop=True)
+    plot_prediction_framewise(X_test, ypred, ytrue,append='_u502')
+    plot_framewise_l2norm(X_test, ypred, ytrue, append='_u502')
 
 
 

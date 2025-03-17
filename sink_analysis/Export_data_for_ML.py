@@ -160,6 +160,7 @@ def export_data_for_ML_autoencoder(trackname, target_frames = None):
         target_frames = this_track.frame_list
     
     df_name = this_track.export_to_ML_fname+"_AllData_AutoEnc.h5"
+    print(this_track.sim_directory)
     if os.path.isfile(df_name):
         print("File exists!")
         return 1
@@ -190,8 +191,8 @@ def export_data_for_ML_autoencoder(trackname, target_frames = None):
 
 
     
-    
-export_data_for_ML_autoencoder(nonsink_trackname)
+test_trackname = 'u502'
+export_data_for_ML_autoencoder(test_trackname)
 
 
 

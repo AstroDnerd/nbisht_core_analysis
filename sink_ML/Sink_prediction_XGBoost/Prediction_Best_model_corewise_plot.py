@@ -17,7 +17,7 @@ mp.rcParams['agg.path.chunksize'] = 100000
 import matplotlib.gridspec as gridspec
 import scienceplots
 
-#plt.style.use(['science','scatter','grid'])
+plt.style.use(['science','scatter','grid'])
 
 # set a seed to ensure reproducibility
 seed = 128
