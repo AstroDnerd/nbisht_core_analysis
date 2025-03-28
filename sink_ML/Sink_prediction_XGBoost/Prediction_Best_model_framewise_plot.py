@@ -23,6 +23,13 @@ import scienceplots
 seed = 128
 rnd  = np.random.RandomState(seed)
 FRAME_DIFF = 30
+
+
+TARGET = ['X', 'Y', 'Z']
+prediction_type_name = ['Core', 'NonCore', 'Combined']
+model_names = ['Model_1', 'Model_2', 'Model_3']
+
+
 def mae_modded(y_true, y_pred):
     mae = np.array([0.,0.,0.])
     mae_diff = np.abs(y_true - y_pred)
@@ -44,7 +51,50 @@ def r2_modded(y_true, y_pred):
 
     return 1-r2_residual.sum(axis=0)/r2_total.sum(axis=0)
 
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
+def paper_plot_mae_r2_phase_plot(X_test, ypred, ytrue, append=''):
+    axes_colors = ['tomato', 'limegreen', 'dodgerblue']
+    axes_colors_pred = ['grey']
+    fig, ax_arr = plt.subplots(1, 3, figsize=(15, 4))
+    y_true = results_dic_core['ytrue'].to_numpy()
+    y_pred = results_dic_core['Model_1_ypred'].to_numpy()
+    x_test = results_dic_core['xtest'][['X_i', 'Y_i', 'Z_i']].to_numpy()
+    mae = mae_modded(y_true, y_pred)
+    r2 = r2_modded(y_true, y_pred)
+    for k in range(3):
+        ax = ax_arr[k]
+        ax.axline([0, 0], [1, 1], color='black', linestyle='--', lw=0.5)
+        ax.scatter(y_true[:,k], x_test[:,k], c=axes_colors[k], s=1e-4, alpha = 0.5, label='Truth', zorder = 0)
+        ax.scatter(y_true[:,k], y_pred[:,k], c=axes_colors_pred, s=1e-4, alpha = 1, label='Prediction', zorder=10)
+        ax.text(0.5, 1.01, f'{TARGET[k]}: \n MAE = {mae[k]:.6f} \n R2 = {r2[k]:.4f}', fontsize=8, horizontalalignment='center', verticalalignment='top')
+        ax.set_aspect('equal')
+        ax.set_ylabel('Initial', fontsize=12)
+        #ax.set_ylabel(f'Core {model_names[0]} Prediction', fontsize=12)
+        ax.set_xlabel('Final', fontsize=12)
+
+    legend_elements = [Line2D([0], [0], marker='o', color=axes_colors[0], label=r'$X$', markersize=1),
+                        Line2D([0], [0], marker='o', color=axes_colors[1], label=r'$Y$', markersize=1),
+                        Line2D([0], [0], marker='o', color=axes_colors[2], label=r'$Z$', markersize=1),
+                        Line2D([0], [0], marker='o', color='0.5', label='Prediction', markersize=1)
+                        ]
+
+    fig.legend(handles=legend_elements, loc='upper center', fontsize=10, ncol=4)
+    plt.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction'+append+'_initial.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+if 1:
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions.pickle', 'rb') as handle:
+        results_dic_core = pickle.load(handle)
+    col = 0
+    row = 0
+    prediction_type = [results_dic_core, results_dic_core, results_dic_core]
+    ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
+    ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
+    X_test = prediction_type[col]['xtest'].reset_index(drop=True)
+    paper_plot_mae_r2_phase_plot(X_test, ypred, ytrue, append='_u502')
 
 def plot_prediction_framewise(X_test, ypred, ytrue, append=''):
     unique_frames = np.unique(X_test['Initial_Frame'])
@@ -173,10 +223,6 @@ def plot_framewise_l2norm(X_test, ypred, ytrue, append=''):
 
 #{'Model_1':{'ytrue':[], 'ypred':[]}, 'Model_2':{'ytrue':[], 'ypred':[]}, 'Model_3':{'ytrue':[], 'ypred':[]}}
 
-TARGET = ['X', 'Y', 'Z']
-prediction_type_name = ['Core', 'NonCore', 'Combined']
-model_names = ['Model_1', 'Model_2', 'Model_3']
-
 if 0:
     with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Core_framewise_predictions.pickle', 'rb') as handle:
         results_dic_core = pickle.load(handle)
@@ -192,7 +238,7 @@ if 0:
     X_test = prediction_type[col]['xtest'].reset_index(drop=True)
     plot_framewise_l2norm(X_test, ypred, ytrue)
 
-if 1:
+if 0:
     with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions.pickle', 'rb') as handle:
         results_dic_core = pickle.load(handle)
     col = 0

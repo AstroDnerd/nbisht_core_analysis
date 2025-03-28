@@ -1,6 +1,6 @@
 #import modules
 import yt
-import matplotlib as mpl
+import matplotlib as mp
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -14,6 +14,12 @@ from starter2 import *
 import track_loader as TL
 from animate_plots import animator
 import pdb
+mp.rcParams.update(mp.rcParamsDefault)
+mp.rcParams['agg.path.chunksize'] = 100000
+import matplotlib.gridspec as gridspec
+import scienceplots
+
+plt.style.use(['science','grid'])
 
 #define paths sinkoff
 path_to_data_128 = "/data/cb1/nbisht/anvil_scratch/projects/128/B2/"
@@ -128,6 +134,39 @@ def plot_autocorrelation_nd(x, dim='1D'):
         plt.close()
     animator("./plots_to_sort/AutocorrelationTest/AT_"+dim+"_plots","AutocorrelationTest_"+dim)
     
+def paperplot_autocorrelation(x):
+    #calculate Nd autocorrelation
+    ac_x = ac_fft(x)
+    print("FFT shape:",ac_x.shape)
+
+    ac_x_summed = ac_x
+    for i in range(1,len(ac_x.shape)):
+        print("Compressing along dimension:",i)
+        ac_x_summed = np.sum(ac_x_summed, axis=1)/ac_x.shape[1]
+    L_fft = get_integral_scale(ac_x_summed)
+
+    #Make timeseries
+    T = np.arange(ac_x.shape[0])*DELTAT
+
+    print(ac_x_summed.shape)
+    print(L_fft)
+    fig = plt.figure(figsize=(6,6))
+    ax = fig.add_subplot(111) 
+    ax.plot(T, ac_x_summed, c='orange')
+    #ax.set_xlim([0,ac_x_summed.shape[0]])
+    ax.set_xlabel(r'Time Lag $\tau$ (s)', fontsize=12)
+    ax.set_ylabel(r'Autocorrelation Function ACF($\tau$)', fontsize=12)
+    ax.hlines(0,0,T[-1],linestyles='dashed', color='black')
+    ax.fill_between(T,ac_x_summed, color="none", hatch="X", edgecolor="powderblue", linewidth=0.0)
+    ax.set_ylim([-0.1,1])
+    props = dict(boxstyle='round', facecolor='wheat', alpha = 0.6)
+    # place a text box in upper left in axes coords
+    ax.text(0.15, 0.2, 'L: %.3fs'%(DELTAT*L_fft), transform=ax.transAxes, fontsize=14,
+            verticalalignment='bottom', bbox=props, zorder=5)
+    print('FFT L:%.3f, %.3fs'%(L_fft,DELTAT*L_fft))
+
+    plt.savefig("./plots_to_sort/Densityvar_autocorrelation.png")
+    plt.close()
 
 #Test Cases
 if 0:
@@ -173,7 +212,7 @@ if 0:
             x_i = np.random.uniform(-1, 1, (128,128,128))
             x.append(x_i)
     plot_autocorrelation_nd(x, dim='3D')
-if 0:
+if 1:
     #3D density Timeseries_Cube
     nonsink_trackname = 'nb101'
     this_track = track_info.tracks[nonsink_trackname]
@@ -184,9 +223,10 @@ if 0:
     infile.close()
     #density variance
     TSCube_density = TSCube_density-1
-    plot_autocorrelation_nd(TSCube_density, dim='3D_densityvariance')
+    #plot_autocorrelation_nd(TSCube_density, dim='3D_densityvariance')
+    paperplot_autocorrelation(TSCube_density)
 
-if 1:
+if 0:
     #3D density Timeseries_Cube visualised with plotly
     import plotly.graph_objects as go
     import plotly.express as px

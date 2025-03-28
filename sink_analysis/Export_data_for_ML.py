@@ -191,7 +191,7 @@ def export_data_for_ML_autoencoder(trackname, target_frames = None):
 
 
     
-test_trackname = 'u502'
+test_trackname = 'u503'
 export_data_for_ML_autoencoder(test_trackname)
 
 

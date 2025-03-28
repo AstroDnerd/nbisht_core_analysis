@@ -11,7 +11,7 @@ import sys
 warnings.filterwarnings("ignore")
 import json
 
-
+from mpl_toolkits.axes_grid1 import AxesGrid
 #define paths
 SIMDIR_nb101  = '/data/cb1/nbisht/anvil_scratch/projects/128/B2/'
 SIMDIR_u502  = '/data/cb1/Projects/P19_CoreSimulations/u202-Beta2/GravPotential/'
@@ -47,6 +47,44 @@ def regular_plot(plot_dir, PlotType, path_to_data, coordinate, dataset_to_plot, 
         if cbar_range != None:
             plot.set_zlim(dataset_to_plot[1],cbar_range[0],cbar_range[1])
         plot.save(path_to_output_plots+plot_dir+PlotType+"/DD"+frame_str+".png")
+
+
+def paper_regular_plot(plot_dir, PlotName, path_to_data, coordinate, dataset_to_plot, number_of_frames):
+    fig = plt.figure(figsize=(15, 4))
+
+    grid = AxesGrid(
+        fig,
+        (0.075, 0.075, 0.85, 0.85),
+        nrows_ncols=(1, 4),
+        axes_pad=0.05,
+        label_mode="L",
+        share_all=True,
+        cbar_location="right",
+        cbar_mode="single",
+        cbar_size="3%",
+        cbar_pad="0%",
+    )
+    i=0
+    for frame_number in [0,25,75,num_of_frames-1]:
+        frame_str = str(frame_number).zfill(4)
+        data = yt.load(path_to_data+"DD"+frame_str+"/data"+frame_str)
+        all_data = data.all_data()
+        print(data.field_list)
+
+        p = yt.ProjectionPlot(data, coordinate, dataset_to_plot, fontsize = 10)
+        p.set_cmap(dataset_to_plot, "CMRmap")
+        p.set_background_color(dataset_to_plot, color="black")
+        p.annotate_timestamp(corner="upper_left")
+        p.annotate_scale(corner="upper_right")
+        p.set_zlim(dataset_to_plot[1],1e-2,1e4)
+        plot = p.plots[dataset_to_plot]
+        plot.figure = fig
+        plot.axes = grid[i].axes
+        plot.cax = grid.cbar_axes[i]
+        p.render()
+        i+=1
+    plt.savefig(path_to_output_plots+plot_dir+PlotName+".png", dpi=300, bbox_inches="tight")
+
 
 
 def volume_renderer(plot_dir, PlotType, path_to_data, coordinate, dataset_to_plot, number_of_frames,cbar_range = None, zoom_level = 1):
@@ -91,7 +129,13 @@ if reg_plot ==1:
     regular_plot('DensityPlots/','DensityPlot_xy_nb101', SIMDIR_nb101, 'z', ("enzo", "Density"), num_of_frames,cbar_range=None,zoom_level = 1)
     regular_plot('DensityPlots/','DensityPlot_xy_u502', SIMDIR_u502, 'z', ("enzo", "Density"), num_of_frames,cbar_range=None,zoom_level = 1)
 
-vol_rend = 1
+vol_rend = 0
 if vol_rend ==1:
     num_of_frames = 115
     volume_renderer('DensityPlots/','DensityPlot_3D_render_nb101', SIMDIR_nb101, 'z', ("enzo", "Density"), num_of_frames,cbar_range=None,zoom_level = 1)
+
+paper_reg_plot = 1
+if paper_reg_plot ==1:
+    num_of_frames = 115
+    #paper_regular_plot('DensityPlots/','DensityPlot_xy_nb101', SIMDIR_nb101, 'z', ("enzo", "Density"), num_of_frames)
+    paper_regular_plot('DensityPlots/','DensityPlot_xy_u502', SIMDIR_u502, 'z', ("enzo", "Density"), num_of_frames)

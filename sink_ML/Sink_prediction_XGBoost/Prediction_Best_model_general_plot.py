@@ -100,9 +100,9 @@ def plot_all_true_pred_panels():
     plt.close()
     return mae_dic, r2_dic
 
-mae_dic, r2_dic = plot_all_true_pred_panels()
-print(mae_dic)
-print(r2_dic)
+#mae_dic, r2_dic = plot_all_true_pred_panels()
+#print(mae_dic)
+#print(r2_dic)
 mae_dic = [[0.00680006, 0.00799723, 0.00638501], #Model 1
             [0.00674917, 0.00797059, 0.00632831]] #Model 3
 
@@ -157,5 +157,42 @@ def plot_mae_r2_phase_plot(mae_dic,r2_dic):
     plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction_Phase_Plot.png', dpi=300, bbox_inches='tight')
     plt.close()
 
+def paper_plot_mae_r2_phase_plot(mae_dic,r2_dic):
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/nb101_Core_predictions.pickle', 'rb') as handle:
+        results_dic_core = pickle.load(handle)
 
-#plot_mae_r2_phase_plot(mae_dic,r2_dic)
+    TARGET = ['X', 'Y', 'Z']
+    prediction_type_name = ['Core', 'NonCore', 'Combined']
+    model_names = ['Model 1', 'Model 3']
+    axes_colors = ['tomato', 'limegreen', 'dodgerblue']
+    fig, ax_arr = plt.subplots(1, 2, figsize=(15, 6))
+    y_true = results_dic_core['ytrue'].to_numpy()
+    y_pred = results_dic_core['Model_1_ypred'].to_numpy()
+    mae = mae_modded(y_true, y_pred)
+    r2 = r2_modded(y_true, y_pred)
+    k=0
+    ax = ax_arr[k]
+    ax.axline([0, 0], [1, 1], color='black', linestyle='--', lw=0.5)
+    ax.scatter(y_true[:,k], y_pred[:,k], c=axes_colors[k], s=1e-4, alpha = 0.5)
+    ax.text(0.5, 1.08, f'{TARGET[k]}: \n MAE = {mae[k]:.6f} \n R2 = {r2[k]:.4f}', fontsize=10, horizontalalignment='center', verticalalignment='top')
+    ax.set_xlim([-0.1,1.1])
+    ax.set_ylim([-0.1,1.1])
+    ax.set_aspect('equal')
+    ax.set_ylabel(f'Core {model_names[0]} Prediction', fontsize=12)
+    ax.set_xlabel('Truth', fontsize=12)
+
+    ax = ax_arr[1]
+    model_colors = ['slateblue', 'orchid']
+    scatter_type = ['o', '+', '*']
+    for i in range(2):
+        for j in range(3):
+            ax.scatter(mae_dic[i][j], r2_dic[i][j], label=prediction_type_name[j] + ' ' +model_names[i], color=model_colors[i], marker=scatter_type[j])
+    
+    ax.set_xlabel(r'$MAE_{modified}$', fontsize=12)
+    ax.set_ylabel(r'$R2_{modified}$', fontsize=12)
+    ax.axhline(1, color='black', linestyle='--', lw=0.5)
+    ax.legend()
+    plt.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction.png', dpi=300, bbox_inches='tight')
+    plt.close()
+paper_plot_mae_r2_phase_plot(mae_dic,r2_dic)

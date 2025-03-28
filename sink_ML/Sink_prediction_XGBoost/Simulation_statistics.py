@@ -111,7 +111,7 @@ def get_df(do_core):
         model_prefix = 'NonCore'
     else:
         df_timeseries_core = pd.read_csv(MCDSO_CORE)
-        df_timeseries_noncore = pd.read_csv(MCDSO_CORE)
+        df_timeseries_noncore = pd.read_csv(MCDSO_NONCORE)
         df_timeseries = pd.concat([df_timeseries_core, df_timeseries_noncore], axis=0).drop_duplicates()
         model_prefix = 'Combined'
     print(model_prefix)
@@ -215,6 +215,89 @@ def plot_features_time(df, threshold = 1000):
             plt.savefig('./plots_to_sort/Features_time/Features_time_core_'+str(core_id)+'.png')
             plt.close()
 
+def paper_plot_tracks_n_features(df_core, core_list):
+    fig = plt.figure(figsize=(15, 10))
+    basenum = 331
+    count=0
+    for core_id in core_list:
+        pid_list = df_core_particles[df_core_particles['Core_id'] == core_id]['Particle_id'].unique()
+        print(core_id, len(pid_list))
+        if len(pid_list)>5000:
+            pid_list = pid_list[::5]
+        ax_track = fig.add_subplot(basenum+0+count)
+        ax_rho = fig.add_subplot(basenum+3+count)
+        ax_v = fig.add_subplot(basenum+6+count, sharex=ax_rho)
+        v_all = []
+        rho_all = []
+        for particle_id in pid_list:
+            track_df = df_core[df_core['Particle_id'] == particle_id]
+            xpos = track_df['X_f'].values
+            ypos = track_df['Y_f'].values
+            zpos = track_df['Z_f'].values
+            vx = track_df['Vx_i'].values
+            vy = track_df['Vy_i'].values
+            vz = track_df['Vz_i'].values
+            v = np.sqrt(vx**2 + vy**2 + vz**2)
+            v_all.append(v)
+            rho = np.log10(track_df['Density_i'].values)
+            rho_all.append(rho)
+            frames = track_df['Initial_Frame'].values
+            ax_v.plot(frames, v, c = 'grey', alpha=0.5, lw=0.5)
+            ax_rho.plot(frames, rho, c = 'grey', alpha=0.5, lw=0.5)
+            lines = colored_line(xpos, ypos, color, ax_track, cmap="plasma_r", alpha = 0.5)
+            ax_track.scatter(xpos[::10], ypos[::10], c = 'grey', s=5, marker = '.')
+        fig.colorbar(lines)
+        ax_track.set_xlabel('X (cm)', fontsize=12)
+        ax_track.set_ylabel('Y (cm)', fontsize=12)
+        v_mean, v_25, v_75 = np.mean(v_all, axis=0), np.percentile(v_all, 25, axis=0), np.percentile(v_all, 75, axis=0)
+        rho_mean, rho_25, rho_75 = np.mean(rho_all, axis=0), np.percentile(rho_all, 25, axis=0), np.percentile(rho_all, 75, axis=0)
+        ax_v.plot(frames, v_mean, c = 'black', lw=2)
+        ax_v.fill_between(frames, v_25, v_75, color = 'black', alpha = 0.25, zorder = 10)
+        ax_rho.plot(frames, rho_mean, c = 'purple', lw=2)
+        ax_rho.fill_between(frames, rho_25, rho_75, color = 'purple', alpha = 0.25, zorder = 10)
+        ax_v.set_xlabel('Frame', fontsize=12)
+        ax_v.set_ylabel('V (cm/s)', fontsize=12)
+        ax_rho.set_ylabel(r'Density (log$_{10}$ g/cm$^3$)', fontsize=12)
+        ax_track.set_title('Core : '+str(core_id))
+        count+=1
+    #plt.subplots_adjust(hspace=0.1)
+    plt.savefig('./plots_to_sort/tracks_n_features.png', dpi=300, bbox_inches='tight')
+    plt.close()
+
+def paper_plot_features_framewise(df):
+    frames = df['Initial_Frame'].unique()
+    fig = plt.figure(figsize=(6, 6))
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    plasma_r = plt.get_cmap('plasma_r', 91)
+    c_arr = plasma_r(np.arange(0,91,1))
+    for frame in [frames[0], frames[35] ,frames[-1]]:
+        print(frame)
+        df_frame = df[df['Initial_Frame'] == frame]
+        vx = df_frame['Vx_i'].values
+        vy = df_frame['Vy_i'].values
+        vz = df_frame['Vz_i'].values
+        v = np.sqrt(vx**2 + vy**2 + vz**2)
+        rho = df_frame['Density_i'].values
+        ax2.set_ylabel('V (cm/s)', fontsize=12)
+        ax2.hist(v, bins=50, color=c_arr[frame], histtype='step')
+        
+        ax1.set_ylabel(r'Density (log$_{10}$ g/cm$^3$)', fontsize=12)
+        ax1.hist(np.log10(rho), bins=50, color=c_arr[frame], histtype='step')
+        
+    plt.savefig('./plots_to_sort/features_framewise.png')
+    plt.close()
+
+def paper_plot_correlation(df):
+    fig = plt.figure(figsize=(6, 6))
+    df_corr = df.corr(method='pearson')
+    plt.matshow(df_corr, fignum=fig.number, cmap = 'RdBu', vmin = -1, vmax = 1)
+    plt.xticks(range(df.select_dtypes(['number']).shape[1]), df.select_dtypes(['number']).columns, fontsize=12, rotation=90)
+    plt.yticks(range(df.select_dtypes(['number']).shape[1]), df.select_dtypes(['number']).columns, fontsize=12)
+    cb = plt.colorbar()
+    cb.ax.tick_params(labelsize=12)
+    plt.savefig('./plots_to_sort/correlation.png')
+    plt.close()
 
 if 0:
     df_timeseries = get_df(1)
@@ -226,6 +309,18 @@ if 0:
     df_timeseries = get_df(-1)
     plot_features_framewise(df_timeseries)
 
-if 1:
+if 0:
     df_timeseries = get_df(1)
     plot_features_time(df_timeseries, 1000)
+
+if 0:
+    good_cores = [12, 36, 45, 79, 81, 177, 235, 240]
+    ok_cores = [16, 65, 72, 80,  176, 178, 237, 251]
+    selected_cores = [12, 79, 235]
+    df_timeseries = get_df(1)
+    paper_plot_tracks_n_features(df_timeseries, selected_cores)
+
+if 1:
+    df_timeseries = get_df(-1)
+    paper_plot_features_framewise(df_timeseries)
+    paper_plot_correlation(df_timeseries)
