@@ -85,8 +85,8 @@ def paper_plot_mae_r2_phase_plot(X_test, ypred, ytrue, append=''):
     plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction'+append+'_initial.png', dpi=300, bbox_inches='tight')
     plt.close()
 
-if 1:
-    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions.pickle', 'rb') as handle:
+if 0:
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions_using_2_sims.pickle', 'rb') as handle:
         results_dic_core = pickle.load(handle)
     col = 0
     row = 0
@@ -94,7 +94,7 @@ if 1:
     ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
     ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
     X_test = prediction_type[col]['xtest'].reset_index(drop=True)
-    paper_plot_mae_r2_phase_plot(X_test, ypred, ytrue, append='_u502')
+    paper_plot_mae_r2_phase_plot(X_test, ypred, ytrue, append='_u502_2sims')
 
 def plot_prediction_framewise(X_test, ypred, ytrue, append=''):
     unique_frames = np.unique(X_test['Initial_Frame'])
@@ -206,6 +206,7 @@ def plot_framewise_l2norm(X_test, ypred, ytrue, append=''):
 
     #original as predicted
     ax1.scatter(inds, medians_orig, marker='x', color='red', s=50, zorder=3)
+    print(medians_orig)
 
     ax1.axhline(0, color='black', linestyle='--', lw=2)
     ax1.set_ylabel('Euclidean Distance', fontsize=18)
@@ -238,17 +239,17 @@ if 0:
     X_test = prediction_type[col]['xtest'].reset_index(drop=True)
     plot_framewise_l2norm(X_test, ypred, ytrue)
 
-if 0:
-    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions.pickle', 'rb') as handle:
+if 1:
+    with open('/data/cb1/nbisht/anvil_scratch/projects/128/B2/datasets/u502_framewise_predictions_using_2_sims.pickle', 'rb') as handle:
         results_dic_core = pickle.load(handle)
     col = 0
     row = 0
     prediction_type = [results_dic_core, results_dic_core, results_dic_core]
-    ypred = prediction_type[col][str(model_names[row])+'_ypred'].reset_index(drop=True)
-    ytrue = prediction_type[col]['ytrue'].reset_index(drop=True)
+    ypred = prediction_type[col][str(model_names[row])+'_ypred'][['X_f', 'Y_f', 'Z_f']].reset_index(drop=True)
+    ytrue = prediction_type[col]['ytrue'][['X_f', 'Y_f', 'Z_f']].reset_index(drop=True)
     X_test = prediction_type[col]['xtest'].reset_index(drop=True)
-    plot_prediction_framewise(X_test, ypred, ytrue,append='_u502')
-    plot_framewise_l2norm(X_test, ypred, ytrue, append='_u502')
+    plot_prediction_framewise(X_test, ypred, ytrue,append='_u502_2sims')
+    plot_framewise_l2norm(X_test, ypred, ytrue, append='_u502_2sims')
 
 
 
