@@ -172,13 +172,21 @@ def paper_plot_mae_r2_phase_plot(mae_dic,r2_dic):
     r2 = r2_modded(y_true, y_pred)
     k=0
     ax = ax_arr[k]
-    ax.axline([0, 0], [1, 1], color='black', linestyle='--', lw=0.5)
-    ax.scatter(y_true[:,k], y_pred[:,k], c=axes_colors[k], s=1e-4, alpha = 0.5)
+    ax.axline([0, 0], [1, 0], color='black', linestyle='-.', lw=0.5)
+    diff_arr = np.abs(y_true[:,k]- y_pred[:,k])
+    add_arr = 1 - diff_arr
+    stacked = np.stack([diff_arr, add_arr])
+    min_val = stacked.min(axis=0)
+    ax.scatter(y_true[:,k], y_true[:,k]- y_pred[:,k], c=axes_colors[k], s=1e-4, alpha = 0.5)
+    bins = np.linspace(0, 1, 50)
+    digitized = np.digitize(y_true[:,k], bins)
+    bin_means = [min_val[digitized == i].mean() for i in range(1, len(bins))]
+    ax.plot(bins[1:], bin_means, c = 'slateblue', lw = 2)
     ax.text(0.5, 1.08, f'{TARGET[k]}: \n MAE = {mae[k]:.6f} \n R2 = {r2[k]:.4f}', fontsize=10, horizontalalignment='center', verticalalignment='top')
-    ax.set_xlim([-0.1,1.1])
-    ax.set_ylim([-0.1,1.1])
-    ax.set_aspect('equal')
-    ax.set_ylabel(f'Core {model_names[0]} Prediction', fontsize=12)
+    ax.set_xlim([-0.05,1.05])
+    ax.set_ylim([-1.1,1.1])
+    #ax.set_aspect('equal')
+    ax.set_ylabel(f'Core {model_names[0]} Prediction - Truth', fontsize=12)
     ax.set_xlabel('Truth', fontsize=12)
 
     ax = ax_arr[1]
@@ -193,6 +201,6 @@ def paper_plot_mae_r2_phase_plot(mae_dic,r2_dic):
     ax.axhline(1, color='black', linestyle='--', lw=0.5)
     ax.legend()
     plt.ticklabel_format(axis='both', style='sci', scilimits=(0,0))
-    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction.png', dpi=300, bbox_inches='tight')
+    plt.savefig('./sink_ML/Sink_prediction_XGBoost/Best_Models_General_prediction_error.png', dpi=300, bbox_inches='tight')
     plt.close()
 paper_plot_mae_r2_phase_plot(mae_dic,r2_dic)
