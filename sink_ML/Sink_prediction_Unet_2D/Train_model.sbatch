@@ -5,9 +5,9 @@
 # Stampede system.
 #----------------------------------------------------
 
-#SBATCH -J Train_UNet_2D_static_attention     # Job name
-#SBATCH -o Train_UNet_2D_static_attention.o%j # Name of stdout output file(%j expands to jobId)
-#SBATCH -e Train_UNet_2D_static_attention.o%j # Name of stderr output file(%j expands to jobId)
+#SBATCH -J Train_UNet_2D_dynamic_attention     # Job name
+#SBATCH -o Train_UNet_2D_dynamic_attention.o%j # Name of stdout output file(%j expands to jobId)
+#SBATCH -e Train_UNet_2D_dynamic_attention.o%j # Name of stderr output file(%j expands to jobId)
 #SBATCH -p highmem          # Submit to the 'normal' or 'development' queue
 #SBATCH -t 24:00:00             # Run time (hh:m) - 1.5 hours
 #SBATCH -N 1                    # Total number of nodes requested (16 cores/node)
