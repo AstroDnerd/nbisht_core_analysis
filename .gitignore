@@ -14,3 +14,5 @@ trash/*
 *pkl
 *pickle
 msu23
+sink_ML/Sink_prediction_Unet_2D/logs/*
+sink_ML/Sink_prediction_Unet_3D/logs/*

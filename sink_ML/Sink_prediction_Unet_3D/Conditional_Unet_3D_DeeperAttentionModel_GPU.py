@@ -63,6 +63,8 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 print(f'Available device: {str(DEVICE):4s}', flush=True)
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 def img_transform(np_arr):
     return np.log10(np_arr)
@@ -290,7 +292,7 @@ def train_unet(input_arr, output_arr, labels, args):
     # Initialize model, loss function, and optimizer
     model = UNet3D(in_ch=1, out_ch=1).to(DEVICE)
     # For trainable weights
-    n_losses = 4  # L1, hist, Mass, Spectral
+    n_losses = 5  # L1, hist, Mass, Spectral, High Density
     loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
     optimizer = optim.Adam(list(model.parameters()) + [loss_w], lr=args.lr)
     writer = SummaryWriter(log_dir=f"./logs/{args.run_name}")
@@ -298,6 +300,7 @@ def train_unet(input_arr, output_arr, labels, args):
     hist_scale = 1.0  # scale histogram loss
     mass_scale = 1.0   # give mass only 10% initial influence
     spectral_scale = 1.0  # scale spectral loss
+    hd_scale = 1.0 #high density loss scale
 
     if args.loss_type == 'static':
         #Precompute initial-loss weights
@@ -316,8 +319,12 @@ def train_unet(input_arr, output_arr, labels, args):
             MASS_0 = torch.log1p(MASS_0)  # log1p to avoid large values
             #FFT Loss
             spectral_0 = compute_spectral_loss(p0, y0).item()
+            #High desnity
+            hd_true0 = torch.heaviside(y0-torch.quantile(y0.flatten(), 0.99), torch.tensor([1.0]))
+            hd_pred0 = torch.heaviside(p0-torch.quantile(p0.flatten(), 0.99), torch.tensor([1.0]))
+            hd_loss0 = F.l1_loss(hd_pred0, hd_true0)
             
-            init_w = torch.tensor([1/L1_0, 1/hist_0, 1/MASS_0, 1/spectral_0],device=DEVICE)
+            init_w = torch.tensor([1/L1_0, 1/hist_0, 1/MASS_0, 1/spectral_0, 1/hd_loss0],device=DEVICE)
             static_w = init_w / init_w.sum()
     if args.loss_type == 'dynamic':
         prev_losses = [1.0]*n_losses    # dummy for epoch 0
@@ -329,7 +336,7 @@ def train_unet(input_arr, output_arr, labels, args):
     for epoch in range(args.epochs):
         model.train()
         total_epoch_loss = 0.0
-        sum_l1, sum_hist, sum_mass, sum_spectral = 0.0, 0.0, 0.0, 0.0
+        sum_l1, sum_hist, sum_mass, sum_spectral, sum_hd = 0.0, 0.0, 0.0, 0.0, 0.0
 
         for x, y in loader:
             x, y = x.to(DEVICE), y.to(DEVICE)
@@ -351,9 +358,15 @@ def train_unet(input_arr, output_arr, labels, args):
             # Spectral loss using power spectrum
             spectral_l = compute_spectral_loss(pred, y)
             spectral_l = spectral_l * spectral_scale  # scale spectral loss
+            #High Density loss using heaviside function as filter
+            with torch.no_grad():
+                hd_true = torch.heaviside(y-torch.quantile(y.flatten(), 0.99), torch.tensor([1.0]))
+                hd_pred = torch.heaviside(pred-torch.quantile(pred.flatten(), 0.99), torch.tensor([1.0]))
+            hd_loss = F.l1_loss(hd_pred, hd_true)
+            hd_l = hd_loss*hd_scale
 
             #Stacking losses
-            losses = torch.stack([l1, hist_l, mass_l, spectral_l])
+            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
             if args.loss_type == 'static':
                 total_loss = (static_w * losses).sum()
             else:
@@ -370,6 +383,7 @@ def train_unet(input_arr, output_arr, labels, args):
             sum_hist    += hist_l.item()     * batch_size
             sum_mass   += mass_l.item()  * batch_size
             sum_spectral   += spectral_l.item()  * batch_size
+            sum_hd   += hd_l.item()  * batch_size
             
 
         #compute per-sample averages
@@ -379,8 +393,9 @@ def train_unet(input_arr, output_arr, labels, args):
         avg_hist  = sum_hist   / N
         avg_mass  = sum_mass   / N
         avg_spectral = sum_spectral / N
+        avg_hd = sum_hd / N
         if args.loss_type == 'dynamic':
-            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral]
+            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd]
             if epoch >= 2:
                 #compute r_i = L_i(t-1)/L_i(t-2)
                 r = [prev_losses[i]/prev2_losses[i] for i in range(n_losses)]
@@ -407,6 +422,7 @@ def train_unet(input_arr, output_arr, labels, args):
               f"L1={avg_l1:.4f} Hist={avg_hist:.4f} "
               f"Mass={avg_mass:.4f} "
               f"Spectral={avg_spectral:.4f} "
+              f"HighDensity={avg_hd:.4f} "
               f"Weights: {*w_print,}")
 
         # log to TensorBoard
@@ -415,11 +431,12 @@ def train_unet(input_arr, output_arr, labels, args):
         writer.add_scalar("Loss/Hist",     avg_hist,   epoch)
         writer.add_scalar("Loss/Mass",     avg_mass,  epoch)
         writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
+        writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
 
         if args.loss_type!='static':
             # log the learned weights (after softmax)
             curr_w = torch.softmax(loss_w, dim=0).detach().cpu().tolist()
-            for i, name in enumerate(["L1","Hist","Mass", "Spectral"]):
+            for i, name in enumerate(["L1","Hist","Mass", "Spectral", "HighDensity"]):
                 writer.add_scalar(f"Weights/{name}", curr_w[i], epoch)
 
     writer.close()
@@ -443,7 +460,7 @@ args = parser.parse_args(args=[])
 args.batch_size = 8
 args.image_size = IMAGESIZE
 args.device = DEVICE
-args.run_name = "Unet_3D"
+args.run_name = "Unet_3D_HD"
 args.epochs = 30
 args.lr = 3e-4
 args.loss_type = 'dynamic' # 'static' or 'dynamic'
@@ -545,6 +562,8 @@ def compare_output(input_arr, output_arr, labels, args):
     # Load the trained model
     model = UNet3D(in_ch=1, out_ch=1).to(DEVICE)
     model.load_state_dict(torch.load(args.run_name+'_'+args.loss_type+'_DeeperAttention_'+MODELFILE))
+    print(f"Model loaded with {count_parameters(model):,} trainable parameters.", flush=True)
+    # Set the model to evaluation mode
     model.eval()
 
     with torch.no_grad():

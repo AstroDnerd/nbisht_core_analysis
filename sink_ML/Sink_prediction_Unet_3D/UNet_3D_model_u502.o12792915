@@ -1,0 +1,4 @@
+Available device: cpu 
+Loading images!
+Model loaded with 6,442,426 trainable parameters.
+slurmstepd: error: *** JOB 12792915 ON b002 CANCELLED AT 2025-07-07T23:49:07 DUE TO TIME LIMIT ***
