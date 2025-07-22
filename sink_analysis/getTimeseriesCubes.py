@@ -7,15 +7,61 @@ import os
 import warnings
 import random
 import sys
+sys.path.insert(0, '/home/nbisht/nikhilb_home/scripts/nbisht_core_analysis/')
 warnings.filterwarnings("ignore")
 import json
 import scipy.fft as fft
-from animate_plots import animator
 import pdb
 from starter2 import *
 import track_loader as TL
 
-
+'''
+ENZO FIELD LIST
+[('all', 'particle_index'),
+ ('all', 'particle_mass'),
+ ('all', 'particle_position_x'),
+ ('all', 'particle_position_y'),
+ ('all', 'particle_position_z'),
+ ('all', 'particle_type'),
+ ('all', 'particle_velocity_x'),
+ ('all', 'particle_velocity_y'),
+ ('all', 'particle_velocity_z'),
+ ('enzo', 'Bx'),
+ ('enzo', 'BxF'),
+ ('enzo', 'By'),
+ ('enzo', 'ByF'),
+ ('enzo', 'Bz'),
+ ('enzo', 'BzF'),
+ ('enzo', 'Dark_Matter_Density'),
+ ('enzo', 'Density'),
+ ('enzo', 'DivB'),
+ ('enzo', 'Ex'),
+ ('enzo', 'Ey'),
+ ('enzo', 'Ez'),
+ ('enzo', 'PotentialField'),
+ ('enzo', 'Temperature'),
+ ('enzo', 'x-velocity'),
+ ('enzo', 'y-velocity'),
+ ('enzo', 'z-velocity'),
+ ('io', 'particle_index'),
+ ('io', 'particle_mass'),
+ ('io', 'particle_position_x'),
+ ('io', 'particle_position_y'),
+ ('io', 'particle_position_z'),
+ ('io', 'particle_type'),
+ ('io', 'particle_velocity_x'),
+ ('io', 'particle_velocity_y'),
+ ('io', 'particle_velocity_z'),
+ ('nbody', 'particle_index'),
+ ('nbody', 'particle_mass'),
+ ('nbody', 'particle_position_x'),
+ ('nbody', 'particle_position_y'),
+ ('nbody', 'particle_position_z'),
+ ('nbody', 'particle_type'),
+ ('nbody', 'particle_velocity_x'),
+ ('nbody', 'particle_velocity_y'),
+ ('nbody', 'particle_velocity_z')]
+'''
 nonsink_trackname = 'nb101'
 sink_trackname = 'nb102'
 
@@ -27,14 +73,14 @@ def make_dir(dir_path):
         os.makedirs(dir_path)
 
 
-def getTimeseriesCubes(trackname, fieldname = 'density', target_frames = None):
+def getTimeseriesCubes(trackname, fieldname = 'density', target_frames = None, savename = None):
     this_track = track_info.tracks[trackname]
     import time
     start_time = time.time()
     if target_frames ==None:
         target_frames = this_track.frame_list
     
-    df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
+    df_name = track_info.tracks['nb101'].sim_directory+'/datasets/'+trackname+'_TimeseriesCubes_'+savename+'.npy'
     if os.path.isfile(df_name):
         print("File exists!")
         return 1
@@ -63,6 +109,10 @@ def getTimeseriesCubes(trackname, fieldname = 'density', target_frames = None):
     diff = time.time() - start_time
     print('Time taken by looper:',diff)
 
-#getTimeseriesCubes(nonsink_trackname, fieldname = 'density')
+
+getTimeseriesCubes('u503', fieldname = 'Density', savename = 'Density')
+getTimeseriesCubes('u503', fieldname = 'x-velocity', savename = 'velocity_x')
+getTimeseriesCubes('u503', fieldname = 'y-velocity', savename = 'velocity_y')
+getTimeseriesCubes('u503', fieldname = 'z-velocity', savename = 'velocity_z')
 
 
