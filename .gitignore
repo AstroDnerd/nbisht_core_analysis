@@ -5,6 +5,7 @@ plots_to_sort/*
 sink_ML/Sink_timeseries_Diffusion/runs/*
 sink_ML/Sink_timeseries_Diffusion/models/*
 trash/*
+*.pth
 *png
 *jpg
 .*swp
