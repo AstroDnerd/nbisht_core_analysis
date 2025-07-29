@@ -31,6 +31,13 @@ def compute_losses(model,data,parameters):
 
     return losses
 
+def compute_losses_gru(model,data,parameters):
+    losses = []
+    preds = model(data)
+    for batch_num in range(data.shape[0]):
+        loss_b = model.criterion(preds[batch_num], parameters[batch_num])
+        losses.append(loss_b.detach())
+    return np.array(losses)
 
 def plot_hist(loss_train,loss_test,loss_validate,testnum):
     everything = torch.cat([loss_train, loss_test,loss_validate])
@@ -45,6 +52,7 @@ def plot_hist(loss_train,loss_test,loss_validate,testnum):
         bc = 0.5*(bins[1:]+bins[:-1])
         #Lmax = bc[np.argmax(hist)]
     ax.legend(loc=0)
+    ax.set_yscale('log')
     ax.set(xlabel='loss',xscale='log')
     fig.savefig('./plots/errhist_test%d'%(testnum))
 
@@ -122,3 +130,41 @@ def test_plot(datalist, parameters,model, fname="plot", characteristic=False, de
         print(oname)
         plt.close(fig)
     return zzz
+
+
+def test_plot_gru(datalist, parameters,model, fname="plot"):
+    nd=-1
+    pred_all = model(datalist.float())
+    for datum, param1 in zip(pred_all,parameters):
+        rows = param1.shape[0]
+        nd+=1
+        fig,axes=plt.subplots(rows,3,figsize=(12,4))
+        for t in range(rows):
+            if rows>1:
+                ax=axes[t]
+            else:
+                ax = axes
+            fields = ['density_'+str(t),'pressure_'+str(t),'velocity_'+str(t)]
+            ymax = [2,2,1.1]
+            for nf,field in enumerate(fields):
+                loss_t = model.criterion(datum[t][nf], param1[t][nf] ,initial=datum[0])
+                ax[nf].plot( param1[t][nf], c='k')
+                ymax[nf]=max([ymax[nf],param1[t][nf].max().item()])
+                ax[nf].plot( param1[t][1][nf], c='k', linestyle='--')
+                ymax[nf]=max([ymax[nf],param1[t][nf].max().item()])
+                zzz = datum[t][nf].detach().numpy()
+                if np.isnan(zzz).sum() > 0:
+                    print("Is nan", np.isnan(zzz).sum(), nd, nf)
+                ax[nf].set(title='error %0.2e'%loss_t)
+                ax[nf].plot( zzz, c='r')
+                ymax[nf]=max([ymax[nf],zzz.max().item()])
+                ax[nf].set(ylabel=field)
+            ax[0].set(ylim=[0,ymax[0]])
+            ax[1].set(ylim=[0,ymax[1]])
+            ax[2].set(ylim=[-1.1,ymax[2]])
+        fig.tight_layout()
+        oname="%s/rieML_%s_%04d"%('./plots',fname,nd)
+        fig.savefig(oname)
+        print(oname)
+        plt.close(fig)
+    return pred_all
