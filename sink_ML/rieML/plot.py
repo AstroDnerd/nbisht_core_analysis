@@ -39,7 +39,7 @@ def compute_losses_gru(model,data,parameters):
         losses.append(loss_b.detach())
     return np.array(losses)
 
-def plot_hist(loss_train,loss_test,loss_validate,testnum):
+def plot_hist(loss_train,loss_test,loss_validate,testnum, dirname="./plots"):
     everything = torch.cat([loss_train, loss_test,loss_validate])
     bmin = min([min(everything),1e-4])
     bmax = max([max(everything),1e-1])
@@ -54,7 +54,7 @@ def plot_hist(loss_train,loss_test,loss_validate,testnum):
     ax.legend(loc=0)
     ax.set_yscale('log')
     ax.set(xlabel='loss',xscale='log')
-    fig.savefig('./plots/errhist_test%d'%(testnum))
+    fig.savefig('./%s/errhist_test%d'%(dirname,testnum))
 
 
 def test_plot(datalist, parameters,model, fname="plot", characteristic=False, delta=False):
@@ -132,7 +132,7 @@ def test_plot(datalist, parameters,model, fname="plot", characteristic=False, de
     return zzz
 
 
-def test_plot_gru(datalist, parameters,model, fname="plot"):
+def test_plot_gru(datalist, parameters,model, fname="plot", dirname="./plots"):
     nd=-1
     pred_all = model(datalist.float())
     for datum, param1 in zip(pred_all,parameters):
@@ -163,7 +163,7 @@ def test_plot_gru(datalist, parameters,model, fname="plot"):
             ax[1].set(ylim=[0,ymax[1]])
             ax[2].set(ylim=[-1.1,ymax[2]])
         fig.tight_layout()
-        oname="%s/rieML_%s_%04d"%('./plots',fname,nd)
+        oname="%s/rieML_%s_%04d"%(dirname,fname,nd)
         fig.savefig(oname)
         print(oname)
         plt.close(fig)
