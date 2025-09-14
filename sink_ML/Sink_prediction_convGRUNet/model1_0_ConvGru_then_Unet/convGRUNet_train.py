@@ -52,7 +52,7 @@ MODELFILE = 'nnmodel.dict'
 
 IMAGESIZE = 64
 FRAME_DIFF = 30
-TEST_PERCENTAGE = 0.2
+TEST_PERCENTAGE = 0.01
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 #DEVICE = torch.device('cpu')
@@ -72,10 +72,102 @@ def model_performance(pred_output_arr, act_output_arr):
 
     return pred_MSE, density_difference
 
+def plot_comparison(input_arr, pred_output_arr, act_output_arr, label, save_filename='xy_data.png', dont_show = False):
+    input_str = 'INPUT IMAGE:\n'
+    pred_str = 'PREDICTED IMAGE:\n'
+    act_str = 'ACTUAL IMAGE:\n'
+    # Calculate metrics
+    input_MSE = ski.metrics.mean_squared_error(act_output_arr, input_arr)
+    input_str+= 'MSE: '+'{:0.5f}'.format(input_MSE)+'\n'
+    pred_MSE = ski.metrics.mean_squared_error(act_output_arr, pred_output_arr)
+    pred_str+= 'MSE: '+'{:0.5f}'.format(pred_MSE)+'\n'
+    actual_MSE = ski.metrics.mean_squared_error(act_output_arr, act_output_arr)
+    act_str+= 'MSE: '+'{:0.5f}'.format(actual_MSE)+'\n'
+
+    input_NMI = ski.metrics.normalized_mutual_information(act_output_arr, input_arr, bins=100)
+    input_str+= 'NMI: '+'{:0.5f}'.format(input_NMI)+'\n'
+    pred_NMI = ski.metrics.normalized_mutual_information(act_output_arr, pred_output_arr, bins=100)
+    pred_str+= 'NMI: '+'{:0.5f}'.format(pred_NMI)+'\n'
+    actual_NMI = ski.metrics.normalized_mutual_information(act_output_arr, act_output_arr, bins=100)
+    act_str+= 'NMI: '+'{:0.5f}'.format(actual_NMI)+'\n'
+
+    inversed_input_arr = img_inverse_transform(input_arr)
+    inversed_pred_output_arr = img_inverse_transform(pred_output_arr)
+    inversed_act_output_arr = img_inverse_transform(act_output_arr)
+    input_PSNR = ski.metrics.peak_signal_noise_ratio(inversed_act_output_arr, inversed_input_arr, data_range=np.max(inversed_input_arr) - np.min(inversed_input_arr))
+    input_str+= 'PSNR: '+'{:0.5f}'.format(input_PSNR)+'\n'
+    pred_PSNR = ski.metrics.peak_signal_noise_ratio(inversed_act_output_arr, inversed_pred_output_arr, data_range=np.max(inversed_pred_output_arr) - np.min(inversed_pred_output_arr))
+    pred_str+= 'PSNR: '+'{:0.5f}'.format(pred_PSNR)+'\n'
+    actual_PSNR = ski.metrics.peak_signal_noise_ratio(inversed_act_output_arr, inversed_act_output_arr, data_range=np.max(inversed_act_output_arr) - np.min(inversed_act_output_arr))
+    act_str+= 'PSNR: '+'{:0.5f}'.format(actual_PSNR)+'\n'
+
+    input_SSI = ski.metrics.structural_similarity(act_output_arr, input_arr, gradient=False, data_range=np.max(input_arr) - np.min(input_arr), channel_axis=None)
+    input_str+= 'SSI: '+'{:0.5f}'.format(input_SSI)+'\n'
+    pred_SSI = ski.metrics.structural_similarity(act_output_arr, pred_output_arr, gradient=False, data_range=np.max(pred_output_arr) - np.min(pred_output_arr), channel_axis=None)
+    pred_str+= 'SSI: '+'{:0.5f}'.format(pred_SSI)+'\n'
+    actual_SSI = ski.metrics.structural_similarity(act_output_arr, act_output_arr, gradient=False, data_range=np.max(act_output_arr) - np.min(act_output_arr), channel_axis=None)
+    act_str+= 'SSI: '+'{:0.5f}'.format(actual_SSI)+'\n'
+
+    input_total_density = np.sum(inversed_input_arr)
+    input_str+= 'Total Density: '+'{:0.5f}'.format(input_total_density)+'\n'
+    pred_total_density = np.sum(inversed_pred_output_arr)
+    pred_str+= 'Total Density: '+'{:0.5f}'.format(pred_total_density)+'\n'
+    act_total_density = np.sum(inversed_act_output_arr)
+    act_str+= 'Total Density: '+'{:0.5f}'.format(act_total_density)+'\n'
+
+    input_FFTL = F.mse_loss(torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(input_arr)))), torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(act_output_arr)))))
+    input_str+= 'FFTL: '+'{:0.5f}'.format(input_FFTL)+'\n'
+    pred_FFTL = F.mse_loss(torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(pred_output_arr)))), torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(act_output_arr)))))
+    pred_str+= 'FFTL: '+'{:0.5f}'.format(pred_FFTL)+'\n'
+    actual_FFTL = F.mse_loss(torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(act_output_arr)))), torch.log1p(torch.abs(torch.fft.fftn(torch.from_numpy(act_output_arr)))))
+    act_str+= 'FFTL: '+'{:0.5f}'.format(actual_FFTL)+'\n'
+
+    fig = plt.figure(figsize=(12, 12))
+    
+    for i in range(3):
+        ax  = fig.add_subplot(3, 3, 3*i+1)
+        c = ax.pcolormesh(np.mean(input_arr, axis=i).T, vmin=-1, vmax=1, cmap='gnuplot2')
+        fig.colorbar(c, ax=ax)
+        if i==0:
+            ax.set_title('Input: '+str(label[0])+'_'+str(label[1])+'_'+str(label[2]))
+        ax.grid('both')
+        if i==2:
+            ax.text(0.15, -0.02, input_str, fontsize=10, transform=plt.gcf().transFigure, bbox=dict(boxstyle="round", edgecolor='black', facecolor='white'))
+
+    for i in range(3):
+        ax2  = fig.add_subplot(3, 3, 3*i+2)
+        c = ax2.pcolormesh(np.mean(pred_output_arr, axis=i).T, vmin=-1, vmax=1, cmap='gnuplot2')
+        fig.colorbar(c, ax=ax2)
+        if i==0:
+            ax2.set_title('Predicted Output '+str(label[0])+'_'+str(label[1])+'_'+str(label[2]))
+        ax2.grid('both')
+        if i==2:
+            ax2.text(0.4, -0.02, pred_str, fontsize=10, transform=plt.gcf().transFigure, bbox=dict(boxstyle="round", edgecolor='black', facecolor='white'))
+
+    for i in range(3):
+        ax3  = fig.add_subplot(3, 3, 3*i+3)
+        c = ax3.pcolormesh(np.mean(act_output_arr, axis=i).T, vmin=-1, vmax=1, cmap='gnuplot2')
+        fig.colorbar(c, ax=ax3)
+        if i==0:
+            ax3.set_title('Actual Output '+str(label[0])+'_'+str(label[1])+'_'+str(label[2]))
+        ax3.grid('both')
+        if i==2:
+            ax3.text(0.7, -0.02, act_str, fontsize=10, transform=plt.gcf().transFigure, bbox=dict(boxstyle="round", edgecolor='black', facecolor='white'))
+
+
+    if save_filename:
+        plt.savefig(save_filename, bbox_inches='tight')
+    
+    if dont_show==False:
+        plt.show()
+    plt.close()
+
+
 def compare_output(input_arr, output_arr, labels, args, argsGRU):
     # Load the trained model
     model = hybridConvGRU3DNET(args, argsGRU).to(DEVICE, non_blocking=True)
-    model.load_state_dict(torch.load(f"./models/{args.run_name}_{MODELFILE}", map_location=DEVICE))
+    checkpoint = torch.load(f"./models/{args.run_name}_{MODELFILE}", map_location=DEVICE, weights_only=False)
+    model.load_state_dict(checkpoint['model_state_dict'])
     print(f"Model loaded with {count_parameters(model):,} trainable parameters.", flush=True)
     # Set the model to evaluation mode
     model.eval()
@@ -84,24 +176,28 @@ def compare_output(input_arr, output_arr, labels, args, argsGRU):
     density_differences = []
     with torch.no_grad():
         for i in range(len(input_arr)):
-            inputs = input_arr[i].unsqueeze(0)
-            targets = output_arr[i]
+            inputs = input_arr[i].unsqueeze(0).unsqueeze(2)
+            targets = output_arr[i].unsqueeze(0).unsqueeze(0)
             label = labels[i]
             inputs, targets = inputs.to(DEVICE, non_blocking=True), targets.to(DEVICE, non_blocking=True)
             outputs = model(inputs)
             # Save the output images
             output_image = outputs.cpu().numpy()
-            pred_MSE, density_difference = model_performance(output_image[0][0], targets[0].numpy())
+            pred_MSE, density_difference = model_performance(output_image, targets.numpy())
+            plot_comparison(inputs[0][-1][0].numpy(), output_image[0][0], targets[0][0].numpy(), label, save_filename='./models/plots/output/img'+"_".join(str(x) for x in label)+'.png', dont_show = True)
             pred_MSEs.append(pred_MSE)
             density_differences.append(density_difference)
     return np.mean(pred_MSEs), np.mean(density_differences)
+
+
+
 
 import time
 
 start = time.time()
 print('Loading images!', flush=True)
 import random
-rng_indices = random.sample(range(0, len(os.listdir(IMAGEINPUT))), 2000)  # Randomly select 400 images for training and testing
+rng_indices = random.sample(range(0, len(os.listdir(IMAGEINPUT))), 2000)  # Randomly select 2000 images for training and testing
 input_image_dic = get_subset_images(IMAGEINPUT, rng_indices)
 output_image_dic = get_subset_images(IMAGEOUTPUT, rng_indices)
 input_image_arr = []
@@ -141,10 +237,10 @@ argsGRU.in_channel = 1
 argsGRU.out_channel = 1
 argsGRU.in_seq = 2
 argsGRU.out_seq = 1
-argsGRU.num_layers = 1
-argsGRU.kernels = [3]
-argsGRU.hidden_dims = [16]
-argsGRU.bias = True
+argsGRU.num_layers = 2
+argsGRU.kernels = [3,3]
+argsGRU.hidden_dims = [32,64]
+argsGRU.bias = False
 
 print(argsUNET.run_name + " Starting training!", flush=True)
 train_unet(input_image_train, output_image_train, label_train, argsUNET, argsGRU)
@@ -154,5 +250,6 @@ print(f"Time taken for training {argsUNET.run_name}: {end - start:.2f} seconds",
 #launch testing
 avg_test_MSE, avg_test_density_diff = compare_output(input_image_test, output_image_test, label_test, argsUNET, argsGRU)
 
+print(f"Model: {argsUNET.run_name} Avg Test MSE: {avg_test_MSE:.4f}, Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
 print(f"Model: {argsUNET.run_name} Testing completed!", flush=True)
 

@@ -1,0 +1,7 @@
+Available device: cpu 
+Loading images!
+Model loaded with 2,141,784 trainable parameters.
+Testing completed and output images plotted.
+[4.38582927e-01 3.34778451e-03 5.96046483e-08 7.42357969e-01
+ 1.81961060e-02]
+Model: convGRUnet3D_best Diffsim Testing completed!

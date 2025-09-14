@@ -46,7 +46,7 @@ def delete_folder_contents(folder):
 
 def get_all_images(input_dir):
     output_dic = {}
-    for filename in os.listdir(input_dir):
+    for filename in sorted(os.listdir(input_dir)):
         infile = open(os.path.join(input_dir, filename), 'r')
         i_file = json.load(infile)
         num = filename.split('_')[1]
@@ -58,7 +58,7 @@ def get_all_images(input_dir):
 
 def get_subset_images(input_dir, indices):
     output_dic = {}
-    all_files = os.listdir(input_dir)
+    all_files = sorted(os.listdir(input_dir))
     for i in indices:
         filename = all_files[i]
         infile = open(os.path.join(input_dir, filename), 'r')
@@ -468,7 +468,7 @@ def train_unet_delta(input_arr, output_arr, labels, args, argsGRU):
     model = hybridConvGRU3DNET(args, argsGRU).to(DEVICE, non_blocking=True)
     # For trainable weights
     n_losses = 5  # L1, hist, Mass, Spectral, High Density
-    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE, non_blocking=True), requires_grad=True)
+    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
     optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
     writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
 
@@ -538,7 +538,7 @@ def train_unet_delta(input_arr, output_arr, labels, args, argsGRU):
             if args.loss_type == 'static':
                 total_loss = (static_w * losses).sum()
             else:
-                w_t = torch.tensor(w, device=DEVICE, non_blocking=True)
+                w_t = torch.tensor(w, device=DEVICE)
                 total_loss = (w_t * losses).sum()
 
             total_loss.backward()
@@ -643,7 +643,7 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
     model = hybridConvGRU3DNET(args, argsGRU).to(DEVICE, non_blocking=True)
     # For trainable weights
     n_losses = 5  # L1, hist, Mass, Spectral, High Density
-    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE, non_blocking=True), requires_grad=True)
+    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
     optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
     writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
 
@@ -661,10 +661,10 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
         print(f"Model initialized for training with {count_parameters(model):,} trainable parameters.", flush=True)
     
     L1_scale = 5.0  # scale L1 loss to be more influential
-    hist_scale = 10.0  # scale histogram loss
+    hist_scale = 1.0  # scale histogram loss
     mass_scale = 0.1   # give mass only 10% initial influence
     spectral_scale = 0.5  # scale spectral loss
-    hd_scale = 50.0 #high density loss scale
+    hd_scale = 1.0 #high density loss scale
 
 
     if args.loss_type == 'static':
@@ -692,9 +692,9 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
             hist_l = hist_loss(y, pred, bins=32)
             hist_l = hist_l * hist_scale  # scale histogram loss
             #Mass loss
-            mass_t = pred.sum()
-            mass_p = y.sum()
-            mass_error = torch.abs(mass_p - mass_t)
+            mass_t = torch.pow(10, y).sum()
+            mass_p = torch.pow(10, pred).sum()
+            mass_error = torch.abs(mass_p - mass_t) / (mass_t + 1e-8)
             mass_l = torch.log1p(mass_error)  # log1p to avoid large values
             mass_l = mass_l * mass_scale  # scale mass loss
             # Spectral loss using power spectrum
@@ -712,7 +712,7 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
             if args.loss_type == 'static':
                 total_loss = (static_w * losses).sum()
             else:
-                w_t = torch.tensor(w, device=DEVICE, non_blocking=True)
+                w_t = torch.tensor(w, device=DEVICE)
                 total_loss = (w_t * losses).sum()
 
             total_loss.backward()
@@ -756,7 +756,7 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
         else:
             w_print = static_w #for console
 
-        loss_history.append(float(avg_total))
+        loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
 
         # log to console
         print(f"Epoch {epoch+1}: "
@@ -787,14 +787,23 @@ def train_unet(input_arr, output_arr, labels, args, argsGRU):
     torch.save({'epoch': args.epochs, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 'loss': loss_history},
                 f"models/{args.run_name}_{MODELFILE}")
     if args.loss_type != 'static':
-        torch.save(loss_w.detach().cpu(), f"models/plots/loss_data/{args.run_name}_loss.pt")
+        torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
     import matplotlib.pyplot as plt
-    print(loss_history)
-    plt.plot(loss_history, marker='o')
+    loss_history = np.array(loss_history)
+    plt.plot(loss_history[:,0], marker='o', label='Total Loss')
+    plt.plot(loss_history[:,1], marker='.', label='L1 Loss')
+    plt.plot(loss_history[:,2], marker='*', label='Histogram Loss')
+    plt.plot(loss_history[:,3], marker='+', label='Mass Loss')
+    plt.plot(loss_history[:,4], marker='x', label='Spectral Loss')
+    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
+    plt.yscale('log')  # log scale for better visibility of loss changes
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
     plt.xlabel("Epoch")
     plt.ylabel("Avg Weighted Loss")
     plt.title(f"{args.run_name} Training Loss")
-    plt.savefig(f"models/plots/training_loss/{args.run_name}.png")
+    plt.savefig(f"models/plots/training_loss_{args.run_name}.png")
     plt.close()
 
-    return min(loss_history)  # return the minimum loss for this run
+    return min(loss_history[:,0])  # return the minimum loss for this run

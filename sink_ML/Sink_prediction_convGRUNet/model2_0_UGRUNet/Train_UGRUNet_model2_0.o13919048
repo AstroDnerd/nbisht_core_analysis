@@ -1,0 +1,14 @@
+Available device: cpu 
+Loading images!
+Total set size: 2000, Training set size: 1980, Test set size: 20, validation set: 136, 
+Time taken to load images: 841.16 seconds
+convUGRUNet_TrainingPhases_yes_validation Starting training!
+Training convGRUNet with 1980 samples, convUGRUNet_TrainingPhases_yes_validation run
+Using 8 DataLoader workers
+Model loaded for training with 4,266,362 trainable parameters.
+TRAINING PHASE 1!!!
+/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+Epoch 26: Total=7.7152 | L1=7.2490 HighDensity=0.0117 Mass=0.0135  Hist=0.0022 Spectral=0.4388 LR=(0.001,) Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Validation! Epoch 26: Total=8.1863 | L1=7.7329 HighDensity=0.0107 Mass=0.0178  Hist=0.0047 Spectral=0.4203 LR=(0.001,) Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 27: Total=7.6938 | L1=7.2308 HighDensity=0.0116 Mass=0.0131  Hist=0.0023 Spectral=0.4360 LR=(0.001,) Weights: (4.490105349164634, 0.11985251570560877, 0.1205303415569945, 0.14909327102519396, 0.12041852254756837)

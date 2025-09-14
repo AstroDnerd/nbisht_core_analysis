@@ -5,13 +5,13 @@
 # Stampede system.
 #----------------------------------------------------
 
-#SBATCH -J Train_UNet_3D_delta_deeperattention     # Job name
-#SBATCH -o Train_UNet_3D_delta_deeperattention.o%j # Name of stdout output file(%j expands to jobId)
-#SBATCH -e Train_UNet_3D_delta_deeperattention.o%j # Name of stderr output file(%j expands to jobId)
+#SBATCH -J Best_Unet_model     # Job name
+#SBATCH -o Best_Unet_model.o%j # Name of stdout output file(%j expands to jobId)
+#SBATCH -e Best_Unet_model.o%j # Name of stderr output file(%j expands to jobId)
 #SBATCH -p highmem          # Submit to the 'normal' or 'development' queue
 #SBATCH -t 48:00:00             # Run time (hh:m) - 48 hours
 #SBATCH -N 1                    # Total number of nodes requested (16 cores/node)
-#SBATCH -c 12                   #number of CPUs
+#SBATCH -c 50                   #number of CPU cores
 #SBATCH --mail-user=npb22a@fsu.edu
 #SBATCH --mail-type=begin  # email me when the job starts
 #SBATCH --mail-type=end    # email me when the job finishes
@@ -25,4 +25,4 @@
 set echo
 source ~/.bashrc
 
-python Unet_3D_DeeperAttentionModel_Delta_GPU.py
+python Unet_3D_BestModel_phase3.py

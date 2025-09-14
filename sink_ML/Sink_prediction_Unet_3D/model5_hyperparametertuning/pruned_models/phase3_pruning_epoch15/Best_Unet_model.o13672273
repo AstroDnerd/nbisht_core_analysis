@@ -1,0 +1,72 @@
+Available device: cpu 
+Loading images!
+Total set size: 400, Training set size: 320, Test set size: 80
+Time taken to load images: 622.13 seconds
+Current pruning level: 2, Minimum epoch: 10
+model_2 Starting training!
+Model loaded for training with 6,220,519 trainable parameters.
+Epoch 11: Total=3.8346 | L1=1.5198 HighDensity=0.8812 Mass=1.0149  Hist=0.1126 Spectral=0.3061 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 12: Total=3.8056 | L1=1.5179 HighDensity=0.8805 Mass=0.9924  Hist=0.1110 Spectral=0.3039 Weights: (1.4110619215941163, 0.6981951087964341, 1.096237899505627, 0.7691225984971004, 1.025382471606722)
+Epoch 13: Total=4.4633 | L1=1.5212 HighDensity=0.8795 Mass=0.9882  Hist=0.1266 Spectral=0.3164 Weights: (1.0039564673382906, 0.9974099705476821, 0.9935365583705476, 1.0009356540850218, 1.004161349658458)
+Epoch 14: Total=3.7830 | L1=1.5078 HighDensity=0.8724 Mass=0.9812  Hist=0.1161 Spectral=0.3022 Weights: (0.9829477527665398, 1.0535894446316452, 0.979767522246419, 1.0023867812843839, 0.9813084990710119)
+Epoch 15: Total=3.7470 | L1=1.5115 HighDensity=0.8762 Mass=0.9944  Hist=0.1154 Spectral=0.3049 Weights: (1.0107387383279536, 0.9739612629951083, 1.0116122380436456, 0.9925781930248998, 1.0111095676083923)
+[4.4888308346271515, 4.121189534664154, 4.0225510656833645, 3.9337591086861408, 3.9417863768523054, 3.8973888158798218, 3.9482270630076526, 4.491701411813899, 3.8911630619510404, 3.75331546837682, 3.8346424758434297, 3.8056146619841456, 4.4633454166886315, 3.7829864848673367, 3.74702190531274]
+model_2 Training completed!
+Time taken for training model_2: 2475.30 seconds
+Model loaded for testing with 6,220,519 trainable parameters.
+Model: model_2 Testing completed!
+model_3 Starting training!
+Model loaded for training with 6,220,519 trainable parameters.
+Epoch 11: Total=3.7182 | L1=1.4897 HighDensity=0.8609 Mass=0.9544  Hist=0.1158 Spectral=0.2973 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 12: Total=3.7481 | L1=1.4916 HighDensity=0.8658 Mass=0.9887  Hist=0.1127 Spectral=0.2893 Weights: (1.4086952827935386, 0.7087192059651329, 1.0778700746334255, 0.7760443168628103, 1.0286711197450926)
+Epoch 13: Total=4.3242 | L1=1.4842 HighDensity=0.8727 Mass=0.9455  Hist=0.1281 Spectral=0.2911 Weights: (1.0016711152244084, 0.9876656319980667, 1.0192017057940996, 0.9876206663276447, 1.0038408806557813)
+Epoch 14: Total=3.7205 | L1=1.4894 HighDensity=0.8664 Mass=0.9486  Hist=0.1118 Spectral=0.2852 Weights: (0.9869246785186425, 1.059275316736083, 0.968014279046051, 0.9924448571691968, 0.9933408685300259)
+Epoch 15: Total=3.7150 | L1=1.4871 HighDensity=0.8649 Mass=1.0006  Hist=0.1226 Spectral=0.2919 Weights: (1.0163490230872299, 0.9521844695219981, 1.0162008490417582, 1.0043696216529983, 1.0108960366960147)
+[4.253531044721603, 3.9931400179862977, 3.874287706613541, 3.8727656309689658, 3.822833517310746, 3.8075280487537384, 3.740834391489625, 4.40233365824823, 3.717674475206239, 3.692312146168723, 3.718183434009552, 3.7481066366657614, 4.324243610851939, 3.7205010068775137, 3.714975659814853]
+model_3 Training completed!
+Time taken for training model_3: 2380.48 seconds
+Model loaded for testing with 6,220,519 trainable parameters.
+Model: model_3 Testing completed!
+model_9 Starting training!
+Model loaded for training with 6,209,943 trainable parameters.
+Epoch 11: Total=3.6940 | L1=1.4719 HighDensity=0.8555 Mass=0.9766  Hist=0.1079 Spectral=0.2821 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 12: Total=3.7541 | L1=1.5032 HighDensity=0.8679 Mass=0.9969  Hist=0.1000 Spectral=0.2861 Weights: (1.3995381264153643, 0.7075912058791564, 1.092536761119925, 0.7720051111745407, 1.028328795411013)
+Epoch 13: Total=4.3954 | L1=1.5056 HighDensity=0.8816 Mass=0.9822  Hist=0.1169 Spectral=0.2926 Weights: (1.0107409622430399, 0.9644091577433243, 1.010450589156402, 1.0070927988560623, 1.0073064920011716)
+Epoch 14: Total=3.7926 | L1=1.4952 HighDensity=0.8788 Mass=0.9902  Hist=0.1128 Spectral=0.2848 Weights: (0.9809764019161087, 1.066580240825666, 0.9730222855616739, 0.9914486026883498, 0.9879724690082018)
+Epoch 15: Total=3.7762 | L1=1.5003 HighDensity=0.8877 Mass=1.0361  Hist=0.1238 Spectral=0.2897 Weights: (1.0029092997984121, 0.9886939130821064, 1.0105198302256508, 0.9930943043397432, 1.0047826525540875)
+[4.188459861278534, 3.9410544753074648, 3.8938150703907013, 3.8547481855672183, 3.8260115524210883, 3.7995040237903597, 3.7506818251684306, 4.330079258187302, 3.7443227086175774, 3.744403326556526, 3.6940162539482118, 3.754066807590425, 4.395447529691138, 3.792568613089711, 3.7761771577748617]
+model_9 Training completed!
+Time taken for training model_9: 2366.69 seconds
+Model loaded for testing with 6,209,943 trainable parameters.
+Model: model_9 Testing completed!
+model_11 Starting training!
+Model loaded for training with 6,209,943 trainable parameters.
+Epoch 11: Total=3.7980 | L1=1.5062 HighDensity=0.8668 Mass=1.0268  Hist=0.1070 Spectral=0.2912 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 12: Total=3.7465 | L1=1.4933 HighDensity=0.8586 Mass=1.0095  Hist=0.1003 Spectral=0.2847 Weights: (1.4065711228388806, 0.6987805013820365, 1.1067861168873032, 0.7661824180394645, 1.021679840852315)
+Epoch 13: Total=4.3610 | L1=1.4762 HighDensity=0.8554 Mass=0.9992  Hist=0.1195 Spectral=0.2889 Weights: (1.0076820610923833, 0.9807389416143918, 1.0035175349936771, 1.0008074191228629, 1.0072540431766852)
+Epoch 14: Total=3.7576 | L1=1.4821 HighDensity=0.8560 Mass=0.9974  Hist=0.1140 Spectral=0.2889 Weights: (0.9758001877996177, 1.0796767830407736, 0.976424455276796, 0.988556056887874, 0.9795425169949381)
+Epoch 15: Total=3.6082 | L1=1.4778 HighDensity=0.8650 Mass=0.9562  Hist=0.1035 Spectral=0.2766 Weights: (1.006248864360335, 0.9815986227468837, 1.0032791814048303, 1.0042481838098098, 1.0046251476781414)
+[4.148050224781036, 3.869866806268692, 3.7879259049892426, 3.8520801189781153, 3.7412979543002423, 3.7637086153030395, 3.757374289724976, 4.345876526022074, 3.766819728351482, 3.710102059108029, 3.7980305314064027, 3.746548254322261, 4.361032834131182, 3.757610113498026, 3.60819101776926]
+model_11 Training completed!
+Time taken for training model_11: 2436.28 seconds
+Model loaded for testing with 6,209,943 trainable parameters.
+Model: model_11 Testing completed!
+model_14 Starting training!
+Model loaded for training with 6,220,519 trainable parameters.
+Epoch 11: Total=3.8569 | L1=1.5349 HighDensity=0.8832 Mass=1.0002  Hist=0.1013 Spectral=0.3373 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 12: Total=3.8701 | L1=1.5487 HighDensity=0.8884 Mass=1.0190  Hist=0.0873 Spectral=0.3267 Weights: (1.4184221748574783, 0.6926086732575525, 1.0856264576235939, 0.7793714498524401, 1.023971244408935)
+Epoch 13: Total=4.5250 | L1=1.5243 HighDensity=0.8860 Mass=1.0287  Hist=0.1079 Spectral=0.3389 Weights: (1.0177742746877947, 0.9457526347186725, 1.0228173853294555, 0.9974796559277891, 1.0161760493362881)
+Epoch 14: Total=3.9550 | L1=1.5298 HighDensity=0.8966 Mass=1.0405  Hist=0.1019 Spectral=0.3271 Weights: (0.9651932436671014, 1.0947226445969178, 0.9774455355207218, 0.9911027556707904, 0.9715358205444682)
+Epoch 15: Total=3.7249 | L1=1.5096 HighDensity=0.8765 Mass=1.0191  Hist=0.0950 Spectral=0.3191 Weights: (1.0081243927600307, 0.9784517456338832, 1.012113066692114, 0.9889548768348074, 1.0123559180791646)
+Traceback (most recent call last):
+  File "/home/x-nbisht1/scripts/nbisht_core_analysis/sink_ML/Sink_prediction_Unet_3D/model5_hyperparametertuning/Unet_3D_BestModel_phase3.py", line 193, in <module>
+    model_df.loc[index, 'min_training_loss'] = train_unet(input_image_train, output_image_train, label_train, args)
+  File "/home/x-nbisht1/scripts/nbisht_core_analysis/sink_ML/Sink_prediction_Unet_3D/model5_hyperparametertuning/model5_modules.py", line 469, in train_unet
+    torch.save(loss_w.detach().cpu(), f"{args.model_dir}{args.phase}/plots/loss_data_{args.run_name}_loss.pt")
+  File "/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/serialization.py", line 964, in save
+    with _open_zipfile_writer(f) as opened_zipfile:
+  File "/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/serialization.py", line 828, in _open_zipfile_writer
+    return container(name_or_buffer)
+  File "/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/serialization.py", line 792, in __init__
+    torch._C.PyTorchFileWriter(
+RuntimeError: File /home/x-nbisht1/projects/ML_models/Unet_3D/model5_hyperparametertuning/models_phase3/plots/loss_data_Unet_Delta_model_14_loss.pt cannot be opened.

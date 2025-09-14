@@ -1,0 +1,4 @@
+Available device: cpu 
+Loading images!
+Model loaded with 2,141,784 trainable parameters.
+Model: convGRUnet3D_best Testing completed!

@@ -1,0 +1,16 @@
+Available device: cpu 
+Loading images!
+Total set size: 2000, Training set size: 1980, Test set size: 20, validation set: 136, 
+Time taken to load images: 825.33 seconds
+UNetconvGRU3D_TrainingPhases_yes_validation Starting training!
+Training convGRUNet with 1980 samples, UNetconvGRU3D_TrainingPhases_yes_validation run
+Using 8 DataLoader workers
+Model loaded for training with 2,141,784 trainable parameters.
+TRAINING PHASE 1!!!
+/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+Epoch 26: Total=9.1336 | L1=8.8252 HighDensity=0.0127 Mass=0.0101  Hist=0.0027 Spectral=0.2829 LR=(0.001,) Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Validation! Epoch 26: Total=9.2727 | L1=8.9568 HighDensity=0.0125 Mass=0.0149  Hist=0.0043 Spectral=0.2843 LR=(0.001,) Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 27: Total=9.0401 | L1=8.7373 HighDensity=0.0126 Mass=0.0076  Hist=0.0026 Spectral=0.2800 LR=(0.001,) Weights: (4.759677238467254, 0.05778220718859486, 0.05799518787595012, 0.06647278010558676, 0.05807258636261373)
+Epoch 28: Total=41.3161 | L1=8.6712 HighDensity=0.0125 Mass=0.0192  Hist=0.0026 Spectral=0.6316 LR=(0.001,) Weights: (1.0259373163212198, 1.0081685750768452, 0.9133960550171505, 1.0256894567220198, 1.0268085968627645)
+Epoch 29: Total=9.2235 | L1=8.6698 HighDensity=0.0126 Mass=0.0122  Hist=0.0025 Spectral=0.2946 LR=(0.001,) Weights: (0.7104605603912582, 0.7198433046929413, 1.5227038274260176, 1.336399678289716, 0.7105926292000673)

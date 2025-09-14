@@ -1113,14 +1113,14 @@ def train_unet_training_phase(input_arr, output_arr, labels, args, argsGRU, vali
                 f"Weights: {*w_print,}", flush=True)
             val_loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
         
-        epoch_ranges = [30,50,70,80,90]
+        epoch_ranges = [25,50,70,80,90]
         if epoch in epoch_ranges:
             if epoch!=epoch_ranges[0]:
                 print("TRAINING PHASE "+str(tp)+"!!!", flush=True)
                 tp+=1
                 for g in optimizer.param_groups:
                     g['lr'] = args.lr
-            torch.save({'epoch': args.epochs, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 
+            torch.save({'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 
                 'scheduler_state_dict': LRSched.state_dict(), 'loss': loss_history, 'val_loss': val_loss_history}, f"models/{args.run_name}_{MODELFILE}")
             torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
 
