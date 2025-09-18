@@ -1,0 +1,120 @@
+
+"""
+This displays what all the functions in loop_apps.py do.
+"""
+from starter2 import *
+import xtra_energy
+reload(loop_apps)
+from scipy.optimize import curve_fit
+core_list=looper.get_all_nonzero()
+frame_list=[0]# range(0,130,10)
+fields=['density']  
+#Look for app_test.h5 and read from that.
+#If not, make a new looper and write app_test.h5.
+save_field = '../Datasets/all_cores_n0000.h5'
+if 'this_looper' not in dir() and os.path.exists(save_field) and True:
+    directory = '/scratch2/dcollins/Paper19_48/B02/u05-r4-l4-128/GravPotential'
+    this_looper = looper.core_looper(directory= directory,savefile=save_field)
+    this_looper.derived = [xtra_energy.add_force_terms] #for some reason derived quantities aren't saved.
+
+if 'this_looper' not in dir() and False:
+    directory = '/scratch2/dcollins/Paper19_48/B02/u05-r4-l4-128/GravPotential'
+    this_looper = looper.core_looper(directory= directory,
+                                     derived=[],
+                                     sim_name = 'u05',
+                                     out_prefix = 'plots_to_sort/test',
+                                     target_frame = 125,
+                                     frame_list = frame_list,
+                                     core_list = core_list,
+                                     fields_from_grid=['x','y','z']+fields
+                                  )
+    this_looper.get_target_indices(h5_name='datasets_small/u05_0125_peaklist.h5',
+                                     bad_particle_list='datasets_small/bad_particles.h5')
+    this_looper.get_tracks()
+    this_looper.save('all_cores_n%04d.h5'%0)
+
+
+#import testing.cic_test as cic
+import testing.early_mask as em
+reload(em)
+
+
+def toplot(prof,quan = 'cell_volume'):
+    xbins = prof.x_bins
+    bin_center = 0.5*(xbins[1:]+xbins[:-1])
+    bin_widths = xbins[1:]-xbins[:-1]
+    pdf = prof[quan]
+    pdf = pdf/bin_widths
+    return xbins, bin_center,pdf,bin_widths
+def gaussian(the_x,norm,x0,sigma):
+    #return norm*np.exp( -(the_x-x0)**2/(2*sigma**2))
+    return norm/np.sqrt(2*np.pi*sigma**2)*np.exp( -(the_x-x0)**2/(2*sigma**2))
+
+if 1:
+    frame=0
+    ds = this_looper.load(frame=frame,derived=[em.add_tracer_density])
+    em.add_tracer_density(ds)
+    ad = ds.all_data() #ds.region([0.5]*3,[0.4]*3,[0.6]*3)
+    deposit_tuple = ("deposit","target_particle_volume")
+    #ad[deposit_tuple]
+        
+if 'prof_mask_vel' not in dir():
+    all_target_indices = np.concatenate( [this_looper.target_indices[core_id] for core_id in core_list])
+    ad.set_field_parameter('target_indices',all_target_indices)
+    ad.set_field_parameter('mask_to_get',np.zeros_like(all_target_indices,dtype='int32'))
+    #bins={'velocity_x':np.linspace(-25,25,64)}
+    #bins['PotentialField']= np.linspace(-50,50,64)
+    bins=None
+    prof_all_vel  = yt.create_profile(ad,bin_fields=['velocity_magnitude'],fields=['cell_volume'],weight_field=None, override_bins=bins)
+    prof_mask_vel = yt.create_profile(ad,bin_fields=['velocity_magnitude'],fields=[deposit_tuple],weight_field=None, override_bins=bins)
+
+if 'vrms' not in dir():
+    ad = ds.all_data()
+    vx = ad['velocity_x']
+    vy = ad['velocity_y']
+    vz = ad['velocity_z']
+    vrms = np.sqrt( (vx**2+vy**2+vz**2).mean() )/np.sqrt(3)
+
+if 1:
+    plt.close('all')
+    bbb1, bcen1, vals1, db= toplot(prof_all_vel)
+    bbb2, bcen2, vals2, db = toplot(prof_mask_vel,quan=deposit_tuple[1])
+    fig,ax=plt.subplots(1,1)
+
+    ok1 = vals1>0
+    ok2 = vals2>0
+    ax.plot( bcen1[ok1],vals1[ok1],'k',linewidth=2, label=r'$V(v)$')
+
+
+    mass_fraction = 1./128**3*211  
+    particle_fraction_scale= all_target_indices.size/128.**3
+    ax.plot( bcen2[ok2],vals2[ok2]/particle_fraction_scale,'k--',linewidth=2, label=r'$V(v|*)$')
+
+if 1:
+    #maxwellian
+    v = bcen1[ok2]
+    maxwell = 1./(2*np.pi*sigmav**2)*v**2*np.exp(-(v-0)**2/(2*sigmav**2))
+    ok3 = maxwell > 1e-7
+    ax.plot( v[ok3], maxwell[ok3])
+
+
+if 1:
+    #comput and plot the ratio
+    ratio = vals2/vals1
+    ok = bcen1>0.1
+    ok = np.logical_and(ratio>0, ok)
+    ax.plot( bcen1[ratio>0], ratio[ratio>0],label=r"$V(*|v)$",c=[0.5]*4)
+
+
+
+if 1:
+    #ax.plot( bcen2,vals2*vals1.max()/vals2.max(),'r:')
+    outname = "plots_to_sort/pdf_velocity_preimage_fits.pdf"
+    #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='log',yscale='log')
+    #axbonk(ax,xlabel=r'$\rho$',ylabel='V(rho)',xscale='linear',yscale='linear')
+    axbonk(ax,xlabel=r'$||v||',ylabel='V(||v||)',xscale='log',yscale='log')
+    ax.legend(loc=3)
+    fig.savefig(outname)
+    print(outname)
+    plt.close(fig)
+    

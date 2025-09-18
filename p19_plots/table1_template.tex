@@ -1,0 +1,13 @@
+\begin{table}[h] \begin{center} \input{table1_caption} \label{table1}                                                                                       
+\begin{tabular}{ r l l l }
+    \hline
+  & \sima & \simb & \simc \\
+  $\beta$ & 0.2 & 2 & 20 \\
+\hline
+{% for name in first_modes %}
+{{name}} & {{ stuff['u501'][name]}} & {{ stuff['u502'][name]}} &  {{ stuff['u503'][name]}} \\
+{% endfor %}
+\hline
+\end{tabular}                                                                                       
+\end{center}                                                                                       
+\end{table}       

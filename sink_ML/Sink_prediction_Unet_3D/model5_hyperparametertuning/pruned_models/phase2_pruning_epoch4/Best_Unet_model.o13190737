@@ -1,0 +1,28 @@
+Available device: cpu 
+Loading images!
+Total set size: 400, Training set size: 320, Test set size: 80
+Time taken to load images: 96.71 seconds
+Current pruning level: 0, Minimum epoch: 0
+model_1 Starting training!
+Model initialized for training with 390,079 trainable parameters.
+Epoch 1: Total=5.4672 | L1=2.3133 HighDensity=0.9482 Mass=1.3459  Hist=0.3286 Spectral=0.5311 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.6372 | L1=1.7732 HighDensity=0.9171 Mass=1.2818  Hist=0.2236 Spectral=0.4415 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.3074 | L1=1.6103 HighDensity=0.9072 Mass=1.2136  Hist=0.1677 Spectral=0.4087 Weights: (0.9626894872318882, 0.9222053732892785, 1.0564573091805722, 0.9943330940659499, 1.064314736232311)
+/apps/spack/anvil/apps/py-pandas/1.2.2-gcc-11.2.0-r4empqj/lib/python3.9/site-packages/pandas/core/indexing.py:1720: SettingWithCopyWarning: 
+A value is trying to be set on a copy of a slice from a DataFrame.
+Try using .loc[row_indexer,col_indexer] = value instead
+
+See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  self._setitem_single_column(loc, value, pi)
+Epoch 4: Total=4.1516 | L1=1.5845 HighDensity=0.9050 Mass=1.0316  Hist=0.1752 Spectral=0.4140 Weights: (1.0012870821812434, 0.9250774423983551, 1.0208115852993516, 1.010147592984927, 1.042676297136123)
+[5.46715247631073, 4.637199532985687, 4.307444155216217, 4.151632294577261]
+model_1 Training completed!
+Time taken for training model_1: 579.93 seconds
+Model loaded for testing with 390,079 trainable parameters.
+Model: model_1 Testing completed!
+model_10 Starting training!
+Model initialized for training with 3,810,354 trainable parameters.
+Epoch 1: Total=5.2924 | L1=2.2397 HighDensity=0.9638 Mass=1.3339  Hist=0.2433 Spectral=0.5117 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.6447 | L1=1.8197 HighDensity=0.9328 Mass=1.2739  Hist=0.1636 Spectral=0.4547 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.3140 | L1=1.6999 HighDensity=0.9146 Mass=1.1398  Hist=0.1260 Spectral=0.4337 Weights: (0.975457630331558, 0.9095305629302805, 1.047503367649381, 1.0132798989588443, 1.0542285401299363)
+slurmstepd: error: *** JOB 13190737 ON b001 CANCELLED AT 2025-07-23T11:23:38 ***

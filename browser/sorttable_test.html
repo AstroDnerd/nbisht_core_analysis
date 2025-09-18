@@ -1,0 +1,43 @@
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>sorttable example</title>
+<script src="./sorttable.js"></script>
+ <link rel="stylesheet" href="sorttable.css">
+</head>
+<body>
+This modified version of sorttable supports (almost) everything the original from kryogenix did, but also improves browser compatibility and adds new features to it.<br/>
+<i>Note the CSS used for these examples is of course free to use</i>
+<hr/>
+<h4>Simple example based on <a href="http://kryogenix.org/code/browser/sorttable/">kryogenix.org's</a>:</h4>
+
+<!-- sortable table -->
+
+<table class="sortable" id="example">
+	<tr>
+		<th>name</th><th>salary</th><th>salary €</th>
+		<th>extension</th><th>dd/mm/yyyy</th><th>mm/dd/yyyy</th><th>dd.mm.yyyy</th>
+		<th>misc numbers</th><th>numbers (comma)</th>
+	</tr>
+	<tr><td>Bloggs, Fred</td><td>$12000.00</td><td>11105.46€</td>
+		<td>1353</td><td>18/08/2003</td><td>08/18/2003</td><td>18.8.2003</td>
+		<td>+10,000.66</td><td>+10.000,66</td></tr>
+	<tr><td>Turvey, Kevin</td><td>$191200.00</td><td>176946.96€</td>
+		<td>2342</td><td>02/05/1979</td><td>05/02/1979</td><td>2.5.1979</td>
+		<td>10000.</td><td>10000,</td></tr>
+	<tr><td>Mbogo, Arnold</td><td>$32010.12</td><td>29623.92€</td>
+		<td>2755</td><td>09/08/1998</td><td>08/09/1998</td><td>9.8.1998</td>
+		<td>1 234 567.89</td><td>1 234 567,89</td></tr>
+	<tr><td>Shakespeare, Bill</td><td>$122000.00</td><td>112905.48€</td>
+		<td>3211</td><td>12/11/1961</td><td>11/12/1961</td><td>12.11.1961</td>
+		<td>+3,425,422</td><td>+3.425.422</td></tr>
+	<tr><td>Shakespeare, Hamnet</td><td>$9000</td><td>8329.09€</td>
+		<td>9005</td><td>01/01/2002</td><td>01/01/2002</td><td>1.1.2002</td>
+		<td>-21,000,000</td><td>-21.000.000</td></tr>
+	<tr><td>Fitz, Marvin</td><td>$3300</td><td>3054.00€</td>
+		<td>5554</td><td>22/05/1995</td><td>05/22/1995</td><td>22.5.1995</td>
+		<td>10000.12</td><td>10000,12</td></tr>
+	<tr><td>Doe, John</td><td>$4139</td><td>3830.46€</td>
+		<td>3674</td><td>03/08/1998</td><td>08/03/1998</td><td>3.8.1998</td>
+		<td>1'234'567.89</td><td>1'234'567,89</td></tr>
+</table>

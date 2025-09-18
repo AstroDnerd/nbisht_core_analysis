@@ -1,0 +1,114 @@
+Core	Mode	Notes
+u501_c0000	B1	
+u501_c0001	B1	
+u501_c0008	F1, Alone	good
+u501_c0010	F1, B2	
+u501_c0011	F1, B2	
+u501_c0012	F1, Alone	Looks like a pair
+u501_c0013	F1, B3	Looks like a pair
+u501_c0014	F1, B3	Looks like a pair
+u501_c0015	F1, C3	
+u501_c0016	F1, C3	
+u501_c0017	F1, C3	
+u501_c0018	F1, C3	Not real
+u501_c0019	F1, C3	
+u501_c0021	F1, C3	
+u501_c0024	F1, Alone	
+u501_c0025	F1, Alone	Multiple?
+u501_c0026	C1	
+u501_c0027	C1	
+u501_c0029	C1	
+u501_c0030	C1	
+u501_c0031	C1	
+u501_c0032	C1	
+u501_c0033	C1	Major, Mergers
+u501_c0034	C1	
+u501_c0037	C1	Or a multiple
+u501_c0041	Alone	Or a multiple
+u501_c0044	C1	Or a multiple
+u501_c0045	B5	Or a multiple
+u501_c0046	B5	
+u501_c0061	B6	
+u501_c0062	B6	
+u501_c0064	Alone	
+u501_c0065	B7	
+u501_c0066	B7	
+u501_c0067	Alone	
+u501_c0070	Alone	
+u501_c0071	Alone	
+u501_c0072	Alone	
+u501_c0073	B8	
+u501_c0074	B8	
+u501_c0077	C2	Merger
+u501_c0079	C2	Merger
+u501_c0080	B9	
+u501_c0081	B9	
+u501_c0082	C2	
+u501_c0083	C2	Probably not real
+u501_c0084	C2	Fragment
+u501_c0085	C2	Major
+u501_c0086	B10	Part of S2
+u501_c0087	B10	Part of S2
+u501_c0088	B10	Part of S2
+u501_c0089	B10	Part of S2
+u501_c0092	Alone	
+u501_c0093	Alone	
+u501_c0096	Alone	Merger
+u501_c0109	Alone	Tides
+u501_c0110	Alone	Tides
+u501_c0115	Alone	Fragment
+u501_c0120	Alone	
+u501_c0121	B11	
+u501_c0122	B11	
+u501_c0123	Alone	
+u501_c0124	Alone	Classic
+u501_c0126	Alone	Amazing Spiral
+u501_c0127	Alone	Merger
+u501_c0135	Alone	
+u501_c0148	B12	
+u501_c0149	B12	
+u501_c0164	B13	
+u501_c0165	B13	
+u501_c0166	B14	
+u501_c0167	B14	
+u501_c0171	Alone	
+u501_c0175	B16	
+u501_c0176	B16	
+u501_c0177	Alone	
+u501_c0180	Alone	Fragment
+u501_c0181	Alone	
+u501_c0183	Alone	
+u501_c0194	B4	
+u501_c0195	B4	
+u501_c0198	Alone	Merger
+u501_c0199	Alone	Slow
+u501_c0201	Alone	
+u501_c0202	B17	
+u501_c0203	B17	
+u501_c0228	Alone	
+u501_c0230	Alone	Good
+u501_c0231	Alone	
+u501_c0238	Alone	Wee
+u501_c0248	Alone	
+u501_c0249	Alone	
+u501_c0250	Alone	
+u501_c0253	B18	
+u501_c0254	B18	
+u501_c0255	Alone	
+u501_c0263	Alone	Merger and Accretion
+u501_c0265	B19	
+u501_c0266	B19	
+u501_c0269	B20	
+u501_c0270	B20	
+u501_c0275	B21	
+u501_c0276	B21	
+u501_c0277	Alone	
+u501_c0286	Alone	
+u501_c0292	Alone	
+u501_c0294	Alone	
+u501_c0297	Alone	
+u501_c0305	B22	
+u501_c0306	B22	
+u501_c0307	Alone	
+u501_c0308	Alone	
+u501_c0323	Alone	The one est.

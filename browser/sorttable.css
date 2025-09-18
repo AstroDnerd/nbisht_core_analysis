@@ -1,0 +1,80 @@
+
+/* sorttable styles, these add the placeholder sort arrow and cursor */
+.sortable th:not(.sorttable_nosort){
+	cursor:pointer;
+}
+.sortable th:not(.sorttable_nosort):not(.sorttable_sorted):not(.sorttable_sorted_reverse):after{
+	opacity:0.25;
+	display:inline;
+	content:'\a0\25B4';
+}
+/* styles used for these examples */
+table{
+	padding:0;
+	border-spacing:0;
+	border:1px solid black;
+	text-align:center;
+}
+tbody tr:hover{
+	background:#eee;
+}
+th{
+	background:#F0F9FF;
+	padding:0 5px;
+	border-top:1px solid #000;
+	border-bottom:1px solid #000;
+}
+thead th{border-top:none;}
+tfoot th{border-bottom:none;}
+tr:not(:last-child) td{
+	border-bottom:1px dotted gray;
+}
+th:not(:last-child), td:not(:last-child){
+	border-right:1px dotted gray;
+}
+a{color:#567BF0}
+a:hover,a:focus{color:#112D87}
+.ok{color:#019e15;}
+.err{color:#e11b31;}
+.works{color:orange;}
+.question{color:#184df3;}
+.row{overflow:hidden;}
+.row>div{
+	float:left;
+	width:300px;
+}
+.row.w500>div{
+	width:500px;
+}
+/* FAQ styles */
+div.Q{
+	display:block;
+	cursor:pointer;
+	text-decoration:none;
+	color:#fff;
+	background:#000;
+}
+div.Q:before{
+	color:#feba05;
+	content:'Q: ';
+}
+div.Q span{
+	display:none;
+	cursor:default;
+	padding:0 0 8px 20px;
+}
+div.Q span:before{
+	color:#019e15;
+	content:'A: ';
+}
+div.Q:hover{
+	background:#111;
+}
+div.Q:focus{
+	pointer-events:none;
+}
+div.Q:focus span{
+	pointer-events:auto;
+	display:block;
+}
+

@@ -1,0 +1,205 @@
+Available device: cpu 
+Loading images!
+Total set size: 400, Training set size: 320, Test set size: 80
+Time taken to load images: 95.39 seconds
+Current pruning level: 0, Minimum epoch: 0
+Randomly selected 18 models for training at pruning level 0
+model_47 Starting training!
+Model initialized for training with 118,889,450 trainable parameters.
+Epoch 1: Total=5.1548 | L1=1.9885 HighDensity=0.9520 Mass=1.1435  Hist=0.2061 Spectral=0.8647 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.3866 | L1=1.6700 HighDensity=0.9582 Mass=1.0835  Hist=0.2310 Spectral=0.4439 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.2088 | L1=1.6351 HighDensity=0.9247 Mass=1.0796  Hist=0.1567 Spectral=0.4126 Weights: (0.9722861993990481, 1.11901845202253, 1.0260952506897627, 0.825826415067527, 1.0567736828211323)
+Epoch 4: Total=4.1374 | L1=1.6146 HighDensity=0.9476 Mass=1.0387  Hist=0.1552 Spectral=0.3957 Weights: (1.0335852921461441, 0.8891926309130511, 1.0425324870251027, 1.0083390449170162, 1.0263505449986854)
+[5.154816675186157, 4.38655915260315, 4.20877331495285, 4.137405642855776]
+model_47 Training completed!
+Time taken for training model_47: 4963.26 seconds
+Model loaded for testing with 118,889,450 trainable parameters.
+Model: model_47 Testing completed!
+model_53 Starting training!
+Model initialized for training with 479,480,173 trainable parameters.
+Epoch 1: Total=5.2316 | L1=2.0880 HighDensity=0.9488 Mass=1.1529  Hist=0.1314 Spectral=0.9104 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.3264 | L1=1.6776 HighDensity=0.9481 Mass=1.0836  Hist=0.1776 Spectral=0.4395 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.2138 | L1=1.6387 HighDensity=0.9375 Mass=1.0486  Hist=0.1599 Spectral=0.4291 Weights: (0.9362576198411477, 1.231271327926506, 1.0023404378108187, 0.7975549351258588, 1.0325756792956686)
+Epoch 4: Total=4.0229 | L1=1.6107 HighDensity=0.9064 Mass=1.0432  Hist=0.1630 Spectral=0.4169 Weights: (1.007324875828616, 0.9695544608287449, 1.0027509040767386, 1.0070292472015565, 1.0133405120643446)
+[5.2315668821334835, 4.326363563537598, 4.213772892951965, 4.022870902194453]
+model_53 Training completed!
+Time taken for training model_53: 5364.02 seconds
+Model loaded for testing with 479,480,173 trainable parameters.
+Model: model_53 Testing completed!
+model_30 Starting training!
+Model initialized for training with 29,727,226 trainable parameters.
+Epoch 1: Total=5.4047 | L1=2.0057 HighDensity=0.9799 Mass=1.0873  Hist=0.2182 Spectral=1.1137 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.9559 | L1=1.8359 HighDensity=0.9621 Mass=1.0970  Hist=0.2232 Spectral=0.8378 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.6486 | L1=1.7835 HighDensity=0.9314 Mass=1.0788  Hist=0.1914 Spectral=0.6635 Weights: (0.9883900527930789, 1.043149042341215, 1.0357015541671146, 0.9109709543161688, 1.0217883963824224)
+Epoch 4: Total=4.5236 | L1=1.7677 HighDensity=0.9269 Mass=1.0624  Hist=0.1919 Spectral=0.5805 Weights: (1.0281513038592422, 0.9712292186096588, 1.0343089306051885, 0.9398832873403984, 1.026427259585512)
+[5.404721403121949, 4.955944752693176, 4.648625600337982, 4.523595789586967]
+model_30 Training completed!
+Time taken for training model_30: 9225.57 seconds
+Model loaded for testing with 29,727,226 trainable parameters.
+Model: model_30 Testing completed!
+model_93 Starting training!
+Model initialized for training with 6,220,519 trainable parameters.
+Epoch 1: Total=4.6357 | L1=1.9740 HighDensity=0.9427 Mass=1.1332  Hist=0.1253 Spectral=0.4605 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.0440 | L1=1.6023 HighDensity=0.9104 Mass=1.0682  Hist=0.1167 Spectral=0.3465 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=3.9877 | L1=1.5841 HighDensity=0.9047 Mass=1.0346  Hist=0.1125 Spectral=0.3517 Weights: (0.9301001724040787, 1.048217251856595, 1.0602667519765683, 0.8764974530988837, 1.0849183706638748)
+Epoch 4: Total=4.0151 | L1=1.5815 HighDensity=0.9130 Mass=1.0636  Hist=0.1144 Spectral=0.3492 Weights: (1.0023694959668166, 0.9784380947314839, 0.9824030933358476, 1.0292836337606852, 1.0075056822051665)
+[4.635681092739105, 4.0440282881259915, 3.987651604413986, 4.015099737011061]
+model_93 Training completed!
+Time taken for training model_93: 4695.96 seconds
+Model loaded for testing with 6,220,519 trainable parameters.
+Model: model_93 Testing completed!
+model_41 Starting training!
+Model initialized for training with 28,705,639 trainable parameters.
+Epoch 1: Total=4.8700 | L1=1.9223 HighDensity=0.9424 Mass=1.0948  Hist=0.1572 Spectral=0.7534 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.2755 | L1=1.6594 HighDensity=0.9515 Mass=1.0671  Hist=0.1713 Spectral=0.4261 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.2043 | L1=1.6317 HighDensity=0.9348 Mass=1.0586  Hist=0.1634 Spectral=0.4158 Weights: (0.9775759660963219, 1.0945853785723092, 1.033628058559024, 0.8423826853240061, 1.0518279114483389)
+Epoch 4: Total=4.1238 | L1=1.5914 HighDensity=0.9348 Mass=1.0412  Hist=0.1526 Spectral=0.4054 Weights: (1.0028572810434595, 0.988344042900377, 1.0072578793455063, 0.9990769528148786, 1.0024638438957787)
+[4.870034235715866, 4.275465780496598, 4.204316288232803, 4.123838845702979]
+model_41 Training completed!
+Time taken for training model_41: 4479.36 seconds
+Model loaded for testing with 28,705,639 trainable parameters.
+Model: model_41 Testing completed!
+model_102 Starting training!
+Model initialized for training with 118,889,450 trainable parameters.
+Epoch 1: Total=6.1355 | L1=2.1859 HighDensity=0.9483 Mass=1.1597  Hist=0.2088 Spectral=1.6328 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.4332 | L1=1.7686 HighDensity=0.9080 Mass=1.0865  Hist=0.2040 Spectral=0.4661 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.3808 | L1=1.7476 HighDensity=0.9071 Mass=1.1012  Hist=0.1971 Spectral=0.4277 Weights: (0.9859666278178972, 1.1657565381661386, 1.120435935148245, 0.5840497714160905, 1.1437911274516288)
+Epoch 4: Total=4.4762 | L1=1.7293 HighDensity=0.9121 Mass=1.1031  Hist=0.1880 Spectral=0.4672 Weights: (1.0107203687417419, 0.9889842198873209, 1.0366725883894399, 0.9418860523975718, 1.0217367705839253)
+[6.135528922080994, 4.433214592933655, 4.380759727954865, 4.476166556751368]
+model_102 Training completed!
+Time taken for training model_102: 33941.33 seconds
+Model loaded for testing with 118,889,450 trainable parameters.
+Model: model_102 Testing completed!
+model_21 Starting training!
+Model initialized for training with 1,556,855 trainable parameters.
+Epoch 1: Total=4.4356 | L1=1.8089 HighDensity=0.9376 Mass=1.0806  Hist=0.1191 Spectral=0.4894 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.0820 | L1=1.6605 HighDensity=0.8953 Mass=1.0433  Hist=0.0856 Spectral=0.3973 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=3.9585 | L1=1.6060 HighDensity=0.8863 Mass=1.0013  Hist=0.0901 Spectral=0.3748 Weights: (1.0212222027086653, 0.9242756657258941, 1.0457344208058632, 0.9685016759142836, 1.0402660348452937)
+Epoch 4: Total=4.0537 | L1=1.5896 HighDensity=0.8819 Mass=1.0165  Hist=0.0995 Spectral=0.3695 Weights: (0.9921671796097614, 1.0353305303266986, 0.988501863179062, 0.9804434931011822, 1.0035569337832955)
+[4.435571622848511, 4.081997418403626, 3.9584818124771117, 4.053670782080385]
+model_21 Training completed!
+Time taken for training model_21: 1590.39 seconds
+Model loaded for testing with 1,556,855 trainable parameters.
+Model: model_21 Testing completed!
+model_58 Starting training!
+Model initialized for training with 921,103 trainable parameters.
+Epoch 1: Total=4.7930 | L1=1.9686 HighDensity=0.9703 Mass=1.0650  Hist=0.1282 Spectral=0.6609 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.3468 | L1=1.7666 HighDensity=0.9402 Mass=1.0862  Hist=0.1066 Spectral=0.4473 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.1703 | L1=1.6760 HighDensity=0.9242 Mass=1.0626  Hist=0.1184 Spectral=0.3890 Weights: (1.011566757263908, 0.9470766421674215, 1.1434130301924423, 0.8113084734705872, 1.0866350969056406)
+Epoch 4: Total=4.3636 | L1=1.6791 HighDensity=0.9188 Mass=1.0811  Hist=0.1099 Spectral=0.4023 Weights: (0.9679809790703414, 1.1386646551065902, 0.9970891582776659, 0.8945028311730371, 1.0017623763723653)
+[4.7929630994796755, 4.346824914216995, 4.170285266637802, 4.363630597016224]
+model_58 Training completed!
+Time taken for training model_58: 1174.48 seconds
+Model loaded for testing with 921,103 trainable parameters.
+Model: model_58 Testing completed!
+model_4 Starting training!
+Model initialized for training with 921,103 trainable parameters.
+Epoch 1: Total=5.1474 | L1=2.1683 HighDensity=0.9606 Mass=1.3105  Hist=0.2135 Spectral=0.4945 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.4158 | L1=1.7768 HighDensity=0.9373 Mass=1.1401  Hist=0.1313 Spectral=0.4302 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.2056 | L1=1.6760 HighDensity=0.9369 Mass=1.0539  Hist=0.1319 Spectral=0.4070 Weights: (0.9929969438104336, 0.8964619282605895, 1.0184168181639246, 1.0183924308269163, 1.0737318789381365)
+Epoch 4: Total=4.1947 | L1=1.6459 HighDensity=0.9269 Mass=1.0231  Hist=0.1309 Spectral=0.3984 Weights: (0.9897652134017265, 1.0205207130414857, 0.9804834884769059, 0.9912311405836768, 1.0179994444962053)
+[5.147352337837219, 4.415801560878753, 4.205644023418427, 4.194694010756099]
+model_4 Training completed!
+Time taken for training model_4: 1148.39 seconds
+Model loaded for testing with 921,103 trainable parameters.
+Model: model_4 Testing completed!
+model_23 Starting training!
+Model initialized for training with 7,179,703 trainable parameters.
+Epoch 1: Total=4.5626 | L1=1.8029 HighDensity=0.9380 Mass=1.1005  Hist=0.1422 Spectral=0.5790 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.2990 | L1=1.6822 HighDensity=0.9281 Mass=1.0681  Hist=0.1392 Spectral=0.4814 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.2644 | L1=1.6717 HighDensity=0.9259 Mass=1.0868  Hist=0.1442 Spectral=0.4358 Weights: (0.9957583962388364, 1.018911811186882, 1.0146481510199234, 0.9464415823523618, 1.0242400592019962)
+Epoch 4: Total=4.1147 | L1=1.6206 HighDensity=0.9177 Mass=1.0418  Hist=0.1260 Spectral=0.3968 Weights: (1.0016120974031701, 1.023054807394312, 1.0135484435613245, 0.9582524613147219, 1.0035321903264711)
+[4.5625698328018185, 4.2990224123001095, 4.264421808719635, 4.114726357414514]
+model_23 Training completed!
+Time taken for training model_23: 1614.03 seconds
+Model loaded for testing with 7,179,703 trainable parameters.
+Model: model_23 Testing completed!
+model_84 Starting training!
+Model initialized for training with 29,727,226 trainable parameters.
+Epoch 1: Total=6.4029 | L1=2.3628 HighDensity=0.9679 Mass=1.1823  Hist=0.1454 Spectral=1.7444 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.5447 | L1=1.8663 HighDensity=0.9338 Mass=1.0866  Hist=0.1142 Spectral=0.5439 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.4174 | L1=1.8259 HighDensity=0.9223 Mass=1.1016  Hist=0.1080 Spectral=0.4597 Weights: (1.0111839763338137, 1.0068903265857962, 1.1506218324672925, 0.626921500812625, 1.2043823638004723)
+Epoch 4: Total=4.4936 | L1=1.7464 HighDensity=0.9178 Mass=1.0469  Hist=0.1282 Spectral=0.4604 Weights: (1.0228095982354792, 0.9896862782302558, 1.0596971281809333, 0.8954082605468263, 1.0323987348065051)
+[6.402930819988251, 4.544702279567718, 4.417435646057129, 4.493601201119584]
+model_84 Training completed!
+Time taken for training model_84: 9870.78 seconds
+Model loaded for testing with 29,727,226 trainable parameters.
+Model: model_84 Testing completed!
+model_85 Starting training!
+Model initialized for training with 25,945,213 trainable parameters.
+Epoch 1: Total=4.3356 | L1=1.7251 HighDensity=0.9227 Mass=1.0916  Hist=0.1568 Spectral=0.4393 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=3.9936 | L1=1.5612 HighDensity=0.8902 Mass=1.0137  Hist=0.1521 Spectral=0.3763 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=3.9959 | L1=1.5894 HighDensity=0.8898 Mass=1.0645  Hist=0.1062 Spectral=0.3459 Weights: (0.9793321185338263, 1.0451769251304905, 1.0027760526958729, 0.9331375187062819, 1.0395773849335288)
+Epoch 4: Total=3.9527 | L1=1.5646 HighDensity=0.8957 Mass=1.0526  Hist=0.1157 Spectral=0.3352 Weights: (1.076118352017879, 0.7814736000103398, 1.111129280538442, 0.9747919634285847, 1.0564868040047537)
+[4.335564053058624, 3.9936046302318573, 3.9959132850170134, 3.952699253432191]
+model_85 Training completed!
+Time taken for training model_85: 956.24 seconds
+Model loaded for testing with 25,945,213 trainable parameters.
+Model: model_85 Testing completed!
+model_28 Starting training!
+Model initialized for training with 15,233,626 trainable parameters.
+Epoch 1: Total=5.1570 | L1=2.1621 HighDensity=0.9525 Mass=1.3008  Hist=0.1858 Spectral=0.5558 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.3484 | L1=1.7795 HighDensity=0.9212 Mass=1.1024  Hist=0.1170 Spectral=0.4282 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.0888 | L1=1.6436 HighDensity=0.9006 Mass=1.0548  Hist=0.1040 Spectral=0.3858 Weights: (1.0062470801483474, 0.9136558763398902, 1.0186038639002102, 0.9800756774620735, 1.0814175021494785)
+Epoch 4: Total=4.1017 | L1=1.6180 HighDensity=0.9007 Mass=1.0289  Hist=0.1011 Spectral=0.3664 Weights: (0.9969032660252244, 0.979592430145102, 1.013564427406397, 0.9857785597835879, 1.024161316639689)
+[5.156969177722931, 4.348387694358825, 4.088811177015304, 4.101674603751759]
+model_28 Training completed!
+Time taken for training model_28: 4456.97 seconds
+Model loaded for testing with 15,233,626 trainable parameters.
+Model: model_28 Testing completed!
+model_66 Starting training!
+Model initialized for training with 7,434,242 trainable parameters.
+Epoch 1: Total=6.2058 | L1=2.0983 HighDensity=0.9829 Mass=1.0646  Hist=0.2162 Spectral=1.8438 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=5.0481 | L1=1.9240 HighDensity=0.9627 Mass=1.1010  Hist=0.1935 Spectral=0.8669 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.7296 | L1=1.8160 HighDensity=0.9535 Mass=1.0872  Hist=0.1910 Spectral=0.6818 Weights: (1.040195362210963, 1.017640035750679, 1.169525846144328, 0.6653927427381405, 1.1072460131558892)
+Epoch 4: Total=4.8042 | L1=1.7876 HighDensity=0.9481 Mass=1.0913  Hist=0.1759 Spectral=0.6607 Weights: (1.001773172868555, 1.0462031582015234, 1.046499221754684, 0.8559457944029277, 1.049578652772309)
+[6.205836081504822, 5.048087394237518, 4.729564535617828, 4.8041698772925]
+model_66 Training completed!
+Time taken for training model_66: 3375.31 seconds
+Model loaded for testing with 7,434,242 trainable parameters.
+Model: model_66 Testing completed!
+model_81 Starting training!
+Model initialized for training with 6,442,426 trainable parameters.
+Epoch 1: Total=4.6068 | L1=1.8975 HighDensity=0.9348 Mass=1.1055  Hist=0.1137 Spectral=0.5553 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.0955 | L1=1.6255 HighDensity=0.8901 Mass=1.0686  Hist=0.1057 Spectral=0.4055 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.0846 | L1=1.6466 HighDensity=0.8971 Mass=1.0766  Hist=0.0895 Spectral=0.3747 Weights: (0.9665041389549138, 1.0393973247748047, 1.0788832537452788, 0.8518330037343409, 1.0633822787906617)
+Epoch 4: Total=4.1235 | L1=1.6481 HighDensity=0.8978 Mass=1.0592  Hist=0.1021 Spectral=0.3838 Weights: (1.0523415639739162, 0.891356370118278, 1.046533647040008, 0.9627756610581235, 1.0469927578096747)
+[4.606829798221588, 4.095508271455765, 4.084587013721466, 4.123496620464467]
+model_81 Training completed!
+Time taken for training model_81: 1674.90 seconds
+Model loaded for testing with 6,442,426 trainable parameters.
+Model: model_81 Testing completed!
+model_97 Starting training!
+Model initialized for training with 25,756,522 trainable parameters.
+Epoch 1: Total=4.4007 | L1=1.7771 HighDensity=0.9361 Mass=1.0470  Hist=0.1681 Spectral=0.4724 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.0747 | L1=1.5992 HighDensity=0.9231 Mass=1.0190  Hist=0.1547 Spectral=0.3786 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=3.9658 | L1=1.5749 HighDensity=0.8862 Mass=1.0025  Hist=0.1297 Spectral=0.3725 Weights: (0.9817156461728922, 1.002064664995799, 1.0564357303260516, 0.8896645475297178, 1.0701194109755399)
+Epoch 4: Total=3.9570 | L1=1.5437 HighDensity=0.8855 Mass=1.0079  Hist=0.1262 Spectral=0.3401 Weights: (1.0335895644433226, 0.892857018157682, 1.0325641333676747, 1.0326974207302615, 1.0082918633010594)
+[4.40074737071991, 4.074710029363632, 3.9657994985580443, 3.956954518964442]
+model_97 Training completed!
+Time taken for training model_97: 2119.59 seconds
+Model loaded for testing with 25,756,522 trainable parameters.
+Model: model_97 Testing completed!
+model_51 Starting training!
+Model initialized for training with 103,756,013 trainable parameters.
+Epoch 1: Total=4.4025 | L1=1.8377 HighDensity=0.9338 Mass=1.0764  Hist=0.0854 Spectral=0.4691 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.0648 | L1=1.6495 HighDensity=0.8963 Mass=1.0601  Hist=0.0822 Spectral=0.3766 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=4.0028 | L1=1.6012 HighDensity=0.8747 Mass=1.0768  Hist=0.0922 Spectral=0.3578 Weights: (0.9875620671343257, 1.0200852020599995, 1.0316306491296068, 0.9419157545359484, 1.0188063271401198)
+Epoch 4: Total=4.0143 | L1=1.5980 HighDensity=0.8821 Mass=1.0616  Hist=0.0959 Spectral=0.3657 Weights: (0.9816237397836729, 1.0588233902806876, 1.0039451380644482, 0.9714909448649859, 0.9841167870062055)
+[4.402512490749359, 4.064786607027054, 4.002763462066651, 4.014339660911576]
+model_51 Training completed!
+Time taken for training model_51: 5389.99 seconds
+Model loaded for testing with 103,756,013 trainable parameters.
+Model: model_51 Testing completed!
+model_45 Starting training!
+Model initialized for training with 25,756,522 trainable parameters.
+Epoch 1: Total=4.4603 | L1=1.8773 HighDensity=0.9249 Mass=1.1299  Hist=0.0833 Spectral=0.4449 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 2: Total=4.1099 | L1=1.6503 HighDensity=0.8830 Mass=1.1231  Hist=0.0782 Spectral=0.3753 Weights: (1.0, 1.0, 1.0, 1.0, 1.0)
+Epoch 3: Total=3.9916 | L1=1.6130 HighDensity=0.8733 Mass=1.0768  Hist=0.0784 Spectral=0.3501 Weights: (0.9784720914860455, 1.0077043613309105, 1.0363522167627754, 0.961263239936633, 1.0162080904836357)
+Epoch 4: Total=3.9649 | L1=1.5821 HighDensity=0.8694 Mass=1.0638  Hist=0.0818 Spectral=0.3625 Weights: (1.0025119579019557, 1.015556016752436, 0.9932167716521835, 0.9803662590204467, 1.0083489946729784)
+[4.460321235656738, 4.109915977716446, 3.991565239429474, 3.9648585758791675]
+model_45 Training completed!
+Time taken for training model_45: 5167.69 seconds
+Model loaded for testing with 25,756,522 trainable parameters.
+Model: model_45 Testing completed!
+Saving model performance results to phase2_model_performance.csv
