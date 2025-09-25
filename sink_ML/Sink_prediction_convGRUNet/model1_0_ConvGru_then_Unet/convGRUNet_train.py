@@ -267,11 +267,12 @@ parser = argparse.ArgumentParser()
 argsUNET = parser.parse_args(args=[])
 argsUNET.image_size = IMAGESIZE
 argsUNET.device = DEVICE
-argsUNET.run_name = "convGRUnet3D_best_GPU_optimized"
+argsUNET.run_name = "convGRUnet3D_best_GPU_optimized_accumulated"
 argsUNET.loss_type = 'dynamic'
-argsUNET.epochs = 30
+argsUNET.epochs = 100
 argsUNET.lr = 3e-4
-argsUNET.batch_size = 2 
+argsUNET.batch_size = 4
+argsUNET.accum_steps= 2
 argsUNET.num_workers = 4
 argsUNET.Adamw_weight_decay = 1e-4
 argsUNET.DWA_temperature = 2
@@ -293,7 +294,7 @@ argsGRU.bias = False
 
 setup_memory_optimization()
 print(argsUNET.run_name + " Starting training!", flush=True)
-train_unet_with_dataset(train_dataset, argsUNET, argsGRU) 
+train_unet_with_dataset_optimized_w_accumulation(train_dataset, argsUNET, argsGRU) 
 #train_unet(input_image_train, output_image_train, label_train, argsUNET, argsGRU)
 print(argsUNET.run_name + " Training completed!", flush=True)
 end = time.time()

@@ -126,7 +126,7 @@ def print_progress(batch_idx, loader, epoch, start_epoch, args,
     print(status + " " * 10, end="\r", flush=True)
 
     # occasional newline to make log searchable (every 500 batches)
-    if (batches_done % 500) == 0:
+    if (batches_done % 100) == 0:
         print()
 
     return batch_time_ema
@@ -638,27 +638,35 @@ class ConvGRUCell3D(nn.Module):
 
 
 def compute_spectral_loss(pred, target):
-    #pred, target are shaped [B, 1, D, H, W]
-    pred_fft = torch.fft.fftn(pred.squeeze(1), dim=(1,2,3))   # [B, D, H, W], complex
-    targ_fft = torch.fft.fftn(target.squeeze(1), dim=(1,2,3))
-    #find the absolute magnitude, whihc gives the power spectrum
+    # pred, target: tensors [B, 1, D, H, W] possibly float16 under autocast
+    # force float32 for FFT and magnitude ops
+    p = pred.squeeze(1).float()
+    t = target.squeeze(1).float()
+    pred_fft = torch.fft.fftn(p, dim=(1,2,3))
+    targ_fft = torch.fft.fftn(t, dim=(1,2,3))
     pred_mag = torch.abs(pred_fft)
     targ_mag = torch.abs(targ_fft)
+    # log1p is stable
     log_pred = torch.log1p(pred_mag)
     log_true = torch.log1p(targ_mag)
     loss = F.mse_loss(log_pred, log_true)
     return loss
 
+
 def hist_loss(pred, true, bins=16):
-    # flatten
-    p = pred.view(-1)
-    t =  true.view(-1)
-    # compute hist counts (differentiable via torch.histc)
-    p_h = torch.histc(p, bins=bins, min=-1, max=1)
-    t_h = torch.histc(t, bins=bins, min=-1, max=1)
-    p_h /= p_h.sum()
-    t_h /= t_h.sum()
+    # ensure float32 (necessary because torch.histc doesn't support float16)
+    p = pred.detach().float().view(-1)
+    t = true.detach().float().view(-1)
+    # compute hist counts (torch.histc supports float32 on CUDA)
+    p_h = torch.histc(p, bins=bins, min=float(torch.min(torch.cat([p,t]))), max=float(torch.max(torch.cat([p,t]))))
+    t_h = torch.histc(t, bins=bins, min=float(torch.min(torch.cat([p,t]))), max=float(torch.max(torch.cat([p,t]))))
+    # avoid division by zero
+    if p_h.sum() > 0:
+        p_h = p_h / p_h.sum()
+    if t_h.sum() > 0:
+        t_h = t_h / t_h.sum()
     return F.l1_loss(p_h, t_h)
+
 
 from torch.utils.tensorboard import SummaryWriter
 #FIX DELTA ISSUES
@@ -1224,6 +1232,7 @@ def train_unet_with_dataset(dataset, args, argsGRU):
 def train_unet_with_dataset_optimized(dataset, args, argsGRU):
     '''
     Optimized training function with mixed precision and improved memory management.
+    Notes: 3 times speed bost and a 2 times memory reduction observed for 2 epochs, 2 batch size, MSE 0.157 vs 0.1455, Density 3 times better (stochastic??)
     '''
     torch.cuda.empty_cache()
     torch.backends.cudnn.benchmark = False
@@ -1303,29 +1312,32 @@ def train_unet_with_dataset_optimized(dataset, args, argsGRU):
             optimizer.zero_grad()
             with torch.amp.autocast(device_type=DEVICE.type, enabled=True):
                 pred = model(x)
-                # Computing individual losses (same as original)
-                l1 = F.l1_loss(y, pred) * L1_scale
-                hist_l = hist_loss(y, pred, bins=32) * hist_scale
-                
-                mass_t = torch.pow(10, y).sum()
-                mass_p = torch.pow(10, pred).sum()
-                mass_error = torch.abs(mass_p - mass_t) / (mass_t + 1e-8)
-                mass_l = torch.log1p(mass_error) * mass_scale
-                
-                spectral_l = compute_spectral_loss(y, pred) * spectral_scale
-                
-                with torch.no_grad():
-                    hd_true = torch.heaviside(y-torch.quantile(y.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
-                    hd_pred = torch.heaviside(pred-torch.quantile(pred.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
-                hd_loss = F.l1_loss(hd_pred, hd_true)
-                hd_l = hd_loss * hd_scale
+            #converting predictions & targets to float32 for loss computation
+            pred_f = pred.float()
+            y_f = y.float()
+            # Computing individual losses
+            l1 = F.l1_loss(y_f, pred_f) * L1_scale
+            hist_l = hist_loss(y_f, pred_f, bins=32) * hist_scale
+            
+            mass_t = torch.pow(10, y_f).sum()
+            mass_p = torch.pow(10, pred_f).sum()
+            mass_error = torch.abs(mass_p - mass_t) / (mass_t + 1e-8)
+            mass_l = torch.log1p(mass_error) * mass_scale
+            
+            spectral_l = compute_spectral_loss(y_f, pred_f) * spectral_scale
+            
+            with torch.no_grad():
+                hd_true = torch.heaviside(y_f-torch.quantile(y_f.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
+                hd_pred = torch.heaviside(pred_f-torch.quantile(pred_f.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
+            hd_loss = F.l1_loss(hd_pred, hd_true)
+            hd_l = hd_loss * hd_scale
 
-                losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
-                if args.loss_type == 'static':
-                    total_loss = (static_w * losses).sum()
-                else:
-                    w_t = torch.tensor(w, device=DEVICE)
-                    total_loss = (w_t * losses).sum()
+            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+            if args.loss_type == 'static':
+                total_loss = (static_w * losses).sum()
+            else:
+                w_t = torch.tensor(w, device=DEVICE)
+                total_loss = (w_t * losses).sum()
 
             scaler.scale(total_loss).backward()
             scaler.unscale_(optimizer)  # if you clip grads
@@ -1346,6 +1358,220 @@ def train_unet_with_dataset_optimized(dataset, args, argsGRU):
             batch_time_ema = print_progress(batch_idx, loader, epoch, start_epoch, args,
                                 total_loss, batch_start, training_start,
                                 batch_time_ema, ema_alpha)
+            if batch_idx % 5 == 0:
+                torch.cuda.empty_cache()
+
+        N = len(dataset)
+        avg_total = total_epoch_loss / N
+        avg_l1 = sum_l1 / N
+        avg_hist = sum_hist / N
+        avg_mass = sum_mass / N
+        avg_spectral = sum_spectral / N
+        avg_hd = sum_hd / N
+        
+        if args.loss_type == 'dynamic':
+            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd]
+            if epoch >= 2:
+                r = [prev_losses[i]/prev2_losses[i] for i in range(n_losses)]
+                T = args.DWA_temperature
+                K = n_losses
+                exp_r = [np.exp(r_i/T) for r_i in r]
+                w = [(K * e) / sum(exp_r) for e in exp_r]
+            else:
+                w = [1.0]*n_losses
+            prev2_losses = prev_losses
+            prev_losses = avg_losses
+            w_print = w
+        else:
+            w_print = static_w
+
+        loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
+
+        print(f"Epoch {epoch+1}: "
+              f"Total={avg_total:.4f} | "
+              f"L1={avg_l1:.4f} "
+              f"HighDensity={avg_hd:.4f} "
+              f"Mass={avg_mass:.4f}  Hist={avg_hist:.4f} "
+              f"Spectral={avg_spectral:.4f} "
+              f"Weights: {*w_print,}")
+        print_memory_stats()
+        # TensorBoard logging
+        writer.add_scalar("Loss/Total", avg_total, epoch)
+        writer.add_scalar("Loss/L1", avg_l1, epoch)
+        writer.add_scalar("Loss/Hist", avg_hist, epoch)
+        writer.add_scalar("Loss/Mass", avg_mass, epoch)
+        writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
+        writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
+
+        if args.loss_type != 'static':
+            curr_w = torch.softmax(loss_w, dim=0).detach().cpu().tolist()
+            for i, name in enumerate(["L1", "Hist", "Mass", "Spectral", "HighDensity"]):
+                writer.add_scalar(f"Weights/{name}", curr_w[i], epoch)
+
+    writer.close()
+
+    # Save model and plot
+    torch.save({
+        'epoch': args.epochs,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss_history
+    }, f"models/{args.run_name}_{MODELFILE}")
+    
+    if args.loss_type != 'static':
+        torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
+    
+    import matplotlib.pyplot as plt
+    loss_history = np.array(loss_history)
+    plt.plot(loss_history[:,0], marker='o', label='Total Loss')
+    plt.plot(loss_history[:,1], marker='.', label='L1 Loss')
+    plt.plot(loss_history[:,2], marker='*', label='Histogram Loss')
+    plt.plot(loss_history[:,3], marker='+', label='Mass Loss')
+    plt.plot(loss_history[:,4], marker='x', label='Spectral Loss')
+    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
+    plt.yscale('log')
+    plt.legend()
+    plt.grid()
+    plt.tight_layout()
+    plt.xlabel("Epoch")
+    plt.ylabel("Avg Weighted Loss")
+    plt.title(f"{args.run_name} Training Loss")
+    plt.savefig(f"models/plots/training_loss_{args.run_name}.png")
+    plt.close()
+
+    return min(loss_history[:,0])
+
+def train_unet_with_dataset_optimized_w_accumulation(dataset, args, argsGRU):
+    '''
+    Optimized training function with mixed precision and improved memory management and gradient accumulation.
+    Notes: 
+    '''
+    torch.cuda.empty_cache()
+    torch.backends.cudnn.benchmark = False
+    print(f"Training convGRUNet with {len(dataset)} samples, {args.run_name} run", flush=True)
+    
+    num_workers = args.num_workers if hasattr(args, 'num_workers') else min(8, os.cpu_count()//2)
+    print(f"Using {num_workers} DataLoader workers", flush=True)
+       
+    loader = DataLoader(dataset,
+                       batch_size=args.batch_size,
+                       shuffle=True,
+                       num_workers=num_workers,
+                       pin_memory=True,
+                       persistent_workers=(num_workers>0))
+    
+    # Initialize model, loss function, and optimizer
+    model = hybridConvGRU3DNET(args, argsGRU).to(DEVICE, non_blocking=True)
+    
+    # For trainable weights
+    n_losses = 5  # L1, hist, Mass, Spectral, High Density
+    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
+    optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
+    writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
+    scaler = torch.amp.GradScaler(device=DEVICE)
+    accum_steps = args.accum_steps if hasattr(args, 'accum_steps') else 8/args.batch_size
+
+    start_epoch = 0
+    loss_history = []
+    
+    # Check if model already exists
+    if os.path.exists(f"models/{args.run_name}_{MODELFILE}"):
+        checkpoint = torch.load(f"models/{args.run_name}_{MODELFILE}", map_location=DEVICE, weights_only=False)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        start_epoch = checkpoint['epoch']
+        loss_history = checkpoint['loss']
+        print(f"Model loaded for training with {count_parameters(model):,} trainable parameters.", flush=True)
+    else:
+        print(f"Model initialized for training with {count_parameters(model):,} trainable parameters.", flush=True)
+    
+    # Loss scales
+    L1_scale = 5.0
+    hist_scale = 1.0
+    mass_scale = 0.1
+    spectral_scale = 0.5
+    hd_scale = 1.0
+
+    if args.loss_type == 'static':
+        static_w = [1.0, 1.0, 1.0, 1.0, 1.0]
+    if args.loss_type == 'dynamic':
+        prev_losses = [1.0]*n_losses
+        prev2_losses = [1.0]*n_losses
+        w = [1.0]*n_losses
+    # Training loop
+    import time, datetime
+    training_start = time.perf_counter()
+    batch_time_ema = None
+    ema_alpha = 0.15
+    for epoch in range(start_epoch, args.epochs):
+        model.train()
+        total_epoch_loss = 0.0
+        sum_l1, sum_hist, sum_mass, sum_spectral, sum_hd = 0.0, 0.0, 0.0, 0.0, 0.0
+        torch.cuda.empty_cache()
+        for batch_idx, batch_data in enumerate(loader):
+            batch_start = time.perf_counter()
+            if len(batch_data) == 3:
+                x, y, labels = batch_data
+                x = x.unsqueeze(2)  # Add channel dimension: [N, t, 1, 64, 64, 64]
+                y = y.unsqueeze(1)  # Add channel dimension: [N, 1, 64, 64, 64]
+            else:
+                # Fallback for original format
+                x, y = batch_data
+            
+            x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
+            
+            optimizer.zero_grad()
+            with torch.amp.autocast(device_type=DEVICE.type, enabled=True):
+                pred = model(x)
+            #converting predictions & targets to float32 for loss computation
+            pred_f = pred.float()
+            y_f = y.float()
+            # Computing individual losses
+            l1 = F.l1_loss(y_f, pred_f) * L1_scale
+            hist_l = hist_loss(y_f, pred_f, bins=32) * hist_scale
+            
+            mass_t = torch.pow(10, y_f).sum()
+            mass_p = torch.pow(10, pred_f).sum()
+            mass_error = torch.abs(mass_p - mass_t) / (mass_t + 1e-8)
+            mass_l = torch.log1p(mass_error) * mass_scale
+            
+            spectral_l = compute_spectral_loss(y_f, pred_f) * spectral_scale
+            
+            with torch.no_grad():
+                hd_true = torch.heaviside(y_f-torch.quantile(y_f.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
+                hd_pred = torch.heaviside(pred_f-torch.quantile(pred_f.flatten(), 0.99), torch.tensor([1.0], device=DEVICE))
+            hd_loss = F.l1_loss(hd_pred, hd_true)
+            hd_l = hd_loss * hd_scale
+
+            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+            if args.loss_type == 'static':
+                total_loss = (static_w * losses).sum()
+            else:
+                w_t = torch.tensor(w, device=DEVICE)
+                total_loss = (w_t * losses).sum()
+
+            loss = total_loss / accum_steps
+            scaler.scale(loss).backward()
+            if (batch_idx+1) % accum_steps == 0:
+                scaler.unscale_(optimizer)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad()
+
+                # Accumulate losses
+                batch_size = x.size(0)
+                total_epoch_loss += total_loss.item() * batch_size
+                sum_l1 += l1.item() * batch_size
+                sum_hist += hist_l.item() * batch_size
+                sum_mass += mass_l.item() * batch_size
+                sum_spectral += spectral_l.item() * batch_size
+                sum_hd += hd_l.item() * batch_size
+
+                #timing printing
+                batch_time_ema = print_progress(batch_idx, loader, epoch, start_epoch, args,
+                                    total_loss, batch_start, training_start,
+                                    batch_time_ema, ema_alpha)
             if batch_idx % 5 == 0:
                 torch.cuda.empty_cache()
 
