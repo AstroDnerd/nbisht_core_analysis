@@ -15,6 +15,8 @@ from torchvision.utils import save_image
 import logging
 from torch.utils.tensorboard import SummaryWriter
 
+import time
+import datetime
 logging.basicConfig(format="%(asctime)s - %(levelname)s: %(message)s", level=logging.INFO, datefmt="%I:%M:%S")
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -72,6 +74,110 @@ def get_subset_images(input_dir, indices):
         output_dic[num] = {'img': img_dic, 'label': label}
         infile.close()
     return output_dic
+
+
+from torch.utils.data import Dataset, DataLoader
+import h5py
+# Custom Dataset class for HDF5 data
+class HDF5Dataset(Dataset):
+    """
+    Custom PyTorch Dataset for loading data from HDF5 files efficiently.
+    This allows for lazy loading - data is only loaded when needed.
+    """
+    def __init__(self, hdf5_file, indices=None):
+        """
+        Initialize HDF5Dataset
+        
+        Parameters:
+        -----------
+        hdf5_file : str
+            Path to HDF5 file
+        indices : list, optional
+            Specific indices to use. If None, uses all available data.
+        """
+        self.hdf5_file = hdf5_file
+        
+        # Get available indices from the file
+        with h5py.File(hdf5_file, 'r') as f:
+            all_keys = list(f['input_images'].keys())
+            
+        if indices is not None:
+            # Convert indices to corresponding keys
+            self.keys = [all_keys[i] for i in indices if i < len(all_keys)]
+        else:
+            self.keys = all_keys
+            
+    def __len__(self):
+        return len(self.keys)
+    
+    def __getitem__(self, idx):
+        key = self.keys[idx]
+        
+        with h5py.File(self.hdf5_file, 'r') as f:
+            # Load input and output images
+            input_img = torch.tensor(f['input_images'][key][...], dtype=torch.float32)
+            output_img = torch.tensor(f['output_images'][key][...], dtype=torch.float32)
+            
+            # Load label
+            label_str = f['labels'][key][()]
+            label_str = label_str.decode('utf-8')
+            label_str = eval(label_str)  # Convert string representation of list to actual list
+        return input_img, output_img, label_str
+
+import random
+from sklearn.model_selection import train_test_split
+def load_hdf5_data_for_training(hdf5_file, num_samples=2000, test_percentage=0.2, seed=128):
+    """
+    Load data from HDF5 file and prepare for training
+    
+    Parameters:
+    -----------
+    hdf5_file : str
+        Path to HDF5 file
+    num_samples : int
+        Number of samples to randomly select
+    test_percentage : float
+        Percentage of data to use for testing
+    seed : int
+        Random seed for reproducibility
+        
+    Returns:
+    --------
+    tuple : (train_dataset, test_dataset, train_indices, test_indices)
+    """
+    # Set random seed
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Get total number of samples in HDF5 file
+    with h5py.File(hdf5_file, 'r') as f:
+        total_samples = len(f['input_images'].keys())
+    
+    print(f'Total samples in HDF5 file: {total_samples}')
+    
+    # Randomly select indices
+    if num_samples > total_samples:
+        print(f'Warning: Requested {num_samples} samples but only {total_samples} available. Using all samples.')
+        selected_indices = list(range(total_samples))
+    else:
+        selected_indices = random.sample(range(total_samples), num_samples)
+    
+    # Split indices into train and test
+    train_indices, test_indices = train_test_split(
+        selected_indices, 
+        test_size=test_percentage, 
+        random_state=seed,
+        shuffle=False  # Keep same as your original code
+    )
+    
+    print(f'Training samples: {len(train_indices)}, Test samples: {len(test_indices)}')
+    
+    # Create datasets
+    train_dataset = HDF5Dataset(hdf5_file, train_indices)
+    test_dataset = HDF5Dataset(hdf5_file, test_indices)
+    
+    return train_dataset, test_dataset, train_indices, test_indices
+
 
 
 class AttentionGate(nn.Module):
@@ -461,6 +567,7 @@ def hist_loss(pred, true, bins=16):
     return F.l1_loss(p_h, t_h)
 
 def return_total_loss(y, pred, L1_scale = 5.0, hist_scale = 1.0, mass_scale = 0.1, spectral_scale = 0.5, hd_scale = 1.0):
+    """Compute all loss components with given scales"""
     #Computing individual losses
     #L1 loss
     l1 = F.l1_loss(y, pred)
@@ -487,6 +594,10 @@ def return_total_loss(y, pred, L1_scale = 5.0, hist_scale = 1.0, mass_scale = 0.
     return l1, hist_l, mass_l, spectral_l, hd_l
 
 def check_training_phase(epoch):
+    """
+    Return loss scales based on training phase
+    Progressively emphasize different loss components
+    """
     #EPOCH 0 losses for 16^3 sim
     #L1=1.4236 HighDensity=0.0164 Mass=0.0138  Hist=0.0064 Spectral=0.3902
     L1_scale, hist_scale, mass_scale, spectral_scale, hd_scale = 5.0, 1.0, 0.1, 0.5, 1.0
@@ -503,8 +614,113 @@ def check_training_phase(epoch):
         hd_scale = 100*hd_scale
     return L1_scale, hist_scale, mass_scale,spectral_scale,hd_scale
 
+def print_memory_stats():
+    """Print GPU memory statistics if available"""
+    if torch.cuda.is_available():
+        print(f"GPU Memory - Allocated: {torch.cuda.memory_allocated()/1024**3:.2f} GB, "
+              f"Reserved: {torch.cuda.memory_reserved()/1024**3:.2f} GB", flush=True)
 
-from torch.utils.tensorboard import SummaryWriter
+def setup_memory_optimization():
+    """
+    Set up environment variables for memory optimization
+    """
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+    os.environ['CUDA_LAUNCH_BLOCKING'] = '1'  # For debugging
+    
+    # Additional PyTorch settings
+    torch.cuda.empty_cache()
+    if torch.cuda.is_available():
+        torch.cuda.set_per_process_memory_fraction(0.95)  # Use 95% of available memory
+        print(f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
+        print(f"GPU Memory allocated: {torch.cuda.memory_allocated() / 1024**3:.1f} GB")
+        print(f"GPU Memory reserved: {torch.cuda.memory_reserved() / 1024**3:.1f} GB")
+
+def fmt_s(sec):
+    return str(datetime.timedelta(seconds=int(sec)))
+
+def print_progress(batch_idx, loader, epoch, start_epoch, args,
+                   total_loss, batch_start, training_start,
+                   batch_time_ema, ema_alpha=0.15):
+    """
+    Print an inline status line (overwrites) with ETA, batch timing, GPU memory.
+    Returns updated batch_time_ema.
+
+    Required inputs:
+      - batch_idx: current batch index (0-based)
+      - loader: the DataLoader object
+      - epoch: current epoch (0-based or 1-based)
+      - start_epoch: epoch resumed from (0 if fresh run)
+      - args: args namespace (must contain args.epochs)
+      - total_loss: current batch's total_loss (tensor or scalar)
+      - batch_start: time.perf_counter() value taken at top of batch loop
+      - training_start: time.perf_counter() taken when training run began
+      - batch_time_ema: previous EMA value (None to initialize)
+      - ema_alpha: smoothing factor (0-1), Larger = faster response.
+    """
+    # synchronize for accurate timing on GPU
+    if torch.cuda.is_available():
+        torch.cuda.synchronize()
+
+    batch_time = time.perf_counter() - batch_start
+    if batch_time_ema is None:
+        batch_time_ema = batch_time
+    else:
+        batch_time_ema = ema_alpha * batch_time + (1.0 - ema_alpha) * batch_time_ema
+
+    batches_done = batch_idx + 1
+    try:
+        batches_total = len(loader)
+    except Exception:
+        batches_total = getattr(loader, "_len_hint", 0) or 0
+    batches_left = max(0, batches_total - batches_done)
+    #avoid printing every batch if dataloader is very large
+    if (batches_done % int(0.1*batches_total)) != 0:
+        return batch_time_ema
+
+    est_remain_epoch_s = batch_time_ema * batches_left
+
+    # compute average epoch time so far (approx)
+    completed_epochs = max(1, (epoch - start_epoch + 1))
+    elapsed_since_training_start = time.perf_counter() - training_start
+    avg_epoch_time = elapsed_since_training_start / completed_epochs
+    epochs_left = max(0, args.epochs - epoch - 1)
+    est_total_remaining_s = est_remain_epoch_s + epochs_left * avg_epoch_time
+
+    # GPU memory stats
+    if torch.cuda.is_available():
+        mem_alloc_gb = torch.cuda.memory_allocated() / (1024**3)
+        mem_max_gb   = torch.cuda.max_memory_allocated() / (1024**3)
+        gpu_mem_str = f" | GPU mem {mem_alloc_gb:4.2f}G (peak {mem_max_gb:4.2f}G)"
+    else:
+        gpu_mem_str = ""
+
+    # current loss
+    try:
+        current_loss = float(total_loss.item())
+    except Exception:
+        try:
+            current_loss = float(total_loss)
+        except Exception:
+            current_loss = 0.0
+
+    # Compose inline status
+    status = (f"Epoch {epoch+1}/{args.epochs} "
+              f"| Batch {batches_done}/{batches_total} "
+              f"| loss {current_loss:.4e} "
+              f"| batch {batch_time_ema:.3f}s "
+              f"| ETA_epoch {fmt_s(est_remain_epoch_s)} "
+              f"| ETA_total {fmt_s(est_total_remaining_s)}"
+              f"{gpu_mem_str}")
+
+    # print inline (carriage return overwrites)
+    print(status + " " * 10, end="\r", flush=True)
+
+    # occasional newline to make log searchable (every 500 batches)
+    if (batches_done % 100) == 0:
+        print()
+
+    return batch_time_ema
+
 #FIX DELTA ISSUES
 def train_unet_delta(input_arr, output_arr, labels, args, argsGRU):
     X = torch.stack(input_arr, dim=0).float().unsqueeze(2)  # [N,t, 1,64, 64, 64]
@@ -678,476 +894,416 @@ def train_unet_delta(input_arr, output_arr, labels, args, argsGRU):
 
     return min(loss_history)  # return the minimum loss for this run
 
-def train_unet(input_arr, output_arr, labels, args, argsGRU, validation_input = None, validation_output = None):
-    print(f"Training convGRUNet with {len(input_arr)} samples, {args.run_name} run", flush=True)
-    X = torch.stack(input_arr, dim=0).float().unsqueeze(2)  # [N, t, 1, 64, 64, 64]
-    Y = torch.stack(output_arr, dim=0).float().unsqueeze(1) # [N, 1, 64, 64, 64]
 
-    if validation_input!=None:
-        #validation
-        val_x_arr = torch.stack(validation_input, dim=0).float().unsqueeze(2)  # [N, t, 1, 64, 64, 64]
-        val_y_arr = torch.stack(validation_output, dim=0).float().unsqueeze(1)  # [N, t, 1, 64, 64, 64]
-
-    num_workers = args.num_workers if hasattr(args, 'num_workers') else min(8, os.cpu_count()//2)
+def train_unet_unified(dataset, args, argsGRU, validation_dataset=None):
+    """
+    Optimized training function with mixed precision and improved memory management and gradient accumulation.
+    Notes:
+    - HDF5 datasets
+    - Both CPU and GPU
+    - Mixed precision training (GPU only)
+    - Gradient accumulation
+    - Training phases with adaptive loss scaling
+    - Validation
+    - Learning rate scheduling
+    - Periodic checkpointing
+    
+    Parameters:
+    -----------
+    dataset : torch.utils.data.Dataset
+        Training dataset (HDF5Dataset)
+    args : argparse.Namespace
+        Training arguments
+    argsGRU : argparse.Namespace
+        GRU model arguments
+    validation_dataset : torch.utils.data.Dataset, optional
+        Validation dataset
+    """
+    #Setup device
+    DEVICE = torch.device(args.device if torch.cuda.is_available() and 'cuda' in args.device else 'cpu')
+    print(f"Using device: {DEVICE}", flush=True)
+    
+    #Memory optimization for GPU
+    if DEVICE.type == 'cuda':
+        torch.cuda.empty_cache()
+        torch.backends.cudnn.benchmark = False
+        print_memory_stats()
+    
+    print(f"Training convGRUNet with {len(dataset)} samples, {args.run_name} run", flush=True)
+    
+    #DataLoader setup
+    num_workers = args.num_workers if hasattr(args, 'num_workers') else min(4, os.cpu_count()//2)
     print(f"Using {num_workers} DataLoader workers", flush=True)
-    dataset = TensorDataset(X, Y)
-    loader  = DataLoader(dataset,
-                         batch_size=args.batch_size,
-                         shuffle=True,
-                         num_workers=num_workers,    # adjust based on your CPU
-                         pin_memory=True,  # if using GPU
-                        persistent_workers=(num_workers>0))
-    # Initialize model, loss function, and optimizer
-    model = hybridUNETconvGRU3D(args, argsGRU).to(DEVICE, non_blocking=True)
-    # For trainable weights
-    n_losses = 5  # L1, hist, Mass, Spectral, High Density
+    
+    loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=num_workers, pin_memory=(DEVICE.type == 'cuda'), persistent_workers=(num_workers > 0))
+    
+    # Validation loader if provided
+    if validation_dataset is not None:
+        val_loader = DataLoader(validation_dataset,batch_size=args.batch_size,shuffle=False,num_workers=num_workers,pin_memory=(DEVICE.type == 'cuda'))
+    
+    # Initialize model
+    model = hybridUNETconvGRU3D(args, argsGRU).to(DEVICE)
+    
+    # Optimizer setup
+    n_losses = 5
     loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
     optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
-    LRSched = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
+    
+    # Learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=1e-7)
+    
+    # TensorBoard
     writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
-
+    
+    # Mixed precision scaler (GPU only)
+    use_amp = DEVICE.type == 'cuda'
+    if use_amp:
+        scaler = torch.amp.GradScaler()
+    
+    # Gradient accumulation steps
+    accum_steps = int(args.accum_steps if hasattr(args, 'accum_steps') else max(1, 8 // args.batch_size))
+    print(f"Gradient accumulation steps: {accum_steps}", flush=True)
+    
+    # Load checkpoint if exists
     start_epoch = 0
     loss_history = []
     val_loss_history = []
-    #check if model already exists
-    if os.path.exists(f"models/{args.run_name}_{MODELFILE}"):
-        checkpoint = torch.load(f"models/{args.run_name}_{MODELFILE}", map_location=DEVICE, weights_only=False)
+    
+    checkpoint_path = f"models/{args.run_name}_{MODELFILE}"
+    if os.path.exists(checkpoint_path):
+        checkpoint = torch.load(checkpoint_path, map_location=DEVICE, weights_only=False)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        LRSched.load_state_dict(checkpoint['scheduler_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
         start_epoch = checkpoint['epoch']
         loss_history = checkpoint['loss']
-        val_loss_history = checkpoint['val_loss']
-        print(f"Model loaded for training with {count_parameters(model):,} trainable parameters.", flush=True)
+        val_loss_history = checkpoint.get('val_loss', [])
+        print(f"Model loaded from checkpoint (epoch {start_epoch}) with {count_parameters(model):,} parameters.", flush=True)
     else:
-        print(f"Model initialized for training with {count_parameters(model):,} trainable parameters.", flush=True)
+        print(f"Model initialized with {count_parameters(model):,} trainable parameters.", flush=True)
     
+    # Dynamic weight adjustment setup
     if args.loss_type == 'static':
-        static_w = [1.0, 1.0, 1.0, 1.0, 1.0]  # initial static weights for L1, hist, Mass, Spectral, High Density
+        static_w = [1.0, 1.0, 1.0, 1.0, 1.0]
     if args.loss_type == 'dynamic':
-        prev_losses = [1.0]*n_losses    # dummy for epoch 0
-        prev2_losses = [1.0]*n_losses   # dummy for epoch -1
-        w = [1.0]*n_losses
-
-    # === Training loop ===
+        prev_losses = [1.0] * n_losses
+        prev2_losses = [1.0] * n_losses
+        w = [1.0] * n_losses
+    
+    # Training loop
+    print("=" * 80)
+    print("STARTING TRAINING")
+    print("=" * 80)
+    training_start = time.perf_counter()
+    batch_time_ema = None
+    ema_alpha = 0.15
+    training_phase = 1
+    
     for epoch in range(start_epoch, args.epochs):
         model.train()
         total_epoch_loss = 0.0
         sum_l1, sum_hist, sum_mass, sum_spectral, sum_hd = 0.0, 0.0, 0.0, 0.0, 0.0
-
-        for x, y in loader:
-            x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
-            optimizer.zero_grad()
-            pred = model(x)
-            l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(y, pred)
-
-            #Stacking losses
-            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
-
-            if args.loss_type == 'static':
-                total_loss = (static_w * losses).sum()
-            else:
-                w_t = torch.tensor(w, device=DEVICE)
-                total_loss = (w_t * losses).sum()
-
-            total_loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # optional
-            optimizer.step()
-            # accumulate
-            batch_size = x.size(0)
-            total_epoch_loss += total_loss.item() * batch_size
-            sum_l1     += l1.item()      * batch_size
-            sum_hist    += hist_l.item()     * batch_size
-            sum_mass   += mass_l.item()  * batch_size
-            sum_spectral   += spectral_l.item()  * batch_size
-            sum_hd   += hd_l.item()  * batch_size
-    
-
-        #compute per-sample averages
-        N = len(dataset)
-        avg_total = total_epoch_loss / N
-        avg_l1    = sum_l1     / N
-        avg_hist  = sum_hist   / N
-        avg_mass  = sum_mass   / N
-        avg_spectral = sum_spectral / N
-        avg_hd = sum_hd / N
-        if args.loss_type == 'dynamic':
-            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd]
-            if epoch >= 2:
-                #compute r_i = L_i(t-1)/L_i(t-2)
-                r = [prev_losses[i]/prev2_losses[i] for i in range(n_losses)]
-                #DWA weights
-                T = args.DWA_temperature #defined as temperature in the paper, smoothes extremes
-                K = n_losses   #defined as number of tasks in the paper
-                exp_r = [np.exp(r_i/T) for r_i in r]
-                w = [(K * e) / sum(exp_r) for e in exp_r]
-            else:
-                # use static equal weights for first two epochs
-                w = [1.0]*n_losses
-
-            prev2_losses = prev_losses
-            prev_losses  = avg_losses
-            w_print = w
-        else:
-            w_print = static_w #for console
         
-        last_lr = LRSched.get_last_lr()
-        LRSched.step(avg_total)
-
-        loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
-
-        # log to console
-        print(f"Epoch {epoch+1}: "
-              f"Total={avg_total:.4f} | "
-              f"L1={avg_l1:.4f} "
-              f"HighDensity={avg_hd:.4f} "
-              f"Mass={avg_mass:.4f}  Hist={avg_hist:.4f} "
-              f"Spectral={avg_spectral:.4f} "
-              f"LR={*last_lr,} "
-              f"Weights: {*w_print,}", flush=True)
-
-        # log to TensorBoard
-        writer.add_scalar("Loss/Total",    avg_total, epoch)
-        writer.add_scalar("Loss/L1",       avg_l1,    epoch)
-        writer.add_scalar("Loss/Hist",     avg_hist,   epoch)
-        writer.add_scalar("Loss/Mass",     avg_mass,  epoch)
-        writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
-        writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
-        writer.add_scalar("LearningRate", last_lr[-1], epoch)
-
-        if args.loss_type!='static':
-            # log the learned weights (after softmax)
-            curr_w = torch.softmax(loss_w, dim=0).detach().cpu().tolist()
-            for i, name in enumerate(["L1","Hist","Mass", "Spectral", "HighDensity"]):
-                writer.add_scalar(f"Weights/{name}", curr_w[i], epoch)
-        
-        if epoch%5==0 and validation_input!=None:
-            val_total, val_l1, val_hist, val_mass, val_spectral, val_hd = 0, 0, 0, 0, 0, 0
-            for i in range(len(validation_input)):
-                val_x = val_x_arr[i].unsqueeze(0)
-                val_y = val_y_arr[i].unsqueeze(0)
-                with torch.no_grad():
-                    pred = model(val_x)
-                    l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(val_y, pred)
-                    losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
-                    w_t = torch.tensor(w_print)
-                    total_loss = (w_t * losses).sum()
-                    val_total += total_loss.item()
-                    val_l1     += l1.item()
-                    val_hist    += hist_l.item()
-                    val_mass   += mass_l.item()
-                    val_spectral   += spectral_l.item()
-                    val_hd   += hd_l.item()
-            N = len(validation_input)
-            avg_total = val_total / N
-            avg_l1    = val_l1     / N
-            avg_hist  = val_hist   / N
-            avg_mass  = val_mass   / N
-            avg_spectral = val_spectral / N
-            avg_hd = val_hd / N
-
-            # log to console
-            print(f"Validation! Epoch {epoch+1}: "
-                f"Total={avg_total:.4f} | "
-                f"L1={avg_l1:.4f} "
-                f"HighDensity={avg_hd:.4f} "
-                f"Mass={avg_mass:.4f}  Hist={avg_hist:.4f} "
-                f"Spectral={avg_spectral:.4f} "
-                f"LR={*last_lr,} "
-                f"Weights: {*w_print,}", flush=True)
-            val_loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
-
-    writer.close()
-
-    # === Save & plot ===
-    torch.save({'epoch': args.epochs, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 
-                'scheduler_state_dict': LRSched.state_dict(), 'loss': loss_history, 'val_loss': val_loss_history}, f"models/{args.run_name}_{MODELFILE}")
-    if args.loss_type != 'static':
-        torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
-    import matplotlib.pyplot as plt
-    loss_history = np.array(loss_history)
-    val_loss_history = np.array(val_loss_history)
-    plt.figure()
-    plt.plot(loss_history[:,0], marker='o', label='Total Loss')
-    plt.plot(loss_history[:,1], marker='.', label='L1 Loss')
-    plt.plot(loss_history[:,2], marker='*', label='Histogram Loss')
-    plt.plot(loss_history[:,3], marker='+', label='Mass Loss')
-    plt.plot(loss_history[:,4], marker='x', label='Spectral Loss')
-    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
-    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
-    plt.yscale('log')  # log scale for better visibility of loss changes
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("Epoch")
-    plt.ylabel("Avg Weighted Loss")
-    plt.title(f"{args.run_name} Training Loss")
-    plt.savefig(f"models/plots/training_loss_{args.run_name}.png")
-    plt.close()
-
-    plt.figure()
-    plt.plot(val_loss_history[:,0], marker='o', label='Total Loss')
-    plt.plot(val_loss_history[:,1], marker='.', label='L1 Loss')
-    plt.plot(val_loss_history[:,2], marker='*', label='Histogram Loss')
-    plt.plot(val_loss_history[:,3], marker='+', label='Mass Loss')
-    plt.plot(val_loss_history[:,4], marker='x', label='Spectral Loss')
-    plt.plot(val_loss_history[:,5], marker='1', label='High Density Loss')
-    plt.plot(val_loss_history[:,5], marker='1', label='High Density Loss')
-    plt.yscale('log')  # log scale for better visibility of loss changes
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("Every 5th Epoch")
-    plt.ylabel("Avg Weighted Loss")
-    plt.title(f"{args.run_name} Validation Training Loss")
-    plt.savefig(f"models/plots/validation_training_loss_{args.run_name}.png")
-    plt.close()
-
-    return min(loss_history[:,0])  # return the minimum loss for this run
-
-
-def train_unet_training_phase(input_arr, output_arr, labels, args, argsGRU, validation_input = None, validation_output = None):
-    print(f"Training convGRUNet with {len(input_arr)} samples, {args.run_name} run", flush=True)
-    X = torch.stack(input_arr, dim=0).float().unsqueeze(2)  # [N, t, 1, 64, 64, 64]
-    Y = torch.stack(output_arr, dim=0).float().unsqueeze(1) # [N, 1, 64, 64, 64]
-
-    if validation_input!=None:
-        #validation
-        val_x_arr = torch.stack(validation_input, dim=0).float().unsqueeze(2)  # [N, t, 1, 64, 64, 64]
-        val_y_arr = torch.stack(validation_output, dim=0).float().unsqueeze(1)  # [N, t, 1, 64, 64, 64]
-
-    num_workers = args.num_workers if hasattr(args, 'num_workers') else min(8, os.cpu_count()//2)
-    print(f"Using {num_workers} DataLoader workers", flush=True)
-    dataset = TensorDataset(X, Y)
-    loader  = DataLoader(dataset,
-                         batch_size=args.batch_size,
-                         shuffle=True,
-                         num_workers=num_workers,    # adjust based on your CPU
-                         pin_memory=True,  # if using GPU
-                        persistent_workers=(num_workers>0))
-    # Initialize model, loss function, and optimizer
-    model = hybridUNETconvGRU3D(args, argsGRU).to(DEVICE, non_blocking=True)
-    # For trainable weights
-    n_losses = 5  # L1, hist, Mass, Spectral, High Density
-    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
-    optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
-    LRSched = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
-    writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
-
-    start_epoch = 0
-    loss_history = []
-    val_loss_history = []
-    #check if model already exists
-    if os.path.exists(f"models/{args.run_name}_{MODELFILE}"):
-        checkpoint = torch.load(f"models/{args.run_name}_{MODELFILE}", map_location=DEVICE, weights_only=False)
-        model.load_state_dict(checkpoint['model_state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        LRSched.load_state_dict(checkpoint['scheduler_state_dict'])
-        start_epoch = checkpoint['epoch']
-        loss_history = checkpoint['loss']
-        val_loss_history = checkpoint['val_loss']
-        print(f"Model loaded for training with {count_parameters(model):,} trainable parameters.", flush=True)
-    else:
-        print(f"Model initialized for training with {count_parameters(model):,} trainable parameters.", flush=True)
-    
-    if args.loss_type == 'static':
-        static_w = [1.0, 1.0, 1.0, 1.0, 1.0]  # initial static weights for L1, hist, Mass, Spectral, High Density
-    if args.loss_type == 'dynamic':
-        prev_losses = [1.0]*n_losses    # dummy for epoch 0
-        prev2_losses = [1.0]*n_losses   # dummy for epoch -1
-        w = [1.0]*n_losses
-
-    # === Training loop ===
-    print("TRAINING PHASE 1!!!", flush=True)
-    tp=2
-    for epoch in range(start_epoch, args.epochs):
-        model.train()
-        total_epoch_loss = 0.0
-        sum_l1, sum_hist, sum_mass, sum_spectral, sum_hd = 0.0, 0.0, 0.0, 0.0, 0.0
-        #Training phases check epoch condition
+        # Check training phase and adjust loss scales
         l1_s, hist_s, mass_s, spec_s, hd_s = check_training_phase(epoch)
-
-
-        for x, y in loader:
-            x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
-            optimizer.zero_grad()
-            pred = model(x)
-            l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(y, pred, L1_scale = l1_s, hist_scale = hist_s, mass_scale = mass_s,
-                                                                      spectral_scale = spec_s, hd_scale = hd_s)
-
-            #Stacking losses
-            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
-
-            if args.loss_type == 'static':
-                total_loss = (static_w * losses).sum()
-            else:
-                w_t = torch.tensor(w, device=DEVICE)
-                total_loss = (w_t * losses).sum()
-
-            total_loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)  # optional
-            optimizer.step()
-            # accumulate
-            batch_size = x.size(0)
-            total_epoch_loss += total_loss.item() * batch_size
-            sum_l1     += l1.item()      * batch_size
-            sum_hist    += hist_l.item()     * batch_size
-            sum_mass   += mass_l.item()  * batch_size
-            sum_spectral   += spectral_l.item()  * batch_size
-            sum_hd   += hd_l.item()  * batch_size
-    
-
-        #compute per-sample averages
-        N = len(dataset)
-        avg_total = total_epoch_loss / N
-        avg_l1    = sum_l1     / N
-        avg_hist  = sum_hist   / N
-        avg_mass  = sum_mass   / N
-        avg_spectral = sum_spectral / N
-        avg_hd = sum_hd / N
-        if args.loss_type == 'dynamic':
-            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd]
-            if epoch >= 2:
-                #compute r_i = L_i(t-1)/L_i(t-2)
-                r = [prev_losses[i]/prev2_losses[i] for i in range(n_losses)]
-                #DWA weights
-                T = args.DWA_temperature #defined as temperature in the paper, smoothes extremes
-                K = n_losses   #defined as number of tasks in the paper
-                exp_r = [np.exp(r_i/T) for r_i in r]
-                w = [(K * e) / sum(exp_r) for e in exp_r]
-            else:
-                # use static equal weights for first two epochs
-                w = [1.0]*n_losses
-
-            prev2_losses = prev_losses
-            prev_losses  = avg_losses
-            w_print = w
-        else:
-            w_print = static_w #for console
         
-        last_lr = LRSched.get_last_lr()
-        LRSched.step(avg_total)
-
-        loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
-
-        # log to console
-        print(f"Epoch {epoch+1}: "
-              f"Total={avg_total:.4f} | "
-              f"L1={avg_l1:.4f} "
-              f"HighDensity={avg_hd:.4f} "
-              f"Mass={avg_mass:.4f}  Hist={avg_hist:.4f} "
-              f"Spectral={avg_spectral:.4f} "
-              f"LR={*last_lr,} "
-              f"Weights: {*w_print,}", flush=True)
-
-        # log to TensorBoard
-        writer.add_scalar("Loss/Total",    avg_total, epoch)
-        writer.add_scalar("Loss/L1",       avg_l1,    epoch)
-        writer.add_scalar("Loss/Hist",     avg_hist,   epoch)
-        writer.add_scalar("Loss/Mass",     avg_mass,  epoch)
-        writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
-        writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
-        writer.add_scalar("LearningRate", last_lr[-1], epoch)
-
-        if args.loss_type!='static':
-            # log the learned weights (after softmax)
-            curr_w = torch.softmax(loss_w, dim=0).detach().cpu().tolist()
-            for i, name in enumerate(["L1","Hist","Mass", "Spectral", "HighDensity"]):
-                writer.add_scalar(f"Weights/{name}", curr_w[i], epoch)
-        
-        if epoch%5==0 and validation_input!=None:
-            val_total, val_l1, val_hist, val_mass, val_spectral, val_hd = 0, 0, 0, 0, 0, 0
-            for i in range(len(validation_input)):
-                val_x = val_x_arr[i].unsqueeze(0)
-                val_y = val_y_arr[i].unsqueeze(0)
-                with torch.no_grad():
-                    pred = model(val_x)
-                    l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(val_y, pred, L1_scale = l1_s, hist_scale = hist_s, mass_scale = mass_s,
-                                                                      spectral_scale = spec_s, hd_scale = hd_s)
-                    losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
-                    w_t = torch.tensor(w_print)
-                    total_loss = (w_t * losses).sum()
-                    val_total += total_loss.item()
-                    val_l1     += l1.item()
-                    val_hist    += hist_l.item()
-                    val_mass   += mass_l.item()
-                    val_spectral   += spectral_l.item()
-                    val_hd   += hd_l.item()
-            N = len(validation_input)
-            avg_total = val_total / N
-            avg_l1    = val_l1     / N
-            avg_hist  = val_hist   / N
-            avg_mass  = val_mass   / N
-            avg_spectral = val_spectral / N
-            avg_hd = val_hd / N
-
-            # log to console
-            print(f"Validation! Epoch {epoch+1}: "
-                f"Total={avg_total:.4f} | "
-                f"L1={avg_l1:.4f} "
-                f"HighDensity={avg_hd:.4f} "
-                f"Mass={avg_mass:.4f}  Hist={avg_hist:.4f} "
-                f"Spectral={avg_spectral:.4f} "
-                f"LR={*last_lr,} "
-                f"Weights: {*w_print,}", flush=True)
-            val_loss_history.append([float(avg_total), float(avg_l1), float(avg_hist), float(avg_mass), float(avg_spectral), float(avg_hd)])
-        
-        epoch_ranges = [25,50,70,80,90]
-        if epoch in epoch_ranges:
-            if epoch!=epoch_ranges[0]:
-                print("TRAINING PHASE "+str(tp)+"!!!", flush=True)
-                tp+=1
+        # Announce training phase changes
+        phase_epochs = [25, 50, 70, 80]
+        if epoch in phase_epochs:
+            training_phase += 1
+            print("\n" + "=" * 80)
+            print(f"TRAINING PHASE {training_phase} - EPOCH {epoch+1}")
+            print(f"Loss scales: L1={l1_s}, Hist={hist_s}, Mass={mass_s}, Spectral={spec_s}, HD={hd_s}")
+            print("=" * 80 + "\n", flush=True)
+            
+            # Reset learning rate at phase boundaries (except first phase)
+            if epoch != phase_epochs[0]:
                 for g in optimizer.param_groups:
                     g['lr'] = args.lr
-            torch.save({'epoch': epoch, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 
-                'scheduler_state_dict': LRSched.state_dict(), 'loss': loss_history, 'val_loss': val_loss_history}, f"models/{args.run_name}_{MODELFILE}")
-            torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
-
-
+                print(f"Learning rate reset to {args.lr}", flush=True)
+        
+        # Clear cache at epoch start (GPU only)
+        if DEVICE.type == 'cuda':
+            torch.cuda.empty_cache()
+        
+        # Training batches
+        optimizer.zero_grad()
+        for batch_idx, batch_data in enumerate(loader):
+            batch_start = time.perf_counter()
+            
+            # Unpack batch
+            if len(batch_data) == 3:
+                x, y, labels = batch_data
+                if args.in_channel == 1:
+                    x = x.unsqueeze(2)  # [N, t, 1, D, H, W]
+                    y = y.unsqueeze(1)  # [N, 1, D, H, W]
+            else:
+                x, y = batch_data
+            
+            x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
+            # Forward pass with mixed precision (GPU) or normal (CPU)
+            if use_amp:
+                with torch.amp.autocast():
+                    pred = model(x)
+                # Convert to float32 for loss computation
+                pred_f = pred.float()
+                y_f = y.float()
+            else:
+                pred = model(x)
+                pred_f = pred
+                y_f = y
+            
+            # Compute losses
+            l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(
+                y_f, pred_f, L1_scale=l1_s, hist_scale=hist_s, 
+                mass_scale=mass_s, spectral_scale=spec_s, hd_scale=hd_s
+            )
+            
+            # Stack and weight losses
+            losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+            if args.loss_type == 'static':
+                total_loss = (torch.tensor(static_w, device=DEVICE) * losses).sum()
+            else:
+                w_t = torch.tensor(w, device=DEVICE)
+                total_loss = (w_t * losses).sum()
+            
+            # Scale loss for gradient accumulation
+            loss = total_loss / accum_steps
+            
+            # Backward pass
+            if use_amp:
+                scaler.scale(loss).backward()
+            else:
+                loss.backward()
+            
+            # Update weights after accumulation steps
+            if (batch_idx + 1) % accum_steps == 0:
+                if use_amp:
+                    scaler.unscale_(optimizer)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                    optimizer.step()
+                
+                optimizer.zero_grad()
+                
+                # Accumulate losses
+                batch_size = x.size(0)
+                total_epoch_loss += total_loss.item() * batch_size
+                sum_l1 += l1.item() * batch_size
+                sum_hist += hist_l.item() * batch_size
+                sum_mass += mass_l.item() * batch_size
+                sum_spectral += spectral_l.item() * batch_size
+                sum_hd += hd_l.item() * batch_size
+                
+                # Print progress
+                batch_time_ema = print_progress(
+                    batch_idx, loader, epoch, start_epoch, args,
+                    total_loss, batch_start, training_start,
+                    batch_time_ema, ema_alpha
+                )
+            
+            # Periodic memory cleanup (GPU only)
+            if DEVICE.type == 'cuda' and batch_idx % 5 == 0:
+                torch.cuda.empty_cache()
+        
+        # Compute epoch averages
+        N = len(dataset)
+        avg_total = total_epoch_loss / N
+        avg_l1 = sum_l1 / N
+        avg_hist = sum_hist / N
+        avg_mass = sum_mass / N
+        avg_spectral = sum_spectral / N
+        avg_hd = sum_hd / N
+        
+        # Dynamic weight adjustment
+        if args.loss_type == 'dynamic':
+            avg_losses = [avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd]
+            if epoch >= 2:
+                r = [prev_losses[i] / (prev2_losses[i] + 1e-8) for i in range(n_losses)]
+                T = args.DWA_temperature
+                K = n_losses
+                exp_r = [np.exp(r_i / T) for r_i in r]
+                sum_exp = sum(exp_r)
+                w = [(K * e) / sum_exp for e in exp_r]
+            else:
+                w = [1.0] * n_losses
+            
+            prev2_losses = prev_losses
+            prev_losses = avg_losses
+            w_print = w
+        else:
+            w_print = static_w
+        
+        # Update learning rate scheduler
+        last_lr = [group['lr'] for group in optimizer.param_groups]
+        scheduler.step(avg_total)
+        
+        # Record history
+        loss_history.append([avg_total, avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd])
+        
+        # Console logging
+        print(f"\nEpoch {epoch+1}/{args.epochs}: "
+              f"Total={avg_total:.4f} | "
+              f"L1={avg_l1:.4f} HD={avg_hd:.4f} "
+              f"Mass={avg_mass:.4f} Hist={avg_hist:.4f} "
+              f"Spectral={avg_spectral:.4f} | "
+              f"LR={last_lr[0]:.2e} | "
+              f"Weights: [{', '.join([f'{w:.2f}' for w in w_print])}]", flush=True)
+        
+        if DEVICE.type == 'cuda':
+            print_memory_stats()
+        
+        # TensorBoard logging
+        writer.add_scalar("Loss/Total", avg_total, epoch)
+        writer.add_scalar("Loss/L1", avg_l1, epoch)
+        writer.add_scalar("Loss/Hist", avg_hist, epoch)
+        writer.add_scalar("Loss/Mass", avg_mass, epoch)
+        writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
+        writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
+        writer.add_scalar("LearningRate", last_lr[0], epoch)
+        
+        if args.loss_type != 'static':
+            curr_w = torch.softmax(loss_w, dim=0).detach().cpu().tolist()
+            for i, name in enumerate(["L1", "Hist", "Mass", "Spectral", "HighDensity"]):
+                writer.add_scalar(f"Weights/{name}", curr_w[i], epoch)
+        
+        # Validation every 5 epochs
+        if validation_dataset is not None and epoch % 5 == 0:
+            print("\nRunning validation...", flush=True)
+            model.eval()
+            val_total, val_l1, val_hist, val_mass, val_spectral, val_hd = 0, 0, 0, 0, 0, 0
+            
+            with torch.no_grad():
+                for val_batch in val_loader:
+                    if len(val_batch) == 3:
+                        val_x, val_y, _ = val_batch
+                        if args.in_channel == 1:
+                            val_x = val_x.unsqueeze(2)
+                            val_y = val_y.unsqueeze(1)
+                    else:
+                        val_x, val_y = val_batch
+                    
+                    val_x, val_y = val_x.to(DEVICE), val_y.to(DEVICE)
+                    
+                    if use_amp:
+                        with torch.cuda.amp.autocast():
+                            pred = model(val_x)
+                        pred = pred.float()
+                        val_y = val_y.float()
+                    else:
+                        pred = model(val_x)
+                    
+                    l1, hist_l, mass_l, spectral_l, hd_l = return_total_loss(
+                        val_y, pred, L1_scale=l1_s, hist_scale=hist_s,
+                        mass_scale=mass_s, spectral_scale=spec_s, hd_scale=hd_s
+                    )
+                    
+                    losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+                    w_t = torch.tensor(w_print, device=DEVICE)
+                    total_loss = (w_t * losses).sum()
+                    
+                    batch_size = val_x.size(0)
+                    val_total += total_loss.item() * batch_size
+                    val_l1 += l1.item() * batch_size
+                    val_hist += hist_l.item() * batch_size
+                    val_mass += mass_l.item() * batch_size
+                    val_spectral += spectral_l.item() * batch_size
+                    val_hd += hd_l.item() * batch_size
+            
+            N_val = len(validation_dataset)
+            val_loss_history.append([
+                val_total / N_val, val_l1 / N_val, val_hist / N_val,
+                val_mass / N_val, val_spectral / N_val, val_hd / N_val
+            ])
+            
+            print(f"Validation: Total={val_total/N_val:.4f} | "
+                  f"L1={val_l1/N_val:.4f} HD={val_hd/N_val:.4f} "
+                  f"Mass={val_mass/N_val:.4f} Hist={val_hist/N_val:.4f} "
+                  f"Spectral={val_spectral/N_val:.4f}\n", flush=True)
+            
+            # TensorBoard validation logging
+            writer.add_scalar("Val_Loss/Total", val_total / N_val, epoch)
+            writer.add_scalar("Val_Loss/L1", val_l1 / N_val, epoch)
+            writer.add_scalar("Val_Loss/Hist", val_hist / N_val, epoch)
+            writer.add_scalar("Val_Loss/Mass", val_mass / N_val, epoch)
+            writer.add_scalar("Val_Loss/Spectral", val_spectral / N_val, epoch)
+            writer.add_scalar("Val_Loss/HighDensity", val_hd / N_val, epoch)
+        
+        # Periodic checkpointing at phase boundaries
+        checkpoint_epochs = [24, 49, 69, 79, 89]  # End of each phase
+        if epoch in checkpoint_epochs or (epoch + 1) == args.epochs:
+            print(f"\nSaving checkpoint at epoch {epoch+1}...", flush=True)
+            torch.save({
+                'epoch': epoch + 1,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scheduler_state_dict': scheduler.state_dict(),
+                'loss': loss_history,
+                'val_loss': val_loss_history
+            }, checkpoint_path)
+            
+            if args.loss_type != 'static':
+                torch.save(loss_w.detach().cpu(), 
+                          f"models/plots/loss_data_{args.run_name}_loss.pt")
+    
     writer.close()
-
-    # === Save & plot ===
-    torch.save({'epoch': args.epochs, 'model_state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict(), 
-                'scheduler_state_dict': LRSched.state_dict(), 'loss': loss_history, 'val_loss': val_loss_history}, f"models/{args.run_name}_{MODELFILE}")
-    if args.loss_type != 'static':
-        torch.save(loss_w.detach().cpu(), f"models/plots/loss_data_{args.run_name}_loss.pt")
+    
+    # Final save
+    print("\nSaving final model...", flush=True)
+    torch.save({
+        'epoch': args.epochs,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'scheduler_state_dict': scheduler.state_dict(),
+        'loss': loss_history,
+        'val_loss': val_loss_history
+    }, checkpoint_path)
+    
+    # Plot training curves
     import matplotlib.pyplot as plt
+    
     loss_history = np.array(loss_history)
-    val_loss_history = np.array(val_loss_history)
-    plt.figure()
-    plt.plot(loss_history[:,0], marker='o', label='Total Loss')
-    plt.plot(loss_history[:,1], marker='.', label='L1 Loss')
-    plt.plot(loss_history[:,2], marker='*', label='Histogram Loss')
-    plt.plot(loss_history[:,3], marker='+', label='Mass Loss')
-    plt.plot(loss_history[:,4], marker='x', label='Spectral Loss')
-    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
-    plt.plot(loss_history[:,5], marker='1', label='High Density Loss')
-    plt.yscale('log')  # log scale for better visibility of loss changes
+    plt.figure(figsize=(10, 6))
+    plt.plot(loss_history[:, 0], marker='o', label='Total Loss')
+    plt.plot(loss_history[:, 1], marker='.', label='L1 Loss')
+    plt.plot(loss_history[:, 2], marker='*', label='Histogram Loss')
+    plt.plot(loss_history[:, 3], marker='+', label='Mass Loss')
+    plt.plot(loss_history[:, 4], marker='x', label='Spectral Loss')
+    plt.plot(loss_history[:, 5], marker='1', label='High Density Loss')
+    plt.yscale('log')
     plt.legend()
     plt.grid()
     plt.tight_layout()
     plt.xlabel("Epoch")
     plt.ylabel("Avg Weighted Loss")
     plt.title(f"{args.run_name} Training Loss")
-    plt.savefig(f"models/plots/training_loss_{args.run_name}.png")
+    plt.savefig(f"models/plots/training_loss_{args.run_name}.png", dpi=150)
     plt.close()
-
-    plt.figure()
-    plt.plot(val_loss_history[:,0], marker='o', label='Total Loss')
-    plt.plot(val_loss_history[:,1], marker='.', label='L1 Loss')
-    plt.plot(val_loss_history[:,2], marker='*', label='Histogram Loss')
-    plt.plot(val_loss_history[:,3], marker='+', label='Mass Loss')
-    plt.plot(val_loss_history[:,4], marker='x', label='Spectral Loss')
-    plt.plot(val_loss_history[:,5], marker='1', label='High Density Loss')
-    plt.plot(val_loss_history[:,5], marker='1', label='High Density Loss')
-    plt.yscale('log')  # log scale for better visibility of loss changes
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-    plt.xlabel("Every 5th Epoch")
-    plt.ylabel("Avg Weighted Loss")
-    plt.title(f"{args.run_name} Validation Training Loss")
-    plt.savefig(f"models/plots/validation_training_loss_{args.run_name}.png")
-    plt.close()
-
-    return min(loss_history[:,0])  # return the minimum loss for this run
+    
+    # Plot validation curves if available
+    if val_loss_history:
+        val_loss_history = np.array(val_loss_history)
+        plt.figure(figsize=(10, 6))
+        plt.plot(val_loss_history[:, 0], marker='o', label='Total Loss')
+        plt.plot(val_loss_history[:, 1], marker='.', label='L1 Loss')
+        plt.plot(val_loss_history[:, 2], marker='*', label='Histogram Loss')
+        plt.plot(val_loss_history[:, 3], marker='+', label='Mass Loss')
+        plt.plot(val_loss_history[:, 4], marker='x', label='Spectral Loss')
+        plt.plot(val_loss_history[:, 5], marker='1', label='High Density Loss')
+        plt.yscale('log')
+        plt.legend()
+        plt.grid()
+        plt.tight_layout()
+        plt.xlabel("Validation Check (every 5 epochs)")
+        plt.ylabel("Avg Weighted Loss")
+        plt.title(f"{args.run_name} Validation Loss")
+        plt.savefig(f"models/plots/validation_loss_{args.run_name}.png", dpi=150)
+        plt.close()
+    
+    total_time = time.perf_counter() - training_start
+    print(f"\nTraining completed in {str(datetime.timedelta(seconds=int(total_time)))}", flush=True)
+    
+    return min(loss_history[:, 0])  # Return minimum loss

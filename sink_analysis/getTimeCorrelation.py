@@ -215,14 +215,16 @@ if 0:
 if 1:
     #3D density Timeseries_Cube
     nonsink_trackname = 'nb101'
-    this_track = track_info.tracks[nonsink_trackname]
-    df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
+    #this_track = track_info.tracks[nonsink_trackname]
+    #df_name = this_track.sim_directory+'/datasets/nb101_TimeseriesCubes_Density.npy'
+    df_name = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/d03_DD0030_TimeseriesCubes_density.npy'
     infile = open(df_name, 'rb')
     TSCube_density = np.load(infile)
     time_array = np.load(infile)
+    DELTAT = np.mean(time_array[1:]-time_array[:-1])
     infile.close()
     #density variance
-    TSCube_density = TSCube_density-1
+    TSCube_density = TSCube_density-np.mean(TSCube_density)
     #plot_autocorrelation_nd(TSCube_density, dim='3D_densityvariance')
     paperplot_autocorrelation(TSCube_density)
 
