@@ -236,14 +236,6 @@ def max_intensity_projection(field3d, axis=0):
     # return MIP along axis
     return np.max(field3d, axis=axis)
 
-def midplane_slice(field3d, axis=0):
-    idx = field3d.shape[axis] // 2
-    if axis == 0:
-        return field3d[idx, :, :]
-    elif axis == 1:
-        return field3d[:, idx, :]
-    else:
-        return field3d[:, :, idx]
 
 #log density (clip small)
 def safe_log10_density(density, eps=1e-12):
@@ -299,9 +291,7 @@ def plot_sim_overview(parent_tensor, frame_idx, out_file=None, cmap='viridis'):
     # inset to show tail (zoom rightmost)
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     axins = inset_axes(ax3, width="30%", height="40%", loc='upper right', borderpad=1)
-    right = np.percentile(logrho, 100)
-    left = np.percentile(logrho, 99.9)
-    axins.hist(logrho, bins=50, density=True)
+    axins.hist(logrho, bins=120, density=False)
     axins.set_xlim(3, 5)
     axins.set_ylim(0, 5)
     axins.set_yscale('linear')
@@ -326,76 +316,12 @@ def plot_sim_overview(parent_tensor, frame_idx, out_file=None, cmap='viridis'):
         plt.savefig(out_file, dpi=300, bbox_inches='tight')
     plt.show()
 
-# ---- 2) density PDF, CCDF, mass fraction -----------------------------------
-def plot_density_pdf_ccdf_mass(parent_tensor, frame_idx, nbins=256, out_file=None):
-    """
-    Plot: (a) PDF of log-density; (b) CCDF voxels (fraction > rho); (c) cumulative mass fraction vs density.
-    """
-    density = parent_tensor[frame_idx, 0]
-    rho = density.ravel()
-    rho_pos = np.clip(rho, 1e-12, None)
-    logrho = np.log10(rho_pos)
 
-    # PDF (log-binned)
-    bins = np.linspace(np.percentile(logrho, 0), np.percentile(logrho, 100), nbins)
-    pdf_vals, edges = np.histogram(logrho, bins=bins, density=True)
-    centers = 0.5*(edges[:-1] + edges[1:])
-
-    # CCDF (voxel count fraction)
-    sorted_rho = np.sort(rho_pos)
-    voxels_above = np.arange(sorted_rho.size, 0, -1) / sorted_rho.size
-    # mass fraction: sort voxels by density descending and compute cumulative mass
-    mass = rho_pos  # assume unit mass per voxel times density; if physical voxel mass scaling required, multiply
-    order = np.argsort(mass)[::-1]
-    mass_sorted = mass[order]
-    cumulative_mass_fraction = np.cumsum(mass_sorted) / (np.sum(mass_sorted)+1e-30)
-    density_sorted_desc = mass_sorted  # densities in desc order
-
-    # For plotting mass fraction as function of density, we can sample unique density bins:
-    uniq_dens, inds = np.unique(np.round(np.log10(density_sorted_desc), 6), return_index=True)
-    sample_mass_frac = cumulative_mass_fraction[inds]
-
-    fig, ax = plt.subplots(1,1, figsize=(6,4))
-    ax.plot(centers, pdf_vals, label='pdf (log10 rho)')
-    ax.set_xlabel('log10(density)')
-    ax.set_ylabel('PDF (arb)')
-    ax_twin = ax.twinx()
-    # CCDF plotted on twin axis
-    # use log-density grid to compute CCDF
-    ccdf_vals = [np.mean(rho_pos > 10**(x)) for x in centers]
-    ax_twin.semilogy(centers, ccdf_vals, color='C1', label='CCDF (vox > rho)')
-    ax_twin.set_ylabel('CCDF (fraction voxels > rho)')
-
-    # add inset showing cumulative mass fraction vs density
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    axins = inset_axes(ax, width="35%", height="35%", loc='upper right')
-    # plot cumulative mass fraction vs log10(density) threshold:
-    log_dens_thresholds = np.linspace(3, np.max(logrho), 200)
-    mass_frac_vs_thresh = [np.sum(mass[rho_pos > 10**th]) / (np.sum(mass)+1e-30) for th in log_dens_thresholds]
-    axins.plot(log_dens_thresholds, mass_frac_vs_thresh)
-    axins.set_xlabel('log10(density thr)', fontsize=8)
-    axins.set_ylabel('mass fraction', fontsize=8)
-    axins.tick_params(labelsize=8)
-
-    # legends
-    lines, labels = ax.get_legend_handles_labels()
-    lines2, labels2 = ax_twin.get_legend_handles_labels()
-    ax.legend(lines + lines2, labels + labels2, loc='upper left', fontsize=8)
-
-    plt.title(f"Density PDF + CCDF + mass fraction (frame {frame_idx})")
-    if out_file:
-        plt.savefig(out_file, dpi=300, bbox_inches='tight')
-    plt.show()
-
-# ---- 3) joint density vs velocity + highlight core voxels -------------------
-def plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_threshold_percentile=None, direct_thresh = 1000, min_voxels=8, out_file=None):
-    """
-    Hexbin/joint plot of log10(density) vs |v|. Overplot core voxels (sampled) as red points.
-    """
+# ---- joint density vs velocity + highlight core voxels -------------------
+def paper_plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_threshold_percentile=None, direct_thresh = 1000, min_voxels=8, nbins=256, out_file=None):
     density = parent_tensor[frame_idx, 0]
     vmag = velocity_magnitude_field(parent_tensor, frame_idx)
     logrho = safe_log10_density(density)
-    rho_flat = density.ravel()
     v_flat = vmag.ravel()
 
     # detect cores - returns masks and centroids
@@ -410,11 +336,33 @@ def plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_thresho
         core_mask |= c['mask']
     core_mask_flat = core_mask.ravel()
 
-    fig = plt.figure(figsize=(6,5))
-    ax = fig.add_subplot(111)
-    hb = ax.hexbin(logrho.ravel(), v_flat, gridsize=200, bins='log', cmap='Blues')
+    bins = np.linspace(np.percentile(logrho, 0), np.percentile(logrho, 100), nbins)
+    pdf_vals_d, edges = np.histogram(logrho, bins=bins, density=True)
+    centers_d = 0.5*(edges[:-1] + edges[1:])
+
+    bins = np.linspace(np.percentile(v_flat, 0), np.percentile(v_flat, 100), nbins)
+    pdf_vals_v, edges = np.histogram(v_flat, bins=bins, density=True)
+    centers_v = 0.5*(edges[:-1] + edges[1:])
+
+    # Create a Figure, which doesn't have to be square.
+    fig = plt.figure(layout='constrained')
+    # Create the main Axes.
+    ax = fig.add_subplot()
+    # Create marginal Axes, which have 25% of the size of the main Axes.  Note that
+    # the inset Axes are positioned *outside* (on the right and the top) of the
+    # main Axes, by specifying axes coordinates greater than 1.  Axes coordinates
+    # less than 0 would likewise specify positions on the left and the bottom of
+    # the main Axes.
+    ax_histx = ax.inset_axes([0, 1.05, 1, 0.25], sharex=ax)
+    ax_histy = ax.inset_axes([1.05, 0, 0.25, 1], sharey=ax)
+    # Draw the histogram plot and marginals.
+    # no labels
+    ax_histx.tick_params(axis="x", labelbottom=False)
+    ax_histy.tick_params(axis="y", labelleft=False)
+
+    hb = ax.hexbin(logrho.ravel(), v_flat, gridsize=nbins, bins = 'log', cmap='Blues')
     plt.colorbar(hb, ax=ax, label='log(count)')
-    ax.set_xlabel('log10(density)')
+    ax.set_xlabel(r'log10($\rho$)')
     ax.set_ylabel('|v|')
 
     # overlay core voxels (sample a subset if too many)
@@ -422,9 +370,27 @@ def plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_thresho
     n_overlay = 2000
     if core_indices.size > 0:
         samp = np.random.choice(core_indices, size=min(n_overlay, core_indices.size), replace=False)
-        ax.scatter(logrho.ravel()[samp], v_flat[samp], s=8, c='red', alpha=0.6, label='core voxels')
+        ax.scatter(logrho.ravel()[samp], v_flat[samp], s=4, c='red', alpha=0.6, label='core voxels')
     ax.legend()
     ax.set_title(f"Density vs |v| (frame {frame_idx}) threshold {thresh:.2f}")
+
+    ax_histy.plot(pdf_vals_v,centers_v, label='pdf (|v|)')
+    ax_histy.set_ylabel('PDF')
+    ax_twin = ax_histy.twinx()
+    # CCDF plotted on twin axis
+    ccdf_vals = [np.mean(v_flat > x) for x in centers_v]
+    ax_twin.plot(ccdf_vals, centers_v, color='C1', label='CCDF (vox > |v|)')
+    ax_twin.set_ylabel('CCDF')
+
+    ax_histx.plot(centers_d, pdf_vals_d, label='pdf (log10 rho)')
+    ax_histx.set_xlabel('PDF')
+    ax_twin = ax_histx.twinx()
+    # CCDF plotted on twin axis
+    # use log-density grid to compute CCDF
+    ccdf_vals = [np.mean(density > 10**(x)) for x in centers_d]
+    ax_twin.semilogx(centers_d, ccdf_vals, color='C1', label='CCDF (vox > rho)')
+    ax_twin.set_xlabel('CCDF')
+
     if out_file:
         plt.savefig(out_file, dpi=300, bbox_inches='tight')
     plt.show()
@@ -449,41 +415,16 @@ def plot_cores_overlay(parent_tensor, frame_idx, detect_threshold_percentile=Non
         print("No cores found for threshold", thresh)
 
     fig = plt.figure(figsize=(12,4))
-    ax1 = fig.add_subplot(1,3,1)
-    mip = max_intensity_projection(np.log10(density), axis=0)
+    ax1 = fig.add_subplot(111)
+    mip = max_intensity_projection(np.log10(density), axis=2)
     ax1.imshow(mip.T, origin='lower')
     ax1.set_title('Density MIP (z-proj)')
     # overlay centroids (project z->x,y)
     if len(centroids)>0:
         cent = np.array(centroids)
         # cent[:,1], cent[:,2] are y,x when projecting z
-        sc = ax1.scatter(cent[:,2], cent[:,1], c=np.log10(peakvals), s=10, cmap='inferno', edgecolor='white')
+        sc = ax1.scatter(cent[:,0], cent[:,1], c=np.log10(peakvals), s=10, cmap='inferno', edgecolor='white')
         plt.colorbar(sc, ax=ax1, label='log10(peak density)')
-
-    # orthogonal slices at midplane
-    midz = density.shape[0]//2
-    midy = density.shape[1]//2
-    midx = density.shape[2]//2
-    ax2 = fig.add_subplot(1,3,2)
-    ax2.imshow(density[midz,:,:].T, origin='lower')
-    ax2.set_title(f'z-slice (z={midz})')
-    # overlay core contours (where mask intersects slice)
-    for c in cores:
-        mask = c['mask']
-        if mask[midz].any():
-            # get contour of that mask in slice (simple outline via bounding box)
-            ys, xs = np.where(mask[midz])
-            ax2.scatter(xs, ys, s=8, c='red', alpha=0.4)
-
-    ax3 = fig.add_subplot(1,3,3)
-    ax3.imshow(density[:,midy,:].T, origin='lower')
-    ax3.set_title(f'y-slice (y={midy})')
-    for c in cores:
-        # mask transpose coords
-        mask = c['mask']
-        if mask[:,midy,:].any():
-            zs, xs = np.where(mask[:,midy,:])
-            ax3.scatter(xs, zs, s=8, c='red', alpha=0.4)
 
     if out_file:
         plt.savefig(out_file, dpi=300, bbox_inches='tight')
@@ -592,29 +533,28 @@ if __name__ == "__main__":
                 DELTAT = np.mean(time_array[1:]-time_array[:-1])
                 infile.close()
             TSCube = np.stack(TSCube, axis=1) #(100,4,128,128,128)
-            #plot feature histograms at frames 20, 55, 90
-            if 0:
-                plot_feature_distributions(TSCube, frames=(20,55,90), fig_file=path_to_output_plots+"/feat_hist_"+datasetname+".png")
-                #compute 3D power spectrum of one snapshot density
-                snapshot = TSCube[55,0]  # density at frame 55
-                plot_power_spectrum_3d(snapshot, dx=1.0, nbins=64, fig_file=path_to_output_plots+"/power_spec55_"+datasetname+".png")
-                thresh = np.percentile(snapshot, 95) #95th percentile threshold
-                pixel_cores = detect_cores_from_density(snapshot, threshold = thresh, min_voxels=8)
-                print(f"{datasetname}: detected {len(pixel_cores)} cores at 95th percentile threshold")
-                print(pixel_cores)
             if 1:
                 frame_idx = 99
-                plot_sim_overview(TSCube, frame_idx, out_file=path_to_output_plots+"/sim_overview_"+datasetname+".png", cmap='viridis')
-                plot_density_pdf_ccdf_mass(TSCube, frame_idx, nbins=256, out_file=path_to_output_plots+"/density_pdf_ccdf_mass_"+datasetname+".png")
+                detect_threshold_percentile = None
+                thresh=2500
+                detect_threshold_percentile_str = '10pow3'
+                min_voxels=1
+                plot_cores_overlay(TSCube, frame_idx, detect_threshold_percentile=detect_threshold_percentile, direct_thresh = thresh, min_voxels=min_voxels,
+                                                     out_file=path_to_output_plots+"/cores_overlay_"+datasetname+
+                                                     "_thresh_"+detect_threshold_percentile_str+"_vox_"+str(min_voxels)+".png")
+                paper_plot_density_vs_velocity_with_cores(TSCube, frame_idx, detect_threshold_percentile=None, direct_thresh = thresh, min_voxels=min_voxels, nbins=256, 
+                                                          out_file=path_to_output_plots+"/density_vs_velocity_with_cores_"+datasetname+
+                                                     "_thresh_"+detect_threshold_percentile_str+"_vox_"+str(min_voxels)+".png")
+            if 0:
+                frame_idx = 99
+                #plot_sim_overview(TSCube, frame_idx, out_file=path_to_output_plots+"/sim_overview_"+datasetname+".png", cmap='viridis')
+                #plot_density_pdf_ccdf_mass(TSCube, frame_idx, nbins=256, out_file=path_to_output_plots+"/density_pdf_ccdf_mass_"+datasetname+".png")
                 #detect_threshold_percentile=99.9
                 #detect_threshold_percentile_str = str(detect_threshold_percentile).replace('.','p')
                 detect_threshold_percentile = None
                 thresh=2500
                 detect_threshold_percentile_str = '10pow3'
                 min_voxels=1
-                plot_density_vs_velocity_with_cores(TSCube, frame_idx, detect_threshold_percentile=detect_threshold_percentile, direct_thresh = thresh, min_voxels=min_voxels,
-                                                     out_file=path_to_output_plots+"/density_vs_velocity_with_cores_"+datasetname+
-                                                     "_thresh_"+detect_threshold_percentile_str+"_vox_"+str(min_voxels)+".png")
                 plot_cores_overlay(TSCube, frame_idx, detect_threshold_percentile=detect_threshold_percentile, direct_thresh = thresh, min_voxels=min_voxels,
                                                      out_file=path_to_output_plots+"/cores_overlay_"+datasetname+
                                                      "_thresh_"+detect_threshold_percentile_str+"_vox_"+str(min_voxels)+".png")
