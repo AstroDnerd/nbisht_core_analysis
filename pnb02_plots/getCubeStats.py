@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
-import seaborn as sns
 from scipy import fftpack
 from scipy import ndimage
 from skimage import measure
 import warnings
 import os
 warnings.filterwarnings("ignore")
-
+plt.style.use('physrev.mplstyle') # Set full path to physrev.mplstyle if the file is not in the same in directory as the notebook
+plt.rcParams['figure.dpi'] = "300"
 def make_dir(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -104,7 +104,7 @@ def radial_profile_3d(ps3d, center=None, nbins=64):
     return k, radial, counts
 
 
-def plot_power_spectrum_3d(field3d, dx=1.0, nbins=64, fig_file=None, label=None):
+def plot_power_spectrum_3d(field3d, dx=1.0, nbins=64, fig_file=None, label=None, plotactually = True):
     """
     Compute and plot the radially averaged 3D power spectrum of a scalar field.
     field3d: (Z,Y,X)
@@ -119,14 +119,15 @@ def plot_power_spectrum_3d(field3d, dx=1.0, nbins=64, fig_file=None, label=None)
     ps = np.fft.fftshift(ps)
     k_bins, radial, counts = radial_profile_3d(ps, center=(arr.shape[0]//2, arr.shape[1]//2, arr.shape[2]//2), nbins=nbins)
     # physical wavenumber scaling: k ~ bin / (N*dx) but we can show relative k
-    plt.loglog(k_bins, radial + 1e-20, label=label)
-    plt.xlabel("k (arb units)")
-    plt.ylabel("Power")
-    if label:
-        plt.legend()
-    if fig_file:
-        plt.savefig(fig_file, dpi=200)
-    plt.show()
+    if plotactually:
+        plt.loglog(k_bins, radial + 1e-20, label=label)
+        plt.xlabel("k")
+        plt.ylabel("Power")
+        if label:
+            plt.legend()
+        if fig_file:
+            plt.savefig(fig_file, dpi=200)
+        plt.show()
     return k_bins, radial
 
 
@@ -324,6 +325,11 @@ def paper_plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_t
     logrho = safe_log10_density(density)
     v_flat = vmag.ravel()
 
+    density_0 = parent_tensor[0, 0]
+    vmag_0 = velocity_magnitude_field(parent_tensor, 0)
+    logrho_0 = safe_log10_density(density_0)
+    v_flat_0 = vmag_0.ravel()
+
     # detect cores - returns masks and centroids
     if detect_threshold_percentile is None:
         thresh = direct_thresh
@@ -340,9 +346,17 @@ def paper_plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_t
     pdf_vals_d, edges = np.histogram(logrho, bins=bins, density=True)
     centers_d = 0.5*(edges[:-1] + edges[1:])
 
+    bins = np.linspace(np.percentile(logrho_0, 0), np.percentile(logrho_0, 100), nbins)
+    pdf_vals_d0, edges = np.histogram(logrho_0, bins=bins, density=True)
+    centers_d0 = 0.5*(edges[:-1] + edges[1:])
+
     bins = np.linspace(np.percentile(v_flat, 0), np.percentile(v_flat, 100), nbins)
     pdf_vals_v, edges = np.histogram(v_flat, bins=bins, density=True)
     centers_v = 0.5*(edges[:-1] + edges[1:])
+
+    bins = np.linspace(np.percentile(v_flat_0, 0), np.percentile(v_flat_0, 100), nbins)
+    pdf_vals_v0, edges = np.histogram(v_flat_0, bins=bins, density=True)
+    centers_v0 = 0.5*(edges[:-1] + edges[1:])
 
     # Create a Figure, which doesn't have to be square.
     fig = plt.figure(layout='constrained')
@@ -363,34 +377,113 @@ def paper_plot_density_vs_velocity_with_cores(parent_tensor, frame_idx, detect_t
     hb = ax.hexbin(logrho.ravel(), v_flat, gridsize=nbins, bins = 'log', cmap='Blues')
     plt.colorbar(hb, ax=ax, label='log(count)')
     ax.set_xlabel(r'log10($\rho$)')
-    ax.set_ylabel('|v|')
+    ax.set_ylabel('$\|v\|$')
 
     # overlay core voxels (sample a subset if too many)
     core_indices = np.where(core_mask_flat)[0]
     n_overlay = 2000
     if core_indices.size > 0:
         samp = np.random.choice(core_indices, size=min(n_overlay, core_indices.size), replace=False)
-        ax.scatter(logrho.ravel()[samp], v_flat[samp], s=4, c='red', alpha=0.6, label='core voxels')
+        sc1 = ax.scatter(logrho.ravel()[samp], v_flat[samp], s=4, c='red', alpha=0.6, label='core voxels')
     ax.legend()
-    ax.set_title(f"Density vs |v| (frame {frame_idx}) threshold {thresh:.2f}")
+    #ax.set_title(f"Density vs |v| (frame {frame_idx}) threshold {thresh:.2f}")
 
-    ax_histy.plot(pdf_vals_v,centers_v, label='pdf (|v|)')
-    ax_histy.set_ylabel('PDF')
-    ax_twin = ax_histy.twinx()
-    # CCDF plotted on twin axis
-    ccdf_vals = [np.mean(v_flat > x) for x in centers_v]
-    ax_twin.plot(ccdf_vals, centers_v, color='C1', label='CCDF (vox > |v|)')
-    ax_twin.set_ylabel('CCDF')
+    ax_histy.plot(pdf_vals_v,centers_v, label='PDF($t=t_{ff}$)')
+    ax_histy.plot(pdf_vals_v0,centers_v0, label='PDF(t=0)', ls = '--')
 
-    ax_histx.plot(centers_d, pdf_vals_d, label='pdf (log10 rho)')
-    ax_histx.set_xlabel('PDF')
-    ax_twin = ax_histx.twinx()
-    # CCDF plotted on twin axis
-    # use log-density grid to compute CCDF
-    ccdf_vals = [np.mean(density > 10**(x)) for x in centers_d]
-    ax_twin.semilogx(centers_d, ccdf_vals, color='C1', label='CCDF (vox > rho)')
-    ax_twin.set_xlabel('CCDF')
+    line1, =ax_histx.plot(centers_d, pdf_vals_d, label='PDF($t=t_{ff}$)')
+    line2, =ax_histx.plot(centers_d0, pdf_vals_d0, label='PDF(t=0)', ls = '--')
+    
+    handles = [sc1, line1, line2]
+    labels = [sc1.get_label(), line1.get_label(), line2.get_label()]
+    ax.legend(handles=handles, labels=labels, bbox_to_anchor=(1.65, 1.5), loc='upper right')
 
+    if out_file:
+        plt.savefig(out_file, dpi=300, bbox_inches='tight')
+    plt.show()
+
+def plot_power_spectrum_all_sims(sim_list, ddlist, frame_idx, out_file=None, simcolors = None):
+    """
+    Power Sectrum of 1 frame of all simulations in a list
+    """
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    if simcolors==None:
+        simcolors = ['#66cdaa', '#1e90ff', '#006400', '#ff0000', '#ffd700', '#00ff00', '#0000ff', 'black']
+    color_in = 0
+    alpha_vals = [0.3,0.5,0.7,1]
+    handles = []
+    labels = []
+    for sim in sim_list:
+        j=0
+        mach_num = sim[4:9]
+        for dd in ddlist:
+            datasetname = sim[0:3]+'_'+dd #'d03_DD0030'
+            TSCube = []
+            df_name = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'+datasetname+'_TimeseriesCubes_density.npy'
+            infile = open(df_name, 'rb')
+            TSCube = np.load(infile)  #(100,128,128,128)
+            infile.close()
+            density = TSCube[frame_idx]  # (Z,Y,X)
+            k_bins, radial = plot_power_spectrum_3d(density, dx=1.0, nbins=48, fig_file=None, label=None, plotactually=False)
+            line1, = ax1.loglog(k_bins, radial, label=mach_num, c = simcolors[color_in], alpha=alpha_vals[j])
+            j+=1
+        color_in+=1
+        handles.append(line1)
+        labels.append(line1.get_label())
+    slope = -1
+    x_ref = 10
+    y_ref = 10**9
+    x_slope_line = np.logspace(0, 2, 100)
+    y_slope_line = y_ref * (x_slope_line / x_ref)**slope
+    ax1.text(7, 10**9, 'm='+str(slope), rotation=-20)
+    ax1.set_xlim(0.2,115)
+    ax1.loglog(x_slope_line, y_slope_line, '--', c='black')
+    ax1.set_xlabel("k")
+    ax1.set_ylabel("Power")
+    #ax1.set_title("3D power spectrum (density)")
+    ax1.legend()
+    ax1.legend(handles=handles, labels=labels, loc='lower left')
+    if out_file:
+        plt.savefig(out_file, dpi=300, bbox_inches='tight')
+    plt.show()
+
+def plot_power_spectrum_all_frames(datasetname, sim_name, frame_step = 10, out_file=None, simcolors = None):
+    """
+    Power Sectrum of 1 frame of all simulations in a list
+    """
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    if simcolors==None:
+        simcolors = ['#66cdaa', '#1e90ff', '#006400', '#ff0000', '#ffd700', '#00ff00', '#0000ff', 'black']
+    color_in = 0
+    alpha_vals = np.linspace(0.2,1,int(100/frame_step))
+    mach_num = sim_name[4:9]
+    TSCube = []
+    df_name = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'+datasetname+'_TimeseriesCubes_density.npy'
+    infile = open(df_name, 'rb')
+    TSCube = np.load(infile)  #(100,128,128,128)
+    infile.close()
+    j=0
+    for framenum in range(0,100,frame_step): 
+        density = TSCube[framenum]  # (Z,Y,X)
+        k_bins, radial = plot_power_spectrum_3d(density, dx=1.0, nbins=48, fig_file=None, label=None, plotactually=False)
+        line1, = ax1.loglog(k_bins, radial, label=framenum, c = simcolors[color_in], alpha=alpha_vals[j])
+        j+=1
+    ax1.set_xlim(0.5,115)
+    slope = -1
+    x_slope_line = np.logspace(0, 2, 100)
+    y_slope_line = (10**10) * (x_slope_line / 10)**slope
+    ax1.loglog(x_slope_line, y_slope_line, '--', c='black')
+    ax1.text(10, 10**10, 'm='+str(slope), rotation=-10)
+    slope = -4
+    y_slope_line = (10**6.5) * (x_slope_line / 10)**slope
+    ax1.loglog(x_slope_line, y_slope_line, '--', c='black')
+    ax1.text(6, 10**5.5, 'm='+str(slope), rotation=-30)
+    ax1.set_xlabel("k")
+    ax1.set_ylabel("Power")
+    #ax1.set_title("3D power spectrum (density)")
+    ax1.legend(loc='lower left')
     if out_file:
         plt.savefig(out_file, dpi=300, bbox_inches='tight')
     plt.show()
@@ -519,6 +612,8 @@ if __name__ == "__main__":
             'd27_Ms7.0_Ma0.0_512', 'd31_Ms8.0_Ma0.0_512']
     ddnumber = ['DD0030', 'DD0050', 'DD0070', 'DD0090']
     make_dir(path_to_output_plots)
+    frame_idx = 99
+    #plot_power_spectrum_all_sims(simarray, ddnumber, frame_idx, out_file=path_to_output_plots+"/Power_Spectrum_All_Sims_density.png")
     for sim in simarray[0:1]:
         for dd in ddnumber[0:1]:
             datasetname = sim[0:3]+'_'+dd #'d03_DD0030'
@@ -534,7 +629,6 @@ if __name__ == "__main__":
                 infile.close()
             TSCube = np.stack(TSCube, axis=1) #(100,4,128,128,128)
             if 1:
-                frame_idx = 99
                 detect_threshold_percentile = None
                 thresh=2500
                 detect_threshold_percentile_str = '10pow3'
@@ -545,6 +639,7 @@ if __name__ == "__main__":
                 paper_plot_density_vs_velocity_with_cores(TSCube, frame_idx, detect_threshold_percentile=None, direct_thresh = thresh, min_voxels=min_voxels, nbins=256, 
                                                           out_file=path_to_output_plots+"/density_vs_velocity_with_cores_"+datasetname+
                                                      "_thresh_"+detect_threshold_percentile_str+"_vox_"+str(min_voxels)+".png")
+                plot_power_spectrum_all_frames(datasetname, simname, frame_step = 10, out_file=path_to_output_plots+"/Power_Spectrum_All_frames_"+datasetname+".png")
             if 0:
                 frame_idx = 99
                 #plot_sim_overview(TSCube, frame_idx, out_file=path_to_output_plots+"/sim_overview_"+datasetname+".png", cmap='viridis')

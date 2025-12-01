@@ -8,8 +8,8 @@
 #SBATCH -J Train_SuiteUNetconvGRU_model3_0     # Job name
 #SBATCH -o Train_SuiteUNetconvGRU_model3_0.o%j # Name of stdout output file(%j expands to jobId)
 #SBATCH -e Train_SuiteUNetconvGRU_model3_0.o%j # Name of stderr output file(%j expands to jobId)
-#SBATCH -p highmem          # Submit to the 'normal' or 'development' queue
-#SBATCH -t 48:00:00             # Run time (hh:m) - 48 hours
+#SBATCH -p wholenode          # Submit to the 'normal' or 'development' queue
+#SBATCH -t 96:00:00             # Run time (hh:m) - 48 hours
 #SBATCH -N 1                    # Total number of nodes requested (16 cores/node)
 #SBATCH -c 50                   #number of CPU cores
 #SBATCH --mail-user=npb22a@fsu.edu

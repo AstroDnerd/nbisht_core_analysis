@@ -1,0 +1,155 @@
+Available device: cpu 
+Preparing HDF5 datasets!
+Total samples in HDF5 file: 8160
+Training samples: 900, Test samples: 100
+Time taken to load image hdf5: 0.18 seconds
+UNetconvGRU_nonsink_allfeatures_seq2_static_loss Starting training!
+Using device: cpu
+Training convGRUNet with 900 samples, UNetconvGRU_nonsink_allfeatures_seq2_static_loss run
+Using 4 DataLoader workers
+Gradient accumulation steps: 4
+Model initialized with 2,157,435 trainable parameters.
+================================================================================
+STARTING TRAINING
+================================================================================
+Epoch 1/100 | Batch 180/450 | loss 2.9893e+01 | batch 10.450s | ETA_epoch 0:47:01 | ETA_total 1 day, 23:43:56          Epoch 1/100 | Batch 360/450 | loss 4.0538e+01 | batch 8.917s | ETA_epoch 0:13:22 | ETA_total 3 days, 21:06:44          
+Epoch 1/100: Total=10.2160 | L1=9.7303 HD=0.0032 Mass=0.0178 Hist=0.0048 Spectral=0.4598 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=28.5523 | L1=27.6685 HD=0.0112 Mass=0.0664 Hist=0.0098 Spectral=0.7964
+
+Epoch 2/100 | Batch 180/450 | loss 2.9928e+01 | batch 7.307s | ETA_epoch 0:32:52 | ETA_total 3 days, 7:03:27          Epoch 2/100 | Batch 360/450 | loss 2.9971e+01 | batch 7.747s | ETA_epoch 0:11:37 | ETA_total 4 days, 2:16:49          
+Epoch 2/100: Total=7.7386 | L1=7.5281 HD=0.0027 Mass=0.0196 Hist=0.0020 Spectral=0.1862 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 3/100 | Batch 180/450 | loss 2.3496e+01 | batch 8.953s | ETA_epoch 0:40:17 | ETA_total 3 days, 13:04:33          Epoch 3/100 | Batch 360/450 | loss 5.0667e+01 | batch 12.160s | ETA_epoch 0:18:14 | ETA_total 4 days, 4:10:42          
+Epoch 3/100: Total=7.2677 | L1=7.0808 HD=0.0026 Mass=0.0177 Hist=0.0014 Spectral=0.1651 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 4/100 | Batch 180/450 | loss 1.9759e+01 | batch 11.152s | ETA_epoch 0:50:11 | ETA_total 3 days, 20:54:56          Epoch 4/100 | Batch 360/450 | loss 2.5136e+01 | batch 9.400s | ETA_epoch 0:14:05 | ETA_total 4 days, 7:28:48          
+Epoch 4/100: Total=7.1589 | L1=6.9684 HD=0.0025 Mass=0.0213 Hist=0.0011 Spectral=0.1656 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 5/100 | Batch 180/450 | loss 2.5398e+01 | batch 9.254s | ETA_epoch 0:41:38 | ETA_total 3 days, 23:53:12          Epoch 5/100 | Batch 360/450 | loss 2.4216e+01 | batch 10.008s | ETA_epoch 0:15:00 | ETA_total 4 days, 7:13:42          
+Epoch 5/100: Total=6.6922 | L1=6.5155 HD=0.0025 Mass=0.0205 Hist=0.0009 Spectral=0.1527 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 6/100 | Batch 180/450 | loss 2.1779e+01 | batch 9.545s | ETA_epoch 0:42:57 | ETA_total 3 days, 23:24:50          Epoch 6/100 | Batch 360/450 | loss 3.2528e+01 | batch 8.933s | ETA_epoch 0:13:23 | ETA_total 4 days, 5:53:49          
+Epoch 6/100: Total=6.7489 | L1=6.5704 HD=0.0025 Mass=0.0210 Hist=0.0009 Spectral=0.1541 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=22.3986 | L1=21.6558 HD=0.0083 Mass=0.0662 Hist=0.0039 Spectral=0.6643
+
+Epoch 7/100 | Batch 180/450 | loss 4.0148e+01 | batch 7.962s | ETA_epoch 0:35:49 | ETA_total 3 days, 23:49:45          Epoch 7/100 | Batch 360/450 | loss 2.1515e+01 | batch 7.847s | ETA_epoch 0:11:46 | ETA_total 4 days, 5:16:06          
+Epoch 7/100: Total=6.3260 | L1=6.1563 HD=0.0024 Mass=0.0194 Hist=0.0008 Spectral=0.1470 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 8/100 | Batch 180/450 | loss 2.0129e+01 | batch 7.325s | ETA_epoch 0:32:57 | ETA_total 3 days, 22:51:11          Epoch 8/100 | Batch 360/450 | loss 3.1784e+01 | batch 8.341s | ETA_epoch 0:12:30 | ETA_total 4 days, 3:09:45          
+Epoch 8/100: Total=6.5079 | L1=6.3373 HD=0.0023 Mass=0.0197 Hist=0.0008 Spectral=0.1477 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 9/100 | Batch 180/450 | loss 2.0101e+01 | batch 9.411s | ETA_epoch 0:42:20 | ETA_total 3 days, 22:04:51          Epoch 9/100 | Batch 360/450 | loss 1.9539e+01 | batch 9.617s | ETA_epoch 0:14:25 | ETA_total 4 days, 2:05:36          
+Epoch 9/100: Total=6.5561 | L1=6.3864 HD=0.0023 Mass=0.0189 Hist=0.0009 Spectral=0.1476 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 10/100 | Batch 180/450 | loss 2.7622e+01 | batch 7.267s | ETA_epoch 0:32:42 | ETA_total 3 days, 21:17:45          Epoch 10/100 | Batch 360/450 | loss 3.0678e+01 | batch 8.470s | ETA_epoch 0:12:42 | ETA_total 4 days, 0:40:00          
+Epoch 10/100: Total=6.2999 | L1=6.1354 HD=0.0023 Mass=0.0207 Hist=0.0009 Spectral=0.1407 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 11/100 | Batch 180/450 | loss 1.7744e+01 | batch 8.279s | ETA_epoch 0:37:15 | ETA_total 3 days, 20:26:15          Epoch 11/100 | Batch 360/450 | loss 1.9253e+01 | batch 8.372s | ETA_epoch 0:12:33 | ETA_total 3 days, 23:12:20          
+Epoch 11/100: Total=6.1146 | L1=5.9561 HD=0.0023 Mass=0.0181 Hist=0.0008 Spectral=0.1374 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=23.5390 | L1=22.8221 HD=0.0089 Mass=0.0664 Hist=0.0058 Spectral=0.6359
+
+Epoch 12/100 | Batch 180/450 | loss 2.2012e+01 | batch 8.345s | ETA_epoch 0:37:33 | ETA_total 3 days, 19:43:52          Epoch 12/100 | Batch 360/450 | loss 2.8984e+01 | batch 8.422s | ETA_epoch 0:12:37 | ETA_total 3 days, 22:19:51          
+Epoch 12/100: Total=6.0906 | L1=5.9337 HD=0.0023 Mass=0.0169 Hist=0.0008 Spectral=0.1369 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 13/100 | Batch 180/450 | loss 3.4475e+01 | batch 7.284s | ETA_epoch 0:32:46 | ETA_total 3 days, 18:15:11          Epoch 13/100 | Batch 360/450 | loss 2.9958e+01 | batch 7.087s | ETA_epoch 0:10:37 | ETA_total 3 days, 20:28:00          
+Epoch 13/100: Total=6.2092 | L1=6.0483 HD=0.0023 Mass=0.0192 Hist=0.0008 Spectral=0.1386 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 14/100 | Batch 180/450 | loss 2.8603e+01 | batch 7.397s | ETA_epoch 0:33:17 | ETA_total 3 days, 16:38:26          Epoch 14/100 | Batch 360/450 | loss 1.7728e+01 | batch 7.641s | ETA_epoch 0:11:27 | ETA_total 3 days, 18:51:25          
+Epoch 14/100: Total=6.0961 | L1=5.9374 HD=0.0022 Mass=0.0177 Hist=0.0008 Spectral=0.1380 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 15/100 | Batch 180/450 | loss 3.0732e+01 | batch 7.726s | ETA_epoch 0:34:46 | ETA_total 3 days, 15:48:10          Epoch 15/100 | Batch 360/450 | loss 2.4676e+01 | batch 8.909s | ETA_epoch 0:13:21 | ETA_total 3 days, 18:03:50          
+Epoch 15/100: Total=6.0201 | L1=5.8599 HD=0.0022 Mass=0.0174 Hist=0.0008 Spectral=0.1398 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 16/100 | Batch 180/450 | loss 2.6681e+01 | batch 7.179s | ETA_epoch 0:32:18 | ETA_total 3 days, 15:14:22          Epoch 16/100 | Batch 360/450 | loss 1.9465e+01 | batch 7.137s | ETA_epoch 0:10:42 | ETA_total 3 days, 17:02:09          
+Epoch 16/100: Total=5.8894 | L1=5.7339 HD=0.0022 Mass=0.0190 Hist=0.0008 Spectral=0.1335 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=19.5585 | L1=18.9166 HD=0.0078 Mass=0.0653 Hist=0.0022 Spectral=0.5666
+
+Epoch 17/100 | Batch 180/450 | loss 2.7858e+01 | batch 7.880s | ETA_epoch 0:35:27 | ETA_total 3 days, 14:31:20          Epoch 17/100 | Batch 360/450 | loss 2.8222e+01 | batch 9.263s | ETA_epoch 0:13:53 | ETA_total 3 days, 16:12:06          
+Epoch 17/100: Total=6.2379 | L1=6.0817 HD=0.0021 Mass=0.0180 Hist=0.0008 Spectral=0.1352 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 18/100 | Batch 180/450 | loss 1.8234e+01 | batch 7.488s | ETA_epoch 0:33:41 | ETA_total 3 days, 13:47:56          Epoch 18/100 | Batch 360/450 | loss 1.7129e+01 | batch 8.160s | ETA_epoch 0:12:14 | ETA_total 3 days, 15:24:18          
+Epoch 18/100: Total=5.9111 | L1=5.7532 HD=0.0021 Mass=0.0187 Hist=0.0007 Spectral=0.1364 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 19/100 | Batch 180/450 | loss 2.2333e+01 | batch 7.510s | ETA_epoch 0:33:47 | ETA_total 3 days, 12:55:09          Epoch 19/100 | Batch 360/450 | loss 2.5100e+01 | batch 9.184s | ETA_epoch 0:13:46 | ETA_total 3 days, 14:29:05          
+Epoch 19/100: Total=5.8762 | L1=5.7242 HD=0.0022 Mass=0.0171 Hist=0.0007 Spectral=0.1320 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 20/100 | Batch 180/450 | loss 2.5333e+01 | batch 7.669s | ETA_epoch 0:34:30 | ETA_total 3 days, 12:11:54          Epoch 20/100 | Batch 360/450 | loss 2.3671e+01 | batch 8.238s | ETA_epoch 0:12:21 | ETA_total 3 days, 13:24:08          
+Epoch 20/100: Total=5.8063 | L1=5.6526 HD=0.0021 Mass=0.0193 Hist=0.0008 Spectral=0.1315 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 21/100 | Batch 180/450 | loss 1.7939e+01 | batch 8.299s | ETA_epoch 0:37:20 | ETA_total 3 days, 11:06:43          Epoch 21/100 | Batch 360/450 | loss 1.7566e+01 | batch 9.790s | ETA_epoch 0:14:41 | ETA_total 3 days, 12:16:14          
+Epoch 21/100: Total=5.7490 | L1=5.6013 HD=0.0021 Mass=0.0173 Hist=0.0008 Spectral=0.1275 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=20.0276 | L1=19.3736 HD=0.0073 Mass=0.0658 Hist=0.0032 Spectral=0.5776
+
+Epoch 22/100 | Batch 180/450 | loss 1.6722e+01 | batch 7.516s | ETA_epoch 0:33:49 | ETA_total 3 days, 9:57:53          Epoch 22/100 | Batch 360/450 | loss 2.0387e+01 | batch 7.164s | ETA_epoch 0:10:44 | ETA_total 3 days, 10:57:38          
+Epoch 22/100: Total=5.7057 | L1=5.5559 HD=0.0021 Mass=0.0174 Hist=0.0007 Spectral=0.1295 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 23/100 | Batch 180/450 | loss 2.4183e+01 | batch 7.707s | ETA_epoch 0:34:41 | ETA_total 3 days, 8:35:23          Epoch 23/100 | Batch 360/450 | loss 2.0228e+01 | batch 8.556s | ETA_epoch 0:12:50 | ETA_total 3 days, 9:31:32          
+Epoch 23/100: Total=5.7961 | L1=5.6414 HD=0.0021 Mass=0.0172 Hist=0.0008 Spectral=0.1348 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 24/100 | Batch 180/450 | loss 1.8040e+01 | batch 8.959s | ETA_epoch 0:40:19 | ETA_total 3 days, 7:29:17          Epoch 24/100 | Batch 360/450 | loss 2.4382e+01 | batch 7.666s | ETA_epoch 0:11:29 | ETA_total 3 days, 8:14:46          
+Epoch 24/100: Total=5.6017 | L1=5.4559 HD=0.0021 Mass=0.0160 Hist=0.0007 Spectral=0.1269 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 25/100 | Batch 180/450 | loss 1.7128e+01 | batch 7.526s | ETA_epoch 0:33:52 | ETA_total 3 days, 6:05:35          Epoch 25/100 | Batch 360/450 | loss 1.7126e+01 | batch 9.085s | ETA_epoch 0:13:37 | ETA_total 3 days, 7:04:10          
+Epoch 25/100: Total=5.6625 | L1=5.5132 HD=0.0022 Mass=0.0166 Hist=0.0007 Spectral=0.1299 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Saving checkpoint at epoch 25...
+
+================================================================================
+TRAINING PHASE 2 - EPOCH 26
+Loss scales: L1=50.0, Hist=1.0, Mass=0.1, Spectral=0.5, HD=1.0
+================================================================================
+
+Epoch 26/100 | Batch 180/450 | loss 2.9598e+01 | batch 9.044s | ETA_epoch 0:40:41 | ETA_total 3 days, 5:15:10          Epoch 26/100 | Batch 360/450 | loss 2.1418e+01 | batch 7.846s | ETA_epoch 0:11:46 | ETA_total 3 days, 5:57:40          
+Epoch 26/100: Total=5.8145 | L1=5.6684 HD=0.0020 Mass=0.0166 Hist=0.0007 Spectral=0.1268 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=18.6497 | L1=18.0302 HD=0.0068 Mass=0.0654 Hist=0.0033 Spectral=0.5440
+
+Epoch 27/100 | Batch 180/450 | loss 4.6117e+01 | batch 8.420s | ETA_epoch 0:37:53 | ETA_total 3 days, 4:18:00          Epoch 27/100 | Batch 360/450 | loss 2.4025e+01 | batch 7.907s | ETA_epoch 0:11:51 | ETA_total 3 days, 4:57:36          
+Epoch 27/100: Total=5.5000 | L1=5.3535 HD=0.0021 Mass=0.0180 Hist=0.0007 Spectral=0.1257 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 28/100 | Batch 180/450 | loss 1.7319e+01 | batch 9.238s | ETA_epoch 0:41:34 | ETA_total 3 days, 3:14:42          Epoch 28/100 | Batch 360/450 | loss 1.8784e+01 | batch 8.285s | ETA_epoch 0:12:25 | ETA_total 3 days, 3:49:10          
+Epoch 28/100: Total=5.7354 | L1=5.5922 HD=0.0020 Mass=0.0159 Hist=0.0007 Spectral=0.1246 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 29/100 | Batch 180/450 | loss 4.2818e+01 | batch 8.125s | ETA_epoch 0:36:33 | ETA_total 3 days, 2:06:24          Epoch 29/100 | Batch 360/450 | loss 2.1550e+01 | batch 8.500s | ETA_epoch 0:12:45 | ETA_total 3 days, 2:43:27          
+Epoch 29/100: Total=5.5298 | L1=5.3837 HD=0.0020 Mass=0.0156 Hist=0.0007 Spectral=0.1278 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 30/100 | Batch 180/450 | loss 2.0644e+01 | batch 9.133s | ETA_epoch 0:41:05 | ETA_total 3 days, 1:12:30          Epoch 30/100 | Batch 360/450 | loss 1.6330e+01 | batch 7.968s | ETA_epoch 0:11:57 | ETA_total 3 days, 1:44:38          
+Epoch 30/100: Total=5.6096 | L1=5.4608 HD=0.0020 Mass=0.0175 Hist=0.0008 Spectral=0.1285 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 31/100 | Batch 180/450 | loss 1.6168e+01 | batch 7.850s | ETA_epoch 0:35:19 | ETA_total 3 days, 0:10:16          Epoch 31/100 | Batch 360/450 | loss 3.5205e+01 | batch 7.524s | ETA_epoch 0:11:17 | ETA_total 3 days, 0:42:58          
+Epoch 31/100: Total=5.3469 | L1=5.2061 HD=0.0019 Mass=0.0165 Hist=0.0007 Spectral=0.1217 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=18.9409 | L1=18.3089 HD=0.0069 Mass=0.0658 Hist=0.0027 Spectral=0.5566
+
+Epoch 32/100 | Batch 180/450 | loss 3.1218e+01 | batch 8.523s | ETA_epoch 0:38:21 | ETA_total 2 days, 23:08:51          Epoch 32/100 | Batch 360/450 | loss 1.5573e+01 | batch 7.562s | ETA_epoch 0:11:20 | ETA_total 2 days, 23:30:47          
+Epoch 32/100: Total=5.2690 | L1=5.1276 HD=0.0019 Mass=0.0151 Hist=0.0007 Spectral=0.1236 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 33/100 | Batch 180/450 | loss 1.4903e+01 | batch 7.910s | ETA_epoch 0:35:35 | ETA_total 2 days, 21:54:02          Epoch 33/100 | Batch 360/450 | loss 1.8454e+01 | batch 7.577s | ETA_epoch 0:11:21 | ETA_total 2 days, 22:17:10          
+Epoch 33/100: Total=5.2950 | L1=5.1520 HD=0.0020 Mass=0.0154 Hist=0.0007 Spectral=0.1250 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 34/100 | Batch 180/450 | loss 1.7534e+01 | batch 7.359s | ETA_epoch 0:33:06 | ETA_total 2 days, 20:39:52          Epoch 34/100 | Batch 360/450 | loss 2.3943e+01 | batch 7.442s | ETA_epoch 0:11:09 | ETA_total 2 days, 21:01:49          
+Epoch 34/100: Total=5.3323 | L1=5.1909 HD=0.0019 Mass=0.0168 Hist=0.0006 Spectral=0.1221 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 35/100 | Batch 180/450 | loss 2.6754e+01 | batch 8.097s | ETA_epoch 0:36:26 | ETA_total 2 days, 19:30:29          Epoch 35/100 | Batch 360/450 | loss 1.8997e+01 | batch 7.119s | ETA_epoch 0:10:40 | ETA_total 2 days, 19:44:30          
+Epoch 35/100: Total=5.2729 | L1=5.1314 HD=0.0019 Mass=0.0156 Hist=0.0007 Spectral=0.1234 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 36/100 | Batch 180/450 | loss 1.7349e+01 | batch 7.722s | ETA_epoch 0:34:44 | ETA_total 2 days, 18:12:17          Epoch 36/100 | Batch 360/450 | loss 2.3897e+01 | batch 7.006s | ETA_epoch 0:10:30 | ETA_total 2 days, 18:27:45          
+Epoch 36/100: Total=5.2268 | L1=5.0868 HD=0.0018 Mass=0.0169 Hist=0.0007 Spectral=0.1206 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=19.1998 | L1=18.5196 HD=0.0065 Mass=0.0667 Hist=0.0038 Spectral=0.6033
+
+Epoch 37/100 | Batch 180/450 | loss 2.6679e+01 | batch 7.531s | ETA_epoch 0:33:53 | ETA_total 2 days, 17:04:09          Epoch 37/100 | Batch 360/450 | loss 1.4889e+01 | batch 7.746s | ETA_epoch 0:11:37 | ETA_total 2 days, 17:21:01          
+Epoch 37/100: Total=5.1341 | L1=4.9934 HD=0.0019 Mass=0.0157 Hist=0.0007 Spectral=0.1225 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 38/100 | Batch 180/450 | loss 1.7074e+01 | batch 8.604s | ETA_epoch 0:38:43 | ETA_total 2 days, 16:02:24          Epoch 38/100 | Batch 360/450 | loss 1.8257e+01 | batch 8.507s | ETA_epoch 0:12:45 | ETA_total 2 days, 16:14:03          
+Epoch 38/100: Total=5.2027 | L1=5.0636 HD=0.0019 Mass=0.0156 Hist=0.0006 Spectral=0.1209 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 39/100 | Batch 180/450 | loss 1.4726e+01 | batch 8.662s | ETA_epoch 0:38:58 | ETA_total 2 days, 14:55:39          Epoch 39/100 | Batch 360/450 | loss 1.4913e+01 | batch 8.573s | ETA_epoch 0:12:51 | ETA_total 2 days, 15:05:00          
+Epoch 39/100: Total=5.1910 | L1=5.0488 HD=0.0018 Mass=0.0158 Hist=0.0006 Spectral=0.1239 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 40/100 | Batch 180/450 | loss 2.1487e+01 | batch 7.552s | ETA_epoch 0:33:59 | ETA_total 2 days, 13:41:09          Epoch 40/100 | Batch 360/450 | loss 1.7002e+01 | batch 9.309s | ETA_epoch 0:13:57 | ETA_total 2 days, 13:55:27          
+Epoch 40/100: Total=5.0194 | L1=4.8818 HD=0.0019 Mass=0.0157 Hist=0.0006 Spectral=0.1193 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 41/100 | Batch 180/450 | loss 1.6786e+01 | batch 8.896s | ETA_epoch 0:40:01 | ETA_total 2 days, 12:41:36          Epoch 41/100 | Batch 360/450 | loss 1.9250e+01 | batch 8.758s | ETA_epoch 0:13:08 | ETA_total 2 days, 12:47:52          
+Epoch 41/100: Total=5.0951 | L1=4.9529 HD=0.0019 Mass=0.0162 Hist=0.0006 Spectral=0.1235 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=19.0284 | L1=18.3627 HD=0.0064 Mass=0.0664 Hist=0.0034 Spectral=0.5895
+
+Epoch 42/100 | Batch 180/450 | loss 1.8990e+01 | batch 8.605s | ETA_epoch 0:38:43 | ETA_total 2 days, 11:37:20          Epoch 42/100 | Batch 360/450 | loss 2.5132e+01 | batch 8.610s | ETA_epoch 0:12:54 | ETA_total 2 days, 11:43:19          
+Epoch 42/100: Total=5.1450 | L1=5.0020 HD=0.0019 Mass=0.0163 Hist=0.0007 Spectral=0.1241 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 43/100 | Batch 180/450 | loss 2.9302e+01 | batch 7.950s | ETA_epoch 0:35:46 | ETA_total 2 days, 10:27:22          Epoch 43/100 | Batch 360/450 | loss 2.5181e+01 | batch 8.550s | ETA_epoch 0:12:49 | ETA_total 2 days, 10:37:07          
+Epoch 43/100: Total=5.0631 | L1=4.9251 HD=0.0019 Mass=0.0154 Hist=0.0007 Spectral=0.1201 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 44/100 | Batch 180/450 | loss 2.6539e+01 | batch 8.368s | ETA_epoch 0:37:39 | ETA_total 2 days, 9:26:43          Epoch 44/100 | Batch 360/450 | loss 1.6735e+01 | batch 7.042s | ETA_epoch 0:10:33 | ETA_total 2 days, 9:28:36          
+Epoch 44/100: Total=5.1392 | L1=4.9990 HD=0.0018 Mass=0.0160 Hist=0.0007 Spectral=0.1218 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 45/100 | Batch 180/450 | loss 1.6899e+01 | batch 7.732s | ETA_epoch 0:34:47 | ETA_total 2 days, 8:18:10          Epoch 45/100 | Batch 360/450 | loss 2.6122e+01 | batch 8.834s | ETA_epoch 0:13:15 | ETA_total 2 days, 8:25:47          
+Epoch 45/100: Total=5.0945 | L1=4.9563 HD=0.0019 Mass=0.0152 Hist=0.0007 Spectral=0.1205 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 46/100 | Batch 180/450 | loss 2.0795e+01 | batch 8.991s | ETA_epoch 0:40:27 | ETA_total 2 days, 7:20:55          Epoch 46/100 | Batch 360/450 | loss 1.4766e+01 | batch 8.116s | ETA_epoch 0:12:10 | ETA_total 2 days, 7:21:59          
+Epoch 46/100: Total=5.2585 | L1=5.1185 HD=0.0019 Mass=0.0165 Hist=0.0007 Spectral=0.1209 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=20.4850 | L1=19.8214 HD=0.0061 Mass=0.0664 Hist=0.0043 Spectral=0.5867
+
+Epoch 47/100 | Batch 180/450 | loss 2.0287e+01 | batch 8.419s | ETA_epoch 0:37:53 | ETA_total 2 days, 6:20:45          slurmstepd: error: *** JOB 14219567 ON b002 CANCELLED AT 2025-10-23T19:38:25 DUE TO TIME LIMIT ***

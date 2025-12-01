@@ -60,14 +60,25 @@ print(f'Available device: {str(DEVICE):4s}', flush=True)
 
 def model_performance(pred_output_arr, act_output_arr):
     # Calculate metrics
-    pred_MSE = ski.metrics.mean_squared_error(act_output_arr, pred_output_arr)
+    if pred_output_arr.shape[1]>1:
+        pred_MSE = []
+        for i in range(pred_output_arr.shape[1]):
+            pred_MSE.append(ski.metrics.mean_squared_error(act_output_arr[0][i], pred_output_arr[0][i]))
+            if i==0:
+                inversed_pred_output_arr = img_inverse_transform(pred_output_arr[0][i])
+                inversed_act_output_arr = img_inverse_transform(act_output_arr[0][i])
 
-    inversed_pred_output_arr = img_inverse_transform(pred_output_arr)
-    inversed_act_output_arr = img_inverse_transform(act_output_arr)
+                pred_total_density = np.sum(inversed_pred_output_arr)
+                act_total_density = np.sum(inversed_act_output_arr)
+                density_difference = np.abs(pred_total_density - act_total_density)
+    else:
+        pred_MSE = ski.metrics.mean_squared_error(act_output_arr, pred_output_arr)
+        inversed_pred_output_arr = img_inverse_transform(pred_output_arr)
+        inversed_act_output_arr = img_inverse_transform(act_output_arr)
 
-    pred_total_density = np.sum(inversed_pred_output_arr)
-    act_total_density = np.sum(inversed_act_output_arr)
-    density_difference = np.abs(pred_total_density - act_total_density)
+        pred_total_density = np.sum(inversed_pred_output_arr)
+        act_total_density = np.sum(inversed_act_output_arr)
+        density_difference = np.abs(pred_total_density - act_total_density)
 
     return pred_MSE, density_difference
 
@@ -206,9 +217,9 @@ def compare_output_batch(dataset, args, argsGRU, batch_size=1, num_workers=0):
     # Set the model to evaluation mode
     model.eval()
     output_dir = './models/plots/test/output_'+argsUNET.run_name
-    make_dir(output_dir)
     pred_MSEs = []
     density_differences = []
+    is_m = 0
     
     with torch.no_grad():
         for batch_idx, batch_data in enumerate(loader):
@@ -246,19 +257,39 @@ def compare_output_batch(dataset, args, argsGRU, batch_size=1, num_workers=0):
                 
                 # Create comparison plot
                 sample_idx = batch_idx * batch_size + i
-                plot_comparison(
-                    input_np[0][-1][0],  # Last frame of input sequence
-                    output_np[0][0], 
-                    target_np[0][0], 
-                    single_label, 
-                    save_filename=f'{output_dir}/img_' + "_".join(str(x) for x in single_label) + '.png', 
-                    dont_show=True
-                )
+                if sample_idx%10 == 0:  # Save every 10th sample
+                    if output_np.shape[1]>1:
+                        is_m = 1
+                        dirnames = ['density', 'velocity_x', 'velocity_y', 'velocity_z']
+                        for ch in range(output_np.shape[1]):
+                            output_dir_ch = output_dir + f'/{dirnames[ch]}'
+                            make_dir(output_dir_ch)
+                            plot_comparison(
+                                input_np[0][-1][ch],  # Last frame of input sequence
+                                output_np[0][ch], 
+                                target_np[0][ch], 
+                                single_label, 
+                                save_filename=f'{output_dir_ch}/img_' + "_".join(str(x) for x in single_label) + '.png', 
+                                dont_show=True
+                            )
+                    else:
+                        make_dir(output_dir)
+                        plot_comparison(
+                            input_np[0][-1][0],  # Last frame of input sequence
+                            output_np[0][0], 
+                            target_np[0][0], 
+                            single_label, 
+                            save_filename=f'{output_dir}/img_' + "_".join(str(x) for x in single_label) + '.png', 
+                            dont_show=True
+                        )
                 
                 pred_MSEs.append(pred_MSE)
                 density_differences.append(density_difference)
     
-    return np.mean(pred_MSEs), np.mean(density_differences)
+    if is_m==1:
+        return np.mean(pred_MSEs,axis=0), np.mean(density_differences)
+    else:
+        return np.mean(pred_MSEs), np.mean(density_differences)
 
 import time
 DATASETNAME = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/training_copy.hdf5'
@@ -316,4 +347,8 @@ print(f"Time taken for training: {end - start:.2f} seconds", flush=True)
 
 #Testing
 avg_test_MSE, avg_test_density_diff = compare_output_batch(test_dataset, argsUNET, argsGRU, batch_size=2, num_workers=4)
-print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+if isinstance(avg_test_MSE, np.ndarray):
+    avg_test_MSE = [f"{mse:.4f}" for mse in avg_test_MSE]
+    print(f"Avg Test MSE per channel: {avg_test_MSE}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+else:
+    print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)

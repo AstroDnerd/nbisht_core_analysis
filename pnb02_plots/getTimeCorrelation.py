@@ -17,9 +17,8 @@ import pdb
 mp.rcParams.update(mp.rcParamsDefault)
 mp.rcParams['agg.path.chunksize'] = 100000
 import matplotlib.gridspec as gridspec
-import scienceplots
-
-plt.style.use(['science','grid'])
+plt.style.use('physrev.mplstyle') # Set full path to physrev.mplstyle if the file is not in the same in directory as the notebook
+plt.rcParams['figure.dpi'] = "300"
 
 #define paths sinkoff
 path_to_data_128 = "/data/cb1/nbisht/anvil_scratch/projects/128/B2/"
@@ -152,18 +151,19 @@ def paperplot_autocorrelation(x, simname='nb101'):
 
     print(ac_x_summed.shape)
     print(L_fft)
-    fig = plt.figure(figsize=(6,6))
+    fig = plt.figure()
     ax = fig.add_subplot(111) 
     ax.plot(T, ac_x_summed, c='orange')
     #ax.set_xlim([0,ac_x_summed.shape[0]])
     ax.set_xlabel(r'Time Lag $\tau$ (s)', fontsize=12)
-    ax.set_ylabel(r'Autocorrelation Function ACF($\tau$)', fontsize=12)
+    ax.set_ylabel(r'ACF($\tau$)', fontsize=12)
     ax.hlines(0,0,T[-1],linestyles='dashed', color='black')
     ax.fill_between(T,ac_x_summed, color="none", hatch="X", edgecolor="powderblue", linewidth=0.0)
-    ax.set_ylim([-0.1,1])
+    ax.set_ylim([-0.05,1.001])
+    ax.set_xlim([0,0.048])
     props = dict(boxstyle='round', facecolor='wheat', alpha = 0.6)
     # place a text box in upper left in axes coords
-    ax.text(0.15, 0.2, 'L: %.3fs'%(DELTAT*L_fft), transform=ax.transAxes, fontsize=14,
+    ax.text(0.15, 0.15, 'L: %.3fs'%(DELTAT*L_fft), transform=ax.transAxes, fontsize=14,
             verticalalignment='bottom', bbox=props, zorder=5)
     print('FFT L:%.3f, %.3fs'%(L_fft,DELTAT*L_fft))
 
@@ -225,7 +225,7 @@ if 1:
     ddnumber = ['DD0030', 'DD0050', 'DD0070', 'DD0090']
     make_dir(path_to_output_plots)
     for sim in simarray[0:2]:
-        for dd in ddnumber:
+        for dd in ddnumber[0:2]:
             datasetname = sim[0:3]+'_'+dd #'d03_DD0030'
             df_name = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'+datasetname+'_TimeseriesCubes_density.npy'
             infile = open(df_name, 'rb')

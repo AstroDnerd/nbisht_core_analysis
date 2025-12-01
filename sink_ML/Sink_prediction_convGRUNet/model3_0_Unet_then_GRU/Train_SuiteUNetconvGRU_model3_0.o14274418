@@ -1,0 +1,93 @@
+Available device: cpu 
+Preparing HDF5 datasets!
+Total samples in HDF5 file: 8160
+Training samples: 900, Test samples: 100
+Time taken to load image hdf5: 0.11 seconds
+UNetconvGRU_nonsink_allfeatures_seq2_static_loss Starting training!
+Using device: cpu
+Training convGRUNet with 900 samples, UNetconvGRU_nonsink_allfeatures_seq2_static_loss run
+Using 4 DataLoader workers
+Gradient accumulation steps: 4
+Model loaded from checkpoint (epoch 80) with 2,157,435 parameters.
+================================================================================
+STARTING TRAINING
+================================================================================
+
+================================================================================
+TRAINING PHASE 2 - EPOCH 81
+Loss scales: L1=5.0, Hist=1.0, Mass=0.1, Spectral=2.5, HD=1.0
+================================================================================
+
+Learning rate reset to 0.0003
+Epoch 81/100 | Batch 180/450 | loss 5.1962e+00 | batch 6.198s | ETA_epoch 0:27:53 | ETA_total 6:40:49          Epoch 81/100 | Batch 360/450 | loss 3.8977e+00 | batch 6.169s | ETA_epoch 0:09:15 | ETA_total 12:35:28          
+Epoch 81/100: Total=0.9401 | L1=0.5210 HD=0.0020 Mass=0.0153 Hist=0.0007 Spectral=0.4012 | LR=3.00e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=3.4761 | L1=1.7352 HD=0.0065 Mass=0.0654 Hist=0.0031 Spectral=1.6660
+
+Epoch 82/100 | Batch 180/450 | loss 2.7021e+00 | batch 6.151s | ETA_epoch 0:27:40 | ETA_total 10:55:33          Epoch 82/100 | Batch 360/450 | loss 2.1041e+00 | batch 6.532s | ETA_epoch 0:09:47 | ETA_total 13:27:43          
+Epoch 82/100: Total=0.6506 | L1=0.4884 HD=0.0020 Mass=0.0158 Hist=0.0628 Spectral=0.0816 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 83/100 | Batch 180/450 | loss 2.4856e+00 | batch 6.640s | ETA_epoch 0:29:52 | ETA_total 11:41:37          Epoch 83/100 | Batch 360/450 | loss 2.4001e+00 | batch 6.395s | ETA_epoch 0:09:35 | ETA_total 13:12:16          
+Epoch 83/100: Total=0.6674 | L1=0.5033 HD=0.0019 Mass=0.0154 Hist=0.0629 Spectral=0.0839 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 84/100 | Batch 180/450 | loss 2.3745e+00 | batch 6.204s | ETA_epoch 0:27:54 | ETA_total 11:35:01          Epoch 84/100 | Batch 360/450 | loss 2.5677e+00 | batch 6.482s | ETA_epoch 0:09:43 | ETA_total 12:31:49          
+Epoch 84/100: Total=0.6740 | L1=0.5099 HD=0.0019 Mass=0.0153 Hist=0.0637 Spectral=0.0833 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 85/100 | Batch 180/450 | loss 3.1272e+00 | batch 6.284s | ETA_epoch 0:28:16 | ETA_total 11:09:22          Epoch 85/100 | Batch 360/450 | loss 2.1379e+00 | batch 6.455s | ETA_epoch 0:09:40 | ETA_total 11:48:13          
+Epoch 85/100: Total=0.6501 | L1=0.4877 HD=0.0019 Mass=0.0154 Hist=0.0620 Spectral=0.0830 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 86/100 | Batch 180/450 | loss 2.0442e+00 | batch 6.421s | ETA_epoch 0:28:53 | ETA_total 10:39:57          Epoch 86/100 | Batch 360/450 | loss 3.2848e+00 | batch 6.105s | ETA_epoch 0:09:09 | ETA_total 11:03:34          
+Epoch 86/100: Total=0.6558 | L1=0.4906 HD=0.0019 Mass=0.0146 Hist=0.0650 Spectral=0.0837 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=2.7852 | L1=1.9164 HD=0.0062 Mass=0.0667 Hist=0.4159 Spectral=0.3800
+
+Epoch 87/100 | Batch 180/450 | loss 1.9949e+00 | batch 6.807s | ETA_epoch 0:30:38 | ETA_total 10:07:38          Epoch 87/100 | Batch 360/450 | loss 2.6720e+00 | batch 6.214s | ETA_epoch 0:09:19 | ETA_total 10:21:16          
+Epoch 87/100: Total=0.6449 | L1=0.4843 HD=0.0019 Mass=0.0147 Hist=0.0614 Spectral=0.0825 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 88/100 | Batch 180/450 | loss 2.0309e+00 | batch 6.137s | ETA_epoch 0:27:37 | ETA_total 9:24:54          Epoch 88/100 | Batch 360/450 | loss 2.8223e+00 | batch 6.147s | ETA_epoch 0:09:13 | ETA_total 9:36:06          
+Epoch 88/100: Total=0.6484 | L1=0.4812 HD=0.0019 Mass=0.0156 Hist=0.0670 Spectral=0.0827 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 89/100 | Batch 180/450 | loss 2.6353e+00 | batch 6.218s | ETA_epoch 0:27:58 | ETA_total 8:45:01          Epoch 89/100 | Batch 360/450 | loss 2.0134e+00 | batch 6.119s | ETA_epoch 0:09:10 | ETA_total 8:48:41          
+Epoch 89/100: Total=0.6744 | L1=0.5082 HD=0.0019 Mass=0.0153 Hist=0.0653 Spectral=0.0837 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 90/100 | Batch 180/450 | loss 2.2878e+00 | batch 6.324s | ETA_epoch 0:28:27 | ETA_total 8:01:24          Epoch 90/100 | Batch 360/450 | loss 2.2096e+00 | batch 6.143s | ETA_epoch 0:09:12 | ETA_total 8:00:45          
+Epoch 90/100: Total=0.6553 | L1=0.4924 HD=0.0018 Mass=0.0162 Hist=0.0615 Spectral=0.0833 | LR=1.50e-04 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Saving checkpoint at epoch 90...
+Epoch 91/100 | Batch 180/450 | loss 2.4030e+00 | batch 6.531s | ETA_epoch 0:29:23 | ETA_total 7:18:41          Epoch 91/100 | Batch 360/450 | loss 2.9759e+00 | batch 6.494s | ETA_epoch 0:09:44 | ETA_total 7:14:49          
+Epoch 91/100: Total=0.6607 | L1=0.4911 HD=0.0018 Mass=0.0152 Hist=0.0685 Spectral=0.0841 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=2.3625 | L1=1.6495 HD=0.0062 Mass=0.0654 Hist=0.2781 Spectral=0.3634
+
+Epoch 92/100 | Batch 180/450 | loss 2.6598e+00 | batch 6.221s | ETA_epoch 0:27:59 | ETA_total 6:34:39          Epoch 92/100 | Batch 360/450 | loss 2.5086e+00 | batch 6.899s | ETA_epoch 0:10:20 | ETA_total 6:30:05          
+Epoch 92/100: Total=0.7393 | L1=0.4554 HD=0.1874 Mass=0.0144 Hist=0.0006 Spectral=0.0816 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 93/100 | Batch 180/450 | loss 2.5666e+00 | batch 6.176s | ETA_epoch 0:27:47 | ETA_total 5:50:15          Epoch 93/100 | Batch 360/450 | loss 3.1313e+00 | batch 6.182s | ETA_epoch 0:09:16 | ETA_total 5:42:11          
+Epoch 93/100: Total=0.7559 | L1=0.4738 HD=0.1834 Mass=0.0154 Hist=0.0006 Spectral=0.0827 | LR=7.50e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 94/100 | Batch 180/450 | loss 3.2929e+00 | batch 6.741s | ETA_epoch 0:30:19 | ETA_total 5:07:49          Epoch 94/100 | Batch 360/450 | loss 3.0877e+00 | batch 6.635s | ETA_epoch 0:09:57 | ETA_total 4:55:34          
+Epoch 94/100: Total=0.7526 | L1=0.4713 HD=0.1839 Mass=0.0148 Hist=0.0006 Spectral=0.0820 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 95/100 | Batch 180/450 | loss 2.9284e+00 | batch 6.289s | ETA_epoch 0:28:18 | ETA_total 4:21:17          Epoch 95/100 | Batch 360/450 | loss 2.9584e+00 | batch 6.270s | ETA_epoch 0:09:24 | ETA_total 4:08:54          
+Epoch 95/100: Total=0.7643 | L1=0.4891 HD=0.1767 Mass=0.0152 Hist=0.0006 Spectral=0.0826 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 96/100 | Batch 180/450 | loss 2.6114e+00 | batch 6.303s | ETA_epoch 0:28:21 | ETA_total 3:35:22          Epoch 96/100 | Batch 360/450 | loss 2.5493e+00 | batch 6.446s | ETA_epoch 0:09:40 | ETA_total 3:21:46          
+Epoch 96/100: Total=0.7762 | L1=0.4936 HD=0.1831 Mass=0.0152 Hist=0.0006 Spectral=0.0837 | LR=3.75e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Running validation...
+Validation: Total=2.8176 | L1=1.7544 HD=0.6102 Mass=0.0660 Hist=0.0033 Spectral=0.3837
+
+Epoch 97/100 | Batch 180/450 | loss 3.6118e+00 | batch 6.136s | ETA_epoch 0:27:36 | ETA_total 2:48:40          Epoch 97/100 | Batch 360/450 | loss 2.8187e+00 | batch 6.091s | ETA_epoch 0:09:08 | ETA_total 2:33:33          
+Epoch 97/100: Total=0.7474 | L1=0.4674 HD=0.1827 Mass=0.0145 Hist=0.0006 Spectral=0.0822 | LR=1.87e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 98/100 | Batch 180/450 | loss 2.9913e+00 | batch 6.145s | ETA_epoch 0:27:39 | ETA_total 2:01:43          Epoch 98/100 | Batch 360/450 | loss 2.7166e+00 | batch 6.004s | ETA_epoch 0:09:00 | ETA_total 1:45:08          
+Epoch 98/100: Total=0.7606 | L1=0.4895 HD=0.1719 Mass=0.0154 Hist=0.0006 Spectral=0.0832 | LR=1.87e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 99/100 | Batch 180/450 | loss 2.7774e+00 | batch 6.145s | ETA_epoch 0:27:39 | ETA_total 1:14:38          Epoch 99/100 | Batch 360/450 | loss 3.7875e+00 | batch 6.053s | ETA_epoch 0:09:04 | ETA_total 0:57:01          
+Epoch 99/100: Total=0.7541 | L1=0.4732 HD=0.1825 Mass=0.0151 Hist=0.0006 Spectral=0.0826 | LR=1.87e-05 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+Epoch 100/100 | Batch 180/450 | loss 2.7525e+00 | batch 6.163s | ETA_epoch 0:27:43 | ETA_total 0:27:43          Epoch 100/100 | Batch 360/450 | loss 3.1867e+00 | batch 6.115s | ETA_epoch 0:09:10 | ETA_total 0:09:10          
+Epoch 100/100: Total=0.7531 | L1=0.4697 HD=0.1846 Mass=0.0157 Hist=0.0006 Spectral=0.0824 | LR=9.37e-06 | Weights: [1.00, 1.00, 1.00, 1.00, 1.00]
+
+Saving checkpoint at epoch 100...
+
+Saving final model...
+
+Training completed in 16:06:06
+Training completed! Minimum loss: 0.6449
+Time taken for training: 57966.89 seconds
+Model loaded with 2,157,435 trainable parameters.
+/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+/home/x-nbisht1/.local/lib/python3.9/site-packages/skimage/metrics/simple_metrics.py:168: RuntimeWarning: divide by zero encountered in scalar divide
+  return 10 * np.log10((data_range**2) / err)
+Avg Test MSE: 0.2728, Avg Test Density Difference: 163389637556152771197009920.0000

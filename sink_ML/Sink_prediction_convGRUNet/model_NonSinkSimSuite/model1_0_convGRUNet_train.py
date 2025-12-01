@@ -375,85 +375,89 @@ def recursive_model_prediction_eval(modelclass, simname, args, argsGRU, num_of_c
 
 import time
 
-# Prepare datasets
-start = time.time()
-print('Preparing datasets!', flush=True)
-number_of_samples = 2000
-#train_dataset, test_dataset, train_indices, test_indices = load_hdf5_data_for_training(DATASETNAME, num_samples=number_of_samples,test_percentage=TEST_PERCENTAGE,seed=seed)
-chunksize = 1000
-chunk_manager = ChunkedHDF5Manager(
-    hdf5_path=DATASETNAME, 
-    chunk_size=chunksize,  # Adjust based on RAM. 2000 is safe (approx 32GB)
-    test_ratio=TEST_PERCENTAGE,
-    total_samples=number_of_samples
-)
+if __name__ == '__main__':
+    # Prepare datasets
+    start = time.time()
+    print('Preparing datasets!', flush=True)
+    number_of_samples = 2000
+    #train_dataset, test_dataset, train_indices, test_indices = load_hdf5_data_for_training(DATASETNAME, num_samples=number_of_samples,test_percentage=TEST_PERCENTAGE,seed=seed)
+    chunksize = 600
+    chunk_manager = ChunkedHDF5Manager(
+        hdf5_path=DATASETNAME, 
+        chunk_size=chunksize,  # Adjust based on RAM. 2000 is safe (approx 32GB)
+        test_ratio=TEST_PERCENTAGE,
+        total_samples=number_of_samples
+    )
 
-end = time.time()
-print(f"Time taken to load image hdf5: {end - start:.2f} seconds", flush=True)
+    end = time.time()
+    print(f"Time taken to load image hdf5: {end - start:.2f} seconds", flush=True)
 
-# Setup arguments
-parser = argparse.ArgumentParser()
-argsUNET = parser.parse_args(args=[])
-argsUNET.image_size = IMAGESIZE
-argsUNET.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-argsUNET.run_name = "model1_0_convGRUnet_nonsink_allfeatures_seq2_statistical_loss_bs32_ch_16_deltatrain_testnumworers"
-argsUNET.loss_type = 'statistical'
-argsUNET.in_channel = 16
-argsUNET.out_channel = 4
-argsUNET.epochs = 1
-argsUNET.lr = 3e-4
-#for CPU run, keep to 8, GPU run, reduce to 2 with accumulation at 4
-argsUNET.batch_size = 32  # Will be reduced automatically if OOM
-argsUNET.accum_steps = 1
-argsUNET.num_workers = 32
-argsUNET.Adamw_weight_decay = 1e-4
-argsUNET.DWA_temperature = 2
-argsUNET.base_f = 32
-argsUNET.depth = 3
-argsUNET.attention_int_division = 2
-argsUNET.conv_param = (3,1,1,1)  # kernel size, stride, padding, dilation
-argsUNET.LRLU_slope = 0.01  # LeakyReLU slope, 0 for ReLU
-argsUNET.dropout_rate = 0.2  # dropout rate, 0 for no dropout
+    # Setup arguments
+    parser = argparse.ArgumentParser()
+    argsUNET = parser.parse_args(args=[])
+    argsUNET.image_size = IMAGESIZE
+    argsUNET.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    argsUNET.run_name = "model1_0_convGRUnet_nonsink_allfeatures_seq2_statistical_loss_bs32_ch_16_deltatrain_DDP"
+    argsUNET.loss_type = 'statistical'
+    argsUNET.in_channel = 16
+    argsUNET.out_channel = 4
+    argsUNET.epochs = 10
+    argsUNET.lr = 3e-4
+    #for CPU run, keep to 8, GPU run, reduce to 2 with accumulation at 4
+    argsUNET.batch_size = 8  # Will be reduced automatically if OOM
+    argsUNET.accum_steps = 1
+    argsUNET.num_workers = 32
+    argsUNET.Adamw_weight_decay = 1e-4
+    argsUNET.DWA_temperature = 2
+    argsUNET.base_f = 32
+    argsUNET.depth = 3
+    argsUNET.attention_int_division = 2
+    argsUNET.conv_param = (3,1,1,1)  # kernel size, stride, padding, dilation
+    argsUNET.LRLU_slope = 0.01  # LeakyReLU slope, 0 for ReLU
+    argsUNET.dropout_rate = 0.2  # dropout rate, 0 for no dropout
 
-argsGRU = parser.parse_args(args=[])
-argsGRU.in_channel = 4
-argsGRU.out_channel = 16
-argsGRU.in_seq = 2
-argsGRU.out_seq = 2
-argsGRU.num_layers = 2
-argsGRU.kernels = [3, 3]
-argsGRU.hidden_dims = [32, 64]
-argsGRU.bias = False
-modelclass = hybridConvGRU3DNET
+    argsGRU = parser.parse_args(args=[])
+    argsGRU.in_channel = 4
+    argsGRU.out_channel = 16
+    argsGRU.in_seq = 2
+    argsGRU.out_seq = 2
+    argsGRU.num_layers = 2
+    argsGRU.kernels = [3, 3]
+    argsGRU.hidden_dims = [32, 64]
+    argsGRU.bias = False
+    modelclass = hybridConvGRU3DNET
 
-print(argsUNET.run_name + " Starting training!", flush=True)
-start = time.time()
+    print(argsUNET.run_name + " Starting training!", flush=True)
+    start = time.time()
 
-setup_cpu_optimizations()
+    setup_cpu_optimizations()
 
-#With validation
-#min_loss = train_unet_unified(modelclass, train_dataset, argsUNET, argsGRU, validation_dataset=test_dataset)
-'''
-for nw in [4,8,16,32,48,64]:
-    argsUNET.num_workers = nw
-    min_loss = train_unet_unified_delta(modelclass, train_dataset, argsUNET, argsGRU, validation_dataset=test_dataset, dont_save=True)
-'''
-min_loss = train_unet_unified_delta_chunked(modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
+    #With validation
+    #min_loss = train_unet_unified(modelclass, train_dataset, argsUNET, argsGRU, validation_dataset=test_dataset)
 
-end = time.time()
-print(f"Training completed! Minimum loss: {min_loss:.4f}", flush=True)
-print(f"Time taken for training: {end - start:.2f} seconds", flush=True)
-'''
-#Testing
-avg_test_MSE, avg_test_density_diff = compare_output_batch(test_dataset, argsUNET, argsGRU, batch_size=2, num_workers=4)
-if isinstance(avg_test_MSE, np.ndarray):
-    avg_test_MSE = [f"{mse:.4f}" for mse in avg_test_MSE]
-    print(f"Avg Test MSE per channel: {avg_test_MSE}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
-else:
-    print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+    #min_loss = train_unet_unified_delta(modelclass, train_dataset, argsUNET, argsGRU, validation_dataset=test_dataset, dont_save=True)
+
+    #min_loss = train_unet_unified_delta_chunked(modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
+    #print(f"Training completed! Minimum loss: {min_loss:.4f}", flush=True)
+
+    # --- Configuration ---
+    WORLD_SIZE = 4             # Number of processes
+    THREADS_PER_PROC = 128//WORLD_SIZE      # 4 * 32 = 128 cores
+    train_unet_unified_delta_chunked_DDP(WORLD_SIZE, THREADS_PER_PROC, modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
+
+    end = time.time()
+    print(f"Time taken for training: {end - start:.2f} seconds", flush=True)
+    '''
+    #Testing
+    avg_test_MSE, avg_test_density_diff = compare_output_batch(test_dataset, argsUNET, argsGRU, batch_size=2, num_workers=4)
+    if isinstance(avg_test_MSE, np.ndarray):
+        avg_test_MSE = [f"{mse:.4f}" for mse in avg_test_MSE]
+        print(f"Avg Test MSE per channel: {avg_test_MSE}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+    else:
+        print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
 
 
-timecube_basepath = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'
-rec_simname = 'd03_DD0090'
-recursive_model_prediction_eval(modelclass, rec_simname, argsUNET, argsGRU, num_of_cycles=3, delta_t=33)
-'''
+    timecube_basepath = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'
+    rec_simname = 'd03_DD0090'
+    recursive_model_prediction_eval(modelclass, rec_simname, argsUNET, argsGRU, num_of_cycles=3, delta_t=33)
+    '''

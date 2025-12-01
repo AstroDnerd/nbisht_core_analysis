@@ -1,0 +1,26 @@
+Available device: cpu 
+Preparing HDF5 datasets!
+Total samples in HDF5 file: 8160
+Training samples: 900, Test samples: 100
+Time taken to load image hdf5: 0.11 seconds
+UNetconvGRU_nonsink_allfeatures_seq2_static_loss Starting training!
+Using device: cpu
+Training convGRUNet with 900 samples, UNetconvGRU_nonsink_allfeatures_seq2_static_loss run
+Using 4 DataLoader workers
+Gradient accumulation steps: 4
+Model loaded from checkpoint (epoch 100) with 2,157,435 parameters.
+================================================================================
+STARTING TRAINING
+================================================================================
+
+Saving final model...
+
+Training completed in 0:00:01
+Training completed! Minimum loss: 0.6449
+Time taken for training: 1.51 seconds
+Model loaded with 2,157,435 trainable parameters.
+/home/x-nbisht1/.local/lib/python3.9/site-packages/torch/utils/data/dataloader.py:665: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  warnings.warn(warn_msg)
+/home/x-nbisht1/.local/lib/python3.9/site-packages/skimage/metrics/simple_metrics.py:168: RuntimeWarning: divide by zero encountered in scalar divide
+  return 10 * np.log10((data_range**2) / err)
+Avg Test MSE per channel: ['0.0375', '0.3199', '0.4164', '0.3174'], Avg Test Density Difference: 24464.4609
