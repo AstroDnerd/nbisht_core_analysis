@@ -45,7 +45,7 @@ from tqdm import tqdm
 # set a seed to ensure reproducibility
 seed = 128
 rnd  = np.random.RandomState(seed)
-DATASETNAME = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/training_copy.hdf5'
+DATASETNAME = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/NonsinkSuite_Images_seq2_3D_all_features.hdf5'
 MODELFILE = 'nnmodel.dict'
 
 IMAGESIZE = 64
@@ -377,31 +377,38 @@ import time
 
 if __name__ == '__main__':
     # Prepare datasets
+    rank = dist.get_rank()
     start = time.time()
-    print('Preparing datasets!', flush=True)
-    number_of_samples = 2000
+    if rank==0:
+        print('Preparing datasets!', flush=True)
+    #number_of_samples = 1560
     #train_dataset, test_dataset, train_indices, test_indices = load_hdf5_data_for_training(DATASETNAME, num_samples=number_of_samples,test_percentage=TEST_PERCENTAGE,seed=seed)
+    #get sim mach 4 DD0030 keys
+    sim_keys = [i+1560*4*4 for i in range(1560)]
     chunksize = 600
     chunk_manager = ChunkedHDF5Manager(
         hdf5_path=DATASETNAME, 
-        chunk_size=chunksize,  # Adjust based on RAM. 2000 is safe (approx 32GB)
+        subset_keys=sim_keys,
+        chunk_size=chunksize,  # Adjust based on RAM. 600 is safe 
         test_ratio=TEST_PERCENTAGE,
-        total_samples=number_of_samples
+        total_samples=None,  #use number_of_samples if you want to limit
+        seed=seed
     )
 
     end = time.time()
-    print(f"Time taken to load image hdf5: {end - start:.2f} seconds", flush=True)
+    if rank==0:
+        print(f"Time taken to load image hdf5: {end - start:.2f} seconds", flush=True)
 
     # Setup arguments
     parser = argparse.ArgumentParser()
     argsUNET = parser.parse_args(args=[])
     argsUNET.image_size = IMAGESIZE
     argsUNET.device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    argsUNET.run_name = "model1_0_convGRUnet_nonsink_allfeatures_seq2_statistical_loss_bs32_ch_16_deltatrain_DDP"
+    argsUNET.run_name = "model1_0_convGRUnet_nonsink_allfeatures_seq2_statistical_loss_bs32_ch_16_deltatrain_TRUN"
     argsUNET.loss_type = 'statistical'
     argsUNET.in_channel = 16
     argsUNET.out_channel = 4
-    argsUNET.epochs = 10
+    argsUNET.epochs = 30
     argsUNET.lr = 3e-4
     #for CPU run, keep to 8, GPU run, reduce to 2 with accumulation at 4
     argsUNET.batch_size = 8  # Will be reduced automatically if OOM
@@ -427,7 +434,8 @@ if __name__ == '__main__':
     argsGRU.bias = False
     modelclass = hybridConvGRU3DNET
 
-    print(argsUNET.run_name + " Starting training!", flush=True)
+    if rank==0:
+        print(argsUNET.run_name + " Starting training!", flush=True)
     start = time.time()
 
     setup_cpu_optimizations()
@@ -440,24 +448,41 @@ if __name__ == '__main__':
     #min_loss = train_unet_unified_delta_chunked(modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
     #print(f"Training completed! Minimum loss: {min_loss:.4f}", flush=True)
 
-    # --- Configuration ---
-    WORLD_SIZE = 4             # Number of processes
-    THREADS_PER_PROC = 128//WORLD_SIZE      # 4 * 32 = 128 cores
-    train_unet_unified_delta_chunked_DDP(WORLD_SIZE, THREADS_PER_PROC, modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
+    if 0:
+        # --- DDP Configuration ---
+        WORLD_SIZE = 4             # Number of processes
+        THREADS_PER_PROC = 128//WORLD_SIZE      # 4 * 32 = 128 cores
+        train_unet_unified_delta_chunked_DDP(WORLD_SIZE, THREADS_PER_PROC, modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=True)
 
+    train_unet_unified_delta_chunked_trun(modelclass, chunk_manager, argsUNET, argsGRU, validate_dataset=True, dont_save=False)
     end = time.time()
-    print(f"Time taken for training: {end - start:.2f} seconds", flush=True)
-    '''
-    #Testing
-    avg_test_MSE, avg_test_density_diff = compare_output_batch(test_dataset, argsUNET, argsGRU, batch_size=2, num_workers=4)
-    if isinstance(avg_test_MSE, np.ndarray):
-        avg_test_MSE = [f"{mse:.4f}" for mse in avg_test_MSE]
-        print(f"Avg Test MSE per channel: {avg_test_MSE}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
-    else:
-        print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
-
-
-    timecube_basepath = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'
-    rec_simname = 'd03_DD0090'
-    recursive_model_prediction_eval(modelclass, rec_simname, argsUNET, argsGRU, num_of_cycles=3, delta_t=33)
-    '''
+    if rank==0:
+        print(f"Time taken for training: {end - start:.2f} seconds", flush=True)
+    
+    if 0:
+        timecube_basepath = '/anvil/scratch/x-nbisht1/projects/512/NonsinkSimSuite/timecubes/'
+        rec_simname = 'd03_DD0090'
+        recursive_model_prediction_eval(modelclass, rec_simname, argsUNET, argsGRU, num_of_cycles=3, delta_t=33)
+    
+    if 1:
+        number_of_samples = 5
+        #get sim mach 4 DD0070 keys
+        sim_keys = [i+1560*(4*3+2) for i in range(1560)]
+        chunksize = 600
+        test_chunk_manager = ChunkedHDF5Manager(
+            hdf5_path=DATASETNAME, 
+            subset_keys=sim_keys,
+            chunk_size=chunksize,  # Adjust based on RAM. 600 is safe 
+            test_ratio=0,
+            total_samples=number_of_samples,  #use number_of_samples if you want to limit
+            seed=seed
+        )
+        Density_testing = test_chunk_manager.load_data_to_ram()
+        #Testing
+        avg_test_MSE, avg_test_density_diff = compare_output_batch(Density_testing, argsUNET, argsGRU, batch_size=number_of_samples, num_workers=4)
+        if isinstance(avg_test_MSE, np.ndarray):
+            avg_test_MSE = [f"{mse:.4f}" for mse in avg_test_MSE]
+            print(f"Avg Test MSE per channel: {avg_test_MSE}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+        else:
+            print(f"Avg Test MSE: {avg_test_MSE:.4f}, "f"Avg Test Density Difference: {avg_test_density_diff:.4f}", flush=True)
+    

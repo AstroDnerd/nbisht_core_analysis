@@ -203,7 +203,7 @@ class hybridUNETconvGRU3D(nn.Module):
         """
         super().__init__()
         self.out_seq = argsGRU.out_seq
-        self.ConvGRUNet = ConvGRUNet3D(input_channels=argsGRU.in_channel, output_channels =argsGRU.in_channel, image_size=args.image_size, in_seq = argsGRU.in_seq, out_seq = argsGRU.out_seq, 
+        self.ConvGRUNet = ConvGRUNet3D(input_channels=argsGRU.in_channel, output_channels =argsGRU.out_channel, image_size=args.image_size, in_seq = argsGRU.in_seq, out_seq = argsGRU.out_seq, 
                                        num_layers = argsGRU.num_layers, kernels = argsGRU.kernels, hidden_dims = argsGRU.hidden_dims, bias = argsGRU.bias)
         self.UNet3D = UNet3D(in_ch=args.in_channel, out_ch=args.out_channel, args=args)
 
@@ -221,7 +221,7 @@ class hybridUNETconvGRU3D(nn.Module):
         unet_output = torch.stack(gru_arr, dim=1)  #(b, t_in, c, l, h ,w)
         GRU_output = self.ConvGRUNet(unet_output)  #(b, t_out, c, l, h ,w)
         
-        return GRU_output[:,-self.out_seq,:,:,:]
+        return GRU_output
         
 
 class ConvGRUNet3D(nn.Module):

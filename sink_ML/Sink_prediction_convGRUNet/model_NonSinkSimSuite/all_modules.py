@@ -141,7 +141,7 @@ class HDF5Dataset(Dataset):
                 pass
 
 class ChunkedHDF5Manager:
-    def __init__(self, hdf5_path, chunk_size=2000, test_ratio=0.1, seed=128, total_samples=None):
+    def __init__(self, hdf5_path, subset_keys=None, chunk_size=2000, test_ratio=0.1, seed=128, total_samples=None):
         """
         Manages splitting HDF5 keys into chunks and loading them into RAM.
         """
@@ -154,7 +154,13 @@ class ChunkedHDF5Manager:
         
         # 1. Get all keys once
         with h5py.File(hdf5_path, 'r') as f:
-            self.all_keys = list(f['input_images'].keys())
+            full_key_list = list(f['input_images'].keys())
+        
+        if subset_keys is not None:
+            # Intersection to ensure keys actually exist
+            self.all_keys = [k for k in subset_keys if k in full_key_list]
+        else:
+            self.all_keys = full_key_list
         
         # 2. Shuffle and Split
         rng = np.random.RandomState(seed)
@@ -3143,7 +3149,8 @@ def train_unet_unified_delta_chunked_DDP_trainer(rank, world_size, THREADS_PER_P
     writer.close()
     loss_history = np.array(loss_history)
     if dont_save:
-        return min(loss_history[:, 0])  # Return minimum loss
+        cleanup_ddp()
+        return dont_save
     # Final save
     print("\nSaving final model...", flush=True)
     if rank == 0:
@@ -3198,3 +3205,470 @@ def train_unet_unified_delta_chunked_DDP_trainer(rank, world_size, THREADS_PER_P
     total_time = time.perf_counter() - training_start
     print(f"\nTraining completed in {str(datetime.timedelta(seconds=int(total_time)))}", flush=True)
     cleanup_ddp()
+    return dont_save
+
+
+
+import torch.distributed as dist
+import torch.multiprocessing as mp
+from torch.utils.data import DataLoader, DistributedSampler
+
+def setup_trun():
+    dist.init_process_group("gloo")
+
+def cleanup_trun():
+    dist.destroy_process_group()
+
+def train_unet_unified_delta_chunked_trun(modelclass, chunk_manager, args, argsGRU, validate_dataset=True, dont_save=False):
+    make_dir(f"models/plots/")
+    train_unet_unified_delta_chunked_trun_trainer(modelclass, chunk_manager, args, argsGRU, validate_dataset, dont_save)
+
+def train_unet_unified_delta_chunked_trun_trainer(modelclass, chunk_manager, args, argsGRU, validate_dataset=True, dont_save=False):
+    """
+    Optimized training function with delta training with mixed precision and improved memory management and gradient accumulation.
+    Notes:
+    - HDF5 datasets
+    - Both CPU and GPU
+    - Mixed precision training (GPU only)
+    - Gradient accumulation
+    - Training phases with adaptive loss scaling
+    - Validation
+    - Learning rate scheduling
+    - Periodic checkpointing
+    
+    Parameters:
+    -----------
+    chunk_manager : ChunkedHDF5Manager
+        chunk manager that loads a chunk into memory
+    args : argparse.Namespace
+        Training arguments
+    argsGRU : argparse.Namespace
+        GRU model arguments
+    validation_dataset : torch.utils.data.Dataset, optional
+        Validation dataset
+    """
+    #Setup device
+    setup_trun()
+    rank = dist.get_rank()
+    
+    DEVICE = torch.device('cpu') # Explicitly CPU for this setup
+    
+    print(f"Rank {rank}: Using device: {DEVICE}", flush=True)
+    
+    #Memory optimization for GPU
+    if DEVICE.type == 'cuda':
+        torch.cuda.empty_cache()
+        torch.backends.cudnn.benchmark = False
+        print_memory_stats()
+    if rank == 0:
+        print(f"Rank {rank}: Training convGRUNet with {chunk_manager.total_samples} samples, {args.run_name} run", flush=True)
+    
+    # Validation loader if provided
+    if validate_dataset:
+        if rank == 0:
+            print(f"Rank {rank}: Loading Validation Set into RAM...", flush=True)
+        val_dataset = chunk_manager.load_data_to_ram(chunk_manager.test_keys, desc="Validation")
+        val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0,pin_memory=(DEVICE.type == 'cuda'))
+    
+    # Initialize model
+    model = modelclass(args, argsGRU).to(DEVICE)
+    # OPTIMIZATION: Channels Last for Weights
+    #model = model.to(memory_format=torch.channels_last_3d)
+    # Wrap in DDP
+    model = DDP(model, device_ids=None, find_unused_parameters=True) # None because we are on CPU
+
+    # Optimizer setup
+    n_losses = 5
+    loss_w = torch.nn.Parameter(torch.ones(n_losses, device=DEVICE), requires_grad=True)
+    optimizer = optim.AdamW(list(model.parameters()) + [loss_w], lr=args.lr, weight_decay=args.Adamw_weight_decay)
+    Earlystopper = EarlyStopping(patience=2, min_delta=0.001)
+    
+    # Learning rate scheduler
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=2, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=1e-7)
+    
+    # TensorBoard
+    writer = SummaryWriter(log_dir=f"models/logs/{args.run_name}")
+    
+    if hasattr(torch, 'compile'):
+        if rank == 0:
+            print("Using torch.compile")
+        model = torch.compile(
+            model, 
+            mode='reduce-overhead',  # max-autotune or 'reduce-overhead' or 'default'
+            backend='inductor'
+        )   #First batch will be slow (compilation), then much faster
+    else:
+        if rank == 0:
+            print("torch.compile not available, upgrade to PyTorch 2.0+")
+            
+    # Mixed precision scaler (GPU only)
+    use_amp = DEVICE.type == 'cuda'
+    if use_amp:
+        scaler = torch.amp.GradScaler()
+    
+    # Gradient accumulation steps
+    accum_steps = int(args.accum_steps if hasattr(args, 'accum_steps') else max(1, 8 // args.batch_size))
+    if rank == 0:
+        print(f"Rank {rank}: Gradient accumulation steps: {accum_steps}", flush=True)
+    
+    # Load checkpoint if exists
+    start_epoch = 0
+    loss_history = []
+    val_loss_history = []
+
+    checkpoint_path = f"models/{args.run_name}_{MODELFILE}"
+    if os.path.exists(checkpoint_path):
+        checkpoint = torch.load(checkpoint_path, map_location=DEVICE, weights_only=False)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+        start_epoch = checkpoint['epoch']
+        loss_history = checkpoint['loss']
+        val_loss_history = checkpoint.get('val_loss', [])
+        if rank == 0:
+            print(f"Rank {rank}: Model loaded from checkpoint (epoch {start_epoch}) with {count_parameters(model):,} parameters.", flush=True)
+    else:
+        if rank == 0:
+            print(f"Rank {rank}: Model initialized with {count_parameters(model):,} trainable parameters.", flush=True)
+
+    # Dynamic weight adjustment setup
+    first_chunk_dataset = None
+    if args.loss_type == 'statistical':
+        #Calculate Statistics (Using ONLY the first training chunk to save time)
+        if rank == 0:
+            print(f"Rank {rank}: Loading First Chunk for Statistics...", flush=True)
+        first_chunk_dataset = chunk_manager.load_data_to_ram(chunk_manager.train_chunks[0], desc="Chunk 0")
+        if rank == 0:
+            print(f"Rank {rank}: Computing initial weights from first chunk...", flush=True)
+        sample_pairs = []
+        #Choose 50 random indices to sample from dataset to get weights and stds
+        sample_len = 50
+        for i in range(min(len(first_chunk_dataset), sample_len)): # Use subset for speed
+            sample_pairs.append(first_chunk_dataset[i])
+            
+        static_w, stds = compute_initial_weights_from_sample(sample_pairs, density_channel=0, hd_q=0.999, hist_bins=32, hist_sample_frac=0.20, device=DEVICE)
+        #Each Loss is normalized to ~1
+        #Boost L1 loss for first 50 epochs?
+        static_w[0] = static_w[0]*10
+        if rank == 0:
+            print(f"Rank {rank}:  Initial weights and std computed with a sample of {sample_len} from dataset. ", flush=True)
+            print(f"Rank {rank}: static_w: ",static_w, flush=True)
+            print(f"Rank {rank}: stds: ",stds, flush=True)
+        config = {
+          'type':'delta',
+          'channel_scales': [stds[0], stds[1], stds[2], stds[3]],
+          'channel_weights': [1.0, 1.0, 1.0, 1.0],
+          'density_channel': 0,
+          'velocity_channels': [1,2,3],
+          'density_is_log': True,
+          'hist_bins': 32, 'hist_vmin': -5.0, 'hist_vmax': 5.0, 'hist_sigma': None, 'hist_sample_frac': 0.2,
+          'do_spectral': True, 'spec_sample_frac': 1.0,
+          'hd_q': 0.999, 'hd_smooth': 1e-2
+        }
+        del sample_pairs
+
+    # Training loop
+    if rank == 0:
+        print(f"Rank {rank}: Starting Training on {len(chunk_manager.train_chunks)} chunks per epoch...", flush=True)
+    training_start = time.perf_counter()
+    batch_time_ema = None
+    ema_alpha = 0.15
+    training_phase = 1
+    phase_epochs = [25, 50]
+    for epoch in range(start_epoch, args.epochs):
+        stop_early = False
+        model.train()
+        total_epoch_loss = 0.0
+        sum_l1, sum_hist, sum_mass, sum_spectral, sum_hd = 0.0, 0.0, 0.0, 0.0, 0.0
+        
+        # Announce training phase changes
+        if epoch in phase_epochs:
+            training_phase += 1
+            if rank == 0:
+                print(f"Rank {rank}: TRAINING PHASE {training_phase} - EPOCH {epoch+1}", flush=True)
+            
+            # Reset learning rate at phase boundaries (except first phase)
+            if epoch != phase_epochs[0]:
+                static_w[0] = static_w[0]/10
+                for g in optimizer.param_groups:
+                    g['lr'] = args.lr
+                if rank == 0:
+                    print(f"Rank {rank}: Learning rate reset to {args.lr}", flush=True)
+        
+        # Clear cache at epoch start (GPU only)
+        if DEVICE.type == 'cuda':
+            torch.cuda.empty_cache()
+        N=0
+        # Iterate over CHUNKS
+        for i, chunk_keys in enumerate(chunk_manager.train_chunks):
+            if first_chunk_dataset is not None and i==0:
+                train_dataset = first_chunk_dataset
+            else:
+                train_dataset = chunk_manager.load_data_to_ram(chunk_keys, desc=f"R{rank}  Ep {epoch} - Chunk {i}")
+
+            sampler = DistributedSampler(train_dataset, shuffle=False)
+            train_loader = DataLoader(train_dataset, batch_size=args.batch_size, sampler=sampler, num_workers=0)
+            # Training batches
+            for batch_idx, batch_data in enumerate(train_loader):
+                batch_start = time.perf_counter()
+                # Unpack batch
+                if len(batch_data) == 3:
+                    x, y, labels = batch_data
+                    if args.in_channel == 1:
+                        x = x.unsqueeze(2)  # [N, t, 1, D, H, W]
+                        y = y.unsqueeze(1)  # [N, 1, D, H, W]
+                else:
+                    x, y = batch_data
+                
+                x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
+                delta = y-x
+                # Forward pass with mixed precision (GPU) or normal (CPU)
+                optimizer.zero_grad()
+                if use_amp:
+                    with torch.amp.autocast(device_type=str(DEVICE)):
+                        deltapred = model(x)
+                    # Convert to float32 for loss computation
+                    pred_f = deltapred.float()
+                    delta_f = delta.float()
+                else:
+                    deltapred = model(x)
+                    pred_f = deltapred
+                    delta_f = delta
+                
+                # Compute losses
+                l1, hist_l, spectral_l, hd_l, mass_l = return_total_loss_multichannel(delta_f, pred_f, config, input_state=x)
+                
+                # Stack and weight losses
+                losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+                if args.loss_type == 'statistical':
+                    total_loss = (torch.tensor(static_w, device=DEVICE) * losses).sum()
+                # Scale loss for gradient accumulation
+                loss = total_loss / accum_steps
+                
+                # Backward pass
+                if use_amp:
+                    scaler.scale(loss).backward()
+                else:
+                    loss.backward()
+                
+                # Update weights after accumulation steps
+                if (batch_idx + 1) % accum_steps == 0:
+                    if use_amp:
+                        scaler.unscale_(optimizer)
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                        scaler.step(optimizer)
+                        scaler.update()
+                    else:
+                        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                        optimizer.step()
+                    
+                    optimizer.zero_grad()
+                    
+                    # Accumulate losses
+                    batch_size = x.size(0)
+                    total_epoch_loss += total_loss.item() * batch_size
+                    sum_l1 += l1.item() * batch_size
+                    sum_hist += hist_l.item() * batch_size
+                    sum_mass += mass_l.item() * batch_size
+                    sum_spectral += spectral_l.item() * batch_size
+                    sum_hd += hd_l.item() * batch_size
+                    
+                    # Print progress
+                    if rank == 0:
+                        batch_time_ema = print_progress(
+                            batch_idx, train_loader, epoch, start_epoch, args,
+                            total_loss, batch_start, training_start,
+                            batch_time_ema, ema_alpha
+                        )
+                
+                # Periodic memory cleanup (GPU only)
+                if DEVICE.type == 'cuda' and batch_idx % 5 == 0:
+                    torch.cuda.empty_cache()
+            
+            N += len(train_dataset)
+            #Delete dataset to free RAM for next chunk
+            del train_dataset
+            del train_loader
+            
+        # Compute epoch averages
+        avg_total = total_epoch_loss / N
+        avg_l1 = sum_l1 / N
+        avg_hist = sum_hist / N
+        avg_mass = sum_mass / N
+        avg_spectral = sum_spectral / N
+        avg_hd = sum_hd / N
+        
+        # Dynamic weight adjustment
+        if args.loss_type == 'statistical':
+            w_print = static_w
+        
+        # Update learning rate scheduler
+        last_lr = [group['lr'] for group in optimizer.param_groups]
+        scheduler.step(avg_total)
+        
+        # Record history
+        loss_history.append([avg_total, avg_l1, avg_hist, avg_mass, avg_spectral, avg_hd])
+        
+        if rank == 0:
+            # Console logging
+            print(f"\nEpoch {epoch+1}/{args.epochs}: "
+                f"Total={avg_total:.4f} | "
+                f"L1={avg_l1:.4f} HD={avg_hd:.4f} "
+                f"Mass={avg_mass:.4f} Hist={avg_hist:.4f} "
+                f"Spectral={avg_spectral:.4f} | "
+                f"LR={last_lr[0]:.2e} | "
+                f"Weights: [{', '.join([f'{wi:.2f}' for wi in w_print])}]", flush=True)
+            
+            if DEVICE.type == 'cuda':
+                print_memory_stats()
+        
+            # TensorBoard logging
+            writer.add_scalar("Loss/Total", avg_total, epoch)
+            writer.add_scalar("Loss/L1", avg_l1, epoch)
+            writer.add_scalar("Loss/Hist", avg_hist, epoch)
+            writer.add_scalar("Loss/Mass", avg_mass, epoch)
+            writer.add_scalar("Loss/Spectral", avg_spectral, epoch)
+            writer.add_scalar("Loss/HighDensity", avg_hd, epoch)
+            writer.add_scalar("LearningRate", last_lr[0], epoch)
+        
+        
+        # Validation every 5 epochs
+        if validate_dataset and epoch % 5 == 0:
+            print("\nRunning validation...", flush=True)
+            model.eval()
+            val_total, val_l1, val_hist, val_mass, val_spectral, val_hd = 0, 0, 0, 0, 0, 0
+            
+            with torch.no_grad():
+                for val_batch in val_loader:
+                    if len(val_batch) == 3:
+                        val_x, val_y, _ = val_batch
+                        if args.in_channel == 1:
+                            val_x = val_x.unsqueeze(2)
+                            val_y = val_y.unsqueeze(1)
+                    else:
+                        val_x, val_y = val_batch
+                    
+                    val_x, val_y = val_x.to(DEVICE), val_y.to(DEVICE)
+                    val_delta = val_y-val_x
+                    if use_amp:
+                        with torch.amp.autocast(device_type=str(DEVICE)):
+                            val_pred = model(val_x)
+                        pred = val_pred.float()
+                        val_delta_f = val_delta.float()
+                    else:
+                        pred = model(val_x)
+                        val_delta_f = val_delta
+                    
+                    l1, hist_l, spectral_l, hd_l, mass_l = return_total_loss_multichannel(val_delta_f, pred, config, input_state=val_x)
+
+                    losses = torch.stack([l1, hist_l, mass_l, spectral_l, hd_l])
+                    w_t = torch.tensor(w_print, device=DEVICE)
+                    total_loss = (w_t * losses).sum()
+                    
+                    batch_size = val_x.size(0)
+                    val_total += total_loss.item() * batch_size
+                    val_l1 += l1.item() * batch_size
+                    val_hist += hist_l.item() * batch_size
+                    val_mass += mass_l.item() * batch_size
+                    val_spectral += spectral_l.item() * batch_size
+                    val_hd += hd_l.item() * batch_size
+            
+            N_val = len(val_dataset)
+            val_loss_history.append([
+                val_total / N_val, val_l1 / N_val, val_hist / N_val,
+                val_mass / N_val, val_spectral / N_val, val_hd / N_val
+            ])
+            stop_early = Earlystopper(val_total / N_val)
+            
+            if rank == 0:
+                print(f"Validation: Total={val_total/N_val:.4f} | "
+                    f"L1={val_l1/N_val:.4f} HD={val_hd/N_val:.4f} "
+                    f"Mass={val_mass/N_val:.4f} Hist={val_hist/N_val:.4f} "
+                    f"Spectral={val_spectral/N_val:.4f}\n", flush=True)
+                
+                # TensorBoard validation logging
+                writer.add_scalar("Val_Loss/Total", val_total / N_val, epoch)
+                writer.add_scalar("Val_Loss/L1", val_l1 / N_val, epoch)
+                writer.add_scalar("Val_Loss/Hist", val_hist / N_val, epoch)
+                writer.add_scalar("Val_Loss/Mass", val_mass / N_val, epoch)
+                writer.add_scalar("Val_Loss/Spectral", val_spectral / N_val, epoch)
+                writer.add_scalar("Val_Loss/HighDensity", val_hd / N_val, epoch)
+        
+        if rank == 0:
+            # Periodic checkpointing at phase boundaries
+            checkpoint_epochs = [24, 49, 69, 79, 89]  # End of each phase
+            if epoch in checkpoint_epochs:
+                print(f"\nSaving checkpoint at epoch {epoch+1}...", flush=True)
+                torch.save({
+                    'epoch': epoch + 1,
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'scheduler_state_dict': scheduler.state_dict(),
+                    'loss': loss_history,
+                    'val_loss': val_loss_history
+                }, checkpoint_path)
+        
+        if stop_early:
+            print(f"Early stopping triggered at epoch {epoch+1}.", flush=True)
+            break
+                
+    writer.close()
+    loss_history = np.array(loss_history)
+    if dont_save:
+        cleanup_trun()
+        return dont_save
+    # Final save
+    print("\nSaving final model...", flush=True)
+    if rank == 0:
+        torch.save({
+            'epoch': args.epochs,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler_state_dict': scheduler.state_dict(),
+            'loss': loss_history,
+            'val_loss': val_loss_history
+        }, checkpoint_path)
+        
+        # Plot training curves
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(10, 6))
+        plt.plot(loss_history[:, 0], marker='o', label='Total Loss')
+        plt.plot(loss_history[:, 1], marker='.', label='L1 Loss')
+        plt.plot(loss_history[:, 2], marker='*', label='Histogram Loss')
+        plt.plot(loss_history[:, 3], marker='+', label='Mass Loss')
+        plt.plot(loss_history[:, 4], marker='x', label='Spectral Loss')
+        plt.plot(loss_history[:, 5], marker='1', label='High Density Loss')
+        plt.yscale('log')
+        plt.legend()
+        plt.grid()
+        plt.tight_layout()
+        plt.xlabel("Epoch")
+        plt.ylabel("Avg Weighted Loss")
+        plt.title(f"{args.run_name} Training Loss")
+        plt.savefig(f"models/plots/training_loss_{args.run_name}.png", dpi=150)
+        plt.close()
+        
+        # Plot validation curves if available
+        if val_loss_history:
+            val_loss_history = np.array(val_loss_history)
+            plt.figure(figsize=(10, 6))
+            plt.plot(val_loss_history[:, 0], marker='o', label='Total Loss')
+            plt.plot(val_loss_history[:, 1], marker='.', label='L1 Loss')
+            plt.plot(val_loss_history[:, 2], marker='*', label='Histogram Loss')
+            plt.plot(val_loss_history[:, 3], marker='+', label='Mass Loss')
+            plt.plot(val_loss_history[:, 4], marker='x', label='Spectral Loss')
+            plt.plot(val_loss_history[:, 5], marker='1', label='High Density Loss')
+            plt.yscale('log')
+            plt.legend()
+            plt.grid()
+            plt.tight_layout()
+            plt.xlabel("Validation Check (every 5 epochs)")
+            plt.ylabel("Avg Weighted Loss")
+            plt.title(f"{args.run_name} Validation Loss")
+            plt.savefig(f"models/plots/validation_loss_{args.run_name}.png", dpi=150)
+            plt.close()
+    
+    total_time = time.perf_counter() - training_start
+    print(f"\nTraining completed in {str(datetime.timedelta(seconds=int(total_time)))}", flush=True)
+    cleanup_trun()
+    return dont_save

@@ -164,52 +164,56 @@ class UNet3D(nn.Module):
         # encoding path
 
         x0 = self.timeparser(x, self.Conv1, doMaxPool = False)
-        x0_g = self.GRU3D1(x0)[:,-1,:,:,:,:]
+        x0_g = self.GRU3D1(x0)
 
         #First Encoder
         x1 = self.timeparser(x0, self.Conv2, doMaxPool = True)
-        x1_g = self.GRU3D2(x1)[:,-1,:,:,:,:]
+        x1_g = self.GRU3D2(x1)
 
         if hasattr(self, 'Conv3'):
             #Second Encoder
             x2 = self.timeparser(x1, self.Conv3, doMaxPool = True)
-            x2_g = self.GRU3D3(x2)[:,-1,:,:,:,:]
+            x2_g = self.GRU3D3(x2)
         if hasattr(self, 'Conv4'):
             #Third Encoder
             x3 = self.timeparser(x2, self.Conv4, doMaxPool = True)
-            x3_g = self.GRU3D4(x3)[:,-1,:,:,:,:]
+            x3_g = self.GRU3D4(x3)
         if hasattr(self, 'Conv5'):
             #Fourth Encoder
             x4 = self.timeparser(x3, self.Conv5, doMaxPool = True)
-            x4_g = self.GRU3D5(x4)[:,-1,:,:,:,:]
+            x4_g = self.GRU3D5(x4)
 
+        all_oups = []
+        for t in range(x.shape[1]):
+            #decoding + concat path
+            if hasattr(self, 'Conv5'):
+                d3 = self.Up4(x4_g[:,t,:,:,:,:])
+                a4 = self.Att4(g=d3,x=x3_g[:,t,:,:,:,:])
+                d3 = torch.cat((a4,d3),dim=1)
+                x3_g[:,t,:,:,:,:] = self.Up_conv4(d3)
 
-        #decoding + concat path
-        if hasattr(self, 'Conv5'):
-            d3 = self.Up4(x4_g)
-            a4 = self.Att4(g=d3,x=x3_g)
-            d3 = torch.cat((a4,d3),dim=1)
-            x3_g = self.Up_conv4(d3)
+            if hasattr(self, 'Conv4'):
+                d2 = self.Up3(x3_g[:,t,:,:,:,:])
+                a3 = self.Att3(g=d2,x=x2_g[:,t,:,:,:,:])
+                d2 = torch.cat((a3,d2),dim=1)
+                x2_g[:,t,:,:,:,:] = self.Up_conv3(d2)
 
-        if hasattr(self, 'Conv4'):
-            d2 = self.Up3(x3_g)
-            a3 = self.Att3(g=d2,x=x2_g)
-            d2 = torch.cat((a3,d2),dim=1)
-            x2_g = self.Up_conv3(d2)
+            if hasattr(self, 'Conv3'):
+                d1 = self.Up2(x2_g[:,t,:,:,:,:])
+                a2 = self.Att2(g=d1,x=x1_g[:,t,:,:,:,:])
+                d1 = torch.cat((a2,d1),dim=1)
+                x1_g[:,t,:,:,:,:] = self.Up_conv2(d1)
 
-        if hasattr(self, 'Conv3'):
-            d1 = self.Up2(x2_g)
-            a2 = self.Att2(g=d1,x=x1_g)
-            d1 = torch.cat((a2,d1),dim=1)
-            x1_g = self.Up_conv2(d1)
+            d0 = self.Up1(x1_g[:,t,:,:,:,:])
+            a1 = self.Att1(g=d0,x=x0_g[:,t,:,:,:,:])
+            d0 = torch.cat((a1,d0),dim=1)
+            d0 = self.Up_conv1(d0)
 
-        d0 = self.Up1(x1_g)
-        a1 = self.Att1(g=d0,x=x0_g)
-        d0 = torch.cat((a1,d0),dim=1)
-        d0 = self.Up_conv1(d0)
-
-        # Final 1x1 convolution to get the output channels
-        return self.Conv_1x1(d0)
+            # Final 1x1 convolution to get the output channels
+            all_oups.append(self.Conv_1x1(d0))
+        
+        out = torch.stack(all_oups, dim=1)
+        return out
 
 
 class hybridUGRUNET(nn.Module):
